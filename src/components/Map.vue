@@ -23,7 +23,7 @@
             <input
               type="checkbox"
               v-model="showContaminationLayers"
-              @click="toggleContaminationLayers"
+              @change="toggleContaminationLayers"
             />
             Show All
           </label>
@@ -315,7 +315,7 @@ const toggleLayer = (layerId: string) => {
     console.log(`Set ${layerId} visibility to ${visibility}`)
 
     // Update the "Show All" checkbox state
-    showContaminationLayers.value = contaminationLayers.every((l) => l.visible)
+    updateShowAllCheckbox()
 
     // Update choropleth if it's visible
     if (showContaminationChoropleth.value) {
@@ -340,6 +340,11 @@ const toggleContaminationLayers = () => {
   if (showContaminationChoropleth.value) {
     updateChoroplethColors()
   }
+}
+
+// Add this new function to synchronize the "Show All" checkbox state
+const updateShowAllCheckbox = () => {
+  showContaminationLayers.value = contaminationLayers.every((l) => l.visible)
 }
 
 const updateChoroplethColors = () => {
