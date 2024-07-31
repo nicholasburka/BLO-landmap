@@ -6,16 +6,29 @@
       style="position: absolute; top: 10px; left: 10px; z-index: 1"
     ></div>
     <div
-      id="layer-control"
+      id="layer-control-container"
+      :class="{ 'layer-control-collapsed': !layerControlExpanded }"
       style="
         position: absolute;
-        top: 10px;
+        top: 50px;
         right: 10px;
         z-index: 10;
-        background: white;
-        padding: 10px;
       "
     >
+      <button @click="toggleLayerControl" class="layer-control-toggle">
+        {{ layerControlExpanded ? '▼' : '▲' }} Layers
+      </button>
+      <div
+        id="layer-control"
+        v-show="layerControlExpanded"
+        @click.stop
+        style="
+          background: white;
+          padding: 10px;
+          border-radius: 4px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        "
+      >
       <template v-if="!DEV_MODE_DEMOGRAPHICS_ONLY">
         <h3 style="color: black">Potential Sources of Contamination</h3>
         <div>
@@ -67,6 +80,11 @@
         <div class="loading-text">Loading layers: {{ loadingProgress }}%</div>
       </div>
     </div>
+    <div v-if="showDetailedPopup" id="detailed-popup" :class="{ 'desktop-view': isDesktopView }"@click.stop>
+      <button @click="closeDetailedPopup" class="detailed-popup-close">&times;</button>
+      <div class="detailed-popup-content" v-html="detailedPopupContent"></div>
+    </div>
+  </div>
   </div>
 </template>
 
@@ -87,9 +105,32 @@ let geocoder: MapboxGeocoder
 const countyContaminationCounts = reactive<{ [key: string]: number }>({})
 const detailedPopup = ref<HTMLElement | null>(null)
 
+const layerControlExpanded = ref(true)
 const showContaminationLayers = ref(false)
 const showContaminationChoropleth = ref(false)
 const showDiversityChoropleth = ref(false)
+const showDetailedPopup = ref(false)
+const detailedPopupContent = ref('')
+
+const isDesktopView = computed(() => {
+  return window.innerWidth > 768
+})
+
+const handleOutsideClick = (event: MouseEvent) => {
+  const popup = document.getElementById('detailed-popup')
+  if (showDetailedPopup.value && popup && !popup.contains(event.target as Node)) {
+    closeDetailedPopup()
+  }
+}
+
+const closeDetailedPopup = () => {
+  showDetailedPopup.value = false
+}
+
+const toggleLayerControl = (event: Event) => {
+  event.stopPropagation()
+  layerControlExpanded.value = !layerControlExpanded.value
+}
 
 const toggleContaminationChoropleth = () => {
   showContaminationChoropleth.value = !showContaminationChoropleth.value
@@ -491,7 +532,7 @@ const addTooltip = () => {
   })
 }
 
-const showDetailedPopup = (feature: mapboxgl.MapboxGeoJSONFeature) => {
+const showDetailedPopupForFeature = (feature: mapboxgl.MapboxGeoJSONFeature) => {
   const countyId = feature.properties.GEOID
   const countyName = feature.properties.NAME
   const stateName =
@@ -500,13 +541,13 @@ const showDetailedPopup = (feature: mapboxgl.MapboxGeoJSONFeature) => {
   const countyDiversityData = diversityData.value[countyId]
   const contaminationData = countyContaminationCounts[countyId] || { total: 0, layers: {} }
 
-  let popupContent = `
+  let content = `
     <h2>${countyName}, ${stateName}</h2>
-    <h3>Demographic Data</h3>
+    <h3>Demographic Data – Census</h3>
   `
 
   if (countyDiversityData) {
-    popupContent += `
+    content += `
       <p>Total Population: ${countyDiversityData.totalPopulation.toLocaleString()}</p>
       <p>Diversity Index: ${countyDiversityData.diversityIndex.toFixed(4)}</p>
       <p>White: ${countyDiversityData.nhWhite.toLocaleString()} (${((countyDiversityData.nhWhite / countyDiversityData.totalPopulation) * 100).toFixed(2)}%)</p>
@@ -518,11 +559,11 @@ const showDetailedPopup = (feature: mapboxgl.MapboxGeoJSONFeature) => {
       <p>Hispanic: ${countyDiversityData.hispanic.toLocaleString()} (${((countyDiversityData.hispanic / countyDiversityData.totalPopulation) * 100).toFixed(2)}%)</p>
     `
   } else {
-    popupContent += `<p>No demographic data available</p>`
+    content += `<p>No demographic data available</p>`
   }
 
-  popupContent += `
-    <h3>Contamination Data</h3>
+  content += `
+    <h3>Contamination Data – EPA</h3>
     <p>Brownfields: ${contaminationData.layers.acres_brownfields || 0}</p>
     <p>Air Pollution Sources: ${contaminationData.layers.air_pollution_sources || 0}</p>
     <p>Hazardous Waste Sites: ${contaminationData.layers.hazardous_waste_sites || 0}</p>
@@ -531,51 +572,8 @@ const showDetailedPopup = (feature: mapboxgl.MapboxGeoJSONFeature) => {
     <p>Total Contamination Count: ${contaminationData.total}</p>
   `
 
-  if (!detailedPopup.value) {
-    detailedPopup.value = document.createElement('div')
-    detailedPopup.value.id = 'detailed-popup'
-    document.body.appendChild(detailedPopup.value)
-    console.log('Created new detailed popup element')
-  }
-
-  // Create a container for the content
-  const contentContainer = document.createElement('div')
-  contentContainer.innerHTML = popupContent
-
-  // Clear the existing content
-  detailedPopup.value.innerHTML = ''
-
-  // Add the close button
-  const closeButton = document.createElement('button')
-  closeButton.textContent = 'Close'
-  closeButton.style.position = 'absolute'
-  closeButton.style.top = '10px'
-  closeButton.style.right = '10px'
-  closeButton.addEventListener('click', () => {
-    if (detailedPopup.value) {
-      detailedPopup.value.style.display = 'none'
-      console.log('Closed detailed popup')
-    }
-  })
-
-  // Append the close button and content container to the popup
-  detailedPopup.value.appendChild(closeButton)
-  detailedPopup.value.appendChild(contentContainer)
-
-  // Set styles
-  detailedPopup.value.style.display = 'block'
-  detailedPopup.value.style.color = 'black'
-  detailedPopup.value.style.position = 'fixed'
-  detailedPopup.value.style.left = '20px'
-  detailedPopup.value.style.top = '20px'
-  detailedPopup.value.style.zIndex = '1000'
-  detailedPopup.value.style.background = 'white'
-  detailedPopup.value.style.padding = '20px'
-  detailedPopup.value.style.borderRadius = '4px'
-  detailedPopup.value.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)'
-  detailedPopup.value.style.maxWidth = '300px'
-  detailedPopup.value.style.maxHeight = '80vh'
-  detailedPopup.value.style.overflowY = 'auto'
+  detailedPopupContent.value = content
+  showDetailedPopup.value = true
 
   console.log('Detailed popup should now be visible')
 }
@@ -629,6 +627,41 @@ const loadDiversityData = async () => {
   }
 }
 
+const showGeocoderError = (message: string) => {
+  const errorElement = document.createElement('div')
+  errorElement.textContent = message
+  errorElement.style.cssText = `
+    position: absolute;
+    top: 50px;
+    left: 10px;
+    background-color: #ff6b6b;
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    z-index: 1000;
+  `
+  document.body.appendChild(errorElement)
+  setTimeout(() => {
+    errorElement.remove()
+  }, 3000)
+}
+
+const handleGeocoderResult = (result: any) => {
+  console.log('Geocoder result:', result)
+
+  if (result.center) {
+    map.value?.flyTo({
+      center: result.center,
+      zoom: 10
+    })
+
+    new mapboxgl.Marker().setLngLat(result.center).addTo(map.value!)
+  } else {
+    console.error('No coordinates found for this result')
+    showGeocoderError('Unable to find location. Please try a different search.')
+  }
+}
+
 onMounted(async () => {
   mapboxgl.accessToken =
     'pk.eyJ1IjoibmJ1cmthIiwiYSI6ImNseWYweWIwdTA5YXIyaW9mY3ViYmw1bTYifQ.io_uiRu0x603ZlLU5-2h1A'
@@ -658,23 +691,27 @@ onMounted(async () => {
     placeholder: 'Search for a location'
   })
 
-  map.value.addControl(geocoder)
+  const geocoderContainer = document.getElementById('geocoder')
+  if (geocoderContainer) {
+    geocoderContainer.appendChild(geocoder.onAdd(map.value!))
 
-  geocoder.on('result', function (e) {
-    const result = e.result
-    console.log('Geocoder result:', result)
+    // Add event listener for the 'result' event
+    geocoder.on('result', function (e) {
+      handleGeocoderResult(e.result)
+    })
 
-    if (result.center) {
-      map.value?.flyTo({
-        center: result.center,
-        zoom: 10
+    // Add event listener for the Enter key press
+    const geocoderInput = geocoderContainer.querySelector('input')
+    if (geocoderInput) {
+      geocoderInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          const query = (e.target as HTMLInputElement).value
+          geocoder.query(query)
+        }
       })
-
-      new mapboxgl.Marker().setLngLat(result.center).addTo(map.value!)
-    } else {
-      console.error('No coordinates found for this result')
     }
-  })
+  }
 
   geocoder.on('error', function (e) {
     console.error('Geocoder error:', e)
@@ -735,7 +772,7 @@ onMounted(async () => {
       console.log('Clicked feature:', feature)
       console.log('Feature ID:', feature.properties.GEOID)
       console.log('Feature properties:', feature.properties)
-      showDetailedPopup(feature)
+      showDetailedPopupForFeature(feature)
     } else {
       console.log('No feature found at click point')
     }
@@ -758,12 +795,47 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-#layer-control {
-  background: white;
-  padding: 10px;
+#layer-control-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none; /* Allow clicks to pass through to the map */
+}
+.layer-control-toggle {
+  background-color: white;
+  border: none;
+  padding: 5px 10px;
+  font-size: 14px;
+  cursor: pointer;
   border-radius: 4px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  color: black;
+  pointer-events: auto; /* Re-enable pointer events for the button */
+}
+#layer-control {
+  margin-top: 5px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  pointer-events: auto; /* Re-enable pointer events for the control panel */
+}
+
+.layer-control-collapsed #layer-control {
+  display: none;
+}
+@media (max-width: 768px) {
+  #layer-control-container {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .layer-control-toggle {
+    width: 100%;
+  }
+
+  #layer-control {
+    width: 100%;
+    max-height: 50vh;
+  }
 }
 
 #layer-control h3 {
@@ -832,6 +904,7 @@ onMounted(async () => {
 }
 
 .loading-text {
+  color: black;
   margin-top: 10px;
   font-weight: bold;
 }
@@ -871,7 +944,7 @@ onMounted(async () => {
   margin: 2px 0;
 }
 
-#detailed-popup {
+/*#detailed-popup {
   position: absolute;
   color: black;
   left: 20px;
@@ -885,20 +958,179 @@ onMounted(async () => {
   overflow-y: auto;
   display: none;
   z-index: 1000;
+}*/
+
+/*#detailed-popup {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  max-width: 90%;
+  max-height: 90vh;
+  width: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  color: black;
+}
+
+.detailed-popup-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+}*/
+
+#detailed-popup {
+  position: fixed;
+  background: white;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+  color: black;
+  font-size: 16px; 
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
+.detailed-popup-content {
+  padding-right: 20px;
+  pointer-events: auto;
+}
+
+.detailed-popup-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 28px; /* Increased close button size */
+  cursor: pointer;
+  color: #333;
+  z-index: 2000; 
+  pointer-events: auto;
 }
 
 #detailed-popup h2 {
-  margin-top: 0;
-  border-bottom: 1px solid #ccc;
-  padding-bottom: 10px;
+  font-size: 24px; /* Larger heading */
+  margin-bottom: 15px;
 }
 
 #detailed-popup h3 {
+  font-size: 20px; /* Larger subheading */
   margin-top: 20px;
   margin-bottom: 10px;
 }
 
 #detailed-popup p {
-  margin: 5px 0;
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  #detailed-popup {
+    left: 5%;
+    right: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+    max-height: 90vh;
+    width: auto;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 769px) {
+  #detailed-popup.desktop-view {
+    left: 20px;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    width: 400px;
+    max-width: 30%;
+  }
+}
+
+.geocoder {
+  width: 50%;
+  max-width: 300px;
+}
+
+:global(.mapboxgl-ctrl-geocoder) {
+  width: 100%;
+  max-width: 100%;
+  font-size: 15px;
+  line-height: 20px;
+  box-shadow: 0 0 10px 2px rgba(0,0,0,.1);
+}
+
+:global(.mapboxgl-ctrl-geocoder--input) {
+  height: 36px;
+}
+
+:global(.mapboxgl-ctrl-geocoder--icon) {
+  top: 8px;
+}
+
+:global(.mapboxgl-ctrl-geocoder--button) {
+  width: 36px;
+  height: 36px;
+}
+
+.layer-control-toggle {
+  background-color: white;
+  border: none;
+  padding: 5px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.layer-control-collapsed .layer-control-toggle {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+#layer-control-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+#layer-control {
+  margin-top: 5px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .geocoder {
+    width: calc(100% - 20px);
+    max-width: none;
+  }
+
+  #layer-control-container {
+    top: auto;
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+  }
+
+  .layer-control-toggle {
+    width: 100%;
+  }
+
+  #layer-control {
+    width: 100%;
+    max-height: 50vh;
+  }
 }
 </style>
