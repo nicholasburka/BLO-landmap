@@ -19,10 +19,13 @@ def calculate_diversity_index(group):
     
     sum_squares = sum((n / total_pop) ** 2 for n in races.values() if n > 0)
     diversity_index = 1 - sum_squares
+    pct_nhBlack = (races['NH_Black'] / total_pop) * 100 if total_pop > 0 else 0
+
     
     result = {
         'diversity_index': diversity_index,
-        'total_population': total_pop
+        'total_population': total_pop,
+        'pct_nhBlack': pct_nhBlack
     }
     result.update(races)
     return pd.Series(result)

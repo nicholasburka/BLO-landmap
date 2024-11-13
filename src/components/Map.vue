@@ -205,6 +205,13 @@ const demographicLayers = reactive([
     file: '/datasets/county_diversity_index_with_stats.csv',
     color: '#800080', // Purple color for diversity
     visible: false
+  },
+  {
+    id: 'pct_nhBlack',
+    name: 'Percent Black (Non-Hispanic)',
+    file: '/datasets/county_diversity_index_with_stats.csv',
+    color: '#000080', // Navy blue color
+    visible: false
   }
 ])
 
@@ -394,23 +401,37 @@ const updateChoroplethColors = () => {
   let expression: mapboxgl.Expression
 
   if (showDiversityChoropleth.value) {
-    // Diversity index layer logic
-    const maxDiversityIndex = Math.max(
-      ...Object.values(diversityData.value).map((d) => d.diversityIndex || 0)
-    )
+    const selectedLayer = demographicLayers.find(layer => layer.visible)
+    
+    if (selectedLayer?.id === 'diversity_index') {
+      // Existing diversity index logic
+      const maxDiversityIndex = Math.max(
+        ...Object.values(diversityData.value).map((d) => d.diversityIndex || 0)
+      )
 
-    expression = [
-      'match',
-      ['get', 'GEOID'],
-      ...Object.entries(diversityData.value).flatMap(([geoID, data]) => {
-        const normalizedValue =
-          maxDiversityIndex > 0 ? (data.diversityIndex || 0) / maxDiversityIndex : 0
-        return [geoID, ['rgba', 128, 0, 128, Math.max(0, Math.min(1, normalizedValue))]]
-      }),
-      'rgba(0, 0, 0, 0)'
-    ]
-
-    console.log('Diversity expression:', expression)
+      expression = [
+        'match',
+        ['get', 'GEOID'],
+        ...Object.entries(diversityData.value).flatMap(([geoID, data]) => {
+          const normalizedValue =
+            maxDiversityIndex > 0 ? (data.diversityIndex || 0) / maxDiversityIndex : 0
+          return [geoID, ['rgba', 128, 0, 128, Math.max(0, Math.min(1, normalizedValue))]]
+        }),
+        'rgba(0, 0, 0, 0)'
+      ]
+    } else if (selectedLayer?.id === 'pct_nhBlack') {
+      // New percentage Black population logic
+      expression = [
+        'match',
+        ['get', 'GEOID'],
+        ...Object.entries(diversityData.value).flatMap(([geoID, data]) => {
+          const percentage = data.pct_nhBlack || 0
+          // Using a blue color scale where darker blue means higher percentage
+          return [geoID, ['rgba', 0, 0, 128, Math.min(1, percentage / 100)]]
+        }),
+        'rgba(0, 0, 0, 0)'
+      ]
+    }
   } else if (!DEV_MODE_DEMOGRAPHICS_ONLY && showContaminationChoropleth.value) {
     // Contamination layer logic
     const maxCount = Math.max(...Object.values(countyContaminationCounts).map((data) => data.total))
@@ -519,6 +540,7 @@ const addTooltip = () => {
       const tooltipContent = `
         <h3>${countyName}, ${stateName}</h3>
         <p>Total Population: ${countyDiversityData ? countyDiversityData.totalPopulation.toLocaleString() : 'N/A'}</p>
+        <p>Percent Black (Non-Hispanic): ${countyDiversityData ? countyDiversityData.pct_nhBlack.toFixed(2) : 'N/A'}</p>
         <p>Diversity Index: ${countyDiversityData ? countyDiversityData.diversityIndex.toFixed(4) : 'N/A'}</p>
         <p>EPA Contaminated Sites: ${totalContamination}</p>
       `
@@ -550,8 +572,8 @@ const showDetailedPopupForFeature = (feature: mapboxgl.MapboxGeoJSONFeature) => 
     content += `
       <p>Total Population: ${countyDiversityData.totalPopulation.toLocaleString()}</p>
       <p>Diversity Index: ${countyDiversityData.diversityIndex.toFixed(4)}</p>
-      <p>White: ${countyDiversityData.nhWhite.toLocaleString()} (${((countyDiversityData.nhWhite / countyDiversityData.totalPopulation) * 100).toFixed(2)}%)</p>
-      <p>Black: ${countyDiversityData.nhBlack.toLocaleString()} (${((countyDiversityData.nhBlack / countyDiversityData.totalPopulation) * 100).toFixed(2)}%)</p>
+      <p>Black (Non-Hispanic): ${countyDiversityData.nhBlack.toLocaleString()} (${countyDiversityData.pct_nhBlack.toFixed(2)}%)</p>
+      <p>White (Non-Hispanic): ${countyDiversityData.nhWhite.toLocaleString()} (${((countyDiversityData.nhWhite / countyDiversityData.totalPopulation) * 100).toFixed(2)}%)</p>
       <p>American Indian: ${countyDiversityData.nhAmIndian.toLocaleString()} (${((countyDiversityData.nhAmIndian / countyDiversityData.totalPopulation) * 100).toFixed(2)}%)</p>
       <p>Asian: ${countyDiversityData.nhAsian.toLocaleString()} (${((countyDiversityData.nhAsian / countyDiversityData.totalPopulation) * 100).toFixed(2)}%)</p>
       <p>Pacific Islander: ${countyDiversityData.nhPacIslander.toLocaleString()} (${((countyDiversityData.nhPacIslander / countyDiversityData.totalPopulation) * 100).toFixed(2)}%)</p>
@@ -598,7 +620,7 @@ const diversityData = ref<DiversityData>({})
 
 const loadDiversityData = async () => {
   try {
-    const response = await fetch('/datasets/county_diversity_index_with_stats.csv')
+    const response = await fetch('/datasets/county_pctBlack_diversity_index_with_stats.csv')
     const csvText = await response.text()
 
     const results = Papa.parse(csvText, { header: true, dynamicTyping: true })
@@ -608,6 +630,7 @@ const loadDiversityData = async () => {
       diversityData.value[geoID] = {
         diversityIndex: row.diversity_index,
         totalPopulation: row.total_population,
+        pct_nhBlack: row.pct_nhBlack,
         nhWhite: row.NH_White,
         nhBlack: row.NH_Black,
         nhAmIndian: row.NH_AmIndian,
