@@ -140,6 +140,16 @@ const toggleContaminationChoropleth = () => {
 const toggleDemographicLayer = (layerId: string) => {
   const layer = demographicLayers.find((l) => l.id === layerId)
   if (layer) {
+    // If this layer is being activated, deactivate all other demographic layers
+    if (!layer.visible) {
+      demographicLayers.forEach((otherLayer) => {
+        if (otherLayer.id !== layerId) {
+          otherLayer.visible = false
+        }
+      })
+    }
+    
+    // Toggle the selected layer
     layer.visible = !layer.visible
     showDiversityChoropleth.value = layer.visible
     updateChoroplethVisibility()
@@ -215,6 +225,69 @@ const demographicLayers = reactive([
   }
 ])
 
+interface ColorBlend {
+  geoID: string
+  diversityColor: [number, number, number, number]
+  blackPctColor: [number, number, number, number]
+  contaminationColor: [number, number, number, number]
+  blendedColors: {
+    diversityAndContamination: [number, number, number, number]
+    blackPctAndContamination: [number, number, number, number]
+  }
+}
+
+const preCalculatedColors = ref<{ [key: string]: ColorBlend }>({})
+const colorCalculationComplete = ref(false)
+
+// Add this function to pre-calculate all possible color combinations
+const preCalculateColors = () => {
+  console.log('Pre-calculating color blends...')
+  const colors = {
+    diversity_index: [128, 0, 128], // Purple
+    pct_nhBlack: [0, 0, 128],      // Navy blue
+    contamination: [255, 0, 0]      // Red
+  }
+
+  const maxDiversityIndex = Math.max(
+    ...Object.values(diversityData.value).map((d) => d.diversityIndex || 0)
+  )
+  const maxContamination = Math.max(
+    ...Object.values(countyContaminationCounts).map(d => d.total)
+  )
+
+  // Pre-calculate colors for each county
+  Object.entries(diversityData.value).forEach(([geoID, data]) => {
+    const diversityValue = maxDiversityIndex > 0 ? (data.diversityIndex || 0) / maxDiversityIndex : 0
+    const blackPctValue = (data.pct_nhBlack || 0) / 100
+    const contaminationValue = countyContaminationCounts[geoID]?.total || 0
+    const contaminationNormalized = maxContamination > 0 ? contaminationValue / maxContamination : 0
+
+    preCalculatedColors.value[geoID] = {
+      geoID,
+      diversityColor: [...colors.diversity_index, diversityValue] as [number, number, number, number],
+      blackPctColor: [...colors.pct_nhBlack, blackPctValue] as [number, number, number, number],
+      contaminationColor: [...colors.contamination, contaminationNormalized] as [number, number, number, number],
+      blendedColors: {
+        diversityAndContamination: [
+          Math.min(255, colors.diversity_index[0] * diversityValue + colors.contamination[0] * contaminationNormalized),
+          Math.min(255, colors.diversity_index[1] * diversityValue + colors.contamination[1] * contaminationNormalized),
+          Math.min(255, colors.diversity_index[2] * diversityValue + colors.contamination[2] * contaminationNormalized),
+          Math.max(diversityValue, contaminationNormalized)
+        ] as [number, number, number, number],
+        blackPctAndContamination: [
+          Math.min(255, colors.pct_nhBlack[0] * blackPctValue + colors.contamination[0] * contaminationNormalized),
+          Math.min(255, colors.pct_nhBlack[1] * blackPctValue + colors.contamination[1] * contaminationNormalized),
+          Math.min(255, colors.pct_nhBlack[2] * blackPctValue + colors.contamination[2] * contaminationNormalized),
+          Math.max(blackPctValue, contaminationNormalized)
+        ] as [number, number, number, number]
+      }
+    }
+  })
+
+  colorCalculationComplete.value = true
+  console.log('Color blend pre-calculation complete')
+}
+
 const layersLoaded = ref(false)
 const loadedLayersCount = ref(0)
 const totalLayers = computed(() => contaminationLayers.length + demographicLayers.length + 1) // +1 for choropleth layer
@@ -232,8 +305,12 @@ const loadCountiesData = async () => {
     const contaminationData = await contaminationResponse.json()
     Object.assign(countyContaminationCounts, contaminationData)
 
-    console.log('Counties data loaded:', countiesData)
-    console.log('Heatmap data loaded:', countyContaminationCounts)
+    await loadDiversityData()
+    
+    // Pre-calculate colors after all data is loaded
+    preCalculateColors()
+
+    console.log('All data loaded and colors pre-calculated')
   } catch (error) {
     console.error('Error loading counties data:', error)
   }
@@ -396,56 +473,48 @@ const updateShowAllCheckbox = () => {
 }
 
 const updateChoroplethColors = () => {
-  if (!map.value || !map.value.getLayer('county-choropleth')) return
+  if (!map.value || !map.value.getLayer('county-choropleth') || !colorCalculationComplete.value) return
 
-  let expression: mapboxgl.Expression
+  let expression: mapboxgl.Expression = ['rgba', 0, 0, 0, 0] // Default transparent
 
   if (showDiversityChoropleth.value) {
     const selectedLayer = demographicLayers.find(layer => layer.visible)
     
     if (selectedLayer?.id === 'diversity_index') {
-      // Existing diversity index logic
-      const maxDiversityIndex = Math.max(
-        ...Object.values(diversityData.value).map((d) => d.diversityIndex || 0)
-      )
-
       expression = [
         'match',
         ['get', 'GEOID'],
-        ...Object.entries(diversityData.value).flatMap(([geoID, data]) => {
-          const normalizedValue =
-            maxDiversityIndex > 0 ? (data.diversityIndex || 0) / maxDiversityIndex : 0
-          return [geoID, ['rgba', 128, 0, 128, Math.max(0, Math.min(1, normalizedValue))]]
-        }),
-        'rgba(0, 0, 0, 0)'
+        ...Object.values(preCalculatedColors.value).flatMap(colors => [
+          colors.geoID,
+          showContaminationChoropleth.value 
+            ? ['rgba', ...colors.blendedColors.diversityAndContamination]
+            : ['rgba', ...colors.diversityColor]
+        ]),
+        ['rgba', 0, 0, 0, 0]
       ]
     } else if (selectedLayer?.id === 'pct_nhBlack') {
-      // New percentage Black population logic
       expression = [
         'match',
         ['get', 'GEOID'],
-        ...Object.entries(diversityData.value).flatMap(([geoID, data]) => {
-          const percentage = data.pct_nhBlack || 0
-          // Using a blue color scale where darker blue means higher percentage
-          return [geoID, ['rgba', 0, 0, 128, Math.min(1, percentage / 100)]]
-        }),
-        'rgba(0, 0, 0, 0)'
+        ...Object.values(preCalculatedColors.value).flatMap(colors => [
+          colors.geoID,
+          showContaminationChoropleth.value 
+            ? ['rgba', ...colors.blendedColors.blackPctAndContamination]
+            : ['rgba', ...colors.blackPctColor]
+        ]),
+        ['rgba', 0, 0, 0, 0]
       ]
     }
   } else if (!DEV_MODE_DEMOGRAPHICS_ONLY && showContaminationChoropleth.value) {
-    // Contamination layer logic
-    const maxCount = Math.max(...Object.values(countyContaminationCounts).map((data) => data.total))
     expression = [
       'match',
       ['get', 'GEOID'],
-      ...Object.entries(countyContaminationCounts).flatMap(([countyId, data]) => [
-        countyId,
-        ['rgba', 255, 0, 0, data.total / maxCount]
+      ...Object.values(preCalculatedColors.value).flatMap(colors => [
+        colors.geoID,
+        ['rgba', ...colors.contaminationColor]
       ]),
-      'rgba(0, 0, 0, 0)'
+      ['rgba', 0, 0, 0, 0]
     ]
-  } else {
-    expression = ['rgba', 0, 0, 0, 0]
   }
 
   map.value.setPaintProperty('county-choropleth', 'fill-color', expression)
