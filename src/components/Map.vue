@@ -61,15 +61,13 @@
       </template>
       <h3 style="color: black">Demographic Layers</h3>
       <div v-for="layer in demographicLayers" :key="layer.id" class="layer-item">
-        <label style="color: black">
-          <input
-            type="checkbox"
-            v-model="layer.visible"
-            @click="toggleDemographicLayer(layer.id)"
-          />
-          <span class="color-dot" :style="{ backgroundColor: layer.color }"></span>
-          {{ layer.name }}
-        </label>
+        <input
+          type="checkbox"
+          :id="layer.id"
+          :checked="layer.visible"
+          @change="toggleDemographicLayer(layer.id)"
+        />
+        <label :for="layer.id">{{ layer.name }}</label>
       </div>
     </div>
     <div v-if="!layersLoaded" class="loading-overlay">
@@ -151,8 +149,10 @@ const toggleDemographicLayer = (layerId: string) => {
     
     // Toggle the selected layer
     layer.visible = !layer.visible
+    selectedDemographicLayer.value = layer.visible ? layerId : ''
     showDiversityChoropleth.value = layer.visible
     updateChoroplethVisibility()
+    updateChoroplethColors()
   }
 }
 
@@ -222,6 +222,11 @@ const demographicLayers = reactive([
     file: '/datasets/county_diversity_index_with_stats.csv',
     color: '#000080', // Navy blue color
     visible: false
+  },
+  {
+    id: 'life_expectancy',
+    name: 'Life Expectancy',
+    visible: false
   }
 ])
 
@@ -230,6 +235,7 @@ interface ColorBlend {
   diversityColor: [number, number, number, number]
   blackPctColor: [number, number, number, number]
   contaminationColor: [number, number, number, number]
+  lifeExpectancyColor: [number, number, number, number]
   blendedColors: {
     diversityAndContamination: [number, number, number, number]
     blackPctAndContamination: [number, number, number, number]
@@ -239,13 +245,15 @@ interface ColorBlend {
 const preCalculatedColors = ref<{ [key: string]: ColorBlend }>({})
 const colorCalculationComplete = ref(false)
 
-// Add this function to pre-calculate all possible color combinations
+const selectedDemographicLayer = ref<string>('')
+
 const preCalculateColors = () => {
   console.log('Pre-calculating color blends...')
   const colors = {
     diversity_index: [128, 0, 128], // Purple
     pct_nhBlack: [0, 0, 128],      // Navy blue
-    contamination: [255, 0, 0]      // Red
+    contamination: [255, 0, 0],      // Red
+    life_expectancy: [0, 128, 0]    // Green
   }
 
   const maxDiversityIndex = Math.max(
@@ -255,18 +263,36 @@ const preCalculateColors = () => {
     ...Object.values(countyContaminationCounts).map(d => d.total)
   )
 
+  // Get life expectancy range
+  const lifeExpectancyValues = Object.values(lifeExpectancyData.value)
+    .map(d => d.lifeExpectancy)
+    .filter(v => v !== undefined && v !== null)
+  const maxLifeExpectancy = Math.max(...lifeExpectancyValues)
+  const minLifeExpectancy = Math.min(...lifeExpectancyValues)
+
+  console.log('Life expectancy range:', {
+    min: minLifeExpectancy,
+    max: maxLifeExpectancy,
+    range: maxLifeExpectancy - minLifeExpectancy
+  })
+
   // Pre-calculate colors for each county
   Object.entries(diversityData.value).forEach(([geoID, data]) => {
     const diversityValue = maxDiversityIndex > 0 ? (data.diversityIndex || 0) / maxDiversityIndex : 0
     const blackPctValue = (data.pct_nhBlack || 0) / 100
     const contaminationValue = countyContaminationCounts[geoID]?.total || 0
     const contaminationNormalized = maxContamination > 0 ? contaminationValue / maxContamination : 0
+    
+    // Linear normalization to [0,1] range
+    const lifeExpectancyValue = lifeExpectancyData.value[geoID]?.lifeExpectancy || minLifeExpectancy
+    const lifeExpectancyNormalized = (lifeExpectancyValue - minLifeExpectancy) / (maxLifeExpectancy - minLifeExpectancy)
 
     preCalculatedColors.value[geoID] = {
       geoID,
       diversityColor: [...colors.diversity_index, diversityValue] as [number, number, number, number],
       blackPctColor: [...colors.pct_nhBlack, blackPctValue] as [number, number, number, number],
       contaminationColor: [...colors.contamination, contaminationNormalized] as [number, number, number, number],
+      lifeExpectancyColor: [...colors.life_expectancy, lifeExpectancyNormalized] as [number, number, number, number],
       blendedColors: {
         diversityAndContamination: [
           Math.min(255, colors.diversity_index[0] * diversityValue + colors.contamination[0] * contaminationNormalized),
@@ -280,12 +306,21 @@ const preCalculateColors = () => {
           Math.min(255, colors.pct_nhBlack[2] * blackPctValue + colors.contamination[2] * contaminationNormalized),
           Math.max(blackPctValue, contaminationNormalized)
         ] as [number, number, number, number]
-      }
+      },
     }
   })
 
   colorCalculationComplete.value = true
   console.log('Color blend pre-calculation complete')
+  console.log('Sample life expectancy colors:', 
+    Object.entries(preCalculatedColors.value)
+      .slice(0, 5)
+      .map(([geoID, colors]) => ({
+        geoID,
+        lifeExpectancy: lifeExpectancyData.value[geoID]?.lifeExpectancy,
+        normalizedValue: colors.lifeExpectancyColor[3]
+      }))
+  )
 }
 
 const layersLoaded = ref(false)
@@ -295,6 +330,9 @@ const totalLayers = computed(() => contaminationLayers.length + demographicLayer
 const loadingProgress = computed(() => {
   return Math.round((loadedLayersCount.value / totalLayers.value) * 100)
 })
+
+const lifeExpectancyData = ref<{ [geoID: string]: { lifeExpectancy: number, standardError: number } }>({})
+const showLifeExpectancyChoropleth = ref(false)
 
 const loadCountiesData = async () => {
   try {
@@ -306,6 +344,7 @@ const loadCountiesData = async () => {
     Object.assign(countyContaminationCounts, contaminationData)
 
     await loadDiversityData()
+    await loadLifeExpectancyData()
     
     // Pre-calculate colors after all data is loaded
     preCalculateColors()
@@ -473,37 +512,59 @@ const updateShowAllCheckbox = () => {
 }
 
 const updateChoroplethColors = () => {
-  if (!map.value || !map.value.getLayer('county-choropleth') || !colorCalculationComplete.value) return
+  console.log('Updating choropleth colors')
+  console.log('Selected demographic layer:', selectedDemographicLayer.value)
+  console.log('Show diversity choropleth:', showDiversityChoropleth.value)
+  
+  if (!map.value || !map.value.getLayer('county-choropleth') || !colorCalculationComplete.value) {
+    console.log('Early return due to:', {
+      mapExists: !!map.value,
+      layerExists: map.value?.getLayer('county-choropleth'),
+      colorCalculationComplete: colorCalculationComplete.value
+    })
+    return
+  }
 
-  let expression: mapboxgl.Expression = ['rgba', 0, 0, 0, 0] // Default transparent
+  let expression: Expression = ['rgba', 0, 0, 0, 0] // Default transparent
 
-  if (showDiversityChoropleth.value) {
-    const selectedLayer = demographicLayers.find(layer => layer.visible)
-    
-    if (selectedLayer?.id === 'diversity_index') {
+  if (selectedDemographicLayer.value) {
+    if (selectedDemographicLayer.value === 'diversity_index') {
       expression = [
         'match',
         ['get', 'GEOID'],
-        ...Object.values(preCalculatedColors.value).flatMap(colors => [
-          colors.geoID,
+        ...Object.entries(preCalculatedColors.value).flatMap(([geoID, colors]) => [
+          geoID,
           showContaminationChoropleth.value 
             ? ['rgba', ...colors.blendedColors.diversityAndContamination]
             : ['rgba', ...colors.diversityColor]
         ]),
         ['rgba', 0, 0, 0, 0]
       ]
-    } else if (selectedLayer?.id === 'pct_nhBlack') {
+    } else if (selectedDemographicLayer.value === 'pct_nhBlack') {
       expression = [
         'match',
         ['get', 'GEOID'],
-        ...Object.values(preCalculatedColors.value).flatMap(colors => [
-          colors.geoID,
+        ...Object.entries(preCalculatedColors.value).flatMap(([geoID, colors]) => [
+          geoID,
           showContaminationChoropleth.value 
             ? ['rgba', ...colors.blendedColors.blackPctAndContamination]
             : ['rgba', ...colors.blackPctColor]
         ]),
         ['rgba', 0, 0, 0, 0]
       ]
+    } else if (selectedDemographicLayer.value === 'life_expectancy') {
+      console.log('Rendering life expectancy choropleth')
+      console.log('Sample colors:', Object.entries(preCalculatedColors.value).slice(0, 5))
+      expression = [
+        'match',
+        ['get', 'GEOID'],
+        ...Object.entries(preCalculatedColors.value).flatMap(([geoID, colors]) => [
+          geoID,
+          ['rgba', ...colors.lifeExpectancyColor]
+        ]),
+        ['rgba', 0, 0, 0, 0]
+      ]
+      console.log('Expression:', expression)
     }
   } else if (!DEV_MODE_DEMOGRAPHICS_ONLY && showContaminationChoropleth.value) {
     expression = [
@@ -603,12 +664,12 @@ const addTooltip = () => {
 
       const countyDiversityData = diversityData.value[countyId]
       const contaminationData = countyContaminationCounts[countyId] || {}
-      //const totalContamination = Object.values(contaminationData).reduce((a, b) => a + b, 0)
       const totalContamination = countyContaminationCounts[feature.properties?.GEOID].total || 0
 
       const tooltipContent = `
         <h3>${countyName}, ${stateName}</h3>
         <p>Total Population: ${countyDiversityData ? countyDiversityData.totalPopulation.toLocaleString() : 'N/A'}</p>
+        <p>Life Expectancy: ${lifeExpectancyData.value[countyId]?.lifeExpectancy.toFixed(1) || 'N/A'} years</p>
         <p>Percent Black (Non-Hispanic): ${countyDiversityData ? countyDiversityData.pct_nhBlack.toFixed(2) : 'N/A'}</p>
         <p>Diversity Index: ${countyDiversityData ? countyDiversityData.diversityIndex.toFixed(4) : 'N/A'}</p>
         <p>EPA Contaminated Sites: ${totalContamination}</p>
@@ -631,6 +692,7 @@ const showDetailedPopupForFeature = (feature: mapboxgl.MapboxGeoJSONFeature) => 
 
   const countyDiversityData = diversityData.value[countyId]
   const contaminationData = countyContaminationCounts[countyId] || { total: 0, layers: {} }
+  const lifeExpectancyValue = lifeExpectancyData.value[countyId]?.lifeExpectancy
 
   let content = `
     <h2>${countyName}, ${stateName}</h2>
@@ -640,6 +702,7 @@ const showDetailedPopupForFeature = (feature: mapboxgl.MapboxGeoJSONFeature) => 
   if (countyDiversityData) {
     content += `
       <p>Total Population: ${countyDiversityData.totalPopulation.toLocaleString()}</p>
+      <p>Life Expectancy: ${lifeExpectancyValue ? lifeExpectancyValue.toFixed(1) : 'N/A'} years</p>
       <p>Diversity Index: ${countyDiversityData.diversityIndex.toFixed(4)}</p>
       <p>Black (Non-Hispanic): ${countyDiversityData.nhBlack.toLocaleString()} (${countyDiversityData.pct_nhBlack.toFixed(2)}%)</p>
       <p>White (Non-Hispanic): ${countyDiversityData.nhWhite.toLocaleString()} (${((countyDiversityData.nhWhite / countyDiversityData.totalPopulation) * 100).toFixed(2)}%)</p>
@@ -655,18 +718,16 @@ const showDetailedPopupForFeature = (feature: mapboxgl.MapboxGeoJSONFeature) => 
 
   content += `
     <h3>Contamination Data – EPA</h3>
-    <p>Brownfields: ${contaminationData.layers.acres_brownfields || 0}</p>
-    <p>Air Pollution Sources: ${contaminationData.layers.air_pollution_sources || 0}</p>
-    <p>Hazardous Waste Sites: ${contaminationData.layers.hazardous_waste_sites || 0}</p>
-    <p>Superfund Sites: ${contaminationData.layers.superfund_sites || 0}</p>
-    <p>Toxic Release Inventory: ${contaminationData.layers.toxic_release_inventory || 0}</p>
+    <p>Brownfields: ${contaminationData.layers?.acres_brownfields || 0}</p>
+    <p>Air Pollution Sources: ${contaminationData.layers?.air_pollution_sources || 0}</p>
+    <p>Hazardous Waste Sites: ${contaminationData.layers?.hazardous_waste_sites || 0}</p>
+    <p>Superfund Sites: ${contaminationData.layers?.superfund_sites || 0}</p>
+    <p>Toxic Release Inventory: ${contaminationData.layers?.toxic_release_inventory || 0}</p>
     <p>Total Contamination Count: ${contaminationData.total}</p>
   `
 
   detailedPopupContent.value = content
   showDetailedPopup.value = true
-
-  console.log('Detailed popup should now be visible')
 }
 
 interface DiversityData {
@@ -716,6 +777,41 @@ const loadDiversityData = async () => {
     console.log('Sample diversity data:', Object.entries(diversityData.value).slice(0, 5))
   } catch (error) {
     console.error('Error loading diversity data:', error)
+  }
+}
+
+const loadLifeExpectancyData = async () => {
+  try {
+    const response = await fetch('/datasets/lifeexpectancy-USA-county.csv')
+    const csvText = await response.text()
+
+    const results = Papa.parse(csvText, { header: true, dynamicTyping: true })
+    console.log('Parsed life expectancy data:', results.data.slice(0, 5))
+
+    results.data.forEach((row: any) => {
+      if (!row.GEOID) return // Skip rows without GEOID
+      
+      lifeExpectancyData.value[row.GEOID] = {
+        lifeExpectancy: row['e(0)'],
+        standardError: row['se(e(0))']
+      }
+    })
+
+    console.log('Life expectancy data loaded:', 
+      Object.entries(lifeExpectancyData.value)
+        .slice(0, 5)
+        .map(([geoID, data]) => ({
+          geoID,
+          lifeExpectancy: data.lifeExpectancy,
+          standardError: data.standardError
+        }))
+    )
+  } catch (error) {
+    console.error('Error loading life expectancy data:', error)
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack
+    })
   }
 }
 
