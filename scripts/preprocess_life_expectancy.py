@@ -27,3 +27,15 @@ county_data = county_data[['GEOID', 'STATE2KX', 'CNTY2KX', 'e(0)', 'se(e(0))']]
 
 # Save to CSV in the public folder
 county_data.to_csv('public/datasets/lifeexpectancy-USA-county.csv', index=False)
+
+# After creating GEOIDs
+# Check Colorado data
+colorado_data = df[df['STATE2KX'] == 8]  # Colorado is FIPS 08
+print("\nColorado counties in life expectancy data:")
+print(colorado_data[['GEOID', 'e(0)']].head())
+print(f"Total Colorado counties: {len(colorado_data)}")
+
+# Check GEOID format
+print("\nSample GEOIDs:")
+print(county_data['GEOID'].head())
+print("\nGEOID lengths:", county_data['GEOID'].str.len().value_counts())

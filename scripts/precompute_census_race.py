@@ -49,3 +49,19 @@ print(county_diversity)
 
 # Save to a new CSV file
 county_diversity.to_csv('county_diversity_index_with_stats.csv', index=False)
+
+# Add after line 38 in precompute_census_race.py
+# Print state coverage statistics
+state_counts = county_diversity.groupby('STNAME').size()
+print("\nState Coverage:")
+print(f"Total states: {len(state_counts)}")
+print("\nStates and their county counts:")
+print(state_counts)
+
+# Check for any states with zero counties
+all_states = df['STNAME'].unique()
+states_with_data = county_diversity['STNAME'].unique()
+missing_states = set(all_states) - set(states_with_data)
+if missing_states:
+    print("\nStates with no county data:")
+    print(missing_states)

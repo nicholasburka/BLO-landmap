@@ -597,12 +597,36 @@ const addTooltip = () => {
       const feature = e.features[0]
       const countyId = feature.properties.GEOID
       const countyName = feature.properties.NAME
-      const stateName =
-        feature.properties.STATE_NAME || diversityData.value[countyId]?.stateName || 'Unknown State'
+      
+      // Use FIPS for state name
+      const stateFIPS = countyId.substring(0, 2)
+      const fipsToState: { [key: string]: string } = {
+        '01': 'Alabama', '02': 'Alaska', '04': 'Arizona', '05': 'Arkansas',
+        '06': 'California', '08': 'Colorado', '09': 'Connecticut', '10': 'Delaware',
+        '11': 'District of Columbia', '12': 'Florida', '13': 'Georgia', '15': 'Hawaii',
+        '16': 'Idaho', '17': 'Illinois', '18': 'Indiana', '19': 'Iowa',
+        '20': 'Kansas', '21': 'Kentucky', '22': 'Louisiana', '23': 'Maine',
+        '24': 'Maryland', '25': 'Massachusetts', '26': 'Michigan', '27': 'Minnesota',
+        '28': 'Mississippi', '29': 'Missouri', '30': 'Montana', '31': 'Nebraska',
+        '32': 'Nevada', '33': 'New Hampshire', '34': 'New Jersey', '35': 'New Mexico',
+        '36': 'New York', '37': 'North Carolina', '38': 'North Dakota', '39': 'Ohio',
+        '40': 'Oklahoma', '41': 'Oregon', '42': 'Pennsylvania', '44': 'Rhode Island',
+        '45': 'South Carolina', '46': 'South Dakota', '47': 'Tennessee', '48': 'Texas',
+        '49': 'Utah', '50': 'Vermont', '51': 'Virginia', '53': 'Washington',
+        '54': 'West Virginia', '55': 'Wisconsin', '56': 'Wyoming'
+      }
+      const stateName = fipsToState[stateFIPS] || 'Unknown State'
+
+      // Add debugging for demographic data linking
+      console.log('County data lookup:', {
+        countyId,
+        hasData: !!diversityData.value[countyId],
+        sampleDiversityKeys: Object.keys(diversityData.value).slice(0, 5),
+        diversityDataFormat: diversityData.value[countyId]
+      })
 
       const countyDiversityData = diversityData.value[countyId]
-      const contaminationData = countyContaminationCounts[countyId] || {}
-      const totalContamination = countyContaminationCounts[feature.properties?.GEOID].total || 0
+      const totalContamination = countyContaminationCounts[countyId]?.total || 0
 
       const tooltipContent = `
         <h3>${countyName}, ${stateName}</h3>
@@ -625,8 +649,29 @@ const addTooltip = () => {
 const showDetailedPopupForFeature = (feature: mapboxgl.MapboxGeoJSONFeature) => {
   const countyId = feature.properties.GEOID
   const countyName = feature.properties.NAME
-  const stateName =
-    feature.properties.STATE_NAME || diversityData.value[countyId]?.stateName || 'Unknown State'
+  // Add debug logging
+  console.log('Feature properties:', feature.properties)
+  
+  // Use FIPS to state mapping for reliable state names
+  const stateFIPS = countyId.substring(0, 2)
+  const fipsToState: { [key: string]: string } = {
+    '01': 'Alabama', '02': 'Alaska', '04': 'Arizona', '05': 'Arkansas',
+    '06': 'California', '08': 'Colorado', '09': 'Connecticut', '10': 'Delaware',
+    '11': 'District of Columbia', '12': 'Florida', '13': 'Georgia', '15': 'Hawaii',
+    '16': 'Idaho', '17': 'Illinois', '18': 'Indiana', '19': 'Iowa',
+    '20': 'Kansas', '21': 'Kentucky', '22': 'Louisiana', '23': 'Maine',
+    '24': 'Maryland', '25': 'Massachusetts', '26': 'Michigan', '27': 'Minnesota',
+    '28': 'Mississippi', '29': 'Missouri', '30': 'Montana', '31': 'Nebraska',
+    '32': 'Nevada', '33': 'New Hampshire', '34': 'New Jersey', '35': 'New Mexico',
+    '36': 'New York', '37': 'North Carolina', '38': 'North Dakota', '39': 'Ohio',
+    '40': 'Oklahoma', '41': 'Oregon', '42': 'Pennsylvania', '44': 'Rhode Island',
+    '45': 'South Carolina', '46': 'South Dakota', '47': 'Tennessee', '48': 'Texas',
+    '49': 'Utah', '50': 'Vermont', '51': 'Virginia', '53': 'Washington',
+    '54': 'West Virginia', '55': 'Wisconsin', '56': 'Wyoming'
+  }
+  
+  const stateName = fipsToState[stateFIPS] || 'Unknown State'
+  console.log('County ID:', countyId, 'State FIPS:', stateFIPS, 'State Name:', stateName)
 
   const countyDiversityData = diversityData.value[countyId]
   const contaminationData = countyContaminationCounts[countyId] || { total: 0, layers: {} }
@@ -692,9 +737,21 @@ const loadDiversityData = async () => {
     const csvText = await response.text()
 
     const results = Papa.parse(csvText, { header: true, dynamicTyping: true })
+    
+    // Debug the parsed data
+    console.log('Diversity data parsing:', {
+      totalRows: results.data.length,
+      sampleRows: results.data.slice(0, 5),
+      sampleGEOIDs: results.data.slice(0, 5).map((row: any) => row.GEOID),
+      errors: results.errors
+    })
 
     results.data.forEach((row: any) => {
-      const geoID = `${row.GEOID}`
+      if (!row.GEOID) return
+      
+      // Ensure GEOID is properly formatted (5 digits with leading zeros)
+      const geoID = row.GEOID.toString().padStart(5, '0')
+      
       diversityData.value[geoID] = {
         diversityIndex: row.diversity_index,
         totalPopulation: row.total_population,
@@ -711,8 +768,11 @@ const loadDiversityData = async () => {
       }
     })
 
-    console.log('Diversity data loaded:', diversityData.value)
-    console.log('Sample diversity data:', Object.entries(diversityData.value).slice(0, 5))
+    console.log('Diversity data loaded:', {
+      totalCounties: Object.keys(diversityData.value).length,
+      sampleKeys: Object.keys(diversityData.value).slice(0, 5),
+      sampleData: Object.entries(diversityData.value).slice(0, 2)
+    })
   } catch (error) {
     console.error('Error loading diversity data:', error)
   }
@@ -724,32 +784,66 @@ const loadLifeExpectancyData = async () => {
     const csvText = await response.text()
 
     const results = Papa.parse(csvText, { header: true, dynamicTyping: true })
-    console.log('Parsed life expectancy data:', results.data.slice(0, 5))
+    
+    // Debug the raw data format
+    console.log('Life expectancy raw data sample:', {
+      headers: results.meta.fields,
+      firstFewRows: results.data.slice(0, 10).map(row => ({
+        rawGEOID: row.GEOID,
+        typeofGEOID: typeof row.GEOID,
+        state: row.STATE2KX,
+        county: row.CNTY2KX,
+        lifeExp: row['e(0)']
+      }))
+    })
+
+    // Check for any Colorado counties using state code
+    const coloradoData = results.data.filter((row: any) => {
+      console.log('Row state:', row.STATE2KX, typeof row.STATE2KX);
+      return row.STATE2KX === 8 || row.STATE2KX === '8' || row.STATE2KX === '08';
+    });
+    console.log('Colorado counties found:', coloradoData);
 
     results.data.forEach((row: any) => {
-      if (!row.GEOID) return // Skip rows without GEOID
+      if (!row.GEOID) return
       
-      lifeExpectancyData.value[row.GEOID] = {
+      // Convert state and county codes to proper GEOID format
+      let geoID;
+      if (row.STATE2KX && row.CNTY2KX) {
+        const stateCode = row.STATE2KX.toString().padStart(2, '0');
+        const countyCode = row.CNTY2KX.toString().padStart(3, '0');
+        geoID = stateCode + countyCode;
+      } else {
+        geoID = row.GEOID.toString().padStart(5, '0');
+      }
+      
+      console.log('Processing row:', {
+        originalGEOID: row.GEOID,
+        state: row.STATE2KX,
+        county: row.CNTY2KX,
+        constructedGEOID: geoID,
+        lifeExp: row['e(0)']
+      });
+      
+      lifeExpectancyData.value[geoID] = {
         lifeExpectancy: row['e(0)'],
         standardError: row['se(e(0))']
       }
     })
 
-    console.log('Life expectancy data loaded:', 
-      Object.entries(lifeExpectancyData.value)
-        .slice(0, 5)
-        .map(([geoID, data]) => ({
-          geoID,
-          lifeExpectancy: data.lifeExpectancy,
-          standardError: data.standardError
+    // Debug final data
+    console.log('Life expectancy data loaded:', {
+      totalCounties: Object.keys(lifeExpectancyData.value).length,
+      coloradoCounties: Object.entries(lifeExpectancyData.value)
+        .filter(([id]) => id.startsWith('08'))
+        .map(([id, data]) => ({
+          id,
+          lifeExp: data.lifeExpectancy
         }))
-    )
+    });
+
   } catch (error) {
     console.error('Error loading life expectancy data:', error)
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack
-    })
   }
 }
 
