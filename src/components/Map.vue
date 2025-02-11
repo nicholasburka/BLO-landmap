@@ -5,6 +5,52 @@
       class="geocoder"
       style="position: absolute; top: 10px; left: 10px; z-index: 1"
     ></div>
+      <div 
+      id="search-listings"
+      class="search-listings"
+      style="position: absolute; top: 60px; left: 10px; z-index: 1"
+    >
+      <button 
+        @click="searchListings" 
+        class="listings-button" 
+        :disabled="!currentGeocoderResult || isSearchResultsLoading"
+      >
+        <span v-if="!isSearchResultsLoading">Find land for sale</span>
+        <div v-else class="loader"></div>
+      </button>
+    </div>
+    <div 
+    v-if="listings.length > 0"
+    id="listings-panel"
+    class="listings-panel"
+  >
+    <h3>Available Properties <button @click="toggleListings" class="toggle-listings-button">
+        {{ listingsPanelExpanded ? '▼' : '▲' }}
+      </button></h3>
+    
+    <div v-show="listingsPanelExpanded">
+      <button @click="downloadCSV" class="download-csv-button">
+        Download CSV
+      </button>
+    <div class="listings-container">
+      <div v-for="listing in listings" :key="listing.id" class="listing-card" 
+      @click="highlightMarker(listing)">
+        <h4>{{ listing.formattedAddress }}</h4>
+        <p>Price: ${{ listing.price.toLocaleString() }}</p>
+        <p>Lot Size: {{ listing.lotSize }} sq ft</p>
+        <p>Days on Market: {{ listing.daysOnMarket }}</p>
+        <a :href="listing.listingOffice?.website" target="_blank">Realtor Website</a>
+        <a 
+          :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(listing.formattedAddress)}`"
+          target="_blank"
+          class="google-maps-link"
+        >
+          View on Google Maps
+        </a>
+      </div>
+    </div>
+    </div>
+  </div>
     <div
       id="layer-control-container"
       :class="{ 'layer-control-collapsed': !layerControlExpanded }"
@@ -120,7 +166,7 @@ import Papa from 'papaparse'
 
 const DEV_MODE_DEMOGRAPHICS_ONLY = false
 
-const DEBUG = false; // Set to false to disable console logs
+const DEBUG = true; // Set to false to disable console logs
 
 // Function to handle logging based on the debug flag
 const debugLog = (...args) => {
@@ -133,6 +179,7 @@ const mapContainer = ref<HTMLElement | null>(null)
 const map = ref<mapboxgl.Map | null>(null)
 const countiesData = ref<GeoJSON.FeatureCollection | null>(null)
 let geocoder: MapboxGeocoder
+const currentGeocoderResult = ref<any>(null)
 const countyContaminationCounts = reactive<{ [key: string]: number }>({})
 const detailedPopup = ref<HTMLElement | null>(null)
 
@@ -142,6 +189,186 @@ const showContaminationChoropleth = ref(false)
 const showDiversityChoropleth = ref(false)
 const showDetailedPopup = ref(false)
 const detailedPopupContent = ref('')
+
+const listings = ref<any[]>([])
+const listingMarkers = ref<mapboxgl.Marker[]>([])
+
+const listingsPanelExpanded = ref(true)
+
+const isSearchResultsLoading = ref(false)
+
+const toggleListings = () => {
+  listingsPanelExpanded.value = !listingsPanelExpanded.value
+}
+
+const highlightMarker = (listing) => {
+  // Remove highlight from all markers
+  listingMarkers.value.forEach(marker => {
+    marker.getElement().style.zIndex = '0'
+    marker.getElement().style.filter = 'none'
+  })
+
+  // Find and highlight the corresponding marker
+  const markerIndex = listings.value.findIndex(l => l.id === listing.id)
+  if (markerIndex !== -1) {
+    const marker = listingMarkers.value[markerIndex]
+    marker.getElement().style.zIndex = '1'
+    marker.getElement().style.filter = 'brightness(1.5)'
+    
+    // Center map on the marker
+    map.value?.flyTo({
+      center: [listing.longitude, listing.latitude],
+      zoom: 10
+    })
+  }
+}
+
+const downloadCSV = () => {
+  // Convert listings data to CSV format
+  const csvData = Papa.unparse(listings.value.map(listing => ({
+    // Basic Property Info
+    address: listing.formattedAddress,
+    addressLine1: listing.addressLine1,
+    addressLine2: listing.addressLine2,
+    city: listing.city,
+    state: listing.state,
+    zipCode: listing.zipCode,
+    county: listing.county,
+    latitude: listing.latitude,
+    longitude: listing.longitude,
+    
+    // Property Details
+    propertyType: listing.propertyType,
+    bedrooms: listing.bedrooms,
+    bathrooms: listing.bathrooms,
+    squareFootage: listing.squareFootage,
+    lotSize: listing.lotSize,
+    yearBuilt: listing.yearBuilt,
+    hoaFee: listing.hoa?.fee,
+    
+    // Listing Info
+    status: listing.status,
+    price: listing.price,
+    listingType: listing.listingType,
+    listedDate: listing.listedDate,
+    removedDate: listing.removedDate,
+    createdDate: listing.createdDate,
+    lastSeenDate: listing.lastSeenDate,
+    daysOnMarket: listing.daysOnMarket,
+    mlsName: listing.mlsName,
+    mlsNumber: listing.mlsNumber,
+    
+    // Listing Agent Info
+    agentName: listing.listingAgent?.name,
+    agentPhone: listing.listingAgent?.phone,
+    agentEmail: listing.listingAgent?.email,
+    agentWebsite: listing.listingAgent?.website,
+    
+    // Listing Office Info
+    officeName: listing.listingOffice?.name,
+    officePhone: listing.listingOffice?.phone,
+    officeEmail: listing.listingOffice?.email,
+    officeWebsite: listing.listingOffice?.website,
+    
+    // History (most recent event)
+    mostRecentHistoryEvent: listing.history ? 
+      Object.entries(listing.history)[0]?.[1]?.event : null,
+    mostRecentHistoryPrice: listing.history ? 
+      Object.entries(listing.history)[0]?.[1]?.price : null,
+    mostRecentHistoryDate: listing.history ? 
+      Object.entries(listing.history)[0]?.[0] : null
+  })))
+
+  // Create and trigger download
+  const blob = new Blob([csvData], { type: 'text/csv' })
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.setAttribute('href', url)
+  const getDateTime = (date = new Date()) => {
+  return date.toLocaleString('en', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  }).replace(',', '');
+}
+  a.setAttribute('download', listings.value[0].county + listings.value[0].state + '-LandForSale-' + getDateTime() + '.csv')
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  window.URL.revokeObjectURL(url)
+}
+
+const searchListings = async () => {
+  isSearchResultsLoading.value = true // Set loading to true when search starts
+  // Clear existing markers
+  listingMarkers.value.forEach(marker => marker.remove())
+  listingMarkers.value = []
+
+  const center = map.value?.getCenter()
+  if (!center) return
+
+  let searchUrl = 'https://api.rentcast.io/v1/listings/sale?'
+  
+  if (currentGeocoderResult.value) {
+    if (currentGeocoderResult.value.place_type?.includes('place')) {
+      // If it's a city search
+      const state = currentGeocoderResult.value.context?.find(c => c.id.startsWith('region'))?.short_code?.split('-')[1]
+      searchUrl += `city=${currentGeocoderResult.value.text}&state=${state}`
+    } else {
+      // If it's an address search
+      searchUrl += `latitude=${center.lat}&longitude=${center.lng}&radius=100`
+    }
+  } else {
+    // No geocoder result, use map center
+    searchUrl += `latitude=${center.lat}&longitude=${center.lng}&radius=100`
+  }
+
+  // Add common parameters
+  searchUrl += '&propertyType=Land&status=Active&limit=60'
+
+  try {
+    const response = await fetch(searchUrl, {
+      headers: {
+        accept: 'application/json',
+        'X-Api-Key': '72f7ed2c628a40169dfa4bdaf2655fd8'
+      }
+    })
+    
+    const data = await response.json()
+    debugLog('got rentcast data')
+    debugLog(data)
+    listings.value = data
+    if (data.length === 0) {
+      alert("No lots found within 100 miles of this point, try somewhere else.");
+    }
+
+    // Add markers for each listing
+    data.forEach((listing: any) => {
+      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
+        <div class="listing-popup">
+          <h4>${listing.formattedAddress}</h4>
+          <p>Price: $${listing.price.toLocaleString()}</p>
+          <p>Lot Size: ${listing.lotSize} sq ft</p>
+          <p>Days on Market: ${listing.daysOnMarket}</p>
+          <a href="${listing.listingOffice?.website}" target="_blank">View Website</a>
+        </div>
+      `)
+
+      const marker = new mapboxgl.Marker()
+        .setLngLat([listing.longitude, listing.latitude])
+        .setPopup(popup)
+        .addTo(map.value!)
+
+      listingMarkers.value.push(marker)
+    })
+  } catch (error) {
+    console.error('Error fetching listings:', error)
+  } finally {
+    isSearchResultsLoading.value = false 
+  }
+}
 
 const isDesktopView = computed(() => {
   return window.innerWidth > 768
@@ -302,7 +529,7 @@ const demographicLayers = reactive([
   },
   {
     id: 'combined_scores',
-    name: 'BLO Combined Scores',
+    name: 'BLO Combined Score',
     visible: false
   }
 ])
@@ -1030,7 +1257,7 @@ onMounted(async () => {
     container: mapContainer.value!,
     style: 'mapbox://styles/mapbox/light-v10',
     center: [-98.5795, 39.8283], // Center of the US
-    zoom: 3
+    zoom: 2
   })
 
   geocoder = new MapboxGeocoder({
@@ -1047,6 +1274,7 @@ onMounted(async () => {
 
     // Add event listener for the 'result' event
     geocoder.on('result', function (e) {
+      currentGeocoderResult.value = e.result
       handleGeocoderResult(e.result)
     })
 
@@ -1303,11 +1531,147 @@ const preCalculateColors = () => {
 
   colorCalculationComplete.value = true
   loadedLayersCount.value++ // Increment the loaded layers count
+  
   debugLog('Color blend pre-calculation complete')
 }
 </script>
 
 <style scoped>
+
+.download-csv-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.download-csv-button:hover {
+  background-color: #45a049;
+}
+
+.listing-card {
+  cursor: pointer;
+}
+
+.listing-card:hover {
+  background-color: #f5f5f5;
+}
+
+.google-maps-link {
+  display: block;
+  margin-top: 5px;
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.google-maps-link:hover {
+  text-decoration: underline;
+}
+
+.listings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toggle-listings-button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.loader {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.listings-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 150px;
+  min-height: 40px;
+}
+
+.listings-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.listings-button:hover {
+  background-color: #45a049;
+}
+
+.listings-panel {
+  position: absolute;
+  left: 10px;
+  top: 20vh;
+  background: white;
+  color: black;
+  padding: 15px;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  max-width: 300px;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 1;
+}
+
+.listing-card {
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+}
+
+.listing-card:last-child {
+  border-bottom: none;
+}
+
+.listing-popup {
+  color: black;
+  padding: 5px;
+}
+
+.listing-popup h4 {
+  color: black;
+  margin: 0 0 5px 0;
+}
+
+.listing-popup p {
+  color: black;
+  margin: 2px 0;
+}
+
+@media (max-width: 768px) {
+  .listings-panel {
+    color: black;
+    left: 10px;
+    right: 10px;
+    max-width: none;
+  }
+}
+
 #layer-control-container {
   display: flex;
   flex-direction: column;
@@ -1583,13 +1947,15 @@ const preCalculateColors = () => {
   color: #333;
 }*/
 
+
+
 #detailed-popup {
   position: fixed;
   background: white;
   padding: 20px;
   border-radius: 4px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  z-index: 1000;
+  z-index: 2000 !important; /* Increased z-index to be above geocoder */
   color: black;
   font-size: 16px; 
   overflow-y: auto;
@@ -1656,6 +2022,11 @@ const preCalculateColors = () => {
 .geocoder {
   width: 50%;
   max-width: 300px;
+  z-index: 100 !important;
+}
+
+:global(.mapboxgl-ctrl-geocoder) {
+  z-index: 100 !important;
 }
 
 :global(.mapboxgl-ctrl-geocoder) {
