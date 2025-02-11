@@ -29,6 +29,16 @@
           box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         "
       >
+      <h3 style="color: black">Demographic Layers</h3>
+      <div v-for="layer in demographicLayers" :key="layer.id" class="layer-item">
+        <input
+          type="checkbox"
+          :id="layer.id"
+          :checked="selectedDemographicLayers.includes(layer.id)"
+          @change="toggleDemographicLayer(layer.id)"
+        />
+        <label :for="layer.id">{{ layer.name }}</label>
+      </div>
       <template v-if="!DEV_MODE_DEMOGRAPHICS_ONLY">
         <h3 style="color: black">Potential Sources of Contamination</h3>
         <div>
@@ -59,16 +69,7 @@
           </label>
         </div>
       </template>
-      <h3 style="color: black">Demographic Layers</h3>
-      <div v-for="layer in demographicLayers" :key="layer.id" class="layer-item">
-        <input
-          type="checkbox"
-          :id="layer.id"
-          :checked="selectedDemographicLayers.includes(layer.id)"
-          @change="toggleDemographicLayer(layer.id)"
-        />
-        <label :for="layer.id">{{ layer.name }}</label>
-      </div>
+      
     </div>
     <div v-if="!layersLoaded" class="loading-overlay">
       <div class="loading-content">
@@ -83,6 +84,24 @@
       <div class="detailed-popup-content" v-html="detailedPopupContent"></div>
     </div>
   </div>
+  <div 
+      id="averages-panel"
+      :class="{ 'averages-panel-collapsed': !averagesPanelExpanded }"
+      style="position: absolute; bottom: 10px; left: 10px; z-index: 10;"
+    >
+      <button @click="toggleAveragesPanel" class="averages-panel-toggle">
+        {{ averagesPanelExpanded ? '▼' : '▲' }} National Averages (per county)
+      </button>
+      <div 
+        v-show="averagesPanelExpanded"
+        class="averages-content"
+      >
+        <p>Contamination Sites: 8.77</p>
+        <p>Black Population: 9.05%</p>
+        <p>Diversity Index: 0.33</p>
+        <p>Life Expectancy: 77.74 years</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -95,6 +114,15 @@ import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import Papa from 'papaparse'
 
 const DEV_MODE_DEMOGRAPHICS_ONLY = false
+
+const DEBUG = false; // Set to false to disable console logs
+
+// Function to handle logging based on the debug flag
+const debugLog = (...args) => {
+  if (DEBUG) {
+    console.log(...args);
+  }
+};
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = ref<mapboxgl.Map | null>(null)
@@ -121,6 +149,13 @@ const handleOutsideClick = (event: MouseEvent) => {
   }
 }
 
+const averagesPanelExpanded = ref(false)
+
+const toggleAveragesPanel = (event: Event) => {
+  event.stopPropagation()
+  averagesPanelExpanded.value = !averagesPanelExpanded.value
+}
+
 const closeDetailedPopup = () => {
   showDetailedPopup.value = false
 }
@@ -138,23 +173,36 @@ const toggleContaminationChoropleth = () => {
 const selectedDemographicLayers = ref<string[]>([])
 
 const toggleDemographicLayer = (layerId: string) => {
+  debugLog("TOGGLING " + layerId);
   const layer = demographicLayers.find((l) => l.id === layerId)
   if (!layer) return
 
-  const currentIndex = selectedDemographicLayers.value.indexOf(layerId)
-  
-  if (currentIndex === -1) {
-    // Adding a new layer
-    if (selectedDemographicLayers.value.length >= 2) {
-      // If we already have 2 layers, remove the first one
-      selectedDemographicLayers.value.shift()
-    }
-    selectedDemographicLayers.value.push(layerId)
-    layer.visible = true
+  if (layerId === 'combined_scores') {
+    // Handle combined scores separately
+    if (selectedDemographicLayers.value[0] === 'combined_scores') {
+      selectedDemographicLayers.value = [];
+      demographicLayers.forEach(l => {if (l.id==='combined_scores') {l.visible = false}})
+    } else {
+      selectedDemographicLayers.value = ['combined_scores']
+      demographicLayers.forEach(l => l.visible = l.id === 'combined_scores')
+    } 
   } else {
-    // Removing a layer
-    selectedDemographicLayers.value.splice(currentIndex, 1)
-    layer.visible = false
+
+    const currentIndex = selectedDemographicLayers.value.indexOf(layerId)
+    
+    if (currentIndex === -1) {
+      // Adding a new layer
+      if (selectedDemographicLayers.value.length >= 2) {
+        // If we already have 2 layers, remove the first one
+        selectedDemographicLayers.value.shift()
+      }
+      selectedDemographicLayers.value.push(layerId)
+      layer.visible = true
+    } else {
+      // Removing a layer
+      selectedDemographicLayers.value.splice(currentIndex, 1)
+      layer.visible = false
+    }
   }
 
   showDiversityChoropleth.value = selectedDemographicLayers.value.length > 0
@@ -165,11 +213,21 @@ const toggleDemographicLayer = (layerId: string) => {
 const updateChoroplethVisibility = () => {
   if (!map.value) return
 
-  const visibility =
-    showContaminationChoropleth.value || showDiversityChoropleth.value ? 'visible' : 'none'
+  debugLog('Updating choropleth visibility:', {
+    showContaminationChoropleth: showContaminationChoropleth.value,
+    showDiversityChoropleth: showDiversityChoropleth.value
+  })
+
+  const visibility = 
+    showContaminationChoropleth.value || 
+    showDiversityChoropleth.value || 
+    selectedDemographicLayers.value.includes('combined_scores')
+      ? 'visible' 
+      : 'none'
+  
   map.value.setLayoutProperty('county-choropleth', 'visibility', visibility)
 
-  if (showContaminationChoropleth.value || showDiversityChoropleth.value) {
+  if (visibility === 'visible') {
     updateChoroplethColors()
   }
 }
@@ -233,6 +291,11 @@ const demographicLayers = reactive([
     id: 'life_expectancy',
     name: 'Life Expectancy',
     visible: false
+  },
+  {
+    id: 'combined_scores',
+    name: 'BLO Combined Scores',
+    visible: false
   }
 ])
 
@@ -245,7 +308,8 @@ interface ColorBlend {
   blendedColors: {
     diversityAndContamination: [number, number, number, number]
     blackPctAndContamination: [number, number, number, number]
-  }
+  },
+  combinedScoreColor: [number, number, number, number]
 }
 
 const preCalculatedColors = ref<{ [key: string]: ColorBlend }>({})
@@ -271,6 +335,12 @@ const loadCountiesData = async () => {
   try {
     const countiesResponse = await fetch('/datasets/counties.geojson')
     countiesData.value = await countiesResponse.json()
+    
+    // Add debug logging
+    debugLog('Counties data loaded:', {
+      features: countiesData.value?.features?.length,
+      sampleFeature: countiesData.value?.features?.[0]
+    })
 
     const contaminationResponse = await fetch('/datasets/contamination_counts.json')
     const contaminationData = await contaminationResponse.json()
@@ -278,11 +348,14 @@ const loadCountiesData = async () => {
 
     await loadDiversityData()
     await loadLifeExpectancyData()
+
+    const combinedScoresResponse = await fetch('/datasets/combined_scores.json')
+    combinedScoresData.value = await combinedScoresResponse.json()
     
     // Pre-calculate colors after all data is loaded
     preCalculateColors()
 
-    console.log('All data loaded and colors pre-calculated')
+    debugLog('All data loaded successfully')
   } catch (error) {
     console.error('Error loading counties data:', error)
   }
@@ -293,7 +366,7 @@ const addContaminationLayer = async (map: mapboxgl.Map, layer: any) => {
     const response = await fetch(layer.file)
     const data = await response.json()
 
-    console.log(`Loaded data for ${layer.id}:`, data.features.length, 'features')
+    debugLog(`Loaded data for ${layer.id}:`, data.features.length, 'features')
 
     const sourceId = `contamination-source-${layer.id}`
     const layerId = `contamination-layer-${layer.id}`
@@ -318,7 +391,7 @@ const addContaminationLayer = async (map: mapboxgl.Map, layer: any) => {
       }
     })
 
-    console.log(`Added contamination layer: ${layerId}`)
+    debugLog(`Added contamination layer: ${layerId}`)
     loadedLayersCount.value++
   } catch (error) {
     console.error(`Error adding layer ${layer.id}:`, error)
@@ -347,7 +420,7 @@ const addDiversityLayer = async (map: mapboxgl.Map) => {
       }
     })
 
-    console.log('Added diversity layer')
+    debugLog('Added diversity layer')
     loadedLayersCount.value++
   } catch (error) {
     console.error('Error adding diversity layer:', error)
@@ -355,15 +428,15 @@ const addDiversityLayer = async (map: mapboxgl.Map) => {
 }
 
 const addCountyChoroplethLayer = () => {
-  console.log('Adding county choropleth layer...')
+  debugLog('Adding county choropleth layer...')
   if (!map.value || !map.value.isStyleLoaded() || !countiesData.value) {
-    console.log('Map style not yet loaded or counties data not ready, waiting...')
+    debugLog('Map style not yet loaded or counties data not ready, waiting...')
     return
   }
 
   if (!map.value.getSource('counties')) {
-    console.log('Adding counties source...')
-    console.log(
+    debugLog('Adding counties source...')
+    debugLog(
       'Sample counties:',
       countiesData.value.features
         .slice(0, 5)
@@ -376,7 +449,7 @@ const addCountyChoroplethLayer = () => {
   }
 
   if (!map.value.getLayer('county-choropleth')) {
-    console.log('Adding county choropleth layer...')
+    debugLog('Adding county choropleth layer...')
     map.value.addLayer({
       id: 'county-choropleth',
       type: 'fill',
@@ -391,12 +464,12 @@ const addCountyChoroplethLayer = () => {
     })
   }
 
-  console.log('County choropleth layer added/updated:', map.value.getLayer('county-choropleth'))
+  debugLog('County choropleth layer added/updated:', map.value.getLayer('county-choropleth'))
 }
 
 const toggleLayer = (layerId: string) => {
   if (!layersLoaded.value || !map.value) {
-    console.log(`Layers not loaded yet, skipping toggle for ${layerId}`)
+    debugLog(`Layers not loaded yet, skipping toggle for ${layerId}`)
     return
   }
 
@@ -409,7 +482,7 @@ const toggleLayer = (layerId: string) => {
       map.value.setLayoutProperty(mapLayerId, 'visibility', visibility)
     }
 
-    console.log(`Set ${layerId} visibility to ${visibility}`)
+    debugLog(`Set ${layerId} visibility to ${visibility}`)
 
     // Update the "Show All" checkbox state
     updateShowAllCheckbox()
@@ -424,7 +497,7 @@ const toggleLayer = (layerId: string) => {
 }
 
 const toggleContaminationLayers = () => {
-  console.log(`Toggling all layers to ${showContaminationLayers.value ? 'visible' : 'none'}`)
+  debugLog(`Toggling all layers to ${showContaminationLayers.value ? 'visible' : 'none'}`)
   contaminationLayers.forEach((layer) => {
     layer.visible = showContaminationLayers.value
     const visibility = layer.visible ? 'visible' : 'none'
@@ -445,11 +518,14 @@ const updateShowAllCheckbox = () => {
 }
 
 const updateChoroplethColors = () => {
-  console.log('Updating choropleth colors')
-  console.log('Selected demographic layers:', selectedDemographicLayers.value)
-  
+  debugLog('Updating choropleth colors:', {
+    selectedLayers: selectedDemographicLayers.value,
+    colorCalculationComplete: colorCalculationComplete.value,
+    preCalculatedColorsCount: Object.keys(preCalculatedColors.value).length
+  })
+
   if (!map.value || !map.value.getLayer('county-choropleth') || !colorCalculationComplete.value) {
-    console.log('Early return due to:', {
+    debugLog('Early return due to:', {
       mapExists: !!map.value,
       layerExists: map.value?.getLayer('county-choropleth'),
       colorCalculationComplete: colorCalculationComplete.value
@@ -459,7 +535,17 @@ const updateChoroplethColors = () => {
 
   let expression: Expression = ['rgba', 0, 0, 0, 0] // Default transparent
 
-  if (selectedDemographicLayers.value.length > 0) {
+  if (showContaminationChoropleth.value) {
+    expression = [
+      'match',
+      ['get', 'GEOID'],
+      ...Object.entries(preCalculatedColors.value).flatMap(([geoID, colors]) => [
+        geoID,
+        ['rgba', ...colors.contaminationColor]
+      ]),
+      ['rgba', 0, 0, 0, 0] // default color
+    ]
+  } else if (selectedDemographicLayers.value.length > 0) {
     expression = [
       'match',
       ['get', 'GEOID'],
@@ -478,6 +564,9 @@ const updateChoroplethColors = () => {
               break
             case 'life_expectancy':
               finalColor = colors.lifeExpectancyColor
+              break
+            case 'combined_scores':
+              finalColor = colors.combinedScoreColor
               break
             default:
               finalColor = [0, 0, 0, 0]
@@ -514,6 +603,8 @@ const getLayerColor = (colors: ColorBlend, layerId: string): [number, number, nu
       return colors.blackPctColor
     case 'life_expectancy':
       return colors.lifeExpectancyColor
+    case 'combined_scores':
+      return colors.combinedScoreColor
     default:
       return [0, 0, 0, 0]
   }
@@ -592,6 +683,13 @@ const addTooltip = () => {
     closeOnClick: false
   })
 
+   const averages = {
+    contamination: 8.767526188557614,
+    blackPct: 9.052875828856244,
+    diversityIndex: 0.32891281038322207,
+    lifeExpectancy: 77.73516731016737
+  }
+
   map.value.on('mousemove', 'county-choropleth', (e) => {
     if (e.features && e.features.length > 0) {
       const feature = e.features[0]
@@ -618,7 +716,7 @@ const addTooltip = () => {
       const stateName = fipsToState[stateFIPS] || 'Unknown State'
 
       // Add debugging for demographic data linking
-      console.log('County data lookup:', {
+      debugLog('County data lookup:', {
         countyId,
         hasData: !!diversityData.value[countyId],
         sampleDiversityKeys: Object.keys(diversityData.value).slice(0, 5),
@@ -628,13 +726,23 @@ const addTooltip = () => {
       const countyDiversityData = diversityData.value[countyId]
       const totalContamination = countyContaminationCounts[countyId]?.total || 0
 
+       const getColoredValue = (value: number, average: number) => {
+        const color = value > average ? 'green' : 'red'
+        return `<span style="color: ${color}">${value.toFixed(2)}</span>`
+      }
+      const getColoredValueContam = (value: number, average: number) => {
+        const color = value > average ? 'red' : 'green'
+        return `<span style="color: ${color}">${value.toFixed(2)}</span>`
+      }
+
       const tooltipContent = `
         <h3>${countyName}, ${stateName}</h3>
+        <p>BLO Combined Score: ${getColoredValue(combinedScoresData.value[countyId]?.combinedScore || 0, 1.4)}</p>
         <p>Total Population: ${countyDiversityData ? countyDiversityData.totalPopulation.toLocaleString() : 'N/A'}</p>
-        <p>Life Expectancy: ${lifeExpectancyData.value[countyId]?.lifeExpectancy.toFixed(1) || 'N/A'} years</p>
-        <p>Percent Black (Non-Hispanic): ${countyDiversityData ? countyDiversityData.pct_nhBlack.toFixed(2) : 'N/A'}</p>
-        <p>Diversity Index: ${countyDiversityData ? countyDiversityData.diversityIndex.toFixed(4) : 'N/A'}</p>
-        <p>EPA Contaminated Sites: ${totalContamination}</p>
+        <p>Life Expectancy: ${getColoredValue(lifeExpectancyData.value[countyId]?.lifeExpectancy || 0, averages.lifeExpectancy)} years</p>
+        <p>Percent Black (Non-Hispanic): ${getColoredValue(countyDiversityData?.pct_nhBlack || 0, averages.blackPct)}</p>
+        <p>Diversity Index: ${getColoredValue(countyDiversityData?.diversityIndex || 0, averages.diversityIndex)}</p>
+        <p>EPA Contaminated Sites: ${getColoredValueContam(totalContamination, averages.contamination)}</p>
       `
 
       tooltip.setLngLat(e.lngLat).setHTML(tooltipContent).addTo(map.value)
@@ -650,7 +758,7 @@ const showDetailedPopupForFeature = (feature: mapboxgl.MapboxGeoJSONFeature) => 
   const countyId = feature.properties.GEOID
   const countyName = feature.properties.NAME
   // Add debug logging
-  console.log('Feature properties:', feature.properties)
+  debugLog('Feature properties:', feature.properties)
   
   // Use FIPS to state mapping for reliable state names
   const stateFIPS = countyId.substring(0, 2)
@@ -671,11 +779,12 @@ const showDetailedPopupForFeature = (feature: mapboxgl.MapboxGeoJSONFeature) => 
   }
   
   const stateName = fipsToState[stateFIPS] || 'Unknown State'
-  console.log('County ID:', countyId, 'State FIPS:', stateFIPS, 'State Name:', stateName)
+  debugLog('County ID:', countyId, 'State FIPS:', stateFIPS, 'State Name:', stateName)
 
   const countyDiversityData = diversityData.value[countyId]
   const contaminationData = countyContaminationCounts[countyId] || { total: 0, layers: {} }
   const lifeExpectancyValue = lifeExpectancyData.value[countyId]?.lifeExpectancy
+  const combinedScore = combinedScoresData.value[countyId]
 
   let content = `
     <h2>${countyName}, ${stateName}</h2>
@@ -684,6 +793,8 @@ const showDetailedPopupForFeature = (feature: mapboxgl.MapboxGeoJSONFeature) => 
 
   if (countyDiversityData) {
     content += `
+      <p>BLO Combined Score: ${combinedScore.combinedScore.toFixed(2)}</p>
+      <p>Rank: ${combinedScore.rankScore} (${combinedScore.countiesWithSameRank} counties tied)</p>
       <p>Total Population: ${countyDiversityData.totalPopulation.toLocaleString()}</p>
       <p>Life Expectancy: ${lifeExpectancyValue ? lifeExpectancyValue.toFixed(1) : 'N/A'} years</p>
       <p>Diversity Index: ${countyDiversityData.diversityIndex.toFixed(4)}</p>
@@ -719,6 +830,7 @@ interface DiversityData {
     totalPopulation: number
     nhWhite: number
     nhBlack: number
+    pct_nhBlack: number
     nhAmIndian: number
     nhAsian: number
     nhPacIslander: number
@@ -729,7 +841,17 @@ interface DiversityData {
   }
 }
 
+
 const diversityData = ref<DiversityData>({})
+
+interface CombinedScoreData {
+  combinedScore: number
+  rankScore: number
+  stdDevsFromMean: number
+  countiesWithSameRank: number
+}
+
+const combinedScoresData = ref<{ [key: string]: CombinedScoreData }>({});
 
 const loadDiversityData = async () => {
   try {
@@ -739,7 +861,7 @@ const loadDiversityData = async () => {
     const results = Papa.parse(csvText, { header: true, dynamicTyping: true })
     
     // Debug the parsed data
-    console.log('Diversity data parsing:', {
+    debugLog('Diversity data parsing:', {
       totalRows: results.data.length,
       sampleRows: results.data.slice(0, 5),
       sampleGEOIDs: results.data.slice(0, 5).map((row: any) => row.GEOID),
@@ -768,7 +890,7 @@ const loadDiversityData = async () => {
       }
     })
 
-    console.log('Diversity data loaded:', {
+    debugLog('Diversity data loaded:', {
       totalCounties: Object.keys(diversityData.value).length,
       sampleKeys: Object.keys(diversityData.value).slice(0, 5),
       sampleData: Object.entries(diversityData.value).slice(0, 2)
@@ -786,7 +908,7 @@ const loadLifeExpectancyData = async () => {
     const results = Papa.parse(csvText, { header: true, dynamicTyping: true })
     
     // Debug the raw data format
-    console.log('Life expectancy raw data sample:', {
+    debugLog('Life expectancy raw data sample:', {
       headers: results.meta.fields,
       firstFewRows: results.data.slice(0, 10).map(row => ({
         rawGEOID: row.GEOID,
@@ -799,10 +921,10 @@ const loadLifeExpectancyData = async () => {
 
     // Check for any Colorado counties using state code
     const coloradoData = results.data.filter((row: any) => {
-      console.log('Row state:', row.STATE2KX, typeof row.STATE2KX);
+      debugLog('Row state:', row.STATE2KX, typeof row.STATE2KX);
       return row.STATE2KX === 8 || row.STATE2KX === '8' || row.STATE2KX === '08';
     });
-    console.log('Colorado counties found:', coloradoData);
+    debugLog('Colorado counties found:', coloradoData);
 
     results.data.forEach((row: any) => {
       if (!row.GEOID) return
@@ -817,7 +939,7 @@ const loadLifeExpectancyData = async () => {
         geoID = row.GEOID.toString().padStart(5, '0');
       }
       
-      console.log('Processing row:', {
+      debugLog('Processing row:', {
         originalGEOID: row.GEOID,
         state: row.STATE2KX,
         county: row.CNTY2KX,
@@ -832,7 +954,7 @@ const loadLifeExpectancyData = async () => {
     })
 
     // Debug final data
-    console.log('Life expectancy data loaded:', {
+    debugLog('Life expectancy data loaded:', {
       totalCounties: Object.keys(lifeExpectancyData.value).length,
       coloradoCounties: Object.entries(lifeExpectancyData.value)
         .filter(([id]) => id.startsWith('08'))
@@ -867,7 +989,7 @@ const showGeocoderError = (message: string) => {
 }
 
 const handleGeocoderResult = (result: any) => {
-  console.log('Geocoder result:', result)
+  debugLog('Geocoder result:', result)
 
   if (result.center) {
     map.value?.flyTo({
@@ -885,17 +1007,17 @@ const handleGeocoderResult = (result: any) => {
 onMounted(async () => {
   mapboxgl.accessToken =
     'pk.eyJ1IjoibmJ1cmthIiwiYSI6ImNseWYweWIwdTA5YXIyaW9mY3ViYmw1bTYifQ.io_uiRu0x603ZlLU5-2h1A'
-  console.log('Component mounted')
+  debugLog('Component mounted')
   try {
     await loadCountiesData()
     await loadDiversityData()
-    console.log('Counties data loaded successfully')
+    debugLog('Counties data loaded successfully')
   } catch (error) {
     console.error('Error loading counties data:', error)
     return
   }
 
-  console.log('Initializing map')
+  debugLog('Initializing map')
   map.value = new mapboxgl.Map({
     container: mapContainer.value!,
     style: 'mapbox://styles/mapbox/light-v10',
@@ -938,9 +1060,41 @@ onMounted(async () => {
   })
 
   map.value.on('load', async function () {
-    console.log('Map loaded')
-    console.log('Counties source:', map.value?.getSource('counties'))
+    debugLog('Map loaded')
+    debugLog('Counties source:', map.value?.getSource('counties'))
 
+    // Wait for style to be fully loaded
+  if (!map.value?.isStyleLoaded()) {
+    await new Promise(resolve => map.value?.once('style.load', resolve))
+  }
+
+  // Add counties source first
+  if (!map.value?.getSource('counties')) {
+    debugLog('Adding counties source...')
+    map.value?.addSource('counties', {
+      type: 'geojson',
+      data: countiesData.value!
+    })
+  }
+
+  // Then add choropleth layer
+  if (!map.value?.getLayer('county-choropleth')) {
+    debugLog('Adding choropleth layer...')
+    map.value?.addLayer({
+      id: 'county-choropleth',
+      type: 'fill',
+      source: 'counties',
+      paint: {
+        'fill-color': ['rgba', 0, 0, 0, 0],
+        'fill-opacity': 0.7
+      },
+      layout: {
+        visibility: 'none'
+      }
+    })
+  }
+
+    
     addCountyChoroplethLayer()
 
     // Add contamination layers
@@ -975,13 +1129,13 @@ onMounted(async () => {
 
   // Check if the style is already loaded (it might be if we're using a local style)
   if (map.value.isStyleLoaded()) {
-    console.log('Style already loaded')
+    debugLog('Style already loaded')
     addCountyChoroplethLayer()
   }
 
   // Add a listener for the 'styledata' event, which fires when the map's style is fully loaded
   map.value.on('styledata', () => {
-    console.log('Style data loaded')
+    debugLog('Style data loaded')
     addCountyChoroplethLayer()
   })
 
@@ -989,12 +1143,12 @@ onMounted(async () => {
     const features = map.value?.queryRenderedFeatures(e.point, { layers: ['county-choropleth'] })
     if (features && features.length > 0) {
       const feature = features[0]
-      console.log('Clicked feature:', feature)
-      console.log('Feature ID:', feature.properties.GEOID)
-      console.log('Feature properties:', feature.properties)
+      debugLog('Clicked feature:', feature)
+      debugLog('Feature ID:', feature.properties.GEOID)
+      debugLog('Feature properties:', feature.properties)
       showDetailedPopupForFeature(feature)
     } else {
-      console.log('No feature found at click point')
+      debugLog('No feature found at click point')
     }
   })
 
@@ -1010,19 +1164,33 @@ onMounted(async () => {
 
   addTooltip()
 
-  console.log('Map initialization complete')
+  debugLog('Map initialization complete')
 })
 
 
 // Update preCalculateColors to handle the new layer structure
 const preCalculateColors = () => {
-  console.log('Pre-calculating color blends...')
+  debugLog('Pre-calculating color blends...')
   const colors = {
-    diversity_index: [128, 0, 128], // Purple
-    pct_nhBlack: [0, 0, 128],      // Navy blue
-    contamination: [255, 0, 0],     // Red
-    life_expectancy: [0, 128, 0]    // Green
+  diversity_index: [128, 0, 128], // Purple
+  pct_nhBlack: [0, 0, 128],      // Navy blue
+  contamination: [255, 0, 0],     // Red
+  life_expectancy: [0, 128, 0],   // Green
+  combined_scores: {
+    min: [255, 255, 0],  // Yellow
+    max: [0, 255, 0]     // Vivid green
   }
+}
+
+  // Get the range of combined scores
+  // Add null checks and proper access to combinedScoresData
+  const combinedScores = Object.values(combinedScoresData.value || {})
+    .filter(d => d && typeof d.combinedScore === 'number')
+    .map(d => d.combinedScore)
+
+  // Add fallback values if there are no valid scores
+  const maxCombinedScore = combinedScores.length > 0 ? Math.max(...combinedScores) : 5
+  const minCombinedScore = combinedScores.length > 0 ? Math.min(...combinedScores) : 0
 
   // Get all necessary ranges
   const maxDiversityIndex = Math.max(
@@ -1039,7 +1207,7 @@ const preCalculateColors = () => {
   const maxLifeExpectancy = Math.max(...lifeExpectancyValues)
   const minLifeExpectancy = Math.min(...lifeExpectancyValues)
 
-  console.log('Pre-calculation ranges:', {
+  debugLog('Pre-calculation ranges:', {
     maxDiversityIndex,
     maxContamination,
     lifeExpectancy: {
@@ -1080,11 +1248,29 @@ const preCalculateColors = () => {
         ] as [number, number, number, number]
       }
     }
+
+    // Ensure combinedScoresData exists for this county
+  const combinedScore = combinedScoresData.value?.[geoID]?.combinedScore ?? minCombinedScore
+  const combinedScoreNormalized = (combinedScore - minCombinedScore) / 
+    (maxCombinedScore - minCombinedScore || 1) // Prevent division by zero
+    
+    // Interpolate between yellow and green
+    const combinedScoreColor: [number, number, number, number] = [
+      Math.round(colors.combined_scores.min[0] + (colors.combined_scores.max[0] - colors.combined_scores.min[0]) * combinedScoreNormalized),
+      Math.round(colors.combined_scores.min[1] + (colors.combined_scores.max[1] - colors.combined_scores.min[1]) * combinedScoreNormalized),
+      Math.round(colors.combined_scores.min[2] + (colors.combined_scores.max[2] - colors.combined_scores.min[2]) * combinedScoreNormalized),
+      0.7 // Set a constant opacity
+    ]
+
+    preCalculatedColors.value[geoID] = {
+      ...preCalculatedColors.value[geoID],
+      combinedScoreColor
+    }
   })
 
   colorCalculationComplete.value = true
   loadedLayersCount.value++ // Increment the loaded layers count
-  console.log('Color blend pre-calculation complete')
+  debugLog('Color blend pre-calculation complete')
 }
 </script>
 
@@ -1115,6 +1301,26 @@ const preCalculateColors = () => {
 .layer-control-collapsed #layer-control {
   display: none;
 }
+
+.averages-panel-toggle {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  padding: 5px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.averages-content {
+  color: black;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
 @media (max-width: 768px) {
   #layer-control-container {
     left: 10px;
@@ -1129,6 +1335,20 @@ const preCalculateColors = () => {
   #layer-control {
     width: 100%;
     max-height: 50vh;
+  }
+
+  #averages-panel {
+    left: 10px;
+    right: 10px;
+    bottom: 60px; /* Adjust based on your layer control height */
+  }
+
+  .averages-panel-toggle {
+    width: 100%;
+  }
+
+  .averages-content {
+    width: 100%;
   }
 }
 

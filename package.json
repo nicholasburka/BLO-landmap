@@ -20,6 +20,8 @@
     "@mapbox/mapbox-gl-geocoder": "^5.0.2",
     "@turf/turf": "^7.0.0",
     "@types/mapbox-gl": "^3.1.0",
+    "csv": "^6.3.11",
+    "csv-parser": "^3.2.0",
     "mapbox-gl": "^3.5.2",
     "papaparse": "^5.4.1",
     "pinia": "^2.1.7",
