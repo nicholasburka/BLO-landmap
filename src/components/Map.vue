@@ -38,9 +38,13 @@
           @change="toggleDemographicLayer(layer.id)"
         />
         <label :for="layer.id">{{ layer.name }}</label>
+        <span class="tooltip-icon" v-if="layer.tooltip">
+        ⓘ
+        <span class="tooltip-text">{{ layer.tooltip }}</span>
+        </span>
       </div>
       <template v-if="!DEV_MODE_DEMOGRAPHICS_ONLY">
-        <h3 style="color: black">Potential Sources of Contamination</h3>
+        <h3 style="color: black">EPA - Sites of Contamination</h3>
         <div>
           <label style="color: black">
             <input
@@ -100,6 +104,7 @@
         <p>Black Population: 9.05%</p>
         <p>Diversity Index: 0.33</p>
         <p>Life Expectancy: 77.74 years</p>
+        <p>BLO Combined Score: 1.4</p>
       </div>
     </div>
   </div>
@@ -278,19 +283,22 @@ const demographicLayers = reactive([
     name: 'Diversity Index',
     file: '/datasets/county_diversity_index_with_stats.csv',
     color: '#800080', // Purple color for diversity
-    visible: false
+    visible: false,
+    tooltip: '2023 Census => Simpson\'s Diversity Index'
   },
   {
     id: 'pct_nhBlack',
     name: 'Percent Black (Non-Hispanic)',
     file: '/datasets/county_diversity_index_with_stats.csv',
     color: '#000080', // Navy blue color
-    visible: false
+    visible: false,
+    tooltip: '2023 Census'
   },
   {
     id: 'life_expectancy',
     name: 'Life Expectancy',
-    visible: false
+    visible: false,
+    tooltip: '2014, Center for Disease Control'
   },
   {
     id: 'combined_scores',
@@ -794,7 +802,7 @@ const showDetailedPopupForFeature = (feature: mapboxgl.MapboxGeoJSONFeature) => 
   if (countyDiversityData) {
     content += `
       <p>BLO Combined Score: ${combinedScore.combinedScore.toFixed(2)}</p>
-      <p>Rank: ${combinedScore.rankScore} (${combinedScore.countiesWithSameRank} counties tied)</p>
+      <p>Rank: ${combinedScore.rankScore} (${combinedScore.countiesWithSameRank} counties tied) of 3244</p>
       <p>Total Population: ${countyDiversityData.totalPopulation.toLocaleString()}</p>
       <p>Life Expectancy: ${lifeExpectancyValue ? lifeExpectancyValue.toFixed(1) : 'N/A'} years</p>
       <p>Diversity Index: ${countyDiversityData.diversityIndex.toFixed(4)}</p>
@@ -1150,6 +1158,31 @@ onMounted(async () => {
     } else {
       debugLog('No feature found at click point')
     }
+
+
+  })
+
+
+  const tooltipIcons = document.querySelectorAll('.tooltip-icon')
+  tooltipIcons.forEach(icon => {
+    icon.addEventListener('mouseenter', (e) => {
+      const tooltip = icon.querySelector('.tooltip-text')
+      const iconRect = icon.getBoundingClientRect()
+      
+      // Position the tooltip above the icon
+      tooltip.style.left = `${iconRect.left}px`
+      tooltip.style.top = `${iconRect.top - tooltip.offsetHeight - 10}px`
+      
+      // Check if tooltip is going off the left side of the screen
+      if (tooltip.getBoundingClientRect().left < 0) {
+        tooltip.style.left = '0px'
+      }
+      
+      // Check if tooltip is going off the right side of the screen
+      if (tooltip.getBoundingClientRect().right > window.innerWidth) {
+        tooltip.style.left = `${window.innerWidth - tooltip.offsetWidth}px`
+      }
+    })
   })
 
   /*map.value.on('mousemove', 'county-choropleth', updatePopup)
@@ -1456,6 +1489,55 @@ const preCalculateColors = () => {
 
 .mapboxgl-popup-content p {
   margin: 2px 0;
+}
+
+.tooltip-icon {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 12px;
+  position: relative;
+  cursor: help;
+  color: #666;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  background-color: black;
+  color: white;
+  text-align: left;
+  padding: 5px 10px;
+  border-radius: 6px;
+  position: fixed; /* Change from absolute to fixed */
+  z-index: 1000; /* Increase z-index to ensure it's above other elements */
+  width: 200px;
+  height: auto;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 12px;
+  pointer-events: none;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.tooltip-icon:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Add a pseudo-element for the tooltip arrow */
+.tooltip-text::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 15px;  /* Position the arrow on the right side */
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+
+.tooltip-icon:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
 }
 
 /*#detailed-popup {
