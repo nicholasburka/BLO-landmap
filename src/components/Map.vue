@@ -1240,7 +1240,7 @@ const handleGeocoderResult = (result: any) => {
 }
 
 onMounted(async () => {
-  mapboxgl.accessToken = process.env.MAPBOX_ACCESS_TOKEN;
+  mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
   debugLog('Component mounted')
   try {
     await loadCountiesData()
