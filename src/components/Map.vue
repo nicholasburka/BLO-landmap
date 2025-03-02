@@ -1240,8 +1240,7 @@ const handleGeocoderResult = (result: any) => {
 }
 
 onMounted(async () => {
-  mapboxgl.accessToken =
-    'pk.eyJ1IjoibmJ1cmthIiwiYSI6ImNseWYweWIwdTA5YXIyaW9mY3ViYmw1bTYifQ.io_uiRu0x603ZlLU5-2h1A'
+  mapboxgl.accessToken = process.env.MAPBOX_ACCESS_TOKEN;
   debugLog('Component mounted')
   try {
     await loadCountiesData()
