@@ -34,6 +34,7 @@ public/datasets/State-zip-code-GeoJSON/
 public/datasets/large/
 
 # Python virtual environment
+.env
 venv/
 env/
 *.pyc
