@@ -184,9 +184,6 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import Papa from "papaparse";
-const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
-console.log("MAPBOX");
-console.log(MAPBOX_ACCESS_TOKEN);
 
 const DEV_MODE_DEMOGRAPHICS_ONLY = false;
 
@@ -1415,7 +1412,7 @@ const handleGeocoderResult = (result: any) => {
 };
 
 onMounted(async () => {
-  mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
+  mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
   debugLog("Component mounted");
   try {
     await loadCountiesData();
