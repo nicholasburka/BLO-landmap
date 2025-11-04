@@ -65,106 +65,36 @@
         </div>
       </div>
     </div>
-    <div
-      id="layer-control-container"
-      :class="{ 'layer-control-collapsed': !layerControlExpanded }"
-      style="position: absolute; top: 50px; right: 10px; z-index: 10"
+    <LayerControls
+      :expanded="layerControlExpanded"
+      :demographic-layers="demographicLayers"
+      :selected-demographic-layers="selectedDemographicLayers"
+      :show-contamination-layers="showContaminationLayers"
+      :show-contamination-choropleth="showContaminationChoropleth"
+      :dev-mode-only="DEV_MODE_DEMOGRAPHICS_ONLY"
+      @toggle="toggleLayerControl"
+      @toggle-demographic="toggleDemographicLayer"
+      @toggle-contamination-layers="toggleContaminationLayers"
+      @toggle-contamination-choropleth="toggleContaminationChoropleth"
     >
-      <button @click="toggleLayerControl" class="layer-control-toggle">
-        {{ layerControlExpanded ? "▼" : "▲" }} Layers
-      </button>
-      <div
-        id="layer-control"
-        v-show="layerControlExpanded"
-        @click.stop
-        style="
-          background: white;
-          padding: 10px;
-          border-radius: 4px;
-          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        "
-      >
-        <h3 style="color: black">Demographic Layers</h3>
-        <div
-          v-for="layer in demographicLayers"
-          :key="layer.id"
-          class="layer-item"
-        >
-          <input
-            type="checkbox"
-            :id="layer.id"
-            :checked="selectedDemographicLayers.includes(layer.id)"
-            @change="toggleDemographicLayer(layer.id)"
-          />
-          <label :for="layer.id">{{ layer.name }}</label>
-          <span class="tooltip-icon" v-if="layer.tooltip">
-            ⓘ
-            <span class="tooltip-text">{{ layer.tooltip }}</span>
-          </span>
-        </div>
-        <template v-if="!DEV_MODE_DEMOGRAPHICS_ONLY">
-          <h3 style="color: black">EPA - Sites of Land Toxicity</h3>
-          <div class="layer-item">
-            <label style="color: black">
-              <input
-                type="checkbox"
-                v-model="showContaminationLayers"
-                @change="toggleContaminationLayers"
-              />
-              Show All Sites
-            </label>
-          </div>
-          <div class="layer-item">
-            <label style="color: black">
-              <input
-                type="checkbox"
-                v-model="showContaminationChoropleth"
-                @click="toggleContaminationChoropleth"
-              />
-              County-Level Breakdown
-            </label>
-          </div>
-        </template>
-      </div>
-      <div v-if="!layersLoaded" class="loading-overlay">
-        <div class="loading-content">
-          <div class="progress-bar">
-            <div
-              class="progress"
-              :style="{ width: `${loadingProgress}%` }"
-            ></div>
-          </div>
-          <div class="loading-text">Loading layers: {{ loadingProgress }}%</div>
-        </div>
-      </div>
-      <div
-        v-if="showDetailedPopup"
-        id="detailed-popup"
-        :class="{ 'desktop-view': isDesktopView }"
-        @click.stop
-      >
-        <button @click="closeDetailedPopup" class="detailed-popup-close">
-          &times;
-        </button>
-        <div class="detailed-popup-content" v-html="detailedPopupContent"></div>
-      </div>
-    </div>
-    <div
-      id="averages-panel"
-      :class="{ 'averages-panel-collapsed': !averagesPanelExpanded }"
-      style="position: absolute; bottom: 10px; left: 10px; z-index: 10"
-    >
-      <button @click="toggleAveragesPanel" class="averages-panel-toggle">
-        {{ averagesPanelExpanded ? "▼" : "▲" }} National Averages (per county)
-      </button>
-      <div v-show="averagesPanelExpanded" class="averages-content">
-        <p>Sites of Land Toxicity: 8.77</p>
-        <p>Black Population: 9.05%</p>
-        <p>Diversity Index: 0.33</p>
-        <p>Life Expectancy: 77.74 years</p>
-        <p>BLO Combined Score: 2.84</p>
-      </div>
-    </div>
+      <LoadingIndicator :loaded="layersLoaded" :progress="loadingProgress" />
+    </LayerControls>
+
+    <CountyModal
+      :show="showDetailedPopup"
+      :county-id="currentCounty?.id || ''"
+      :county-name="currentCounty?.name || ''"
+      :diversity-data="currentCounty?.id ? diversityData[currentCounty.id] : undefined"
+      :contamination-data="currentCounty?.id ? countyContaminationCounts[currentCounty.id] : undefined"
+      :life-expectancy="currentCounty?.id ? lifeExpectancyData[currentCounty.id]?.lifeExpectancy : undefined"
+      :combined-score="currentCounty?.id ? combinedScoresData[currentCounty.id] : undefined"
+      @close="closeDetailedPopup"
+    />
+
+    <AveragesPanel
+      :expanded="averagesPanelExpanded"
+      @toggle="toggleAveragesPanel"
+    />
   </div>
 </template>
 
@@ -174,25 +104,49 @@ import mapboxgl, { Expression, Map } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
-import Papa from "papaparse";
 import { usePropertyListings } from "@/composables/usePropertyListings";
+import { useMapData } from "@/composables/useMapData";
+import { useColorCalculation } from "@/composables/useColorCalculation";
 import { DEMOGRAPHIC_LAYERS, CONTAMINATION_LAYERS } from "@/config/layerConfig";
 import {
   DEV_MODE_DEMOGRAPHICS_ONLY,
   debugLog,
   MAPBOX_ACCESS_TOKEN,
-  DATA_PATHS,
   MAP_CONFIG,
-  LAYER_COLORS
 } from "@/config/constants";
+import CountyModal from "@/components/CountyModal.vue";
+import LayerControls from "@/components/LayerControls.vue";
+import LoadingIndicator from "@/components/LoadingIndicator.vue";
+import AveragesPanel from "@/components/AveragesPanel.vue";
 
 const mapContainer = ref<HTMLElement | null>(null);
 const map = ref<mapboxgl.Map | null>(null);
-const countiesData = ref<GeoJSON.FeatureCollection | null>(null);
 let geocoder: MapboxGeocoder;
 const geocoderRef = { value: undefined as MapboxGeocoder | undefined };
-const countyContaminationCounts = reactive<{ [key: string]: number }>({});
 const detailedPopup = ref<HTMLElement | null>(null);
+
+// Initialize map data composable
+const {
+  countiesData,
+  diversityData,
+  lifeExpectancyData,
+  countyContaminationCounts,
+  combinedScoresData,
+  loadAllCountyData,
+} = useMapData();
+
+// Initialize color calculation composable
+const {
+  preCalculatedColors,
+  colorCalculationComplete,
+  preCalculateColors,
+  getColorForLayer,
+} = useColorCalculation(
+  diversityData,
+  lifeExpectancyData,
+  countyContaminationCounts,
+  combinedScoresData
+);
 
 // Initialize property listings composable
 const {
@@ -213,7 +167,12 @@ const showContaminationLayers = ref(false);
 const showContaminationChoropleth = ref(false);
 const showDiversityChoropleth = ref(false);
 const showDetailedPopup = ref(false);
-const detailedPopupContent = ref("");
+
+// County modal state
+const currentCounty = ref<{
+  id: string
+  name: string
+} | null>(null);
 
 const isDesktopView = computed(() => {
   return window.innerWidth > 768;
@@ -232,8 +191,7 @@ const handleOutsideClick = (event: MouseEvent) => {
 
 const averagesPanelExpanded = ref(false);
 
-const toggleAveragesPanel = (event: Event) => {
-  event.stopPropagation();
+const toggleAveragesPanel = () => {
   averagesPanelExpanded.value = !averagesPanelExpanded.value;
 };
 
@@ -241,8 +199,7 @@ const closeDetailedPopup = () => {
   showDetailedPopup.value = false;
 };
 
-const toggleLayerControl = (event: Event) => {
-  event.stopPropagation();
+const toggleLayerControl = () => {
   layerControlExpanded.value = !layerControlExpanded.value;
 };
 
@@ -324,25 +281,6 @@ const contaminationLayers = DEV_MODE_DEMOGRAPHICS_ONLY
 
 const demographicLayers = reactive(DEMOGRAPHIC_LAYERS);
 
-interface ColorBlend {
-  geoID: string;
-  diversityColor: [number, number, number, number];
-  blackPctColor: [number, number, number, number];
-  contaminationColor: [number, number, number, number];
-  lifeExpectancyColor: [number, number, number, number];
-  blendedColors: {
-    diversityAndContamination: [number, number, number, number];
-    blackPctAndContamination: [number, number, number, number];
-  };
-  combinedScoreColor: [number, number, number, number];
-}
-
-const preCalculatedColors = ref<{ [key: string]: ColorBlend }>({});
-const colorCalculationComplete = ref(false);
-
-const lifeExpectancyData = ref<{
-  [geoID: string]: { lifeExpectancy: number; standardError: number };
-}>({});
 const showLifeExpectancyChoropleth = ref(false);
 
 const layersLoaded = ref(false);
@@ -361,29 +299,10 @@ const loadingProgress = computed(() => {
 
 const loadCountiesData = async () => {
   try {
-    const countiesResponse = await fetch(DATA_PATHS.COUNTIES);
-    countiesData.value = await countiesResponse.json();
-
-    // Add debug logging
-    debugLog("Counties data loaded:", {
-      features: countiesData.value?.features?.length,
-      sampleFeature: countiesData.value?.features?.[0],
-    });
-
-    const contaminationResponse = await fetch(DATA_PATHS.CONTAMINATION_COUNTS);
-    const contaminationData = await contaminationResponse.json();
-    Object.assign(countyContaminationCounts, contaminationData);
-
-    await loadDiversityData();
-    await loadLifeExpectancyData();
-
-    const combinedScoresResponse = await fetch(DATA_PATHS.COMBINED_SCORES);
-    combinedScoresData.value = await combinedScoresResponse.json();
-
+    await loadAllCountyData();
     // Pre-calculate colors after all data is loaded
     preCalculateColors();
-
-    debugLog("All data loaded successfully");
+    loadedLayersCount.value++; // Increment the loaded layers count
   } catch (error) {
     console.error("Error loading counties data:", error);
   }
@@ -429,8 +348,7 @@ const addContaminationLayer = async (map: mapboxgl.Map, layer: any) => {
 
 const addDiversityLayer = async (map: mapboxgl.Map) => {
   try {
-    await loadDiversityData();
-
+    // Data already loaded by loadCountiesData()
     if (!map.getSource("counties")) {
       console.warn(
         "Counties source not found. Make sure it's added before calling this function."
@@ -531,6 +449,7 @@ const toggleLayer = (layerId: string) => {
 };
 
 const toggleContaminationLayers = () => {
+  showContaminationLayers.value = !showContaminationLayers.value;
   debugLog(
     `Toggling all layers to ${showContaminationLayers.value ? "visible" : "none"}`
   );
@@ -853,277 +772,16 @@ const showDetailedPopupForFeature = (
 ) => {
   const countyId = feature.properties.GEOID;
   const countyName = feature.properties.NAME;
-  // Add debug logging
-  debugLog("Feature properties:", feature.properties);
 
-  // Use FIPS to state mapping for reliable state names
-  const stateFIPS = countyId.substring(0, 2);
-  const fipsToState: { [key: string]: string } = {
-    "01": "Alabama",
-    "02": "Alaska",
-    "04": "Arizona",
-    "05": "Arkansas",
-    "06": "California",
-    "08": "Colorado",
-    "09": "Connecticut",
-    "10": "Delaware",
-    "11": "District of Columbia",
-    "12": "Florida",
-    "13": "Georgia",
-    "15": "Hawaii",
-    "16": "Idaho",
-    "17": "Illinois",
-    "18": "Indiana",
-    "19": "Iowa",
-    "20": "Kansas",
-    "21": "Kentucky",
-    "22": "Louisiana",
-    "23": "Maine",
-    "24": "Maryland",
-    "25": "Massachusetts",
-    "26": "Michigan",
-    "27": "Minnesota",
-    "28": "Mississippi",
-    "29": "Missouri",
-    "30": "Montana",
-    "31": "Nebraska",
-    "32": "Nevada",
-    "33": "New Hampshire",
-    "34": "New Jersey",
-    "35": "New Mexico",
-    "36": "New York",
-    "37": "North Carolina",
-    "38": "North Dakota",
-    "39": "Ohio",
-    "40": "Oklahoma",
-    "41": "Oregon",
-    "42": "Pennsylvania",
-    "44": "Rhode Island",
-    "45": "South Carolina",
-    "46": "South Dakota",
-    "47": "Tennessee",
-    "48": "Texas",
-    "49": "Utah",
-    "50": "Vermont",
-    "51": "Virginia",
-    "53": "Washington",
-    "54": "West Virginia",
-    "55": "Wisconsin",
-    "56": "Wyoming",
+  debugLog("Showing modal for county:", countyId, countyName);
+
+  currentCounty.value = {
+    id: countyId,
+    name: countyName,
   };
-
-  const stateName = fipsToState[stateFIPS] || "Unknown State";
-  debugLog(
-    "County ID:",
-    countyId,
-    "State FIPS:",
-    stateFIPS,
-    "State Name:",
-    stateName
-  );
-
-  const countyDiversityData = diversityData.value[countyId];
-  const contaminationData = countyContaminationCounts[countyId] || {
-    total: 0,
-    layers: {},
-  };
-  const lifeExpectancyValue =
-    lifeExpectancyData.value[countyId]?.lifeExpectancy;
-  const combinedScore = combinedScoresData.value[countyId];
-
-  let content = `
-    <h2>${countyName}, ${stateName}</h2>
-  `;
-
-  if (countyDiversityData) {
-    content += `
-      <table class="county-stats-table">
-        <tr>
-          <td class="label">BLO Liveability Score:</td>
-          <td class="value">${combinedScore?.combinedScore != null ? combinedScore.combinedScore.toFixed(2) + " of 5.0" : "?"}</td>
-        </tr>
-        <tr>
-          <td class="label">Rank:</td>
-          <td class="value">${combinedScore?.rankScore != null ? combinedScore.rankScore + " of 3244" : "?"}</td>
-        </tr>
-        <tr>
-          <td class="label">Total Population:</td>
-          <td class="value">${countyDiversityData.totalPopulation != null ? countyDiversityData.totalPopulation.toLocaleString() : "?"}</td>
-        </tr>
-        <tr>
-          <td class="label">Percent Black:</td>
-          <td class="value">${countyDiversityData.pct_Black != null ? countyDiversityData.pct_Black.toFixed(2) + "%" : "?"}</td>
-        </tr>
-        <tr>
-          <td class="label">Life Expectancy:</td>
-          <td class="value">${lifeExpectancyValue != null ? lifeExpectancyValue.toFixed(1) + " years" : "?"}</td>
-        </tr>
-        <tr>
-          <td class="label">Diversity Index:</td>
-          <td class="value">${countyDiversityData.diversityIndex != null ? countyDiversityData.diversityIndex.toFixed(4) : "?"}</td>
-        </tr>
-        <tr>
-          <td class="label">EPA Sites of Land Toxicity:</td>
-          <td class="value">${contaminationData?.total != null ? contaminationData.total : "?"}</td>
-        </tr>
-      </table>
-    `;
-  } else {
-    content += `<p>No data available</p>`;
-  }
-
-  detailedPopupContent.value = content;
   showDetailedPopup.value = true;
 };
 
-interface DiversityData {
-  [geoID: string]: {
-    diversityIndex: number;
-    totalPopulation: number;
-    nhWhite: number;
-    nhBlack: number;
-    pct_nhBlack: number;
-    pct_Black: number;
-    total_Black: number;
-    nhAmIndian: number;
-    nhAsian: number;
-    nhPacIslander: number;
-    nhTwoOrMore: number;
-    hispanic: number;
-    countyName: string;
-    stateName: string;
-  };
-}
-
-const diversityData = ref<DiversityData>({});
-
-interface CombinedScoreData {
-  combinedScore: number;
-  rankScore: number;
-  stdDevsFromMean: number;
-  countiesWithSameRank: number;
-}
-
-const combinedScoresData = ref<{ [key: string]: CombinedScoreData }>({});
-
-const loadDiversityData = async () => {
-  try {
-    const response = await fetch(DATA_PATHS.DIVERSITY_DATA);
-    const csvText = await response.text();
-
-    const results = Papa.parse(csvText, { header: true, dynamicTyping: true });
-
-    // Debug the parsed data
-    debugLog("Diversity data parsing:", {
-      totalRows: results.data.length,
-      sampleRows: results.data.slice(0, 5),
-      sampleGEOIDs: results.data.slice(0, 5).map((row: any) => row.GEOID),
-      errors: results.errors,
-    });
-
-    results.data.forEach((row: any) => {
-      if (!row.GEOID) return;
-
-      // Ensure GEOID is properly formatted (5 digits with leading zeros)
-      const geoID = row.GEOID.toString().padStart(5, "0");
-
-      diversityData.value[geoID] = {
-        diversityIndex: row.diversity_index,
-        totalPopulation: row.total_population,
-        pct_nhBlack: row.pct_nhBlack,
-        pct_Black: row.pct_Black,
-        total_Black: row.total_Black,
-        nhWhite: row.NH_White,
-        nhBlack: row.NH_Black,
-        nhAmIndian: row.NH_AmIndian,
-        nhAsian: row.NH_Asian,
-        nhPacIslander: row.NH_PacIslander,
-        nhTwoOrMore: row.NH_TwoOrMore,
-        hispanic: row.Hispanic,
-        countyName: row.CTYNAME,
-        stateName: row.STNAME,
-      };
-    });
-
-    debugLog("Diversity data loaded:", {
-      totalCounties: Object.keys(diversityData.value).length,
-      sampleKeys: Object.keys(diversityData.value).slice(0, 5),
-      sampleData: Object.entries(diversityData.value).slice(0, 2),
-    });
-  } catch (error) {
-    console.error("Error loading diversity data:", error);
-  }
-};
-
-const loadLifeExpectancyData = async () => {
-  try {
-    const response = await fetch(DATA_PATHS.LIFE_EXPECTANCY);
-    const csvText = await response.text();
-
-    const results = Papa.parse(csvText, { header: true, dynamicTyping: true });
-
-    // Debug the raw data format
-    debugLog("Life expectancy raw data sample:", {
-      headers: results.meta.fields,
-      firstFewRows: results.data.slice(0, 10).map((row) => ({
-        rawGEOID: row.GEOID,
-        typeofGEOID: typeof row.GEOID,
-        state: row.STATE2KX,
-        county: row.CNTY2KX,
-        lifeExp: row["e(0)"],
-      })),
-    });
-
-    // Check for any Colorado counties using state code
-    const coloradoData = results.data.filter((row: any) => {
-      debugLog("Row state:", row.STATE2KX, typeof row.STATE2KX);
-      return (
-        row.STATE2KX === 8 || row.STATE2KX === "8" || row.STATE2KX === "08"
-      );
-    });
-    debugLog("Colorado counties found:", coloradoData);
-
-    results.data.forEach((row: any) => {
-      if (!row.GEOID) return;
-
-      // Convert state and county codes to proper GEOID format
-      let geoID;
-      if (row.STATE2KX && row.CNTY2KX) {
-        const stateCode = row.STATE2KX.toString().padStart(2, "0");
-        const countyCode = row.CNTY2KX.toString().padStart(3, "0");
-        geoID = stateCode + countyCode;
-      } else {
-        geoID = row.GEOID.toString().padStart(5, "0");
-      }
-
-      debugLog("Processing row:", {
-        originalGEOID: row.GEOID,
-        state: row.STATE2KX,
-        county: row.CNTY2KX,
-        constructedGEOID: geoID,
-        lifeExp: row["e(0)"],
-      });
-
-      lifeExpectancyData.value[geoID] = {
-        lifeExpectancy: row["e(0)"],
-        standardError: row["se(e(0))"],
-      };
-    });
-
-    // Debug final data
-    debugLog("Life expectancy data loaded:", {
-      totalCounties: Object.keys(lifeExpectancyData.value).length,
-      coloradoCounties: Object.entries(lifeExpectancyData.value)
-        .filter(([id]) => id.startsWith("08"))
-        .map(([id, data]) => ({
-          id,
-          lifeExp: data.lifeExpectancy,
-        })),
-    });
-  } catch (error) {
-    console.error("Error loading life expectancy data:", error);
-  }
-};
 
 const showGeocoderError = (message: string) => {
   const errorElement = document.createElement("div");
@@ -1167,7 +825,6 @@ onMounted(async () => {
   debugLog("Component mounted");
   try {
     await loadCountiesData();
-    await loadDiversityData();
     debugLog("Counties data loaded successfully");
   } catch (error) {
     console.error("Error loading counties data:", error);
@@ -1358,174 +1015,6 @@ onMounted(async () => {
   debugLog("Map initialization complete");
 });
 
-// Update preCalculateColors to handle the new layer structure
-const preCalculateColors = () => {
-  debugLog("Pre-calculating color blends...");
-  const colors = {
-    diversity_index: LAYER_COLORS.DIVERSITY_INDEX,
-    pct_Black: LAYER_COLORS.PCT_BLACK,
-    contamination: LAYER_COLORS.CONTAMINATION,
-    life_expectancy: LAYER_COLORS.LIFE_EXPECTANCY,
-    combined_scores: {
-      min: [255, 255, 0], // Yellow
-      max: [0, 255, 0], // Vivid green
-    },
-  };
-
-  // Get the range of combined scores
-  // Add null checks and proper access to combinedScoresData
-  const combinedScores = Object.values(combinedScoresData.value || {})
-    .filter((d) => d && typeof d.combinedScore === "number")
-    .map((d) => d.combinedScore);
-
-  // Add fallback values if there are no valid scores
-  const maxCombinedScore =
-    combinedScores.length > 0 ? Math.max(...combinedScores) : 5;
-  const minCombinedScore =
-    combinedScores.length > 0 ? Math.min(...combinedScores) : 0;
-
-  // Get all necessary ranges
-  const maxDiversityIndex = Math.max(
-    ...Object.values(diversityData.value).map((d) => d.diversityIndex || 0)
-  );
-  const maxContamination = Math.max(
-    ...Object.values(countyContaminationCounts).map((d) => d.total)
-  );
-
-  // Get life expectancy range
-  const lifeExpectancyValues = Object.values(lifeExpectancyData.value)
-    .map((d) => d.lifeExpectancy)
-    .filter((v) => v !== undefined && v !== null);
-  const maxLifeExpectancy = Math.max(...lifeExpectancyValues);
-  const minLifeExpectancy = Math.min(...lifeExpectancyValues);
-
-  debugLog("Pre-calculation ranges:", {
-    maxDiversityIndex,
-    maxContamination,
-    lifeExpectancy: {
-      min: minLifeExpectancy,
-      max: maxLifeExpectancy,
-    },
-  });
-
-  // Pre-calculate colors for each county
-  Object.entries(diversityData.value).forEach(([geoID, data]) => {
-    const diversityValue =
-      maxDiversityIndex > 0
-        ? (data.diversityIndex || 0) / maxDiversityIndex
-        : 0;
-    const blackPctValue = (data.pct_Black || 0) / 100;
-    const contaminationValue = countyContaminationCounts[geoID]?.total || 0;
-    const contaminationNormalized =
-      maxContamination > 0 ? contaminationValue / maxContamination : 0;
-
-    // Linear normalization to [0,1] range
-    const lifeExpectancyValue =
-      lifeExpectancyData.value[geoID]?.lifeExpectancy || minLifeExpectancy;
-    const lifeExpectancyNormalized =
-      (lifeExpectancyValue - minLifeExpectancy) /
-      (maxLifeExpectancy - minLifeExpectancy);
-
-    preCalculatedColors.value[geoID] = {
-      geoID,
-      diversityColor: [...colors.diversity_index, diversityValue] as [
-        number,
-        number,
-        number,
-        number,
-      ],
-      blackPctColor: [...colors.pct_Black, blackPctValue] as [
-        number,
-        number,
-        number,
-        number,
-      ],
-      contaminationColor: [
-        ...colors.contamination,
-        contaminationNormalized,
-      ] as [number, number, number, number],
-      lifeExpectancyColor: [
-        ...colors.life_expectancy,
-        lifeExpectancyNormalized,
-      ] as [number, number, number, number],
-      blendedColors: {
-        diversityAndContamination: [
-          Math.min(
-            255,
-            colors.diversity_index[0] * diversityValue +
-              colors.contamination[0] * contaminationNormalized
-          ),
-          Math.min(
-            255,
-            colors.diversity_index[1] * diversityValue +
-              colors.contamination[1] * contaminationNormalized
-          ),
-          Math.min(
-            255,
-            colors.diversity_index[2] * diversityValue +
-              colors.contamination[2] * contaminationNormalized
-          ),
-          Math.max(diversityValue, contaminationNormalized),
-        ] as [number, number, number, number],
-        blackPctAndContamination: [
-          Math.min(
-            255,
-            colors.pct_Black[0] * blackPctValue +
-              colors.contamination[0] * contaminationNormalized
-          ),
-          Math.min(
-            255,
-            colors.pct_Black[1] * blackPctValue +
-              colors.contamination[1] * contaminationNormalized
-          ),
-          Math.min(
-            255,
-            colors.pct_Black[2] * blackPctValue +
-              colors.contamination[2] * contaminationNormalized
-          ),
-          Math.max(blackPctValue, contaminationNormalized),
-        ] as [number, number, number, number],
-      },
-    };
-
-    // Ensure combinedScoresData exists for this county
-    const combinedScore =
-      combinedScoresData.value?.[geoID]?.combinedScore ?? minCombinedScore;
-    const combinedScoreNormalized =
-      (combinedScore - minCombinedScore) /
-      (maxCombinedScore - minCombinedScore || 1); // Prevent division by zero
-
-    // Interpolate between yellow and green
-    const combinedScoreColor: [number, number, number, number] = [
-      Math.round(
-        colors.combined_scores.min[0] +
-          (colors.combined_scores.max[0] - colors.combined_scores.min[0]) *
-            combinedScoreNormalized
-      ),
-      Math.round(
-        colors.combined_scores.min[1] +
-          (colors.combined_scores.max[1] - colors.combined_scores.min[1]) *
-            combinedScoreNormalized
-      ),
-      Math.round(
-        colors.combined_scores.min[2] +
-          (colors.combined_scores.max[2] - colors.combined_scores.min[2]) *
-            combinedScoreNormalized
-      ),
-      0.7, // Set a constant opacity
-    ];
-
-    preCalculatedColors.value[geoID] = {
-      ...preCalculatedColors.value[geoID],
-      combinedScoreColor,
-    };
-  });
-
-  colorCalculationComplete.value = true;
-  loadedLayersCount.value++; // Increment the loaded layers count
-
-  debugLog("Color blend pre-calculation complete");
-};
 </script>
 
 <style scoped>
