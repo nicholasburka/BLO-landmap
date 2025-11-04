@@ -5,10 +5,16 @@
     style="position: absolute; bottom: 10px; left: 10px; z-index: 10; pointer-events: auto"
     @click.stop
   >
-    <button @click="$emit('toggle')" class="averages-panel-toggle">
+    <button
+      @click="$emit('toggle')"
+      class="averages-panel-toggle"
+      :aria-expanded="expanded"
+      aria-controls="averages-content"
+      aria-label="Toggle national averages panel"
+    >
       {{ expanded ? '▼' : '▲' }} National Averages (per county)
     </button>
-    <div v-show="expanded" class="averages-content">
+    <div v-show="expanded" id="averages-content" class="averages-content">
       <p>Sites of Land Toxicity: 8.77</p>
       <p>Black Population: 9.05%</p>
       <p>Diversity Index: 0.33</p>
@@ -46,16 +52,23 @@ defineEmits<{
 .averages-panel-toggle {
   background-color: white;
   border: none;
-  padding: 10px;
+  padding: 12px 15px;
   cursor: pointer;
   width: 100%;
   text-align: left;
   font-weight: 600;
   border-radius: 4px;
+  min-height: 44px;
+  font-size: 16px;
 }
 
 .averages-panel-toggle:hover {
   background-color: #f0f0f0;
+}
+
+.averages-panel-toggle:focus {
+  outline: 2px solid #4a90e2;
+  outline-offset: 2px;
 }
 
 .averages-content {
@@ -66,5 +79,11 @@ defineEmits<{
 .averages-content p {
   margin: 5px 0;
   font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  #averages-panel {
+    display: none;
+  }
 }
 </style>

@@ -9,7 +9,7 @@
     <div
       id="search-listings"
       class="search-listings"
-      v-show="!showDetailedPopup"
+      v-show="!showDetailedPopup && currentGeocoderResult"
       style="position: absolute; top: 60px; left: 10px; z-index: 1"
     >
       <button
@@ -1090,7 +1090,7 @@ onMounted(async () => {
 .listings-button {
   background-color: #4caf50;
   color: white;
-  padding: 10px 20px;
+  padding: 12px 20px;
   margin-top: 20px;
   border: none;
   border-radius: 4px;
@@ -1100,7 +1100,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   min-width: 150px;
-  min-height: 40px;
+  min-height: 44px;
 }
 
 .listings-button:disabled {
@@ -1108,14 +1108,19 @@ onMounted(async () => {
   cursor: not-allowed;
 }
 
-.listings-button:hover {
+.listings-button:hover:not(:disabled) {
   background-color: #45a049;
+}
+
+.listings-button:focus {
+  outline: 2px solid #4a90e2;
+  outline-offset: 2px;
 }
 
 .clear-search-button {
   background-color: #f44336;
   color: white;
-  padding: 10px 20px;
+  padding: 12px 20px;
   margin-top: 20px;
   border: none;
   border-radius: 4px;
@@ -1125,11 +1130,16 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   min-width: 150px;
-  min-height: 40px;
+  min-height: 44px;
 }
 
 .clear-search-button:hover {
   background-color: #da190b;
+}
+
+.clear-search-button:focus {
+  outline: 2px solid #4a90e2;
+  outline-offset: 2px;
 }
 
 .listings-panel {
@@ -1176,103 +1186,24 @@ onMounted(async () => {
     color: black;
     left: 10px;
     right: 10px;
+    top: 110px;
     max-width: none;
-  }
-}
-
-#layer-control-container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  pointer-events: none; /* Allow clicks to pass through to the map */
-}
-.layer-control-toggle {
-  background-color: white;
-  border: none;
-  padding: 5px 10px;
-  font-size: 14px;
-  cursor: pointer;
-  border-radius: 4px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  pointer-events: auto; /* Re-enable pointer events for the button */
-}
-#layer-control {
-  margin-top: 5px;
-  max-height: calc(100vh - 120px);
-  overflow-y: auto;
-  pointer-events: auto; /* Re-enable pointer events for the control panel */
-}
-
-.layer-control-collapsed #layer-control {
-  display: none;
-}
-
-.averages-panel-toggle {
-  background-color: rgba(255, 255, 255, 0.9);
-  border: none;
-  padding: 5px 10px;
-  font-size: 14px;
-  cursor: pointer;
-  border-radius: 4px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.averages-content {
-  color: black;
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 10px;
-  margin-top: 5px;
-  border-radius: 4px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-@media (max-width: 768px) {
-  #layer-control-container {
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
+    max-height: calc(100vh - 220px);
   }
 
-  .layer-control-toggle {
-    width: 100%;
+  .search-listings {
+    flex-direction: column;
+    gap: 5px;
   }
 
-  #layer-control {
-    width: 100%;
-    max-height: 50vh;
-  }
-
-  #averages-panel {
-    left: 10px;
-    right: 10px;
-    bottom: 60px; /* Adjust based on your layer control height */
-  }
-
-  .averages-panel-toggle {
-    width: 100%;
-  }
-
-  .averages-content {
+  .listings-button,
+  .clear-search-button {
+    margin-top: 10px;
     width: 100%;
   }
 }
 
-#layer-control h3 {
-  margin-top: 0;
-  color: black;
-}
-
-#layer-control label {
-  display: block;
-  margin-bottom: 5px;
-  color: black;
-}
-
-.layer-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 5px;
-}
+/* Duplicate styles removed - now in LayerControls.vue and AveragesPanel.vue */
 
 .color-dot {
   display: inline-block;
@@ -1412,150 +1343,7 @@ onMounted(async () => {
   opacity: 1;
 }
 
-/*#detailed-popup {
-  position: absolute;
-  color: black;
-  left: 20px;
-  top: 20px;
-  background: white;
-  padding: 20px;
-  border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  max-width: 300px;
-  max-height: 80vh;
-  display: none;
-  z-index: 1000;
-}*/
-
-/*#detailed-popup {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  max-width: 90%;
-  max-height: 90vh;
-  width: 400px;
-  overflow-y: auto;
-  z-index: 1000;
-  color: black;
-}
-
-.detailed-popup-close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #333;
-}*/
-
-#detailed-popup {
-  position: fixed;
-  background: white;
-  padding: 20px;
-  border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 2000 !important; /* Increased z-index to be above geocoder */
-  color: black;
-  font-size: 16px;
-  overflow-y: auto;
-  pointer-events: auto;
-}
-
-.detailed-popup-content {
-  padding-right: 20px;
-  pointer-events: auto;
-}
-
-.county-stats-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 10px 0;
-}
-
-.county-stats-table tr {
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.county-stats-table tr:last-child {
-  border-bottom: none;
-}
-
-.county-stats-table td {
-  padding: 8px 10px;
-  line-height: 1.4;
-}
-
-.county-stats-table td.label {
-  font-weight: 600;
-  color: #555;
-  width: 50%;
-  text-align: left;
-}
-
-.county-stats-table td.value {
-  color: #333;
-  text-align: right;
-  width: 50%;
-}
-
-.detailed-popup-close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 28px; /* Increased close button size */
-  cursor: pointer;
-  color: #333;
-  z-index: 2000;
-  pointer-events: auto;
-}
-
-#detailed-popup h2 {
-  font-size: 24px; /* Larger heading */
-  margin-bottom: 15px;
-}
-
-#detailed-popup h3 {
-  font-size: 20px; /* Larger subheading */
-  margin-top: 20px;
-  margin-bottom: 10px;
-}
-
-#detailed-popup p {
-  margin: 8px 0;
-  line-height: 1.4;
-}
-
-/* Mobile styles */
-@media (max-width: 768px) {
-  #detailed-popup {
-    left: 5%;
-    right: 5%;
-    top: 50%;
-    transform: translateY(-50%);
-    max-height: 90vh;
-    width: auto;
-  }
-}
-
-/* Desktop styles */
-@media (min-width: 769px) {
-  #detailed-popup.desktop-view {
-    left: 20px;
-    top: 20px;
-    max-height: calc(100vh - 40px);
-    width: 400px;
-    max-width: 30%;
-  }
-}
+/* Duplicate #detailed-popup styles removed - now in CountyModal.vue */
 
 .geocoder {
   width: 50%;

@@ -5,13 +5,20 @@
     style="position: absolute; top: 50px; right: 10px; z-index: 10; pointer-events: auto"
     @click.stop
   >
-    <button @click="$emit('toggle')" class="layer-control-toggle">
-      {{ expanded ? '▼' : '▲' }} Layers
+    <button
+      @click="$emit('toggle')"
+      class="layer-control-toggle"
+      :aria-expanded="expanded"
+      aria-controls="layer-control"
+      aria-label="Toggle layer controls"
+    >
+      {{ expanded ? '▼' : '▲' }} Data Layers
     </button>
     <div
       id="layer-control"
       v-show="expanded"
       @click.stop
+      class="layer-control-content"
       style="
         background: white;
         padding: 10px;
@@ -95,17 +102,84 @@ defineEmits<{
 .layer-control-toggle {
   background-color: white;
   border: none;
-  padding: 10px;
+  padding: 12px 15px;
   cursor: pointer;
   border-radius: 4px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   width: 100%;
   text-align: left;
   font-weight: 600;
+  min-height: 44px;
+  font-size: 16px;
 }
 
 .layer-control-toggle:hover {
   background-color: #f0f0f0;
+}
+
+.layer-control-toggle:focus {
+  outline: 2px solid #4a90e2;
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  #layer-control-container {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 20px !important;
+    right: auto !important;
+    left: 10px !important;
+    max-width: calc(100vw - 20px) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .layer-control-toggle {
+    font-size: 14px;
+    width: auto !important;
+    min-width: 140px;
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  .layer-control-content {
+    position: absolute !important;
+    bottom: 100% !important;
+    left: 0 !important;
+    margin-bottom: 8px !important;
+    width: auto !important;
+    max-width: calc(100vw - 40px) !important;
+    min-width: 280px !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  #layer-control {
+    max-height: 50vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #layer-control h3 {
+    font-size: 14px;
+    word-wrap: break-word;
+  }
+
+  .layer-item {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .layer-item label {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: calc(100% - 50px);
+  }
+
+  .layer-control-collapsed {
+    max-height: none;
+  }
 }
 
 .layer-item {

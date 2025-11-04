@@ -4,12 +4,20 @@
     id="detailed-popup"
     :class="{ 'desktop-view': isDesktopView }"
     @click.stop
+    role="dialog"
+    aria-modal="true"
+    :aria-labelledby="'modal-title-' + countyId"
   >
-    <button @click="$emit('close')" class="detailed-popup-close">
+    <button
+      @click="$emit('close')"
+      class="detailed-popup-close"
+      aria-label="Close county details"
+      type="button"
+    >
       &times;
     </button>
     <div class="detailed-popup-content">
-      <h2>{{ countyName }}, {{ stateName }}</h2>
+      <h2 :id="'modal-title-' + countyId">{{ countyName }}, {{ stateName }}</h2>
 
       <table v-if="hasData" class="county-stats-table">
         <tr>
@@ -164,12 +172,34 @@ const formatContamination = computed(() => {
   color: #666;
   line-height: 1;
   padding: 0;
-  width: 30px;
-  height: 30px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .detailed-popup-close:hover {
   color: #000;
+}
+
+.detailed-popup-close:focus {
+  outline: 2px solid #4a90e2;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  #detailed-popup {
+    width: 90% !important;
+    max-width: none !important;
+    max-height: 85vh !important;
+  }
+
+  .detailed-popup-content h2 {
+    font-size: 20px;
+    padding-right: 40px;
+  }
 }
 
 .detailed-popup-content {
