@@ -126,7 +126,7 @@ const formatLifeExpectancy = computed(() => {
 
 const formatDiversityIndex = computed(() => {
   if (props.diversityData?.diversityIndex != null) {
-    return props.diversityData.diversityIndex.toFixed(4)
+    return `${props.diversityData.diversityIndex.toFixed(4)} of 1`
   }
   return '?'
 })

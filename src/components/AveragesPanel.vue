@@ -10,16 +10,16 @@
       class="averages-panel-toggle"
       :aria-expanded="expanded"
       aria-controls="averages-content"
-      aria-label="Toggle national averages panel"
+      aria-label="Toggle county averages panel"
     >
-      {{ expanded ? '▼' : '▲' }} National Averages (per county)
+      {{ expanded ? '▼' : '▲' }} County Averages
     </button>
     <div v-show="expanded" id="averages-content" class="averages-content">
-      <p>Sites of Land Toxicity: 8.77</p>
+      <p>BLO Combined Score: 2.84 of 5</p>
       <p>Black Population: 9.05%</p>
-      <p>Diversity Index: 0.33</p>
+      <p>Diversity Index: 0.33 of 1</p>
+      <p>Sites of Land Toxicity: 8.77</p>
       <p>Life Expectancy: 77.74 years</p>
-      <p>BLO Combined Score: 2.84</p>
     </div>
   </div>
 </template>

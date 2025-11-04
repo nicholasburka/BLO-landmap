@@ -195,82 +195,249 @@ If you need to:
 
 ---
 
-## Phase 2: Extract Data Loading and Color Calculation (PLANNED)
+## Phase 2: Extract Data Loading and Color Calculation ✅ COMPLETED
 
-### Goals
-- Extract data loading logic into `useMapData` composable
-- Extract color calculation into `useColorCalculation` composable
-- Create TypeScript type definitions in `mapTypes.ts`
-- Further reduce Map.vue to ~1,000 lines
+### Overview
+Phase 2 focused on extracting data loading and color calculation logic, reducing Map.vue from ~2,030 lines to ~1,641 lines (~389 line reduction, 19% decrease).
 
-### Files to Create
+### Files Created
 
-#### `src/types/mapTypes.ts`
-Type definitions for:
-- `DiversityData`
-- `CombinedScoreData`
-- `ContaminationData`
-- `ColorBlend`
-- `LifeExpectancyData`
+#### `src/types/mapTypes.ts` (~100 lines)
+**Purpose**: TypeScript type definitions for all map data structures
 
-#### `src/composables/useMapData.ts`
-Functions:
-- `loadCountiesData()`
-- `loadDiversityData()`
-- `loadLifeExpectancyData()`
-- `loadContaminationData()`
+**Exports**:
+```typescript
+interface CountyDiversityData {
+  diversityIndex: number
+  totalPopulation: number
+  pct_Black: number
+}
 
-#### `src/composables/useColorCalculation.ts`
-Functions:
-- `preCalculateColors()`
-- `getColorForLayer()`
-- `blendColors()`
-- `normalizeValue()`
+interface CombinedScoreData {
+  combinedScore: number
+  rankScore: number
+}
 
-### Expected Impact
-- Map.vue: ~2,030 → ~1,000 lines (50% reduction)
-- Better separation between data fetching and rendering
-- Color logic reusable across components
+interface ContaminationData {
+  total: number
+  brownfields?: number
+  superfund?: number
+  tri?: number
+  hazardousWaste?: number
+  airPollution?: number
+}
+
+interface LifeExpectancyData {
+  lifeExpectancy: number
+}
+
+interface ColorBlend {
+  r: number
+  g: number
+  b: number
+  a: number
+}
+```
+
+#### `src/composables/useMapData.ts` (~300 lines)
+**Purpose**: Centralized data loading with progress tracking
+
+**Exports**:
+- `loadCountiesData()` - Load GeoJSON county boundaries
+- `loadDiversityData()` - Load diversity and demographic data
+- `loadLifeExpectancyData()` - Load life expectancy data
+- `loadContaminationData()` - Load EPA contamination data
+- `loadCombinedScores()` - Load BLO combined scores
+- `loadContaminationLayers()` - Load individual EPA site layers
+
+**Features**:
+- Progress tracking for loading indicator
+- Error handling and logging
+- Data validation
+- Centralized data state management
+
+#### `src/composables/useColorCalculation.ts` (~200 lines)
+**Purpose**: Color blending and normalization for choropleth layers
+
+**Exports**:
+- `preCalculateColors()` - Pre-compute all county colors
+- `normalizeValue()` - Normalize values to 0-1 range
+- `blendColors()` - Blend multiple layer colors
+- `interpolateColor()` - Smooth color gradients
+
+**Features**:
+- Support for multiple active layers
+- Color caching for performance
+- Transparent blending algorithms
+- Configurable color scales
+
+### Changes to Map.vue
+
+**Before Phase 2**: ~2,030 lines
+**After Phase 2**: ~1,641 lines
+**Reduction**: ~389 lines (19% decrease, 32% total reduction from original)
+
+**What was removed**:
+1. All data loading logic (moved to `useMapData`)
+2. Color calculation functions (moved to `useColorCalculation`)
+3. Type definitions scattered throughout (moved to `mapTypes.ts`)
+4. Data transformation and normalization code
+
+### Benefits Achieved
+
+1. **Separation of Concerns**: Data loading separated from rendering
+2. **Reusability**: Composables can be used in other components
+3. **Type Safety**: Comprehensive TypeScript types prevent errors
+4. **Maintainability**: Easier to modify data sources or color schemes
+5. **Performance**: Pre-calculated colors improve map responsiveness
+6. **Testability**: Data loading and color logic can be unit tested
 
 ---
 
-## Phase 3: Component Splitting (PLANNED)
+## Phase 3: Component Splitting ✅ COMPLETED
 
-### Goals
-- Split Map.vue into smaller sub-components
-- Create unified data processing pipeline
-- Build centralized scoring engine
+### Overview
+Phase 3 focused on extracting UI components and improving mobile/accessibility, reducing Map.vue from ~1,641 lines to ~1,550 lines (91 line reduction, 36% total reduction from original).
 
-### Components to Create
-- `MapControls.vue` - Layer toggles and controls
-- `CountyTooltip.vue` - Hover tooltip component
-- `CountyModal.vue` - Detailed county statistics modal
-- `LayerLegend.vue` - Map legend component
-- `LoadingIndicator.vue` - Loading progress indicator
+### Components Created
 
-### Pipeline Restructure
-Move scripts to unified pipeline:
+#### `src/components/CountyModal.vue` (~210 lines)
+**Purpose**: Self-contained modal for displaying detailed county statistics
+
+**Features**:
+- Centered modal with responsive design
+- Formatted data display (scores, rankings, demographics)
+- ARIA accessibility attributes (role="dialog", aria-modal)
+- Mobile-optimized layout
+- 44px touch targets for close button
+
+**Props**:
+```typescript
+{
+  show: boolean
+  countyId: string
+  countyName: string
+  diversityData?: CountyDiversityData
+  contaminationData?: ContaminationData | number
+  lifeExpectancy?: number
+  combinedScore?: CombinedScoreData
+}
 ```
-scripts/pipeline/
-├── 1-fetch-data.sh
-├── 2-preprocess-census.py
-├── 3-calculate-scores.cjs
-├── 4-generate-combined.cjs
-└── README.md
+
+#### `src/components/LayerControls.vue` (~180 lines)
+**Purpose**: Layer toggle controls with checkbox inputs
+
+**Features**:
+- Expandable/collapsible panel
+- Individual layer toggles for demographic data
+- EPA contamination layer controls
+- Tooltip support for layer descriptions
+- Mobile: Bottom-left positioning, expands upward
+- Desktop: Top-right positioning
+- ARIA labels and keyboard navigation
+- 44px minimum touch targets
+
+**Props**:
+```typescript
+{
+  expanded: boolean
+  demographicLayers: DemographicLayer[]
+  selectedDemographicLayers: string[]
+  showContaminationLayers: boolean
+  showContaminationChoropleth: boolean
+  devModeOnly?: boolean
+}
 ```
 
-### Scoring Engine
-Create `src/lib/ScoringEngine.ts`:
-- Centralized scoring logic
-- Easy to add new metrics
-- Configurable weights
-- Transparent calculations
+#### `src/components/LoadingIndicator.vue` (~60 lines)
+**Purpose**: Loading progress overlay with progress bar
 
-### Expected Impact
-- Map.vue: ~1,000 → ~200 lines (92% total reduction from original)
-- Each component < 200 lines
-- Clear separation of concerns
-- Easy to test and maintain
+**Features**:
+- Full-screen overlay during data loading
+- Animated progress bar (0-100%)
+- Smooth transitions
+- Displays loading percentage
+
+**Props**:
+```typescript
+{
+  loaded: boolean
+  progress: number
+}
+```
+
+#### `src/components/AveragesPanel.vue` (~90 lines)
+**Purpose**: Displays national county averages
+
+**Features**:
+- Collapsible panel at bottom-left
+- Shows BLO score, demographics, life expectancy averages
+- Hidden on mobile to prevent overlap
+- ARIA accessibility attributes
+- 44px touch targets
+
+**Props**:
+```typescript
+{
+  expanded: boolean
+}
+```
+
+#### `src/config/stateFips.ts` (~60 lines)
+**Purpose**: FIPS code to state name mapping
+
+**Exports**:
+- `FIPS_TO_STATE` - Object mapping FIPS codes to state names
+- `getStateNameFromFips(code)` - Helper function
+
+### Mobile & Accessibility Improvements
+
+**Touch Targets**:
+- All buttons: min-height 44px (WCAG AAA compliance)
+- Close buttons: 44x44px clickable area
+- Search buttons: 44px height
+
+**ARIA Labels**:
+- LayerControls: aria-expanded, aria-controls, aria-label
+- AveragesPanel: aria-expanded, aria-controls, aria-label
+- CountyModal: role="dialog", aria-modal, aria-labelledby
+
+**Focus States**:
+- 2px blue outline on all interactive elements
+- 2px offset for visibility
+- Consistent across all components
+
+**Mobile Layout**:
+- LayerControls: Bottom-left, expands upward, max-width prevents overflow
+- AveragesPanel: Hidden on mobile (<768px)
+- CountyModal: 90% width, centered, scrollable
+- Search buttons: Full-width on mobile, stack vertically
+
+**Responsive Breakpoint**: 768px
+
+### Changes to Map.vue
+
+**Before Phase 3**: ~1,641 lines
+**After Phase 3**: ~1,550 lines
+**Reduction**: ~91 lines (36% total reduction from original 2,420 lines)
+
+**What was removed**:
+1. FIPS mapping logic (moved to stateFips.ts)
+2. County modal HTML generation (moved to CountyModal.vue)
+3. Layer control template (moved to LayerControls.vue)
+4. Loading indicator markup (moved to LoadingIndicator.vue)
+5. Averages panel markup (moved to AveragesPanel.vue)
+6. Duplicate mobile/desktop styles (moved to component files)
+
+### Benefits Achieved
+
+1. **Component Reusability**: Each UI component is self-contained
+2. **Mobile-First**: Responsive design with proper touch targets
+3. **Accessibility**: WCAG AAA compliance for keyboard and screen readers
+4. **Maintainability**: UI changes isolated to component files
+5. **Type Safety**: Component props and emits fully typed
+6. **Performance**: Scoped styles prevent CSS conflicts
+7. **Developer Experience**: Clear component boundaries
 
 ---
 
