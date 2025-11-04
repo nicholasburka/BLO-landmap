@@ -1,0 +1,3145 @@
+GEOID,county_name,state_name,year,median_property_tax_with_mortgage,median_property_tax_without_mortgage
+40015,"Caddo County, Oklahoma",Oklahoma,2023,821,504
+21071,"Floyd County, Kentucky",Kentucky,2023,1063,505
+28017,"Chickasaw County, Mississippi",Mississippi,2023,889,574
+47079,"Henry County, Tennessee",Tennessee,2023,755,656
+47115,"Marion County, Tennessee",Tennessee,2023,876,669
+48137,"Edwards County, Texas",Texas,2023,0,693
+38007,"Billings County, North Dakota",North Dakota,2023,1462,781
+48153,"Floyd County, Texas",Texas,2023,1936,868
+13189,"McDuffie County, Georgia",Georgia,2023,1661,881
+31091,"Hooker County, Nebraska",Nebraska,2023,1664,1104
+42013,"Blair County, Pennsylvania",Pennsylvania,2023,1803,1601
+39167,"Washington County, Ohio",Ohio,2023,1716,1608
+31163,"Sherman County, Nebraska",Nebraska,2023,1620,1672
+13067,"Cobb County, Georgia",Georgia,2023,2841,1683
+56033,"Sheridan County, Wyoming",Wyoming,2023,1962,1933
+48305,"Lynn County, Texas",Texas,2023,3191,2007
+20069,"Gray County, Kansas",Kansas,2023,2730,2014
+55037,"Florence County, Wisconsin",Wisconsin,2023,2271,2166
+31151,"Saline County, Nebraska",Nebraska,2023,2756,2184
+12097,"Osceola County, Florida",Florida,2023,2574,2273
+20123,"Mitchell County, Kansas",Kansas,2023,1874,2335
+02063,"Chugach Census Area, Alaska",Alaska,2023,4267,2362
+55129,"Washburn County, Wisconsin",Wisconsin,2023,2230,2413
+55023,"Crawford County, Wisconsin",Wisconsin,2023,2981,2769
+26045,"Eaton County, Michigan",Michigan,2023,2966,2842
+55091,"Pepin County, Wisconsin",Wisconsin,2023,2899,2846
+55073,"Marathon County, Wisconsin",Wisconsin,2023,3201,2978
+24003,"Anne Arundel County, Maryland",Maryland,2023,3902,3665
+06073,"San Diego County, California",California,2023,6119,3929
+36109,"Tompkins County, New York",New York,2023,6576,6114
+36047,"Kings County, New York",New York,2023,5952,6393
+40089,"McCurtain County, Oklahoma",Oklahoma,2023,725,399
+21125,"Laurel County, Kentucky",Kentucky,2023,1077,566
+12007,"Bradford County, Florida",Florida,2023,1365,680
+37061,"Duplin County, North Carolina",North Carolina,2023,1143,701
+13265,"Taliaferro County, Georgia",Georgia,2023,1365,803
+49031,"Piute County, Utah",Utah,2023,1086,877
+30035,"Glacier County, Montana",Montana,2023,1416,970
+29213,"Taney County, Missouri",Missouri,2023,1324,1024
+28073,"Lamar County, Mississippi",Mississippi,2023,1582,1212
+20187,"Stanton County, Kansas",Kansas,2023,1908,1336
+12005,"Bay County, Florida",Florida,2023,1845,1368
+30025,"Fallon County, Montana",Montana,2023,1346,1379
+13015,"Bartow County, Georgia",Georgia,2023,2181,1381
+37059,"Davie County, North Carolina",North Carolina,2023,1605,1518
+41033,"Josephine County, Oregon",Oregon,2023,2172,1791
+42039,"Crawford County, Pennsylvania",Pennsylvania,2023,2315,1859
+37025,"Cabarrus County, North Carolina",North Carolina,2023,2614,1938
+12117,"Seminole County, Florida",Florida,2023,2671,2086
+27095,"Mille Lacs County, Minnesota",Minnesota,2023,2539,2345
+51830,"Williamsburg city, Virginia",Virginia,2023,2115,2444
+41005,"Clackamas County, Oregon",Oregon,2023,5185,4788
+48209,"Hays County, Texas",Texas,2023,6694,5641
+46102,"Oglala Lakota County, South Dakota",South Dakota,2023,0,199
+22011,"Beauregard Parish, Louisiana",Louisiana,2023,852,266
+21135,"Lewis County, Kentucky",Kentucky,2023,720,452
+54105,"Wirt County, West Virginia",West Virginia,2023,759,484
+18021,"Clay County, Indiana",Indiana,2023,639,517
+47061,"Grundy County, Tennessee",Tennessee,2023,625,523
+22079,"Rapides Parish, Louisiana",Louisiana,2023,1278,553
+21223,"Trimble County, Kentucky",Kentucky,2023,1670,584
+47005,"Benton County, Tennessee",Tennessee,2023,782,606
+21095,"Harlan County, Kentucky",Kentucky,2023,881,616
+29227,"Worth County, Missouri",Missouri,2023,918,732
+13107,"Emanuel County, Georgia",Georgia,2023,1027,737
+13299,"Ware County, Georgia",Georgia,2023,1378,740
+29065,"Dent County, Missouri",Missouri,2023,919,748
+13243,"Randolph County, Georgia",Georgia,2023,902,759
+13319,"Wilkinson County, Georgia",Georgia,2023,884,775
+28063,"Jefferson County, Mississippi",Mississippi,2023,0,813
+20019,"Chautauqua County, Kansas",Kansas,2023,1443,843
+38013,"Burke County, North Dakota",North Dakota,2023,1071,923
+08075,"Logan County, Colorado",Colorado,2023,1157,933
+54069,"Ohio County, West Virginia",West Virginia,2023,987,952
+29121,"Macon County, Missouri",Missouri,2023,1106,1000
+05045,"Faulkner County, Arkansas",Arkansas,2023,1249,1081
+30069,"Petroleum County, Montana",Montana,2023,1672,1107
+12129,"Wakulla County, Florida",Florida,2023,1555,1213
+16035,"Clearwater County, Idaho",Idaho,2023,1580,1375
+13143,"Haralson County, Georgia",Georgia,2023,1971,1396
+08019,"Clear Creek County, Colorado",Colorado,2023,2138,2217
+19101,"Jefferson County, Iowa",Iowa,2023,2420,2378
+06067,"Sacramento County, California",California,2023,4070,2878
+55035,"Eau Claire County, Wisconsin",Wisconsin,2023,3549,3341
+48113,"Dallas County, Texas",Texas,2023,5448,3621
+27053,"Hennepin County, Minnesota",Minnesota,2023,4357,4294
+01109,"Pike County, Alabama",Alabama,2023,478,351
+54007,"Braxton County, West Virginia",West Virginia,2023,594,433
+22045,"Iberia Parish, Louisiana",Louisiana,2023,706,450
+05113,"Polk County, Arkansas",Arkansas,2023,589,511
+47151,"Scott County, Tennessee",Tennessee,2023,842,532
+21195,"Pike County, Kentucky",Kentucky,2023,1263,574
+40005,"Atoka County, Oklahoma",Oklahoma,2023,1114,590
+29143,"New Madrid County, Missouri",Missouri,2023,905,668
+48125,"Dickens County, Texas",Texas,2023,1700,680
+45073,"Oconee County, South Carolina",South Carolina,2023,1017,712
+35007,"Colfax County, New Mexico",New Mexico,2023,1080,790
+28083,"Leflore County, Mississippi",Mississippi,2023,1490,821
+13071,"Colquitt County, Georgia",Georgia,2023,1270,845
+37121,"Mitchell County, North Carolina",North Carolina,2023,1142,937
+31085,"Hayes County, Nebraska",Nebraska,2023,2088,994
+39087,"Lawrence County, Ohio",Ohio,2023,1290,1050
+37043,"Clay County, North Carolina",North Carolina,2023,1138,1225
+31003,"Antelope County, Nebraska",Nebraska,2023,1815,1255
+46021,"Campbell County, South Dakota",South Dakota,2023,1274,1260
+17149,"Pike County, Illinois",Illinois,2023,1669,1460
+51193,"Westmoreland County, Virginia",Virginia,2023,1564,1463
+48417,"Shackelford County, Texas",Texas,2023,2778,1825
+48211,"Hemphill County, Texas",Texas,2023,3663,1878
+21015,"Boone County, Kentucky",Kentucky,2023,2394,1922
+17075,"Iroquois County, Illinois",Illinois,2023,2643,2213
+42093,"Montour County, Pennsylvania",Pennsylvania,2023,2640,2321
+31111,"Lincoln County, Nebraska",Nebraska,2023,2747,2637
+19167,"Sioux County, Iowa",Iowa,2023,2738,2697
+25003,"Berkshire County, Massachusetts",Massachusetts,2023,3856,3949
+55109,"St. Croix County, Wisconsin",Wisconsin,2023,4329,4207
+05097,"Montgomery County, Arkansas",Arkansas,2023,723,396
+45031,"Darlington County, South Carolina",South Carolina,2023,744,481
+40107,"Okfuskee County, Oklahoma",Oklahoma,2023,638,514
+05105,"Perry County, Arkansas",Arkansas,2023,872,536
+29179,"Reynolds County, Missouri",Missouri,2023,558,551
+21159,"Martin County, Kentucky",Kentucky,2023,1014,568
+37163,"Sampson County, North Carolina",North Carolina,2023,1314,887
+30087,"Rosebud County, Montana",Montana,2023,1608,911
+40009,"Beckham County, Oklahoma",Oklahoma,2023,1520,953
+39067,"Harrison County, Ohio",Ohio,2023,1280,1175
+47043,"Dickson County, Tennessee",Tennessee,2023,1430,1257
+30065,"Musselshell County, Montana",Montana,2023,1417,1355
+42121,"Venango County, Pennsylvania",Pennsylvania,2023,1727,1362
+19063,"Emmet County, Iowa",Iowa,2023,1652,1453
+42123,"Warren County, Pennsylvania",Pennsylvania,2023,1865,1564
+46023,"Charles Mix County, South Dakota",South Dakota,2023,2415,1578
+31037,"Colfax County, Nebraska",Nebraska,2023,1665,1584
+13035,"Butts County, Georgia",Georgia,2023,2183,1701
+19179,"Wapello County, Iowa",Iowa,2023,1932,1762
+19189,"Winnebago County, Iowa",Iowa,2023,1790,1808
+39005,"Ashland County, Ohio",Ohio,2023,1768,1822
+13139,"Hall County, Georgia",Georgia,2023,2659,1865
+19077,"Guthrie County, Iowa",Iowa,2023,2327,1976
+31099,"Kearney County, Nebraska",Nebraska,2023,3137,2286
+17155,"Putnam County, Illinois",Illinois,2023,2876,2509
+27049,"Goodhue County, Minnesota",Minnesota,2023,2866,2866
+38017,"Cass County, North Dakota",North Dakota,2023,3509,3329
+36115,"Washington County, New York",New York,2023,4112,3413
+25009,"Essex County, Massachusetts",Massachusetts,2023,6235,6351
+01013,"Butler County, Alabama",Alabama,2023,460,283
+01061,"Geneva County, Alabama",Alabama,2023,452,291
+45021,"Cherokee County, South Carolina",South Carolina,2023,728,461
+51089,"Henry County, Virginia",Virginia,2023,674,558
+05029,"Conway County, Arkansas",Arkansas,2023,821,662
+05005,"Baxter County, Arkansas",Arkansas,2023,816,713
+37047,"Columbus County, North Carolina",North Carolina,2023,1357,956
+35055,"Taos County, New Mexico",New Mexico,2023,1461,974
+29171,"Putnam County, Missouri",Missouri,2023,1132,1046
+29123,"Madison County, Missouri",Missouri,2023,1186,1099
+48107,"Crosby County, Texas",Texas,2023,1897,1167
+13027,"Brooks County, Georgia",Georgia,2023,1957,1183
+27081,"Lincoln County, Minnesota",Minnesota,2023,1731,1281
+20141,"Osborne County, Kansas",Kansas,2023,1510,1301
+20063,"Gove County, Kansas",Kansas,2023,1807,1381
+20075,"Hamilton County, Kansas",Kansas,2023,2581,1411
+56015,"Goshen County, Wyoming",Wyoming,2023,1377,1422
+29003,"Andrew County, Missouri",Missouri,2023,1534,1465
+26043,"Dickinson County, Michigan",Michigan,2023,2084,1726
+48267,"Kimble County, Texas",Texas,2023,2740,1917
+27035,"Crow Wing County, Minnesota",Minnesota,2023,2175,2137
+39043,"Erie County, Ohio",Ohio,2023,2376,2268
+20177,"Shawnee County, Kansas",Kansas,2023,2562,2406
+42019,"Butler County, Pennsylvania",Pennsylvania,2023,3295,2611
+13135,"Gwinnett County, Georgia",Georgia,2023,3568,2817
+55061,"Kewaunee County, Wisconsin",Wisconsin,2023,3094,3063
+39049,"Franklin County, Ohio",Ohio,2023,4201,3863
+42091,"Montgomery County, Pennsylvania",Pennsylvania,2023,5894,5514
+09140,"Naugatuck Valley Planning Region, Connecticut",Connecticut,2023,6054,5657
+34005,"Burlington County, New Jersey",New Jersey,2023,8112,7487
+34007,"Camden County, New Jersey",New Jersey,2023,8164,7857
+22035,"East Carroll Parish, Louisiana",Louisiana,2023,1210,199
+01037,"Coosa County, Alabama",Alabama,2023,343,271
+08099,"Prowers County, Colorado",Colorado,2023,635,376
+01051,"Elmore County, Alabama",Alabama,2023,598,467
+40099,"Murray County, Oklahoma",Oklahoma,2023,1109,485
+54031,"Hardy County, West Virginia",West Virginia,2023,675,544
+05079,"Lincoln County, Arkansas",Arkansas,2023,643,546
+28051,"Holmes County, Mississippi",Mississippi,2023,822,602
+48405,"San Augustine County, Texas",Texas,2023,874,606
+47057,"Grainger County, Tennessee",Tennessee,2023,1044,730
+13075,"Cook County, Georgia",Georgia,2023,1301,786
+37173,"Swain County, North Carolina",North Carolina,2023,941,808
+37177,"Tyrrell County, North Carolina",North Carolina,2023,1588,907
+48403,"Sabine County, Texas",Texas,2023,2022,971
+04015,"Mohave County, Arizona",Arizona,2023,1347,1068
+31065,"Furnas County, Nebraska",Nebraska,2023,1704,1084
+28105,"Oktibbeha County, Mississippi",Mississippi,2023,2205,1144
+27011,"Big Stone County, Minnesota",Minnesota,2023,1171,1168
+13275,"Thomas County, Georgia",Georgia,2023,1696,1212
+39047,"Fayette County, Ohio",Ohio,2023,1605,1477
+19073,"Greene County, Iowa",Iowa,2023,1780,1577
+47189,"Wilson County, Tennessee",Tennessee,2023,1804,1617
+27033,"Cottonwood County, Minnesota",Minnesota,2023,1759,1716
+19079,"Hamilton County, Iowa",Iowa,2023,1750,1859
+20175,"Seward County, Kansas",Kansas,2023,2469,2031
+53051,"Pend Oreille County, Washington",Washington,2023,2030,2063
+20003,"Anderson County, Kansas",Kansas,2023,2665,2069
+31179,"Wayne County, Nebraska",Nebraska,2023,2539,2186
+55078,"Menominee County, Wisconsin",Wisconsin,2023,4476,2310
+55007,"Bayfield County, Wisconsin",Wisconsin,2023,2495,2367
+27067,"Kandiyohi County, Minnesota",Minnesota,2023,2217,2416
+27103,"Nicollet County, Minnesota",Minnesota,2023,3008,2731
+26081,"Kent County, Michigan",Michigan,2023,3130,2894
+06079,"San Luis Obispo County, California",California,2023,5901,4400
+34019,"Hunterdon County, New Jersey",New Jersey,2023,10001,10001
+02013,"Aleutians East Borough, Alaska",Alaska,2023,0,0
+01041,"Crenshaw County, Alabama",Alabama,2023,461,276
+28015,"Carroll County, Mississippi",Mississippi,2023,1070,398
+48269,"King County, Texas",Texas,2023,0,533
+18121,"Parke County, Indiana",Indiana,2023,726,604
+21141,"Logan County, Kentucky",Kentucky,2023,1201,654
+54107,"Wood County, West Virginia",West Virginia,2023,1065,825
+35039,"Rio Arriba County, New Mexico",New Mexico,2023,1197,846
+29163,"Pike County, Missouri",Missouri,2023,1076,912
+46073,"Jerauld County, South Dakota",South Dakota,2023,1384,986
+18065,"Henry County, Indiana",Indiana,2023,1086,994
+48219,"Hockley County, Texas",Texas,2023,2574,1165
+29151,"Osage County, Missouri",Missouri,2023,1272,1173
+48499,"Wood County, Texas",Texas,2023,2266,1531
+37125,"Moore County, North Carolina",North Carolina,2023,1857,1593
+48193,"Hamilton County, Texas",Texas,2023,2167,1770
+13151,"Henry County, Georgia",Georgia,2023,2715,1814
+13077,"Coweta County, Georgia",Georgia,2023,2668,1985
+42037,"Columbia County, Pennsylvania",Pennsylvania,2023,2326,2201
+12061,"Indian River County, Florida",Florida,2023,2233,2351
+16069,"Nez Perce County, Idaho",Idaho,2023,2573,2446
+55031,"Douglas County, Wisconsin",Wisconsin,2023,2605,2479
+17129,"Menard County, Illinois",Illinois,2023,3327,2521
+20113,"McPherson County, Kansas",Kansas,2023,2820,2712
+17085,"Jo Daviess County, Illinois",Illinois,2023,3468,3207
+23031,"York County, Maine",Maine,2023,3769,3538
+55101,"Racine County, Wisconsin",Wisconsin,2023,4194,3866
+06085,"Santa Clara County, California",California,2023,10001,6435
+36061,"New York County, New York",New York,2023,10001,10001
+34027,"Morris County, New Jersey",New Jersey,2023,10001,10001
+22041,"Franklin Parish, Louisiana",Louisiana,2023,492,311
+01057,"Fayette County, Alabama",Alabama,2023,381,324
+22085,"Sabine Parish, Louisiana",Louisiana,2023,631,374
+01123,"Tallapoosa County, Alabama",Alabama,2023,497,401
+35011,"De Baca County, New Mexico",New Mexico,2023,1690,430
+40057,"Harmon County, Oklahoma",Oklahoma,2023,864,478
+21235,"Whitley County, Kentucky",Kentucky,2023,1103,531
+35059,"Union County, New Mexico",New Mexico,2023,933,545
+28107,"Panola County, Mississippi",Mississippi,2023,1315,664
+21085,"Grayson County, Kentucky",Kentucky,2023,1162,695
+48315,"Marion County, Texas",Texas,2023,1543,698
+35005,"Chaves County, New Mexico",New Mexico,2023,1171,699
+54027,"Hampshire County, West Virginia",West Virginia,2023,803,716
+47143,"Rhea County, Tennessee",Tennessee,2023,882,759
+37123,"Montgomery County, North Carolina",North Carolina,2023,1230,815
+47099,"Lawrence County, Tennessee",Tennessee,2023,1052,825
+37107,"Lenoir County, North Carolina",North Carolina,2023,1179,826
+22005,"Ascension Parish, Louisiana",Louisiana,2023,1544,978
+29057,"Dade County, Missouri",Missouri,2023,988,1062
+13317,"Wilkes County, Georgia",Georgia,2023,1323,1126
+20167,"Russell County, Kansas",Kansas,2023,2615,1213
+48401,"Rusk County, Texas",Texas,2023,2375,1228
+47179,"Washington County, Tennessee",Tennessee,2023,1308,1235
+48123,"DeWitt County, Texas",Texas,2023,2300,1314
+19025,"Calhoun County, Iowa",Iowa,2023,1749,1359
+21049,"Clark County, Kentucky",Kentucky,2023,1463,1400
+21029,"Bullitt County, Kentucky",Kentucky,2023,2145,1693
+04025,"Yavapai County, Arizona",Arizona,2023,1736,1730
+19023,"Butler County, Iowa",Iowa,2023,2205,2086
+29019,"Boone County, Missouri",Missouri,2023,2235,2224
+31157,"Scotts Bluff County, Nebraska",Nebraska,2023,2512,2230
+46135,"Yankton County, South Dakota",South Dakota,2023,2409,2234
+26159,"Van Buren County, Michigan",Michigan,2023,2534,2290
+39083,"Knox County, Ohio",Ohio,2023,2371,2296
+31013,"Box Butte County, Nebraska",Nebraska,2023,2505,2303
+20067,"Grant County, Kansas",Kansas,2023,1782,2307
+17115,"Macon County, Illinois",Illinois,2023,2728,2311
+55135,"Waupaca County, Wisconsin",Wisconsin,2023,2903,2832
+55063,"La Crosse County, Wisconsin",Wisconsin,2023,3989,3920
+36067,"Onondaga County, New York",New York,2023,5141,4234
+35041,"Roosevelt County, New Mexico",New Mexico,2023,837,486
+45089,"Williamsburg County, South Carolina",South Carolina,2023,884,516
+28111,"Perry County, Mississippi",Mississippi,2023,1280,558
+18165,"Vermillion County, Indiana",Indiana,2023,812,758
+37165,"Scotland County, North Carolina",North Carolina,2023,1284,841
+40037,"Creek County, Oklahoma",Oklahoma,2023,1638,849
+29009,"Barry County, Missouri",Missouri,2023,1091,906
+46055,"Haakon County, South Dakota",South Dakota,2023,2059,944
+08029,"Delta County, Colorado",Colorado,2023,1014,950
+29055,"Crawford County, Missouri",Missouri,2023,1070,953
+49017,"Garfield County, Utah",Utah,2023,1176,968
+01073,"Jefferson County, Alabama",Alabama,2023,1448,1116
+13251,"Screven County, Georgia",Georgia,2023,1669,1262
+31149,"Rock County, Nebraska",Nebraska,2023,1154,1301
+48057,"Calhoun County, Texas",Texas,2023,2613,1387
+48411,"San Saba County, Texas",Texas,2023,2161,1436
+17135,"Montgomery County, Illinois",Illinois,2023,2016,1467
+55107,"Rusk County, Wisconsin",Wisconsin,2023,1893,1777
+26033,"Chippewa County, Michigan",Michigan,2023,2143,1797
+02220,"Sitka City and Borough, Alaska",Alaska,2023,2200,1875
+23019,"Penobscot County, Maine",Maine,2023,2718,1957
+16057,"Latah County, Idaho",Idaho,2023,2499,2035
+17137,"Morgan County, Illinois",Illinois,2023,2613,2209
+55125,"Vilas County, Wisconsin",Wisconsin,2023,1994,2350
+38101,"Ward County, North Dakota",North Dakota,2023,2903,2562
+13089,"DeKalb County, Georgia",Georgia,2023,3249,2639
+53005,"Benton County, Washington",Washington,2023,2947,2837
+12119,"Sumter County, Florida",Florida,2023,3055,2864
+42041,"Cumberland County, Pennsylvania",Pennsylvania,2023,3257,3027
+26089,"Leelanau County, Michigan",Michigan,2023,2700,3191
+41039,"Lane County, Oregon",Oregon,2023,3487,3278
+19113,"Linn County, Iowa",Iowa,2023,3446,3307
+40025,"Cimarron County, Oklahoma",Oklahoma,2023,811,296
+54015,"Clay County, West Virginia",West Virginia,2023,433,347
+54075,"Pocahontas County, West Virginia",West Virginia,2023,506,392
+45047,"Greenwood County, South Carolina",South Carolina,2023,1148,792
+46049,"Faulk County, South Dakota",South Dakota,2023,1026,809
+21191,"Pendleton County, Kentucky",Kentucky,2023,1460,875
+30107,"Wheatland County, Montana",Montana,2023,1358,935
+45083,"Spartanburg County, South Carolina",South Carolina,2023,1356,949
+13253,"Seminole County, Georgia",Georgia,2023,1663,1118
+45091,"York County, South Carolina",South Carolina,2023,1809,1172
+08077,"Mesa County, Colorado",Colorado,2023,1389,1289
+13097,"Douglas County, Georgia",Georgia,2023,2304,1325
+42009,"Bedford County, Pennsylvania",Pennsylvania,2023,1471,1339
+21059,"Daviess County, Kentucky",Kentucky,2023,1770,1390
+48361,"Orange County, Texas",Texas,2023,2720,1394
+39073,"Hocking County, Ohio",Ohio,2023,1914,1449
+31051,"Dixon County, Nebraska",Nebraska,2023,1780,1672
+48195,"Hansford County, Texas",Texas,2023,2993,1693
+12009,"Brevard County, Florida",Florida,2023,2290,1915
+19127,"Marshall County, Iowa",Iowa,2023,2143,1923
+24045,"Wicomico County, Maryland",Maryland,2023,2202,1933
+49019,"Grand County, Utah",Utah,2023,2050,1965
+46117,"Stanley County, South Dakota",South Dakota,2023,2578,2133
+17053,"Ford County, Illinois",Illinois,2023,2613,2163
+42063,"Indiana County, Pennsylvania",Pennsylvania,2023,2304,2239
+26029,"Charlevoix County, Michigan",Michigan,2023,2430,2374
+51700,"Newport News city, Virginia",Virginia,2023,2526,2460
+26111,"Midland County, Michigan",Michigan,2023,2812,2711
+53009,"Clallam County, Washington",Washington,2023,2864,2855
+31055,"Douglas County, Nebraska",Nebraska,2023,4429,3980
+33001,"Belknap County, New Hampshire",New Hampshire,2023,5001,4699
+34013,"Essex County, New Jersey",New Jersey,2023,10001,10001
+22037,"East Feliciana Parish, Louisiana",Louisiana,2023,359,323
+40133,"Seminole County, Oklahoma",Oklahoma,2023,886,419
+05013,"Calhoun County, Arkansas",Arkansas,2023,382,519
+18075,"Jay County, Indiana",Indiana,2023,688,596
+21097,"Harrison County, Kentucky",Kentucky,2023,1492,883
+29015,"Benton County, Missouri",Missouri,2023,934,904
+38027,"Eddy County, North Dakota",North Dakota,2023,1177,910
+37143,"Perquimans County, North Carolina",North Carolina,2023,1488,945
+13321,"Worth County, Georgia",Georgia,2023,1382,1018
+40047,"Garfield County, Oklahoma",Oklahoma,2023,1420,1161
+18113,"Noble County, Indiana",Indiana,2023,1286,1179
+35013,"Doña Ana County, New Mexico",New Mexico,2023,1583,1185
+16047,"Gooding County, Idaho",Idaho,2023,1231,1213
+08085,"Montrose County, Colorado",Colorado,2023,1312,1225
+56043,"Washakie County, Wyoming",Wyoming,2023,1358,1277
+47009,"Blount County, Tennessee",Tennessee,2023,1435,1306
+47117,"Marshall County, Tennessee",Tennessee,2023,1333,1335
+40145,"Wagoner County, Oklahoma",Oklahoma,2023,1971,1371
+51125,"Nelson County, Virginia",Virginia,2023,1636,1381
+51171,"Shenandoah County, Virginia",Virginia,2023,1390,1581
+46107,"Potter County, South Dakota",South Dakota,2023,1830,1587
+26057,"Gratiot County, Michigan",Michigan,2023,1810,1605
+27045,"Fillmore County, Minnesota",Minnesota,2023,1923,1946
+06007,"Butte County, California",California,2023,3205,2193
+12111,"St. Lucie County, Florida",Florida,2023,3063,2626
+30029,"Flathead County, Montana",Montana,2023,2928,2767
+26099,"Macomb County, Michigan",Michigan,2023,3467,2972
+20121,"Miami County, Kansas",Kansas,2023,3498,3248
+23013,"Knox County, Maine",Maine,2023,3599,3709
+48171,"Gillespie County, Texas",Texas,2023,4780,3946
+06057,"Nevada County, California",California,2023,4695,3986
+22029,"Concordia Parish, Louisiana",Louisiana,2023,643,199
+45025,"Chesterfield County, South Carolina",South Carolina,2023,665,369
+22105,"Tangipahoa Parish, Louisiana",Louisiana,2023,1007,522
+47097,"Lauderdale County, Tennessee",Tennessee,2023,963,689
+51590,"Danville city, Virginia",Virginia,2023,789,693
+40007,"Beaver County, Oklahoma",Oklahoma,2023,1027,828
+30033,"Garfield County, Montana",Montana,2023,1385,1033
+18033,"DeKalb County, Indiana",Indiana,2023,1124,1104
+20147,"Phillips County, Kansas",Kansas,2023,1949,1372
+20183,"Smith County, Kansas",Kansas,2023,1754,1410
+39037,"Darke County, Ohio",Ohio,2023,1673,1470
+30073,"Pondera County, Montana",Montana,2023,1486,1670
+31105,"Kimball County, Nebraska",Nebraska,2023,2203,1788
+53077,"Yakima County, Washington",Washington,2023,2483,1943
+39097,"Madison County, Ohio",Ohio,2023,2515,2207
+27113,"Pennington County, Minnesota",Minnesota,2023,2290,2315
+48469,"Victoria County, Texas",Texas,2023,3703,2371
+51550,"Chesapeake city, Virginia",Virginia,2023,2932,2951
+48439,"Tarrant County, Texas",Texas,2023,5903,3844
+36029,"Erie County, New York",New York,2023,4837,4049
+53011,"Clark County, Washington",Washington,2023,4036,4182
+25025,"Suffolk County, Massachusetts",Massachusetts,2023,4469,4695
+09120,"Greater Bridgeport Planning Region, Connecticut",Connecticut,2023,8712,8199
+05039,"Dallas County, Arkansas",Arkansas,2023,561,386
+40053,"Grant County, Oklahoma",Oklahoma,2023,706,389
+05003,"Ashley County, Arkansas",Arkansas,2023,703,463
+54097,"Upshur County, West Virginia",West Virginia,2023,755,600
+18079,"Jennings County, Indiana",Indiana,2023,1023,746
+18041,"Fayette County, Indiana",Indiana,2023,909,802
+13303,"Washington County, Georgia",Georgia,2023,1666,861
+38001,"Adams County, North Dakota",North Dakota,2023,1408,872
+48419,"Shelby County, Texas",Texas,2023,1822,905
+22051,"Jefferson Parish, Louisiana",Louisiana,2023,1496,931
+13233,"Polk County, Georgia",Georgia,2023,1468,1072
+40031,"Comanche County, Oklahoma",Oklahoma,2023,1560,1161
+48239,"Jackson County, Texas",Texas,2023,2683,1346
+39033,"Crawford County, Ohio",Ohio,2023,1572,1439
+40131,"Rogers County, Oklahoma",Oklahoma,2023,1878,1493
+16017,"Bonner County, Idaho",Idaho,2023,1869,1513
+26031,"Cheboygan County, Michigan",Michigan,2023,1632,1614
+29219,"Warren County, Missouri",Missouri,2023,1814,1722
+30005,"Blaine County, Montana",Montana,2023,1943,1821
+27061,"Itasca County, Minnesota",Minnesota,2023,1829,1881
+12115,"Sarasota County, Florida",Florida,2023,2839,2813
+37183,"Wake County, North Carolina",North Carolina,2023,3038,2983
+55009,"Brown County, Wisconsin",Wisconsin,2023,3625,3532
+42071,"Lancaster County, Pennsylvania",Pennsylvania,2023,3973,3881
+45001,"Abbeville County, South Carolina",South Carolina,2023,906,543
+40093,"Major County, Oklahoma",Oklahoma,2023,1328,588
+18009,"Blackford County, Indiana",Indiana,2023,1012,647
+28161,"Yalobusha County, Mississippi",Mississippi,2023,852,724
+48263,"Kent County, Texas",Texas,2023,1766,733
+28099,"Neshoba County, Mississippi",Mississippi,2023,949,781
+28085,"Lincoln County, Mississippi",Mississippi,2023,1221,818
+21047,"Christian County, Kentucky",Kentucky,2023,1244,864
+28093,"Marshall County, Mississippi",Mississippi,2023,1525,929
+54065,"Morgan County, West Virginia",West Virginia,2023,1184,1084
+26153,"Schoolcraft County, Michigan",Michigan,2023,1436,1261
+31135,"Perkins County, Nebraska",Nebraska,2023,1555,1454
+13255,"Spalding County, Georgia",Georgia,2023,2067,1528
+37051,"Cumberland County, North Carolina",North Carolina,2023,1958,1545
+26107,"Mecosta County, Michigan",Michigan,2023,1802,1561
+31143,"Polk County, Nebraska",Nebraska,2023,1829,1588
+48341,"Moore County, Texas",Texas,2023,2576,1618
+12091,"Okaloosa County, Florida",Florida,2023,2049,1773
+18105,"Monroe County, Indiana",Indiana,2023,1842,1826
+20005,"Atchison County, Kansas",Kansas,2023,1987,1875
+13223,"Paulding County, Georgia",Georgia,2023,2567,1885
+47157,"Shelby County, Tennessee",Tennessee,2023,2548,1962
+20081,"Haskell County, Kansas",Kansas,2023,2313,2141
+49053,"Washington County, Utah",Utah,2023,2023,2158
+24019,"Dorchester County, Maryland",Maryland,2023,2490,2255
+17109,"McDonough County, Illinois",Illinois,2023,2208,2268
+26019,"Benzie County, Michigan",Michigan,2023,2025,2278
+19095,"Iowa County, Iowa",Iowa,2023,2648,2454
+26015,"Barry County, Michigan",Michigan,2023,2794,2543
+17123,"Marshall County, Illinois",Illinois,2023,2791,2670
+41009,"Columbia County, Oregon",Oregon,2023,2906,3085
+39103,"Medina County, Ohio",Ohio,2023,3525,3288
+02110,"Juneau City and Borough, Alaska",Alaska,2023,4135,3829
+42089,"Monroe County, Pennsylvania",Pennsylvania,2023,4649,4004
+02020,"Anchorage Municipality, Alaska",Alaska,2023,4964,4452
+44001,"Bristol County, Rhode Island",Rhode Island,2023,6665,6021
+25007,"Dukes County, Massachusetts",Massachusetts,2023,4369,6538
+02290,"Yukon-Koyukuk Census Area, Alaska",Alaska,2023,761,0
+22119,"Webster Parish, Louisiana",Louisiana,2023,583,270
+21075,"Fulton County, Kentucky",Kentucky,2023,1053,447
+05057,"Hempstead County, Arkansas",Arkansas,2023,582,454
+28069,"Kemper County, Mississippi",Mississippi,2023,615,529
+21219,"Todd County, Kentucky",Kentucky,2023,1033,536
+40003,"Alfalfa County, Oklahoma",Oklahoma,2023,781,556
+54053,"Mason County, West Virginia",West Virginia,2023,861,589
+08017,"Cheyenne County, Colorado",Colorado,2023,1175,589
+28079,"Leake County, Mississippi",Mississippi,2023,1225,621
+37083,"Halifax County, North Carolina",North Carolina,2023,1325,995
+12041,"Gilchrist County, Florida",Florida,2023,1597,1045
+18067,"Howard County, Indiana",Indiana,2023,1136,1058
+37137,"Pamlico County, North Carolina",North Carolina,2023,1389,1149
+37167,"Stanly County, North Carolina",North Carolina,2023,1451,1179
+17065,"Hamilton County, Illinois",Illinois,2023,1917,1322
+42031,"Clarion County, Pennsylvania",Pennsylvania,2023,1626,1367
+19007,"Appanoose County, Iowa",Iowa,2023,1583,1435
+31011,"Boone County, Nebraska",Nebraska,2023,1913,1451
+27105,"Nobles County, Minnesota",Minnesota,2023,1855,1473
+51670,"Hopewell city, Virginia",Virginia,2023,1615,1564
+27153,"Todd County, Minnesota",Minnesota,2023,1920,1824
+31139,"Pierce County, Nebraska",Nebraska,2023,2320,1911
+39069,"Henry County, Ohio",Ohio,2023,1948,1967
+20151,"Pratt County, Kansas",Kansas,2023,2045,2000
+46079,"Lake County, South Dakota",South Dakota,2023,2683,2215
+29095,"Jackson County, Missouri",Missouri,2023,2574,2218
+39095,"Lucas County, Ohio",Ohio,2023,3003,2228
+51087,"Henrico County, Virginia",Virginia,2023,2397,2461
+48141,"El Paso County, Texas",Texas,2023,4290,2662
+12085,"Martin County, Florida",Florida,2023,3560,2752
+55011,"Buffalo County, Wisconsin",Wisconsin,2023,2784,2843
+47187,"Williamson County, Tennessee",Tennessee,2023,2899,2875
+55105,"Rock County, Wisconsin",Wisconsin,2023,3701,3566
+30031,"Gallatin County, Montana",Montana,2023,3641,3593
+42095,"Northampton County, Pennsylvania",Pennsylvania,2023,4913,4384
+50025,"Windham County, Vermont",Vermont,2023,4957,4990
+01011,"Bullock County, Alabama",Alabama,2023,417,204
+22111,"Union Parish, Louisiana",Louisiana,2023,686,304
+45081,"Saluda County, South Carolina",South Carolina,2023,1053,461
+40071,"Kay County, Oklahoma",Oklahoma,2023,980,630
+30045,"Judith Basin County, Montana",Montana,2023,1050,950
+04017,"Navajo County, Arizona",Arizona,2023,1251,977
+31009,"Blaine County, Nebraska",Nebraska,2023,1568,1000
+12075,"Levy County, Florida",Florida,2023,1221,1007
+13181,"Lincoln County, Georgia",Georgia,2023,2227,1037
+31183,"Wheeler County, Nebraska",Nebraska,2023,1563,1096
+17171,"Scott County, Illinois",Illinois,2023,1794,1210
+17121,"Marion County, Illinois",Illinois,2023,2202,1306
+29117,"Livingston County, Missouri",Missouri,2023,1115,1362
+27133,"Rock County, Minnesota",Minnesota,2023,1499,1403
+48073,"Cherokee County, Texas",Texas,2023,2635,1449
+48383,"Reagan County, Texas",Texas,2023,2114,1643
+48291,"Liberty County, Texas",Texas,2023,2881,1648
+39157,"Tuscarawas County, Ohio",Ohio,2023,2118,1686
+48451,"Tom Green County, Texas",Texas,2023,3237,1703
+23007,"Franklin County, Maine",Maine,2023,1962,1818
+48071,"Chambers County, Texas",Texas,2023,3970,1898
+39091,"Logan County, Ohio",Ohio,2023,1959,1925
+53039,"Klickitat County, Washington",Washington,2023,2519,2255
+08001,"Adams County, Colorado",Colorado,2023,2902,2343
+30049,"Lewis and Clark County, Montana",Montana,2023,2973,2744
+27025,"Chisago County, Minnesota",Minnesota,2023,3741,3453
+19121,"Madison County, Iowa",Iowa,2023,3719,3597
+06055,"Napa County, California",California,2023,6856,3758
+17113,"McLean County, Illinois",Illinois,2023,4722,4122
+17133,"Monroe County, Illinois",Illinois,2023,4777,4174
+25005,"Bristol County, Massachusetts",Massachusetts,2023,4692,4673
+17037,"DeKalb County, Illinois",Illinois,2023,6108,5430
+34015,"Gloucester County, New Jersey",New Jersey,2023,8147,7622
+08089,"Otero County, Colorado",Colorado,2023,633,423
+05067,"Jackson County, Arkansas",Arkansas,2023,560,427
+54093,"Tucker County, West Virginia",West Virginia,2023,571,451
+05049,"Fulton County, Arkansas",Arkansas,2023,582,462
+54063,"Monroe County, West Virginia",West Virginia,2023,716,685
+28145,"Union County, Mississippi",Mississippi,2023,1104,685
+40019,"Carter County, Oklahoma",Oklahoma,2023,1589,749
+13305,"Wayne County, Georgia",Georgia,2023,1588,751
+29061,"Daviess County, Missouri",Missouri,2023,1174,923
+12043,"Glades County, Florida",Florida,2023,1487,1014
+51131,"Northampton County, Virginia",Virginia,2023,2126,1375
+04023,"Santa Cruz County, Arizona",Arizona,2023,1393,1377
+31083,"Harlan County, Nebraska",Nebraska,2023,1943,1507
+16019,"Bonneville County, Idaho",Idaho,2023,1852,1724
+30077,"Powell County, Montana",Montana,2023,1870,1755
+20149,"Pottawatomie County, Kansas",Kansas,2023,2935,1823
+32003,"Clark County, Nevada",Nevada,2023,2040,1888
+48007,"Aransas County, Texas",Texas,2023,3323,1950
+48311,"McMullen County, Texas",Texas,2023,2179,2159
+41059,"Umatilla County, Oregon",Oregon,2023,2718,2172
+19031,"Cedar County, Iowa",Iowa,2023,2552,2256
+17131,"Mercer County, Illinois",Illinois,2023,2995,2310
+42055,"Franklin County, Pennsylvania",Pennsylvania,2023,2732,2445
+12081,"Manatee County, Florida",Florida,2023,3136,2528
+36013,"Chautauqua County, New York",New York,2023,3222,2546
+08039,"Elbert County, Colorado",Colorado,2023,3128,2640
+39153,"Summit County, Ohio",Ohio,2023,3162,2809
+36099,"Seneca County, New York",New York,2023,3331,3158
+48367,"Parker County, Texas",Texas,2023,6097,3302
+06053,"Monterey County, California",California,2023,5366,3540
+55079,"Milwaukee County, Wisconsin",Wisconsin,2023,4483,4252
+22107,"Tensas Parish, Louisiana",Louisiana,2023,253,218
+01065,"Hale County, Alabama",Alabama,2023,496,337
+28129,"Smith County, Mississippi",Mississippi,2023,715,396
+28151,"Washington County, Mississippi",Mississippi,2023,1351,492
+40063,"Hughes County, Oklahoma",Oklahoma,2023,789,527
+28037,"Franklin County, Mississippi",Mississippi,2023,845,527
+46137,"Ziebach County, South Dakota",South Dakota,2023,586,609
+47101,"Lewis County, Tennessee",Tennessee,2023,1005,638
+22057,"Lafourche Parish, Louisiana",Louisiana,2023,1250,640
+13167,"Johnson County, Georgia",Georgia,2023,1172,652
+47075,"Haywood County, Tennessee",Tennessee,2023,1030,729
+18125,"Pike County, Indiana",Indiana,2023,1201,753
+29013,"Bates County, Missouri",Missouri,2023,1126,819
+13259,"Stewart County, Georgia",Georgia,2023,787,959
+29125,"Maries County, Missouri",Missouri,2023,1142,1034
+37057,"Davidson County, North Carolina",North Carolina,2023,1363,1109
+48275,"Knox County, Texas",Texas,2023,1867,1138
+45053,"Jasper County, South Carolina",South Carolina,2023,2083,1159
+37065,"Edgecombe County, North Carolina",North Carolina,2023,1397,1168
+32013,"Humboldt County, Nevada",Nevada,2023,1363,1219
+45045,"Greenville County, South Carolina",South Carolina,2023,1573,1232
+19161,"Sac County, Iowa",Iowa,2023,1466,1387
+37101,"Johnston County, North Carolina",North Carolina,2023,1990,1416
+51053,"Dinwiddie County, Virginia",Virginia,2023,1490,1444
+16041,"Franklin County, Idaho",Idaho,2023,1484,1553
+26121,"Muskegon County, Michigan",Michigan,2023,2364,2140
+38031,"Foster County, North Dakota",North Dakota,2023,1987,2188
+55001,"Adams County, Wisconsin",Wisconsin,2023,2563,2189
+36031,"Essex County, New York",New York,2023,3789,2633
+41047,"Marion County, Oregon",Oregon,2023,3447,3223
+25019,"Nantucket County, Massachusetts",Massachusetts,2023,2857,4120
+55133,"Waukesha County, Wisconsin",Wisconsin,2023,4557,4463
+42017,"Bucks County, Pennsylvania",Pennsylvania,2023,5913,5666
+02158,"Kusilvak Census Area, Alaska",Alaska,2023,199,199
+22059,"LaSalle Parish, Louisiana",Louisiana,2023,1150,460
+51025,"Brunswick County, Virginia",Virginia,2023,801,646
+21091,"Hancock County, Kentucky",Kentucky,2023,1257,683
+47095,"Lake County, Tennessee",Tennessee,2023,893,731
+48433,"Stonewall County, Texas",Texas,2023,742,746
+16059,"Lemhi County, Idaho",Idaho,2023,1375,778
+28001,"Adams County, Mississippi",Mississippi,2023,1255,789
+21089,"Greenup County, Kentucky",Kentucky,2023,1804,879
+37199,"Yancey County, North Carolina",North Carolina,2023,1192,943
+13017,"Ben Hill County, Georgia",Georgia,2023,1390,943
+18177,"Wayne County, Indiana",Indiana,2023,1162,970
+21229,"Washington County, Kentucky",Kentucky,2023,1320,1014
+37151,"Randolph County, North Carolina",North Carolina,2023,1331,1087
+48083,"Coleman County, Texas",Texas,2023,1402,1112
+48067,"Cass County, Texas",Texas,2023,1872,1223
+30019,"Daniels County, Montana",Montana,2023,1884,1234
+13023,"Bleckley County, Georgia",Georgia,2023,1870,1271
+24039,"Somerset County, Maryland",Maryland,2023,1836,1294
+26083,"Keweenaw County, Michigan",Michigan,2023,1981,1320
+39101,"Marion County, Ohio",Ohio,2023,1488,1343
+26129,"Ogemaw County, Michigan",Michigan,2023,1467,1375
+46003,"Aurora County, South Dakota",South Dakota,2023,1411,1387
+24023,"Garrett County, Maryland",Maryland,2023,2016,1483
+48393,"Roberts County, Texas",Texas,2023,3231,1583
+38073,"Ransom County, North Dakota",North Dakota,2023,2046,1639
+17087,"Johnson County, Illinois",Illinois,2023,2337,1656
+18097,"Marion County, Indiana",Indiana,2023,2001,1709
+21211,"Shelby County, Kentucky",Kentucky,2023,2424,1827
+19019,"Buchanan County, Iowa",Iowa,2023,2391,2158
+20079,"Harvey County, Kansas",Kansas,2023,2633,2344
+55081,"Monroe County, Wisconsin",Wisconsin,2023,2918,2657
+19155,"Pottawattamie County, Iowa",Iowa,2023,3137,2737
+19183,"Washington County, Iowa",Iowa,2023,2602,2824
+42003,"Allegheny County, Pennsylvania",Pennsylvania,2023,3692,2980
+29189,"St. Louis County, Missouri",Missouri,2023,3236,3118
+53059,"Skamania County, Washington",Washington,2023,3525,3228
+53073,"Whatcom County, Washington",Washington,2023,3876,3713
+54001,"Barbour County, West Virginia",West Virginia,2023,620,479
+05099,"Nevada County, Arkansas",Arkansas,2023,396,484
+08061,"Kiowa County, Colorado",Colorado,2023,1383,570
+18049,"Fulton County, Indiana",Indiana,2023,922,596
+47107,"McMinn County, Tennessee",Tennessee,2023,748,668
+51007,"Amelia County, Virginia",Virginia,2023,1173,806
+22015,"Bossier Parish, Louisiana",Louisiana,2023,1605,900
+38033,"Golden Valley County, North Dakota",North Dakota,2023,1308,1061
+12049,"Hardee County, Florida",Florida,2023,1693,1118
+20037,"Crawford County, Kansas",Kansas,2023,1503,1198
+48457,"Tyler County, Texas",Texas,2023,1590,1329
+42111,"Somerset County, Pennsylvania",Pennsylvania,2023,1606,1341
+48373,"Polk County, Texas",Texas,2023,2206,1343
+12101,"Pasco County, Florida",Florida,2023,2513,1363
+48465,"Val Verde County, Texas",Texas,2023,3362,1380
+20117,"Marshall County, Kansas",Kansas,2023,1783,1394
+48061,"Cameron County, Texas",Texas,2023,2816,1411
+27127,"Redwood County, Minnesota",Minnesota,2023,1454,1435
+29186,"Ste. Genevieve County, Missouri",Missouri,2023,1313,1448
+20201,"Washington County, Kansas",Kansas,2023,1774,1452
+20145,"Pawnee County, Kansas",Kansas,2023,1991,1457
+23025,"Somerset County, Maine",Maine,2023,1982,1602
+31047,"Dawson County, Nebraska",Nebraska,2023,2263,1676
+39007,"Ashtabula County, Ohio",Ohio,2023,2052,1690
+53025,"Grant County, Washington",Washington,2023,2489,1745
+16065,"Madison County, Idaho",Idaho,2023,1726,1922
+13103,"Effingham County, Georgia",Georgia,2023,2486,1949
+17187,"Warren County, Illinois",Illinois,2023,1866,2034
+13145,"Harris County, Georgia",Georgia,2023,2703,2035
+12001,"Alachua County, Florida",Florida,2023,2821,2319
+41057,"Tillamook County, Oregon",Oregon,2023,2493,2357
+48027,"Bell County, Texas",Texas,2023,3892,2558
+55017,"Chippewa County, Wisconsin",Wisconsin,2023,2784,2719
+55095,"Polk County, Wisconsin",Wisconsin,2023,2953,2935
+53057,"Skagit County, Washington",Washington,2023,3980,4055
+34031,"Passaic County, New Jersey",New Jersey,2023,10001,10001
+28019,"Choctaw County, Mississippi",Mississippi,2023,667,294
+28005,"Amite County, Mississippi",Mississippi,2023,764,404
+01009,"Blount County, Alabama",Alabama,2023,598,422
+21131,"Leslie County, Kentucky",Kentucky,2023,933,459
+38005,"Benson County, North Dakota",North Dakota,2023,1177,546
+29011,"Barton County, Missouri",Missouri,2023,1209,901
+46121,"Todd County, South Dakota",South Dakota,2023,1324,913
+30051,"Liberty County, Montana",Montana,2023,1875,927
+13105,"Elbert County, Georgia",Georgia,2023,1336,993
+56007,"Carbon County, Wyoming",Wyoming,2023,1283,1064
+38095,"Towner County, North Dakota",North Dakota,2023,1098,1074
+48151,"Fisher County, Texas",Texas,2023,1785,1195
+46053,"Gregory County, South Dakota",South Dakota,2023,1803,1257
+48233,"Hutchinson County, Texas",Texas,2023,2042,1284
+18091,"LaPorte County, Indiana",Indiana,2023,1448,1414
+31089,"Holt County, Nebraska",Nebraska,2023,1714,1743
+02240,"Southeast Fairbanks Census Area, Alaska",Alaska,2023,0,1910
+26025,"Calhoun County, Michigan",Michigan,2023,2434,1962
+21117,"Kenton County, Kentucky",Kentucky,2023,2401,2004
+02185,"North Slope Borough, Alaska",Alaska,2023,2173,2006
+20027,"Clay County, Kansas",Kansas,2023,2105,2007
+19033,"Cerro Gordo County, Iowa",Iowa,2023,2391,2185
+20085,"Jackson County, Kansas",Kansas,2023,2318,2288
+46035,"Davison County, South Dakota",South Dakota,2023,2362,2360
+06099,"Stanislaus County, California",California,2023,3313,2420
+27147,"Steele County, Minnesota",Minnesota,2023,2881,2711
+06069,"San Benito County, California",California,2023,6645,3729
+36081,"Queens County, New York",New York,2023,6054,6240
+25017,"Middlesex County, Massachusetts",Massachusetts,2023,7260,7203
+01007,"Bibb County, Alabama",Alabama,2023,334,227
+01131,"Wilcox County, Alabama",Alabama,2023,445,247
+01035,"Conecuh County, Alabama",Alabama,2023,457,266
+01133,"Winston County, Alabama",Alabama,2023,461,282
+01021,"Chilton County, Alabama",Alabama,2023,584,396
+35009,"Curry County, New Mexico",New Mexico,2023,1254,531
+28011,"Bolivar County, Mississippi",Mississippi,2023,1353,638
+13033,"Burke County, Georgia",Georgia,2023,1310,704
+18071,"Jackson County, Indiana",Indiana,2023,890,744
+05089,"Marion County, Arkansas",Arkansas,2023,960,748
+35051,"Sierra County, New Mexico",New Mexico,2023,880,755
+51071,"Giles County, Virginia",Virginia,2023,1038,784
+51001,"Accomack County, Virginia",Virginia,2023,1190,851
+20189,"Stevens County, Kansas",Kansas,2023,3395,994
+49009,"Daggett County, Utah",Utah,2023,1333,1038
+37005,"Alleghany County, North Carolina",North Carolina,2023,1276,1085
+20181,"Sherman County, Kansas",Kansas,2023,2452,1412
+46037,"Day County, South Dakota",South Dakota,2023,1728,1485
+41023,"Grant County, Oregon",Oregon,2023,1700,1730
+51790,"Staunton city, Virginia",Virginia,2023,1657,1743
+13227,"Pickens County, Georgia",Georgia,2023,1980,1790
+41001,"Baker County, Oregon",Oregon,2023,2316,2029
+51177,"Spotsylvania County, Virginia",Virginia,2023,2304,2107
+51650,"Hampton city, Virginia",Virginia,2023,2273,2222
+36041,"Hamilton County, New York",New York,2023,2510,2274
+26147,"St. Clair County, Michigan",Michigan,2023,2548,2404
+49057,"Weber County, Utah",Utah,2023,2396,2468
+23001,"Androscoggin County, Maine",Maine,2023,2997,2742
+42027,"Centre County, Pennsylvania",Pennsylvania,2023,3517,2865
+42043,"Dauphin County, Pennsylvania",Pennsylvania,2023,3282,2974
+27141,"Sherburne County, Minnesota",Minnesota,2023,3293,3360
+36037,"Genesee County, New York",New York,2023,4267,3405
+25013,"Hampden County, Massachusetts",Massachusetts,2023,4316,4360
+33009,"Grafton County, New Hampshire",New Hampshire,2023,5791,5384
+54047,"McDowell County, West Virginia",West Virginia,2023,556,255
+22047,"Iberville Parish, Louisiana",Louisiana,2023,931,299
+01115,"St. Clair County, Alabama",Alabama,2023,722,527
+05053,"Grant County, Arkansas",Arkansas,2023,1036,558
+40121,"Pittsburg County, Oklahoma",Oklahoma,2023,986,567
+22017,"Caddo Parish, Louisiana",Louisiana,2023,1380,585
+29203,"Shannon County, Missouri",Missouri,2023,739,595
+46071,"Jackson County, South Dakota",South Dakota,2023,0,750
+37011,"Avery County, North Carolina",North Carolina,2023,1166,831
+21143,"Lyon County, Kentucky",Kentucky,2023,1332,899
+48023,"Baylor County, Texas",Texas,2023,2495,912
+31087,"Hitchcock County, Nebraska",Nebraska,2023,1379,952
+46031,"Corson County, South Dakota",South Dakota,2023,1136,960
+37169,"Stokes County, North Carolina",North Carolina,2023,1252,1038
+48283,"La Salle County, Texas",Texas,2023,2432,1144
+16073,"Owyhee County, Idaho",Idaho,2023,1405,1267
+48087,"Collingsworth County, Texas",Texas,2023,1701,1277
+08067,"La Plata County, Colorado",Colorado,2023,1568,1288
+20105,"Lincoln County, Kansas",Kansas,2023,1515,1337
+39147,"Seneca County, Ohio",Ohio,2023,1563,1424
+48459,"Upshur County, Texas",Texas,2023,2710,1439
+18039,"Elkhart County, Indiana",Indiana,2023,1631,1502
+51139,"Page County, Virginia",Virginia,2023,1466,1538
+38021,"Dickey County, North Dakota",North Dakota,2023,1536,1542
+49023,"Juab County, Utah",Utah,2023,1738,1644
+39077,"Huron County, Ohio",Ohio,2023,1673,1648
+30083,"Richland County, Montana",Montana,2023,2297,1669
+16015,"Boise County, Idaho",Idaho,2023,1460,1769
+19027,"Carroll County, Iowa",Iowa,2023,1800,1914
+48485,"Wichita County, Texas",Texas,2023,2979,1946
+19041,"Clay County, Iowa",Iowa,2023,2081,1970
+42125,"Washington County, Pennsylvania",Pennsylvania,2023,2749,2053
+10003,"New Castle County, Delaware",Delaware,2023,2481,2334
+51740,"Portsmouth city, Virginia",Virginia,2023,2429,2501
+38015,"Burleigh County, North Dakota",North Dakota,2023,2908,2589
+17105,"Livingston County, Illinois",Illinois,2023,3075,2615
+46011,"Brookings County, South Dakota",South Dakota,2023,2815,2761
+36069,"Ontario County, New York",New York,2023,4641,4047
+50013,"Grand Isle County, Vermont",Vermont,2023,4768,5530
+33013,"Merrimack County, New Hampshire",New Hampshire,2023,6951,5953
+22083,"Richland Parish, Louisiana",Louisiana,2023,709,266
+01033,"Colbert County, Alabama",Alabama,2023,700,520
+21175,"Morgan County, Kentucky",Kentucky,2023,988,573
+47007,"Bledsoe County, Tennessee",Tennessee,2023,850,604
+47139,"Polk County, Tennessee",Tennessee,2023,975,624
+47131,"Obion County, Tennessee",Tennessee,2023,749,647
+40035,"Craig County, Oklahoma",Oklahoma,2023,905,653
+47091,"Johnson County, Tennessee",Tennessee,2023,671,674
+05019,"Clark County, Arkansas",Arkansas,2023,1075,691
+29081,"Harrison County, Missouri",Missouri,2023,1027,782
+40137,"Stephens County, Oklahoma",Oklahoma,2023,1151,832
+13229,"Pierce County, Georgia",Georgia,2023,1416,876
+47045,"Dyer County, Tennessee",Tennessee,2023,959,978
+01089,"Madison County, Alabama",Alabama,2023,1109,1029
+22125,"West Feliciana Parish, Louisiana",Louisiana,2023,1435,1038
+18013,"Brown County, Indiana",Indiana,2023,1178,1077
+18145,"Shelby County, Indiana",Indiana,2023,1407,1157
+13115,"Floyd County, Georgia",Georgia,2023,2011,1165
+48359,"Oldham County, Texas",Texas,2023,3413,1259
+30053,"Lincoln County, Montana",Montana,2023,1565,1431
+19081,"Hancock County, Iowa",Iowa,2023,1665,1439
+51750,"Radford city, Virginia",Virginia,2023,1449,1568
+42101,"Philadelphia County, Pennsylvania",Pennsylvania,2023,2144,1660
+42097,"Northumberland County, Pennsylvania",Pennsylvania,2023,1900,1663
+13217,"Newton County, Georgia",Georgia,2023,2276,1678
+16083,"Twin Falls County, Idaho",Idaho,2023,2121,1752
+31145,"Red Willow County, Nebraska",Nebraska,2023,1855,1784
+31071,"Garfield County, Nebraska",Nebraska,2023,2347,1865
+19171,"Tama County, Iowa",Iowa,2023,1975,1896
+35043,"Sandoval County, New Mexico",New Mexico,2023,2236,1955
+51137,"Orange County, Virginia",Virginia,2023,2069,1988
+40027,"Cleveland County, Oklahoma",Oklahoma,2023,2393,2072
+19043,"Clayton County, Iowa",Iowa,2023,2205,2087
+37055,"Dare County, North Carolina",North Carolina,2023,2244,2245
+20087,"Jefferson County, Kansas",Kansas,2023,2550,2578
+50009,"Essex County, Vermont",Vermont,2023,3098,2628
+06077,"San Joaquin County, California",California,2023,4147,2889
+23015,"Lincoln County, Maine",Maine,2023,2770,2966
+20161,"Riley County, Kansas",Kansas,2023,3480,3120
+06003,"Alpine County, California",California,2023,3091,3300
+06083,"Santa Barbara County, California",California,2023,5434,3762
+53055,"San Juan County, Washington",Washington,2023,3916,4453
+33015,"Rockingham County, New Hampshire",New Hampshire,2023,7702,7163
+36087,"Rockland County, New York",New York,2023,10001,10001
+21133,"Letcher County, Kentucky",Kentucky,2023,823,522
+21069,"Fleming County, Kentucky",Kentucky,2023,995,552
+45007,"Anderson County, South Carolina",South Carolina,2023,1188,720
+31075,"Grant County, Nebraska",Nebraska,2023,1325,776
+51147,"Prince Edward County, Virginia",Virginia,2023,863,784
+37093,"Hoke County, North Carolina",North Carolina,2023,1527,876
+48075,"Childress County, Texas",Texas,2023,2772,1074
+47145,"Roane County, Tennessee",Tennessee,2023,1223,1087
+29199,"Scotland County, Missouri",Missouri,2023,1231,1119
+12093,"Okeechobee County, Florida",Florida,2023,1599,1145
+17159,"Richland County, Illinois",Illinois,2023,2148,1288
+29127,"Marion County, Missouri",Missouri,2023,1414,1328
+27091,"Martin County, Minnesota",Minnesota,2023,1639,1453
+26007,"Alpena County, Michigan",Michigan,2023,1558,1554
+48321,"Matagorda County, Texas",Texas,2023,2761,1705
+48135,"Ector County, Texas",Texas,2023,3192,1723
+53001,"Adams County, Washington",Washington,2023,2612,1755
+37179,"Union County, North Carolina",North Carolina,2023,2402,1998
+30021,"Dawson County, Montana",Montana,2023,2493,2008
+17015,"Carroll County, Illinois",Illinois,2023,2401,2228
+27171,"Wright County, Minnesota",Minnesota,2023,3422,2990
+48021,"Bastrop County, Texas",Texas,2023,4701,3119
+51685,"Manassas Park city, Virginia",Virginia,2023,4430,3828
+17007,"Boone County, Illinois",Illinois,2023,4645,4008
+35021,"Harding County, New Mexico",New Mexico,2023,717,300
+21109,"Jackson County, Kentucky",Kentucky,2023,902,559
+12029,"Dixie County, Florida",Florida,2023,954,597
+54081,"Raleigh County, West Virginia",West Virginia,2023,870,601
+51135,"Nottoway County, Virginia",Virginia,2023,797,632
+29103,"Knox County, Missouri",Missouri,2023,1000,656
+51083,"Halifax County, Virginia",Virginia,2023,793,682
+29129,"Mercer County, Missouri",Missouri,2023,1015,782
+48047,"Brooks County, Texas",Texas,2023,1321,786
+16023,"Butte County, Idaho",Idaho,2023,1141,902
+31061,"Franklin County, Nebraska",Nebraska,2023,1594,921
+32017,"Lincoln County, Nevada",Nevada,2023,1353,984
+28047,"Harrison County, Mississippi",Mississippi,2023,1428,984
+29005,"Atchison County, Missouri",Missouri,2023,1246,1111
+08095,"Phillips County, Colorado",Colorado,2023,1327,1133
+30055,"McCone County, Montana",Montana,2023,1942,1198
+48277,"Lamar County, Texas",Texas,2023,2258,1366
+18005,"Bartholomew County, Indiana",Indiana,2023,1740,1368
+20035,"Cowley County, Kansas",Kansas,2023,2095,1520
+19197,"Wright County, Iowa",Iowa,2023,1774,1584
+06025,"Imperial County, California",California,2023,2679,1586
+42059,"Greene County, Pennsylvania",Pennsylvania,2023,2219,1616
+39003,"Allen County, Ohio",Ohio,2023,1874,1639
+19117,"Lucas County, Iowa",Iowa,2023,1804,1654
+48471,"Walker County, Texas",Texas,2023,3143,1746
+38057,"Mercer County, North Dakota",North Dakota,2023,2274,1944
+36049,"Lewis County, New York",New York,2023,2966,2400
+42081,"Lycoming County, Pennsylvania",Pennsylvania,2023,2745,2496
+31019,"Buffalo County, Nebraska",Nebraska,2023,3515,3312
+06095,"Solano County, California",California,2023,4789,3360
+36023,"Cortland County, New York",New York,2023,4539,3641
+06111,"Ventura County, California",California,2023,5944,3802
+06013,"Contra Costa County, California",California,2023,7538,5099
+05021,"Clay County, Arkansas",Arkansas,2023,498,428
+54041,"Lewis County, West Virginia",West Virginia,2023,732,541
+21139,"Livingston County, Kentucky",Kentucky,2023,1061,563
+12125,"Union County, Florida",Florida,2023,1368,652
+08055,"Huerfano County, Colorado",Colorado,2023,750,675
+29133,"Mississippi County, Missouri",Missouri,2023,954,746
+21199,"Pulaski County, Kentucky",Kentucky,2023,1158,831
+40039,"Custer County, Oklahoma",Oklahoma,2023,1475,890
+37193,"Wilkes County, North Carolina",North Carolina,2023,1137,901
+27155,"Traverse County, Minnesota",Minnesota,2023,1194,967
+29025,"Caldwell County, Missouri",Missouri,2023,1514,1010
+35031,"McKinley County, New Mexico",New Mexico,2023,1607,1036
+16003,"Adams County, Idaho",Idaho,2023,1672,1063
+37181,"Vance County, North Carolina",North Carolina,2023,1240,1113
+31125,"Nance County, Nebraska",Nebraska,2023,2198,1157
+30023,"Deer Lodge County, Montana",Montana,2023,1942,1458
+47147,"Robertson County, Tennessee",Tennessee,2023,1565,1524
+17117,"Macoupin County, Illinois",Illinois,2023,2045,1935
+27099,"Mower County, Minnesota",Minnesota,2023,1724,2005
+19039,"Clarke County, Iowa",Iowa,2023,2489,2008
+30009,"Carbon County, Montana",Montana,2023,1980,2219
+27027,"Clay County, Minnesota",Minnesota,2023,2858,2846
+55127,"Walworth County, Wisconsin",Wisconsin,2023,4004,3903
+51610,"Falls Church city, Virginia",Virginia,2023,10001,10001
+34039,"Union County, New Jersey",New Jersey,2023,10001,10001
+13239,"Quitman County, Georgia",Georgia,2023,0,0
+22013,"Bienville Parish, Louisiana",Louisiana,2023,584,199
+28007,"Attala County, Mississippi",Mississippi,2023,896,569
+28123,"Scott County, Mississippi",Mississippi,2023,886,612
+28133,"Sunflower County, Mississippi",Mississippi,2023,1132,681
+21027,"Breckinridge County, Kentucky",Kentucky,2023,1113,693
+54039,"Kanawha County, West Virginia",West Virginia,2023,1071,777
+51197,"Wythe County, Virginia",Virginia,2023,907,798
+05085,"Lonoke County, Arkansas",Arkansas,2023,1298,873
+18109,"Morgan County, Indiana",Indiana,2023,1083,990
+20089,"Jewell County, Kansas",Kansas,2023,2255,1012
+37045,"Cleveland County, North Carolina",North Carolina,2023,1383,1060
+38067,"Pembina County, North Dakota",North Dakota,2023,1273,1094
+13207,"Monroe County, Georgia",Georgia,2023,2081,1114
+19177,"Van Buren County, Iowa",Iowa,2023,1936,1156
+13031,"Bulloch County, Georgia",Georgia,2023,1677,1194
+27151,"Swift County, Minnesota",Minnesota,2023,1309,1219
+18129,"Posey County, Indiana",Indiana,2023,1412,1272
+39015,"Brown County, Ohio",Ohio,2023,1616,1314
+29053,"Cooper County, Missouri",Missouri,2023,1339,1319
+46059,"Hand County, South Dakota",South Dakota,2023,1372,1374
+19037,"Chickasaw County, Iowa",Iowa,2023,1839,1750
+51023,"Botetourt County, Virginia",Virginia,2023,1762,1759
+12073,"Leon County, Florida",Florida,2023,2415,2094
+36101,"Steuben County, New York",New York,2023,3754,2750
+42077,"Lehigh County, Pennsylvania",Pennsylvania,2023,4669,4448
+48397,"Rockwall County, Texas",Texas,2023,6812,4846
+34041,"Warren County, New Jersey",New Jersey,2023,8331,7842
+02105,"Hoonah-Angoon Census Area, Alaska",Alaska,2023,0,0
+40141,"Tillman County, Oklahoma",Oklahoma,2023,911,360
+32011,"Eureka County, Nevada",Nevada,2023,2233,400
+21183,"Ohio County, Kentucky",Kentucky,2023,844,524
+54025,"Greenbrier County, West Virginia",West Virginia,2023,825,536
+21115,"Johnson County, Kentucky",Kentucky,2023,1213,555
+51185,"Tazewell County, Virginia",Virginia,2023,917,634
+47017,"Carroll County, Tennessee",Tennessee,2023,889,733
+29087,"Holt County, Missouri",Missouri,2023,1041,865
+21035,"Calloway County, Kentucky",Kentucky,2023,1433,970
+45015,"Berkeley County, South Carolina",South Carolina,2023,1476,1002
+56017,"Hot Springs County, Wyoming",Wyoming,2023,1396,1110
+18077,"Jefferson County, Indiana",Indiana,2023,1226,1139
+49007,"Carbon County, Utah",Utah,2023,1337,1210
+46091,"Marshall County, South Dakota",South Dakota,2023,1485,1213
+05119,"Pulaski County, Arkansas",Arkansas,2023,1702,1300
+13261,"Sumter County, Georgia",Georgia,2023,1941,1313
+30101,"Toole County, Montana",Montana,2023,2040,1439
+48161,"Freestone County, Texas",Texas,2023,2274,1440
+26101,"Manistee County, Michigan",Michigan,2023,1967,1633
+37019,"Brunswick County, North Carolina",North Carolina,2023,1828,1712
+12095,"Orange County, Florida",Florida,2023,2950,2393
+17189,"Washington County, Illinois",Illinois,2023,3073,2472
+17083,"Jersey County, Illinois",Illinois,2023,3268,2715
+41053,"Polk County, Oregon",Oregon,2023,3705,3200
+05077,"Lee County, Arkansas",Arkansas,2023,449,392
+48101,"Cottle County, Texas",Texas,2023,1163,600
+13069,"Coffee County, Georgia",Georgia,2023,1264,672
+29059,"Dallas County, Missouri",Missouri,2023,733,710
+21083,"Graves County, Kentucky",Kentucky,2023,1136,712
+51081,"Greensville County, Virginia",Virginia,2023,987,905
+51009,"Amherst County, Virginia",Virginia,2023,1056,940
+48385,"Real County, Texas",Texas,2023,4846,973
+48507,"Zavala County, Texas",Texas,2023,1712,1082
+32023,"Nye County, Nevada",Nevada,2023,1375,1083
+48005,"Angelina County, Texas",Texas,2023,2584,1145
+47051,"Franklin County, Tennessee",Tennessee,2023,1220,1217
+47031,"Coffee County, Tennessee",Tennessee,2023,1451,1298
+02195,"Petersburg Borough, Alaska",Alaska,2023,2332,1427
+39127,"Perry County, Ohio",Ohio,2023,1851,1429
+18019,"Clark County, Indiana",Indiana,2023,1611,1470
+48295,"Lipscomb County, Texas",Texas,2023,2147,1494
+32029,"Storey County, Nevada",Nevada,2023,1643,1509
+47149,"Rutherford County, Tennessee",Tennessee,2023,1770,1715
+06021,"Glenn County, California",California,2023,2469,1776
+27077,"Lake of the Woods County, Minnesota",Minnesota,2023,1372,1808
+39011,"Auglaize County, Ohio",Ohio,2023,1722,1812
+38097,"Traill County, North Dakota",North Dakota,2023,2150,1837
+49045,"Tooele County, Utah",Utah,2023,2358,2072
+31073,"Gosper County, Nebraska",Nebraska,2023,2644,2268
+20169,"Saline County, Kansas",Kansas,2023,2291,2274
+27157,"Wabasha County, Minnesota",Minnesota,2023,2754,2566
+31141,"Platte County, Nebraska",Nebraska,2023,2938,2589
+36043,"Herkimer County, New York",New York,2023,3300,2840
+36065,"Oneida County, New York",New York,2023,3945,3259
+55059,"Kenosha County, Wisconsin",Wisconsin,2023,4256,4018
+20091,"Johnson County, Kansas",Kansas,2023,4205,4256
+55089,"Ozaukee County, Wisconsin",Wisconsin,2023,4736,4445
+01129,"Washington County, Alabama",Alabama,2023,423,308
+48105,"Crockett County, Texas",Texas,2023,8512,367
+01071,"Jackson County, Alabama",Alabama,2023,528,378
+35033,"Mora County, New Mexico",New Mexico,2023,724,563
+51031,"Campbell County, Virginia",Virginia,2023,954,831
+47123,"Monroe County, Tennessee",Tennessee,2023,929,859
+39081,"Jefferson County, Ohio",Ohio,2023,1352,1054
+20077,"Harper County, Kansas",Kansas,2023,1741,1144
+56031,"Platte County, Wyoming",Wyoming,2023,1681,1292
+02282,"Yakutat City and Borough, Alaska",Alaska,2023,1643,1345
+21167,"Mercer County, Kentucky",Kentucky,2023,1714,1347
+12053,"Hernando County, Florida",Florida,2023,1919,1435
+48035,"Bosque County, Texas",Texas,2023,2175,1685
+48009,"Archer County, Texas",Texas,2023,2972,1881
+30039,"Granite County, Montana",Montana,2023,2136,1998
+35049,"Santa Fe County, New Mexico",New Mexico,2023,2165,2038
+26087,"Lapeer County, Michigan",Michigan,2023,2249,2053
+48309,"McLennan County, Texas",Texas,2023,3999,2469
+46093,"Meade County, South Dakota",South Dakota,2023,3085,2543
+36035,"Fulton County, New York",New York,2023,3656,2793
+48187,"Guadalupe County, Texas",Texas,2023,4952,2827
+12109,"St. Johns County, Florida",Florida,2023,3730,3149
+36117,"Wayne County, New York",New York,2023,4428,3580
+51600,"Fairfax city, Virginia",Virginia,2023,6421,6304
+16033,"Clark County, Idaho",Idaho,2023,1389,405
+21031,"Butler County, Kentucky",Kentucky,2023,740,439
+05041,"Desha County, Arkansas",Arkansas,2023,559,448
+45017,"Calhoun County, South Carolina",South Carolina,2023,811,523
+12063,"Jackson County, Florida",Florida,2023,824,529
+28153,"Wayne County, Mississippi",Mississippi,2023,836,565
+21169,"Metcalfe County, Kentucky",Kentucky,2023,934,568
+45023,"Chester County, South Carolina",South Carolina,2023,1014,717
+13053,"Chattahoochee County, Georgia",Georgia,2023,1415,797
+29185,"St. Clair County, Missouri",Missouri,2023,1066,831
+21019,"Boyd County, Kentucky",Kentucky,2023,1384,935
+51011,"Appomattox County, Virginia",Virginia,2023,1051,974
+29097,"Jasper County, Missouri",Missouri,2023,1242,1018
+26135,"Oscoda County, Michigan",Michigan,2023,1233,1110
+29001,"Adair County, Missouri",Missouri,2023,1245,1156
+27029,"Clearwater County, Minnesota",Minnesota,2023,1350,1229
+29073,"Gasconade County, Missouri",Missouri,2023,1235,1242
+18183,"Whitley County, Indiana",Indiana,2023,1455,1372
+13201,"Miller County, Georgia",Georgia,2023,2039,1410
+06035,"Lassen County, California",California,2023,2144,1445
+02060,"Bristol Bay Borough, Alaska",Alaska,2023,3125,1545
+26059,"Hillsdale County, Michigan",Michigan,2023,1696,1562
+29099,"Jefferson County, Missouri",Missouri,2023,1953,1586
+19089,"Howard County, Iowa",Iowa,2023,1744,1743
+39023,"Clark County, Ohio",Ohio,2023,2042,1782
+27159,"Wadena County, Minnesota",Minnesota,2023,1684,1887
+48185,"Grimes County, Texas",Texas,2023,3590,1947
+30105,"Valley County, Montana",Montana,2023,2360,1996
+20173,"Sedgwick County, Kansas",Kansas,2023,2467,2148
+48421,"Sherman County, Texas",Texas,2023,2942,2158
+20139,"Osage County, Kansas",Kansas,2023,2351,2173
+46065,"Hughes County, South Dakota",South Dakota,2023,2645,2221
+42079,"Luzerne County, Pennsylvania",Pennsylvania,2023,2696,2259
+46033,"Custer County, South Dakota",South Dakota,2023,2743,2271
+18011,"Boone County, Indiana",Indiana,2023,2807,2358
+48043,"Brewster County, Texas",Texas,2023,2818,2368
+08035,"Douglas County, Colorado",Colorado,2023,3730,3630
+11001,"District of Columbia, District of Columbia",District of Columbia,2023,4311,3653
+39057,"Greene County, Ohio",Ohio,2023,4138,3793
+51061,"Fauquier County, Virginia",Virginia,2023,4170,4221
+53053,"Pierce County, Washington",Washington,2023,4533,4619
+51013,"Arlington County, Virginia",Virginia,2023,7684,7978
+40023,"Choctaw County, Oklahoma",Oklahoma,2023,813,403
+17003,"Alexander County, Illinois",Illinois,2023,1899,497
+05117,"Prairie County, Arkansas",Arkansas,2023,550,531
+05109,"Pike County, Arkansas",Arkansas,2023,781,534
+54095,"Tyler County, West Virginia",West Virginia,2023,819,571
+28141,"Tishomingo County, Mississippi",Mississippi,2023,885,626
+40073,"Kingfisher County, Oklahoma",Oklahoma,2023,1341,855
+48247,"Jim Hogg County, Texas",Texas,2023,2452,914
+28121,"Rankin County, Mississippi",Mississippi,2023,1512,963
+48289,"Leon County, Texas",Texas,2023,1638,998
+51057,"Essex County, Virginia",Virginia,2023,1495,1032
+13199,"Meriwether County, Georgia",Georgia,2023,1846,1096
+20049,"Elk County, Kansas",Kansas,2023,1372,1125
+48111,"Dallam County, Texas",Texas,2023,2762,1126
+08053,"Hinsdale County, Colorado",Colorado,2023,1392,1136
+29063,"DeKalb County, Missouri",Missouri,2023,1359,1207
+38099,"Walsh County, North Dakota",North Dakota,2023,1632,1217
+17193,"White County, Illinois",Illinois,2023,1461,1338
+13187,"Lumpkin County, Georgia",Georgia,2023,2198,1342
+18163,"Vanderburgh County, Indiana",Indiana,2023,1437,1386
+47021,"Cheatham County, Tennessee",Tennessee,2023,1526,1410
+37109,"Lincoln County, North Carolina",North Carolina,2023,1798,1437
+26011,"Arenac County, Michigan",Michigan,2023,1780,1554
+18043,"Floyd County, Indiana",Indiana,2023,1645,1675
+51069,"Frederick County, Virginia",Virginia,2023,1849,1719
+51678,"Lexington city, Virginia",Virginia,2023,2663,1800
+20041,"Dickinson County, Kansas",Kansas,2023,2347,1856
+42015,"Bradford County, Pennsylvania",Pennsylvania,2023,2335,1866
+17139,"Moultrie County, Illinois",Illinois,2023,2416,2225
+42115,"Susquehanna County, Pennsylvania",Pennsylvania,2023,2505,2264
+53003,"Asotin County, Washington",Washington,2023,2296,2281
+31043,"Dakota County, Nebraska",Nebraska,2023,2898,2435
+53017,"Douglas County, Washington",Washington,2023,3419,2624
+51043,"Clarke County, Virginia",Virginia,2023,2763,2743
+49051,"Wasatch County, Utah",Utah,2023,3220,3249
+23023,"Sagadahoc County, Maine",Maine,2023,3373,3351
+01047,"Dallas County, Alabama",Alabama,2023,568,301
+05147,"Woodruff County, Arkansas",Arkansas,2023,652,476
+30109,"Wibaux County, Montana",Montana,2023,772,554
+05059,"Hot Spring County, Arkansas",Arkansas,2023,810,568
+29069,"Dunklin County, Missouri",Missouri,2023,751,595
+21233,"Webster County, Kentucky",Kentucky,2023,1498,620
+13141,"Hancock County, Georgia",Georgia,2023,1124,835
+28149,"Warren County, Mississippi",Mississippi,2023,1401,928
+18167,"Vigo County, Indiana",Indiana,2023,1303,1156
+48413,"Schleicher County, Texas",Texas,2023,1927,1216
+37159,"Rowan County, North Carolina",North Carolina,2023,1555,1223
+18087,"LaGrange County, Indiana",Indiana,2023,1401,1267
+13237,"Putnam County, Georgia",Georgia,2023,1793,1358
+31031,"Cherry County, Nebraska",Nebraska,2023,1357,1398
+37097,"Iredell County, North Carolina",North Carolina,2023,2124,1403
+30091,"Sheridan County, Montana",Montana,2023,1475,1417
+31041,"Custer County, Nebraska",Nebraska,2023,2096,1530
+19083,"Hardin County, Iowa",Iowa,2023,1629,1595
+08113,"San Miguel County, Colorado",Colorado,2023,1564,1643
+22103,"St. Tammany Parish, Louisiana",Louisiana,2023,2159,1698
+26051,"Gladwin County, Michigan",Michigan,2023,1859,1755
+30043,"Jefferson County, Montana",Montana,2023,2408,2122
+19015,"Boone County, Iowa",Iowa,2023,2811,2618
+36097,"Schuyler County, New York",New York,2023,3376,2884
+51760,"Richmond city, Virginia",Virginia,2023,2798,2932
+17179,"Tazewell County, Illinois",Illinois,2023,3637,3214
+55033,"Dunn County, Wisconsin",Wisconsin,2023,3368,3250
+36039,"Greene County, New York",New York,2023,4568,3617
+34011,"Cumberland County, New Jersey",New Jersey,2023,5183,4895
+22003,"Allen Parish, Louisiana",Louisiana,2023,544,199
+05081,"Little River County, Arkansas",Arkansas,2023,637,485
+21165,"Menifee County, Kentucky",Kentucky,2023,646,498
+08057,"Jackson County, Colorado",Colorado,2023,0,519
+40033,"Cotton County, Oklahoma",Oklahoma,2023,838,609
+21105,"Hickman County, Kentucky",Kentucky,2023,989,616
+47071,"Hardin County, Tennessee",Tennessee,2023,670,660
+40129,"Roger Mills County, Oklahoma",Oklahoma,2023,681,789
+47011,"Bradley County, Tennessee",Tennessee,2023,1263,1020
+37003,"Alexander County, North Carolina",North Carolina,2023,1269,1120
+39145,"Scioto County, Ohio",Ohio,2023,1722,1189
+12023,"Columbia County, Florida",Florida,2023,1676,1191
+48049,"Brown County, Texas",Texas,2023,2415,1324
+46007,"Bennett County, South Dakota",South Dakota,2023,1589,1346
+26141,"Presque Isle County, Michigan",Michigan,2023,1413,1350
+48199,"Hardin County, Texas",Texas,2023,2662,1416
+26003,"Alger County, Michigan",Michigan,2023,1787,1504
+54037,"Jefferson County, West Virginia",West Virginia,2023,1875,1529
+48245,"Jefferson County, Texas",Texas,2023,3529,1776
+48327,"Menard County, Texas",Texas,2023,1550,1792
+42085,"Mercer County, Pennsylvania",Pennsylvania,2023,2065,1813
+42117,"Tioga County, Pennsylvania",Pennsylvania,2023,2178,2025
+31007,"Banner County, Nebraska",Nebraska,2023,4125,2217
+38059,"Morton County, North Dakota",North Dakota,2023,2677,2372
+37037,"Chatham County, North Carolina",North Carolina,2023,2813,2437
+27009,"Benton County, Minnesota",Minnesota,2023,2566,2469
+51810,"Virginia Beach city, Virginia",Virginia,2023,2876,3131
+42011,"Berks County, Pennsylvania",Pennsylvania,2023,4459,3849
+22081,"Red River Parish, Louisiana",Louisiana,2023,793,321
+21147,"McCreary County, Kentucky",Kentucky,2023,800,345
+01001,"Autauga County, Alabama",Alabama,2023,615,475
+28061,"Jasper County, Mississippi",Mississippi,2023,1071,509
+05135,"Sharp County, Arkansas",Arkansas,2023,578,517
+13315,"Wilcox County, Georgia",Georgia,2023,1643,586
+47035,"Cumberland County, Tennessee",Tennessee,2023,731,663
+13161,"Jeff Davis County, Georgia",Georgia,2023,1341,766
+13163,"Jefferson County, Georgia",Georgia,2023,1137,796
+32033,"White Pine County, Nevada",Nevada,2023,1157,839
+18181,"White County, Indiana",Indiana,2023,873,851
+18069,"Huntington County, Indiana",Indiana,2023,1110,975
+21217,"Taylor County, Kentucky",Kentucky,2023,1208,1136
+48461,"Upton County, Texas",Texas,2023,1189,1200
+20165,"Rush County, Kansas",Kansas,2023,1919,1240
+47169,"Trousdale County, Tennessee",Tennessee,2023,1150,1324
+38011,"Bowman County, North Dakota",North Dakota,2023,1315,1341
+21227,"Warren County, Kentucky",Kentucky,2023,1624,1440
+37105,"Lee County, North Carolina",North Carolina,2023,1863,1476
+16039,"Elmore County, Idaho",Idaho,2023,1758,1576
+39019,"Carroll County, Ohio",Ohio,2023,1748,1587
+48429,"Stephens County, Texas",Texas,2023,2153,1633
+18081,"Johnson County, Indiana",Indiana,2023,1899,1829
+48223,"Hopkins County, Texas",Texas,2023,2311,1876
+53047,"Okanogan County, Washington",Washington,2023,2353,1974
+26073,"Isabella County, Michigan",Michigan,2023,2246,2070
+27169,"Winona County, Minnesota",Minnesota,2023,2086,2119
+31093,"Howard County, Nebraska",Nebraska,2023,2356,2248
+36019,"Clinton County, New York",New York,2023,4001,2752
+17177,"Stephenson County, Illinois",Illinois,2023,3375,2925
+26077,"Kalamazoo County, Michigan",Michigan,2023,3503,3144
+29183,"St. Charles County, Missouri",Missouri,2023,3370,3269
+36055,"Monroe County, New York",New York,2023,5643,5212
+06001,"Alameda County, California",California,2023,9108,5709
+51059,"Fairfax County, Virginia",Virginia,2023,6945,7430
+08065,"Lake County, Colorado",Colorado,2023,1946,0
+40077,"Latimer County, Oklahoma",Oklahoma,2023,730,421
+01067,"Henry County, Alabama",Alabama,2023,642,422
+01113,"Russell County, Alabama",Alabama,2023,752,455
+01101,"Montgomery County, Alabama",Alabama,2023,671,498
+12123,"Taylor County, Florida",Florida,2023,1347,533
+13061,"Clay County, Georgia",Georgia,2023,1484,595
+12039,"Gadsden County, Florida",Florida,2023,1193,615
+38051,"McIntosh County, North Dakota",North Dakota,2023,1207,707
+05023,"Cleburne County, Arkansas",Arkansas,2023,824,804
+54049,"Marion County, West Virginia",West Virginia,2023,1094,872
+40051,"Grady County, Oklahoma",Oklahoma,2023,1637,919
+28043,"Grenada County, Mississippi",Mississippi,2023,1467,955
+13283,"Treutlen County, Georgia",Georgia,2023,603,1047
+53023,"Garfield County, Washington",Washington,2023,1757,1090
+51159,"Richmond County, Virginia",Virginia,2023,1244,1141
+51155,"Pulaski County, Virginia",Virginia,2023,1178,1174
+20065,"Graham County, Kansas",Kansas,2023,1833,1332
+26097,"Mackinac County, Michigan",Michigan,2023,1806,1617
+41069,"Wheeler County, Oregon",Oregon,2023,2010,1708
+51047,"Culpeper County, Virginia",Virginia,2023,2211,1834
+42005,"Armstrong County, Pennsylvania",Pennsylvania,2023,2483,1897
+31121,"Merrick County, Nebraska",Nebraska,2023,1960,1983
+53027,"Grays Harbor County, Washington",Washington,2023,2609,2202
+48097,"Cooke County, Texas",Texas,2023,3250,2403
+42119,"Union County, Pennsylvania",Pennsylvania,2023,2942,2407
+17073,"Henry County, Illinois",Illinois,2023,3111,2560
+31079,"Hall County, Nebraska",Nebraska,2023,2986,2651
+27041,"Douglas County, Minnesota",Minnesota,2023,2446,2662
+48039,"Brazoria County, Texas",Texas,2023,6192,2865
+48201,"Harris County, Texas",Texas,2023,5134,3294
+31153,"Sarpy County, Nebraska",Nebraska,2023,5394,4696
+48243,"Jeff Davis County, Texas",Texas,2023,2158,0
+22097,"St. Landry Parish, Louisiana",Louisiana,2023,581,284
+05075,"Lawrence County, Arkansas",Arkansas,2023,490,401
+01069,"Houston County, Alabama",Alabama,2023,589,433
+08023,"Costilla County, Colorado",Colorado,2023,931,455
+22019,"Calcasieu Parish, Louisiana",Louisiana,2023,1191,628
+01125,"Tuscaloosa County, Alabama",Alabama,2023,799,662
+30011,"Carter County, Montana",Montana,2023,1208,662
+05145,"White County, Arkansas",Arkansas,2023,894,664
+21197,"Powell County, Kentucky",Kentucky,2023,954,689
+28115,"Pontotoc County, Mississippi",Mississippi,2023,1133,692
+37111,"McDowell County, North Carolina",North Carolina,2023,1033,750
+30037,"Golden Valley County, Montana",Montana,2023,1523,783
+51143,"Pittsylvania County, Virginia",Virginia,2023,960,855
+37091,"Hertford County, North Carolina",North Carolina,2023,1303,897
+37113,"Macon County, North Carolina",North Carolina,2023,1049,922
+18023,"Clinton County, Indiana",Indiana,2023,939,1048
+20199,"Wallace County, Kansas",Kansas,2023,2115,1160
+37195,"Wilson County, North Carolina",North Carolina,2023,1677,1166
+47105,"Loudon County, Tennessee",Tennessee,2023,1147,1190
+37031,"Carteret County, North Carolina",North Carolina,2023,1417,1294
+49013,"Duchesne County, Utah",Utah,2023,1707,1408
+17191,"Wayne County, Illinois",Illinois,2023,1913,1422
+18141,"St. Joseph County, Indiana",Indiana,2023,1640,1428
+48163,"Frio County, Texas",Texas,2023,2399,1452
+37071,"Gaston County, North Carolina",North Carolina,2023,2095,1492
+39143,"Sandusky County, Ohio",Ohio,2023,1670,1560
+51530,"Buena Vista city, Virginia",Virginia,2023,1372,1587
+19111,"Lee County, Iowa",Iowa,2023,1988,1660
+55085,"Oneida County, Wisconsin",Wisconsin,2023,2151,2139
+39129,"Pickaway County, Ohio",Ohio,2023,2561,2244
+48303,"Lubbock County, Texas",Texas,2023,3822,2258
+24013,"Carroll County, Maryland",Maryland,2023,3916,3673
+06041,"Marin County, California",California,2023,10001,7538
+22123,"West Carroll Parish, Louisiana",Louisiana,2023,261,199
+21237,"Wolfe County, Kentucky",Kentucky,2023,548,357
+01063,"Greene County, Alabama",Alabama,2023,751,358
+01079,"Lawrence County, Alabama",Alabama,2023,496,410
+01015,"Calhoun County, Alabama",Alabama,2023,678,508
+13083,"Dade County, Georgia",Georgia,2023,1380,698
+05091,"Miller County, Arkansas",Arkansas,2023,1222,703
+29039,"Cedar County, Missouri",Missouri,2023,1042,892
+13313,"Whitfield County, Georgia",Georgia,2023,1588,1096
+37041,"Chowan County, North Carolina",North Carolina,2023,1510,1103
+56023,"Lincoln County, Wyoming",Wyoming,2023,1695,1252
+28045,"Hancock County, Mississippi",Mississippi,2023,1705,1277
+48335,"Mitchell County, Texas",Texas,2023,3035,1476
+48237,"Jack County, Texas",Texas,2023,2795,1480
+38071,"Ramsey County, North Dakota",North Dakota,2023,2031,1645
+26063,"Huron County, Michigan",Michigan,2023,1804,1724
+31033,"Cheyenne County, Nebraska",Nebraska,2023,2640,1858
+06115,"Yuba County, California",California,2023,3272,1926
+18059,"Hancock County, Indiana",Indiana,2023,1702,1928
+27111,"Otter Tail County, Minnesota",Minnesota,2023,1936,2006
+30047,"Lake County, Montana",Montana,2023,2613,2176
+39133,"Portage County, Ohio",Ohio,2023,2892,2445
+19013,"Black Hawk County, Iowa",Iowa,2023,2799,2776
+51179,"Stafford County, Virginia",Virginia,2023,3385,2983
+46103,"Pennington County, South Dakota",South Dakota,2023,3043,3058
+42133,"York County, Pennsylvania",Pennsylvania,2023,4102,3672
+51735,"Poquoson city, Virginia",Virginia,2023,3610,3691
+44005,"Newport County, Rhode Island",Rhode Island,2023,5472,5109
+33011,"Hillsborough County, New Hampshire",New Hampshire,2023,6876,6606
+22031,"De Soto Parish, Louisiana",Louisiana,2023,1047,283
+01017,"Chambers County, Alabama",Alabama,2023,559,409
+29035,"Carter County, Missouri",Missouri,2023,874,556
+22043,"Grant Parish, Louisiana",Louisiana,2023,1199,567
+08083,"Montezuma County, Colorado",Colorado,2023,992,755
+13025,"Brantley County, Georgia",Georgia,2023,1669,782
+08125,"Yuma County, Colorado",Colorado,2023,1186,852
+37079,"Greene County, North Carolina",North Carolina,2023,1021,970
+13125,"Glascock County, Georgia",Georgia,2023,2135,974
+16031,"Cassia County, Idaho",Idaho,2023,1205,1044
+01081,"Lee County, Alabama",Alabama,2023,1235,1060
+46075,"Jones County, South Dakota",South Dakota,2023,1607,1155
+35061,"Valencia County, New Mexico",New Mexico,2023,1479,1188
+30089,"Sanders County, Montana",Montana,2023,1788,1769
+20095,"Kingman County, Kansas",Kansas,2023,2037,1830
+16081,"Teton County, Idaho",Idaho,2023,2230,1875
+39009,"Athens County, Ohio",Ohio,2023,2388,1879
+31029,"Chase County, Nebraska",Nebraska,2023,2527,1891
+51101,"King William County, Virginia",Virginia,2023,1658,1917
+53049,"Pacific County, Washington",Washington,2023,2497,1917
+02150,"Kodiak Island Borough, Alaska",Alaska,2023,4070,2193
+26091,"Lenawee County, Michigan",Michigan,2023,2461,2324
+51660,"Harrisonburg city, Virginia",Virginia,2023,1977,2474
+19061,"Dubuque County, Iowa",Iowa,2023,2821,2917
+36057,"Montgomery County, New York",New York,2023,3990,3274
+42103,"Pike County, Pennsylvania",Pennsylvania,2023,3578,3353
+36107,"Tioga County, New York",New York,2023,4070,3450
+13121,"Fulton County, Georgia",Georgia,2023,3948,3537
+39165,"Warren County, Ohio",Ohio,2023,4252,3617
+48091,"Comal County, Texas",Texas,2023,5622,3801
+22001,"Acadia Parish, Louisiana",Louisiana,2023,757,234
+54087,"Roane County, West Virginia",West Virginia,2023,652,473
+18103,"Miami County, Indiana",Indiana,2023,744,620
+21057,"Cumberland County, Kentucky",Kentucky,2023,894,734
+47177,"Warren County, Tennessee",Tennessee,2023,768,787
+18035,"Delaware County, Indiana",Indiana,2023,1106,872
+40083,"Logan County, Oklahoma",Oklahoma,2023,2255,1080
+48081,"Coke County, Texas",Texas,2023,1574,1141
+30075,"Powder River County, Montana",Montana,2023,1290,1173
+20007,"Barber County, Kansas",Kansas,2023,1818,1188
+01117,"Shelby County, Alabama",Alabama,2023,1358,1299
+42023,"Cameron County, Pennsylvania",Pennsylvania,2023,1635,1378
+18037,"Dubois County, Indiana",Indiana,2023,1373,1394
+38009,"Bottineau County, North Dakota",North Dakota,2023,1265,1398
+06105,"Trinity County, California",California,2023,2234,1445
+13063,"Clayton County, Georgia",Georgia,2023,1858,1451
+06103,"Tehama County, California",California,2023,2308,1455
+46005,"Beadle County, South Dakota",South Dakota,2023,2177,1677
+12031,"Duval County, Florida",Florida,2023,2333,1707
+51109,"Louisa County, Virginia",Virginia,2023,1785,1767
+27065,"Kanabec County, Minnesota",Minnesota,2023,2555,2342
+20193,"Thomas County, Kansas",Kansas,2023,2038,2343
+49011,"Davis County, Utah",Utah,2023,2534,2580
+55005,"Barron County, Wisconsin",Wisconsin,2023,2817,2831
+48205,"Hartley County, Texas",Texas,2023,2413,2859
+18057,"Hamilton County, Indiana",Indiana,2023,3345,3325
+55131,"Washington County, Wisconsin",Wisconsin,2023,3894,3609
+36091,"Saratoga County, New York",New York,2023,5096,4339
+09130,"Lower Connecticut River Valley Planning Region, Connecticut",Connecticut,2023,6437,6121
+50007,"Chittenden County, Vermont",Vermont,2023,6545,6480
+34037,"Sussex County, New Jersey",New Jersey,2023,8546,8285
+01111,"Randolph County, Alabama",Alabama,2023,513,353
+12059,"Holmes County, Florida",Florida,2023,730,420
+21203,"Rockcastle County, Kentucky",Kentucky,2023,862,501
+54071,"Pendleton County, West Virginia",West Virginia,2023,673,553
+28119,"Quitman County, Mississippi",Mississippi,2023,1113,681
+28125,"Sharkey County, Mississippi",Mississippi,2023,1974,741
+08121,"Washington County, Colorado",Colorado,2023,955,815
+38063,"Nelson County, North Dakota",North Dakota,2023,1093,832
+37099,"Jackson County, North Carolina",North Carolina,2023,984,888
+29167,"Polk County, Missouri",Missouri,2023,1192,972
+54079,"Putnam County, West Virginia",West Virginia,2023,1460,979
+18147,"Spencer County, Indiana",Indiana,2023,1205,1009
+18151,"Steuben County, Indiana",Indiana,2023,1202,1170
+48017,"Bailey County, Texas",Texas,2023,1864,1200
+41035,"Klamath County, Oregon",Oregon,2023,2022,1287
+51730,"Petersburg city, Virginia",Virginia,2023,1529,1337
+30061,"Mineral County, Montana",Montana,2023,1957,1441
+46009,"Bon Homme County, South Dakota",South Dakota,2023,1579,1454
+29157,"Perry County, Missouri",Missouri,2023,1332,1456
+48287,"Lee County, Texas",Texas,2023,2969,1566
+08091,"Ouray County, Colorado",Colorado,2023,2019,1710
+38105,"Williams County, North Dakota",North Dakota,2023,1987,1762
+12103,"Pinellas County, Florida",Florida,2023,2657,1837
+08049,"Grand County, Colorado",Colorado,2023,1668,1878
+18127,"Porter County, Indiana",Indiana,2023,2234,2043
+21037,"Campbell County, Kentucky",Kentucky,2023,2672,2109
+46029,"Codington County, South Dakota",South Dakota,2023,2372,2231
+17005,"Bond County, Illinois",Illinois,2023,2780,2298
+13117,"Forsyth County, Georgia",Georgia,2023,4025,2374
+28023,"Clarke County, Mississippi",Mississippi,2023,885,445
+54055,"Mercer County, West Virginia",West Virginia,2023,777,476
+05129,"Searcy County, Arkansas",Arkansas,2023,599,493
+01019,"Cherokee County, Alabama",Alabama,2023,745,538
+28095,"Monroe County, Mississippi",Mississippi,2023,1009,599
+08103,"Rio Blanco County, Colorado",Colorado,2023,945,631
+13055,"Chattooga County, Georgia",Georgia,2023,1054,702
+08063,"Kit Carson County, Colorado",Colorado,2023,1329,721
+29207,"Stoddard County, Missouri",Missouri,2023,990,755
+40103,"Noble County, Oklahoma",Oklahoma,2023,1362,815
+40153,"Woodward County, Oklahoma",Oklahoma,2023,1292,830
+13007,"Baker County, Georgia",Georgia,2023,572,1157
+21017,"Bourbon County, Kentucky",Kentucky,2023,1753,1285
+39161,"Van Wert County, Ohio",Ohio,2023,1319,1338
+42021,"Cambria County, Pennsylvania",Pennsylvania,2023,1712,1348
+48227,"Howard County, Texas",Texas,2023,1899,1358
+39171,"Williams County, Ohio",Ohio,2023,1647,1579
+29071,"Franklin County, Missouri",Missouri,2023,1860,1596
+48357,"Ochiltree County, Texas",Texas,2023,2738,1709
+46111,"Sanborn County, South Dakota",South Dakota,2023,1482,1875
+04005,"Coconino County, Arizona",Arizona,2023,2065,1880
+42067,"Juniata County, Pennsylvania",Pennsylvania,2023,2235,2097
+19175,"Union County, Iowa",Iowa,2023,2086,2123
+27097,"Morrison County, Minnesota",Minnesota,2023,2132,2183
+06071,"San Bernardino County, California",California,2023,3729,2462
+53031,"Jefferson County, Washington",Washington,2023,3380,3784
+28029,"Copiah County, Mississippi",Mississippi,2023,1168,573
+35006,"Cibola County, New Mexico",New Mexico,2023,1188,592
+13091,"Dodge County, Georgia",Georgia,2023,1308,596
+01083,"Limestone County, Alabama",Alabama,2023,838,626
+40123,"Pontotoc County, Oklahoma",Oklahoma,2023,1314,714
+48365,"Panola County, Texas",Texas,2023,2117,797
+37153,"Richmond County, North Carolina",North Carolina,2023,1287,890
+29141,"Morgan County, Missouri",Missouri,2023,1202,926
+21173,"Montgomery County, Kentucky",Kentucky,2023,1393,936
+47153,"Sequatchie County, Tennessee",Tennessee,2023,1008,969
+13215,"Muscogee County, Georgia",Georgia,2023,1970,994
+05143,"Washington County, Arkansas",Arkansas,2023,1573,1306
+13241,"Rabun County, Georgia",Georgia,2023,1560,1383
+29027,"Callaway County, Missouri",Missouri,2023,1616,1439
+24001,"Allegany County, Maryland",Maryland,2023,1712,1485
+26013,"Baraga County, Michigan",Michigan,2023,1844,1539
+48379,"Rains County, Texas",Texas,2023,3544,1648
+27075,"Lake County, Minnesota",Minnesota,2023,1667,1680
+46125,"Turner County, South Dakota",South Dakota,2023,2255,1868
+48011,"Armstrong County, Texas",Texas,2023,3317,2035
+17001,"Adams County, Illinois",Illinois,2023,2553,2350
+55019,"Clark County, Wisconsin",Wisconsin,2023,2531,2388
+06109,"Tuolumne County, California",California,2023,2887,2498
+36025,"Delaware County, New York",New York,2023,3294,2843
+53035,"Kitsap County, Washington",Washington,2023,3978,4185
+48453,"Travis County, Texas",Texas,2023,7918,6682
+34025,"Monmouth County, New Jersey",New Jersey,2023,10001,10001
+45067,"Marion County, South Carolina",South Carolina,2023,531,350
+28021,"Claiborne County, Mississippi",Mississippi,2023,517,447
+08033,"Dolores County, Colorado",Colorado,2023,1578,469
+29181,"Ripley County, Missouri",Missouri,2023,593,509
+21055,"Crittenden County, Kentucky",Kentucky,2023,929,560
+47137,"Pickett County, Tennessee",Tennessee,2023,765,572
+54103,"Wetzel County, West Virginia",West Virginia,2023,772,585
+40079,"Le Flore County, Oklahoma",Oklahoma,2023,1055,596
+12079,"Madison County, Florida",Florida,2023,1387,686
+18123,"Perry County, Indiana",Indiana,2023,1148,800
+31171,"Thomas County, Nebraska",Nebraska,2023,1567,913
+46095,"Mellette County, South Dakota",South Dakota,2023,1250,925
+45071,"Newberry County, South Carolina",South Carolina,2023,1245,934
+28081,"Lee County, Mississippi",Mississippi,2023,1537,966
+13005,"Bacon County, Georgia",Georgia,2023,1092,1043
+13101,"Echols County, Georgia",Georgia,2023,1179,1074
+10001,"Kent County, Delaware",Delaware,2023,1416,1098
+12055,"Highlands County, Florida",Florida,2023,1496,1101
+21213,"Simpson County, Kentucky",Kentucky,2023,1368,1104
+48025,"Bee County, Texas",Texas,2023,1988,1175
+38053,"McKenzie County, North Dakota",North Dakota,2023,1673,1229
+30071,"Phillips County, Montana",Montana,2023,1915,1297
+17183,"Vermilion County, Illinois",Illinois,2023,2243,1306
+23021,"Piscataquis County, Maine",Maine,2023,1684,1338
+20133,"Neosho County, Kansas",Kansas,2023,1679,1383
+20131,"Nemaha County, Kansas",Kansas,2023,2387,1503
+12037,"Franklin County, Florida",Florida,2023,1619,1535
+17081,"Jefferson County, Illinois",Illinois,2023,2397,1561
+53065,"Stevens County, Washington",Washington,2023,2227,1760
+13159,"Jasper County, Georgia",Georgia,2023,2027,1805
+13133,"Greene County, Georgia",Georgia,2023,2572,1933
+21113,"Jessamine County, Kentucky",Kentucky,2023,1869,1983
+19029,"Cass County, Iowa",Iowa,2023,1816,2019
+26017,"Bay County, Michigan",Michigan,2023,2280,2110
+39109,"Miami County, Ohio",Ohio,2023,2103,2112
+27007,"Beltrami County, Minnesota",Minnesota,2023,2228,2192
+06019,"Fresno County, California",California,2023,2891,2219
+19149,"Plymouth County, Iowa",Iowa,2023,2389,2329
+17027,"Clinton County, Illinois",Illinois,2023,3610,2956
+36071,"Orange County, New York",New York,2023,8904,7379
+01105,"Perry County, Alabama",Alabama,2023,449,289
+05127,"Scott County, Arkansas",Arkansas,2023,598,386
+54043,"Lincoln County, West Virginia",West Virginia,2023,732,417
+08025,"Crowley County, Colorado",Colorado,2023,562,467
+29153,"Ozark County, Missouri",Missouri,2023,801,674
+28087,"Lowndes County, Mississippi",Mississippi,2023,1083,779
+37187,"Washington County, North Carolina",North Carolina,2023,1363,973
+08081,"Moffat County, Colorado",Colorado,2023,1187,987
+47089,"Jefferson County, Tennessee",Tennessee,2023,982,1003
+48119,"Delta County, Texas",Texas,2023,2052,1023
+29007,"Audrain County, Missouri",Missouri,2023,1085,1035
+05125,"Saline County, Arkansas",Arkansas,2023,1422,1129
+46025,"Clark County, South Dakota",South Dakota,2023,1754,1222
+31049,"Deuel County, Nebraska",Nebraska,2023,1661,1322
+20033,"Comanche County, Kansas",Kansas,2023,1380,1360
+27129,"Renville County, Minnesota",Minnesota,2023,1649,1447
+48065,"Carson County, Texas",Texas,2023,2343,1506
+51820,"Waynesboro city, Virginia",Virginia,2023,1564,1636
+19035,"Cherokee County, Iowa",Iowa,2023,1478,1643
+51133,"Northumberland County, Virginia",Virginia,2023,1549,1654
+46067,"Hutchinson County, South Dakota",South Dakota,2023,1927,1689
+15007,"Kauai County, Hawaii",Hawaii,2023,1860,1759
+30013,"Cascade County, Montana",Montana,2023,2292,2139
+48355,"Nueces County, Texas",Texas,2023,4115,2227
+23011,"Kennebec County, Maine",Maine,2023,2548,2440
+55083,"Oconto County, Wisconsin",Wisconsin,2023,2743,2499
+26047,"Emmet County, Michigan",Michigan,2023,2383,2663
+48281,"Lampasas County, Texas",Texas,2023,3288,2683
+51199,"York County, Virginia",Virginia,2023,2648,2730
+42127,"Wayne County, Pennsylvania",Pennsylvania,2023,2966,2800
+36011,"Cayuga County, New York",New York,2023,4152,3249
+24033,"Prince George's County, Maryland",Maryland,2023,4726,4449
+36021,"Columbia County, New York",New York,2023,4974,4546
+50023,"Washington County, Vermont",Vermont,2023,5690,5097
+17093,"Kendall County, Illinois",Illinois,2023,7697,7018
+36119,"Westchester County, New York",New York,2023,10001,10001
+47049,"Fentress County, Tennessee",Tennessee,2023,610,469
+51111,"Lunenburg County, Virginia",Virginia,2023,695,579
+05055,"Greene County, Arkansas",Arkansas,2023,914,593
+13165,"Jenkins County, Georgia",Georgia,2023,1187,597
+21225,"Union County, Kentucky",Kentucky,2023,1155,631
+18169,"Wabash County, Indiana",Indiana,2023,822,651
+40021,"Cherokee County, Oklahoma",Oklahoma,2023,1161,651
+05001,"Arkansas County, Arkansas",Arkansas,2023,833,652
+40041,"Delaware County, Oklahoma",Oklahoma,2023,1316,698
+05115,"Pope County, Arkansas",Arkansas,2023,997,789
+16049,"Idaho County, Idaho",Idaho,2023,971,977
+16025,"Camas County, Idaho",Idaho,2023,1041,1063
+48343,"Morris County, Texas",Texas,2023,2090,1119
+37009,"Ashe County, North Carolina",North Carolina,2023,1153,1121
+42065,"Jefferson County, Pennsylvania",Pennsylvania,2023,1538,1320
+16021,"Boundary County, Idaho",Idaho,2023,1632,1326
+49037,"San Juan County, Utah",Utah,2023,1776,1346
+39071,"Highland County, Ohio",Ohio,2023,1534,1378
+39031,"Coshocton County, Ohio",Ohio,2023,1359,1414
+38019,"Cavalier County, North Dakota",North Dakota,2023,1670,1449
+26041,"Delta County, Michigan",Michigan,2023,1769,1535
+45019,"Charleston County, South Carolina",South Carolina,2023,1968,1569
+39155,"Trumbull County, Ohio",Ohio,2023,1883,1712
+51187,"Warren County, Virginia",Virginia,2023,1888,1748
+16005,"Bannock County, Idaho",Idaho,2023,1987,1788
+31063,"Frontier County, Nebraska",Nebraska,2023,2231,1788
+12127,"Volusia County, Florida",Florida,2023,2378,1875
+19099,"Jasper County, Iowa",Iowa,2023,2551,2459
+08031,"Denver County, Colorado",Colorado,2023,2632,2491
+55141,"Wood County, Wisconsin",Wisconsin,2023,2685,2554
+27145,"Stearns County, Minnesota",Minnesota,2023,2612,2625
+12035,"Flagler County, Florida",Florida,2023,2606,2662
+20143,"Ottawa County, Kansas",Kansas,2023,2576,2717
+41007,"Clatsop County, Oregon",Oregon,2023,3096,3063
+01043,"Cullman County, Alabama",Alabama,2023,514,381
+40127,"Pushmataha County, Oklahoma",Oklahoma,2023,685,400
+28077,"Lawrence County, Mississippi",Mississippi,2023,1172,556
+48351,"Newton County, Texas",Texas,2023,1257,579
+05139,"Union County, Arkansas",Arkansas,2023,772,587
+21099,"Hart County, Kentucky",Kentucky,2023,1186,612
+18073,"Jasper County, Indiana",Indiana,2023,1053,908
+37131,"Northampton County, North Carolina",North Carolina,2023,1396,1066
+18085,"Kosciusko County, Indiana",Indiana,2023,1260,1090
+13137,"Habersham County, Georgia",Georgia,2023,1508,1119
+32007,"Elko County, Nevada",Nevada,2023,1674,1120
+37189,"Watauga County, North Carolina",North Carolina,2023,1446,1166
+56041,"Uinta County, Wyoming",Wyoming,2023,1412,1346
+48115,"Dawson County, Texas",Texas,2023,1940,1350
+46039,"Deuel County, South Dakota",South Dakota,2023,1555,1415
+49021,"Iron County, Utah",Utah,2023,1431,1473
+48407,"San Jacinto County, Texas",Texas,2023,2567,1474
+48363,"Palo Pinto County, Texas",Texas,2023,3426,1497
+46077,"Kingsbury County, South Dakota",South Dakota,2023,1642,1540
+17169,"Schuyler County, Illinois",Illinois,2023,2203,1694
+42105,"Potter County, Pennsylvania",Pennsylvania,2023,1971,1779
+04013,"Maricopa County, Arizona",Arizona,2023,2005,1864
+19137,"Montgomery County, Iowa",Iowa,2023,2015,1910
+12057,"Hillsborough County, Florida",Florida,2023,3154,2106
+36089,"St. Lawrence County, New York",New York,2023,3249,2240
+55057,"Juneau County, Wisconsin",Wisconsin,2023,2522,2510
+24041,"Talbot County, Maryland",Maryland,2023,2653,2553
+27055,"Houston County, Minnesota",Minnesota,2023,2684,2574
+06009,"Calaveras County, California",California,2023,3396,2787
+55021,"Columbia County, Wisconsin",Wisconsin,2023,3891,3673
+06059,"Orange County, California",California,2023,6733,4432
+23005,"Cumberland County, Maine",Maine,2023,4601,4532
+51051,"Dickenson County, Virginia",Virginia,2023,568,478
+13269,"Taylor County, Georgia",Georgia,2023,1023,555
+28103,"Noxubee County, Mississippi",Mississippi,2023,1152,698
+51141,"Patrick County, Virginia",Virginia,2023,933,760
+47161,"Stewart County, Tennessee",Tennessee,2023,983,878
+29105,"Laclede County, Missouri",Missouri,2023,1120,913
+37027,"Caldwell County, North Carolina",North Carolina,2023,1268,920
+47003,"Bedford County, Tennessee",Tennessee,2023,1259,1305
+30015,"Chouteau County, Montana",Montana,2023,1487,1422
+21209,"Scott County, Kentucky",Kentucky,2023,1931,1424
+48313,"Madison County, Texas",Texas,2023,2513,1450
+30001,"Beaverhead County, Montana",Montana,2023,2143,1605
+26127,"Oceana County, Michigan",Michigan,2023,2061,1737
+39139,"Richland County, Ohio",Ohio,2023,2078,1846
+17079,"Jasper County, Illinois",Illinois,2023,2793,1846
+19051,"Davis County, Iowa",Iowa,2023,2316,2100
+41063,"Wallowa County, Oregon",Oregon,2023,2048,2256
+41031,"Jefferson County, Oregon",Oregon,2023,2555,2365
+24043,"Washington County, Maryland",Maryland,2023,2472,2391
+27031,"Cook County, Minnesota",Minnesota,2023,2061,2578
+55115,"Shawano County, Wisconsin",Wisconsin,2023,2560,2631
+46027,"Clay County, South Dakota",South Dakota,2023,2855,2957
+25023,"Plymouth County, Massachusetts",Massachusetts,2023,6336,6369
+34017,"Hudson County, New Jersey",New Jersey,2023,9499,9221
+22127,"Winn Parish, Louisiana",Louisiana,2023,376,265
+22049,"Jackson Parish, Louisiana",Louisiana,2023,528,314
+21189,"Owsley County, Kentucky",Kentucky,2023,824,511
+45041,"Florence County, South Carolina",South Carolina,2023,898,527
+40111,"Okmulgee County, Oklahoma",Oklahoma,2023,1042,545
+29221,"Washington County, Missouri",Missouri,2023,876,563
+05065,"Izard County, Arkansas",Arkansas,2023,808,629
+13289,"Twiggs County, Georgia",Georgia,2023,1351,694
+28025,"Clay County, Mississippi",Mississippi,2023,1053,698
+54017,"Doddridge County, West Virginia",West Virginia,2023,787,733
+28039,"George County, Mississippi",Mississippi,2023,1270,738
+47085,"Humphreys County, Tennessee",Tennessee,2023,989,828
+48045,"Briscoe County, Texas",Texas,2023,1500,843
+48179,"Gray County, Texas",Texas,2023,2568,891
+38061,"Mountrail County, North Dakota",North Dakota,2023,1551,914
+48495,"Winkler County, Texas",Texas,2023,2154,1046
+13281,"Towns County, Georgia",Georgia,2023,1188,1070
+39111,"Monroe County, Ohio",Ohio,2023,1234,1090
+37073,"Gates County, North Carolina",North Carolina,2023,1428,1118
+18051,"Gibson County, Indiana",Indiana,2023,1311,1148
+15001,"Hawaii County, Hawaii",Hawaii,2023,1530,1159
+17165,"Saline County, Illinois",Illinois,2023,1975,1166
+48387,"Red River County, Texas",Texas,2023,1768,1177
+27107,"Norman County, Minnesota",Minnesota,2023,1481,1199
+51033,"Caroline County, Virginia",Virginia,2023,1694,1316
+48463,"Uvalde County, Texas",Texas,2023,3632,1316
+17051,"Fayette County, Illinois",Illinois,2023,2256,1413
+49047,"Uintah County, Utah",Utah,2023,1457,1427
+51620,"Franklin city, Virginia",Virginia,2023,1862,1567
+29049,"Clinton County, Missouri",Missouri,2023,1776,1721
+48013,"Atascosa County, Texas",Texas,2023,2372,1888
+31067,"Gage County, Nebraska",Nebraska,2023,2530,2267
+20055,"Finney County, Kansas",Kansas,2023,2966,2347
+06051,"Mono County, California",California,2023,4364,2409
+29047,"Clay County, Missouri",Missouri,2023,2885,2679
+39093,"Lorain County, Ohio",Ohio,2023,3199,2722
+27079,"Le Sueur County, Minnesota",Minnesota,2023,3112,3130
+42001,"Adams County, Pennsylvania",Pennsylvania,2023,3691,3329
+19181,"Warren County, Iowa",Iowa,2023,3903,3553
+50001,"Addison County, Vermont",Vermont,2023,5974,4974
+56039,"Teton County, Wyoming",Wyoming,2023,4807,7342
+54051,"Marshall County, West Virginia",West Virginia,2023,820,549
+29149,"Oregon County, Missouri",Missouri,2023,668,582
+47181,"Wayne County, Tennessee",Tennessee,2023,757,595
+05071,"Johnson County, Arkansas",Arkansas,2023,834,598
+35003,"Catron County, New Mexico",New Mexico,2023,350,685
+54073,"Pleasants County, West Virginia",West Virginia,2023,791,699
+05087,"Madison County, Arkansas",Arkansas,2023,707,700
+16037,"Custer County, Idaho",Idaho,2023,1242,755
+13175,"Laurens County, Georgia",Georgia,2023,1337,781
+31117,"McPherson County, Nebraska",Nebraska,2023,1741,800
+13267,"Tattnall County, Georgia",Georgia,2023,1606,835
+13191,"McIntosh County, Georgia",Georgia,2023,1844,880
+13011,"Banks County, Georgia",Georgia,2023,1777,1228
+13235,"Pulaski County, Georgia",Georgia,2023,1414,1257
+26001,"Alcona County, Michigan",Michigan,2023,1312,1332
+51015,"Augusta County, Virginia",Virginia,2023,1387,1366
+37147,"Pitt County, North Carolina",North Carolina,2023,1761,1399
+48103,"Crane County, Texas",Texas,2023,1625,1556
+08041,"El Paso County, Colorado",Colorado,2023,1828,1611
+20137,"Norton County, Kansas",Kansas,2023,1418,1704
+20115,"Marion County, Kansas",Kansas,2023,2140,1801
+30057,"Madison County, Montana",Montana,2023,1773,1813
+08045,"Garfield County, Colorado",Colorado,2023,2206,1860
+26021,"Berrien County, Michigan",Michigan,2023,2447,2224
+42007,"Beaver County, Pennsylvania",Pennsylvania,2023,2819,2453
+17201,"Winnebago County, Illinois",Illinois,2023,4106,3422
+39159,"Union County, Ohio",Ohio,2023,3905,3641
+48339,"Montgomery County, Texas",Texas,2023,5996,3848
+19153,"Polk County, Iowa",Iowa,2023,4498,4033
+02188,"Northwest Arctic Borough, Alaska",Alaska,2023,199,199
+40001,"Adair County, Oklahoma",Oklahoma,2023,745,436
+05037,"Cross County, Arkansas",Arkansas,2023,636,501
+05063,"Independence County, Arkansas",Arkansas,2023,698,614
+22061,"Lincoln Parish, Louisiana",Louisiana,2023,1344,617
+21001,"Adair County, Kentucky",Kentucky,2023,1192,717
+18179,"Wells County, Indiana",Indiana,2023,1002,814
+48297,"Live Oak County, Texas",Texas,2023,1951,861
+32015,"Lander County, Nevada",Nevada,2023,1416,1009
+28137,"Tate County, Mississippi",Mississippi,2023,1545,1017
+35045,"San Juan County, New Mexico",New Mexico,2023,1371,1024
+45057,"Lancaster County, South Carolina",South Carolina,2023,1751,1030
+47127,"Moore County, Tennessee",Tennessee,2023,1693,1031
+29225,"Webster County, Missouri",Missouri,2023,1234,1074
+37069,"Franklin County, North Carolina",North Carolina,2023,1928,1312
+51181,"Surry County, Virginia",Virginia,2023,1647,1359
+20107,"Linn County, Kansas",Kansas,2023,1847,1732
+48503,"Young County, Texas",Texas,2023,2525,1744
+55113,"Sawyer County, Wisconsin",Wisconsin,2023,1977,1786
+39063,"Hancock County, Ohio",Ohio,2023,2050,1862
+19105,"Jones County, Iowa",Iowa,2023,2598,2103
+48055,"Caldwell County, Texas",Texas,2023,3511,2274
+26163,"Wayne County, Michigan",Michigan,2023,3315,2286
+42109,"Snyder County, Pennsylvania",Pennsylvania,2023,2473,2329
+51085,"Hanover County, Virginia",Virginia,2023,2502,2513
+36017,"Chenango County, New York",New York,2023,3639,2580
+06065,"Riverside County, California",California,2023,4601,3096
+36063,"Niagara County, New York",New York,2023,4418,3590
+41003,"Benton County, Oregon",Oregon,2023,4727,4692
+01023,"Choctaw County, Alabama",Alabama,2023,218,199
+01127,"Walker County, Alabama",Alabama,2023,430,277
+01107,"Pickens County, Alabama",Alabama,2023,447,319
+54045,"Logan County, West Virginia",West Virginia,2023,775,497
+05011,"Bradley County, Arkansas",Arkansas,2023,588,520
+05069,"Jefferson County, Arkansas",Arkansas,2023,847,556
+21065,"Estill County, Kentucky",Kentucky,2023,1085,580
+40117,"Pawnee County, Oklahoma",Oklahoma,2023,1230,590
+40011,"Blaine County, Oklahoma",Oklahoma,2023,958,593
+48197,"Hardeman County, Texas",Texas,2023,1831,743
+48207,"Haskell County, Texas",Texas,2023,1780,807
+17025,"Clay County, Illinois",Illinois,2023,1902,809
+31103,"Keya Paha County, Nebraska",Nebraska,2023,2079,896
+37191,"Wayne County, North Carolina",North Carolina,2023,1373,935
+18031,"Decatur County, Indiana",Indiana,2023,1218,1079
+21187,"Owen County, Kentucky",Kentucky,2023,1348,1088
+29135,"Moniteau County, Missouri",Missouri,2023,1260,1138
+26131,"Ontonagon County, Michigan",Michigan,2023,1359,1191
+31161,"Sheridan County, Nebraska",Nebraska,2023,1776,1200
+16079,"Shoshone County, Idaho",Idaho,2023,1265,1282
+28033,"DeSoto County, Mississippi",Mississippi,2023,1692,1322
+31173,"Thurston County, Nebraska",Nebraska,2023,1958,1356
+48217,"Hill County, Texas",Texas,2023,2671,1443
+19159,"Ringgold County, Iowa",Iowa,2023,2246,1633
+31021,"Burt County, Nebraska",Nebraska,2023,1915,1715
+32510,"Carson City, Nevada",Nevada,2023,1685,1971
+27119,"Polk County, Minnesota",Minnesota,2023,2222,1984
+48481,"Wharton County, Texas",Texas,2023,3445,2333
+20059,"Franklin County, Kansas",Kansas,2023,2901,2450
+51157,"Rappahannock County, Virginia",Virginia,2023,3018,2651
+31159,"Seward County, Nebraska",Nebraska,2023,2745,2841
+08117,"Summit County, Colorado",Colorado,2023,2527,2951
+53063,"Spokane County, Washington",Washington,2023,3248,3092
+53037,"Kittitas County, Washington",Washington,2023,3293,3201
+55087,"Outagamie County, Wisconsin",Wisconsin,2023,3603,3543
+26125,"Oakland County, Michigan",Michigan,2023,4430,3893
+05111,"Poinsett County, Arkansas",Arkansas,2023,645,450
+21063,"Elliott County, Kentucky",Kentucky,2023,822,494
+21153,"Magoffin County, Kentucky",Kentucky,2023,1161,513
+21121,"Knox County, Kentucky",Kentucky,2023,1245,569
+40095,"Marshall County, Oklahoma",Oklahoma,2023,1206,612
+29211,"Sullivan County, Missouri",Missouri,2023,911,679
+48427,"Starr County, Texas",Texas,2023,2781,860
+48249,"Jim Wells County, Texas",Texas,2023,2546,866
+47053,"Gibson County, Tennessee",Tennessee,2023,1178,890
+28139,"Tippah County, Mississippi",Mississippi,2023,993,897
+29079,"Grundy County, Missouri",Missouri,2023,1133,1060
+21157,"Marshall County, Kentucky",Kentucky,2023,1376,1097
+51091,"Highland County, Virginia",Virginia,2023,1105,1103
+39053,"Gallia County, Ohio",Ohio,2023,1619,1152
+17185,"Wabash County, Illinois",Illinois,2023,1942,1189
+12065,"Jefferson County, Florida",Florida,2023,1437,1287
+26157,"Tuscola County, Michigan",Michigan,2023,1841,1663
+19085,"Harrison County, Iowa",Iowa,2023,2286,2100
+27093,"Meeker County, Minnesota",Minnesota,2023,2162,2153
+51145,"Powhatan County, Virginia",Virginia,2023,2360,2578
+27085,"McLeod County, Minnesota",Minnesota,2023,2765,2613
+55047,"Green Lake County, Wisconsin",Wisconsin,2023,2721,2693
+36007,"Broome County, New York",New York,2023,4026,3546
+34023,"Middlesex County, New Jersey",New Jersey,2023,9783,9489
+01087,"Macon County, Alabama",Alabama,2023,546,406
+40075,"Kiowa County, Oklahoma",Oklahoma,2023,737,419
+45087,"Union County, South Carolina",South Carolina,2023,780,463
+13001,"Appling County, Georgia",Georgia,2023,1058,530
+54019,"Fayette County, West Virginia",West Virginia,2023,866,539
+47087,"Jackson County, Tennessee",Tennessee,2023,874,574
+38037,"Grant County, North Dakota",North Dakota,2023,1172,634
+45009,"Bamberg County, South Carolina",South Carolina,2023,999,654
+51117,"Mecklenburg County, Virginia",Virginia,2023,1030,663
+28057,"Itawamba County, Mississippi",Mississippi,2023,912,685
+47063,"Hamblen County, Tennessee",Tennessee,2023,925,778
+29041,"Chariton County, Missouri",Missouri,2023,956,854
+13287,"Turner County, Georgia",Georgia,2023,1384,897
+13065,"Clinch County, Georgia",Georgia,2023,1468,918
+37161,"Rutherford County, North Carolina",North Carolina,2023,1162,941
+31057,"Dundy County, Nebraska",Nebraska,2023,924,987
+37033,"Caswell County, North Carolina",North Carolina,2023,1041,1004
+46129,"Walworth County, South Dakota",South Dakota,2023,2299,1121
+18027,"Daviess County, Indiana",Indiana,2023,1335,1183
+26119,"Montmorency County, Michigan",Michigan,2023,1403,1190
+13293,"Upson County, Georgia",Georgia,2023,1455,1197
+27001,"Aitkin County, Minnesota",Minnesota,2023,1415,1279
+28071,"Lafayette County, Mississippi",Mississippi,2023,2073,1346
+12083,"Marion County, Florida",Florida,2023,1846,1443
+48177,"Gonzales County, Texas",Texas,2023,2531,1551
+48333,"Mills County, Texas",Texas,2023,2187,1553
+20119,"Meade County, Kansas",Kansas,2023,2200,1717
+19071,"Fremont County, Iowa",Iowa,2023,2074,1755
+27051,"Grant County, Minnesota",Minnesota,2023,1523,1814
+27083,"Lyon County, Minnesota",Minnesota,2023,2160,1850
+13231,"Pike County, Georgia",Georgia,2023,2606,2113
+53075,"Whitman County, Washington",Washington,2023,2759,2274
+27039,"Dodge County, Minnesota",Minnesota,2023,3053,2644
+55053,"Jackson County, Wisconsin",Wisconsin,2023,2636,2726
+27131,"Rice County, Minnesota",Minnesota,2023,3007,2738
+48167,"Galveston County, Texas",Texas,2023,5019,3213
+41017,"Deschutes County, Oregon",Oregon,2023,3622,3766
+06075,"San Francisco County, California",California,2023,10001,5561
+34003,"Bergen County, New Jersey",New Jersey,2023,10001,10001
+21025,"Breathitt County, Kentucky",Kentucky,2023,934,428
+54021,"Gilmer County, West Virginia",West Virginia,2023,293,462
+45061,"Lee County, South Carolina",South Carolina,2023,781,495
+21013,"Bell County, Kentucky",Kentucky,2023,1048,552
+28053,"Humphreys County, Mississippi",Mississippi,2023,1561,611
+45029,"Colleton County, South Carolina",South Carolina,2023,1220,657
+40125,"Pottawatomie County, Oklahoma",Oklahoma,2023,1330,737
+21007,"Ballard County, Kentucky",Kentucky,2023,1243,782
+51035,"Carroll County, Virginia",Virginia,2023,979,804
+48447,"Throckmorton County, Texas",Texas,2023,1359,897
+29109,"Lawrence County, Missouri",Missouri,2023,997,918
+51191,"Washington County, Virginia",Virginia,2023,1173,929
+40113,"Osage County, Oklahoma",Oklahoma,2023,1569,961
+38091,"Steele County, North Dakota",North Dakota,2023,1293,1033
+18115,"Ohio County, Indiana",Indiana,2023,1206,1101
+51175,"Southampton County, Virginia",Virginia,2023,1494,1241
+46043,"Douglas County, South Dakota",South Dakota,2023,1705,1355
+27047,"Freeborn County, Minnesota",Minnesota,2023,1745,1758
+42113,"Sullivan County, Pennsylvania",Pennsylvania,2023,2090,1845
+17077,"Jackson County, Illinois",Illinois,2023,2939,1902
+20093,"Kearny County, Kansas",Kansas,2023,1769,1981
+46057,"Hamlin County, South Dakota",South Dakota,2023,2397,2064
+51149,"Prince George County, Virginia",Virginia,2023,1986,2241
+48497,"Wise County, Texas",Texas,2023,3962,2501
+48139,"Ellis County, Texas",Texas,2023,5264,3149
+27037,"Dakota County, Minnesota",Minnesota,2023,3616,3597
+25021,"Norfolk County, Massachusetts",Massachusetts,2023,7065,7114
+47173,"Union County, Tennessee",Tennessee,2023,718,722
+40101,"Muskogee County, Oklahoma",Oklahoma,2023,1271,738
+51169,"Scott County, Virginia",Virginia,2023,949,760
+28109,"Pearl River County, Mississippi",Mississippi,2023,1457,893
+08101,"Pueblo County, Colorado",Colorado,2023,1470,1195
+48253,"Jones County, Texas",Texas,2023,1685,1289
+20013,"Brown County, Kansas",Kansas,2023,1546,1292
+48063,"Camp County, Texas",Texas,2023,2625,1324
+19141,"O'Brien County, Iowa",Iowa,2023,1777,1368
+49041,"Sevier County, Utah",Utah,2023,1595,1415
+27149,"Stevens County, Minnesota",Minnesota,2023,1483,1429
+42083,"McKean County, Pennsylvania",Pennsylvania,2023,1818,1450
+27087,"Mahnomen County, Minnesota",Minnesota,2023,1410,1452
+13095,"Dougherty County, Georgia",Georgia,2023,2118,1452
+48501,"Yoakum County, Texas",Texas,2023,2975,1520
+13085,"Dawson County, Georgia",Georgia,2023,2489,1621
+41049,"Morrow County, Oregon",Oregon,2023,2027,1683
+51119,"Middlesex County, Virginia",Virginia,2023,1578,1810
+13057,"Cherokee County, Georgia",Georgia,2023,2966,1909
+19187,"Webster County, Iowa",Iowa,2023,2153,1940
+17035,"Cumberland County, Illinois",Illinois,2023,2025,2103
+26115,"Monroe County, Michigan",Michigan,2023,2585,2324
+19139,"Muscatine County, Iowa",Iowa,2023,2779,2493
+20051,"Ellis County, Kansas",Kansas,2023,2620,2500
+08107,"Routt County, Colorado",Colorado,2023,2409,2777
+17031,"Cook County, Illinois",Illinois,2023,6346,5496
+06081,"San Mateo County, California",California,2023,10001,6267
+02164,"Lake and Peninsula Borough, Alaska",Alaska,2023,0,0
+22113,"Vermilion Parish, Louisiana",Louisiana,2023,1028,260
+21181,"Nicholas County, Kentucky",Kentucky,2023,919,430
+22069,"Natchitoches Parish, Louisiana",Louisiana,2023,1075,467
+21053,"Clinton County, Kentucky",Kentucky,2023,1063,497
+04012,"La Paz County, Arizona",Arizona,2023,1139,660
+29017,"Bollinger County, Missouri",Missouri,2023,1027,666
+21061,"Edmonson County, Kentucky",Kentucky,2023,1038,682
+21041,"Carroll County, Kentucky",Kentucky,2023,1184,791
+47041,"DeKalb County, Tennessee",Tennessee,2023,693,834
+16007,"Bear Lake County, Idaho",Idaho,2023,1237,927
+27071,"Koochiching County, Minnesota",Minnesota,2023,1242,1057
+20073,"Greenwood County, Kansas",Kansas,2023,1727,1152
+48487,"Wilbarger County, Texas",Texas,2023,2152,1175
+38039,"Griggs County, North Dakota",North Dakota,2023,1125,1178
+26071,"Iron County, Michigan",Michigan,2023,1780,1247
+18099,"Marshall County, Indiana",Indiana,2023,1243,1294
+46063,"Harding County, South Dakota",South Dakota,2023,1480,1438
+02130,"Ketchikan Gateway Borough, Alaska",Alaska,2023,2678,2389
+47037,"Davidson County, Tennessee",Tennessee,2023,2376,2420
+12015,"Charlotte County, Florida",Florida,2023,2706,2449
+38035,"Grand Forks County, North Dakota",North Dakota,2023,2881,2517
+24029,"Kent County, Maryland",Maryland,2023,2793,3094
+48121,"Denton County, Texas",Texas,2023,7326,5820
+38085,"Sioux County, North Dakota",North Dakota,2023,1929,269
+47067,"Hancock County, Tennessee",Tennessee,2023,876,436
+47013,"Campbell County, Tennessee",Tennessee,2023,812,520
+21127,"Lawrence County, Kentucky",Kentucky,2023,889,552
+08021,"Conejos County, Colorado",Colorado,2023,851,583
+48345,"Motley County, Texas",Texas,2023,1518,593
+13197,"Marion County, Georgia",Georgia,2023,1120,631
+47183,"Weakley County, Tennessee",Tennessee,2023,779,660
+13019,"Berrien County, Georgia",Georgia,2023,1329,798
+40045,"Ellis County, Oklahoma",Oklahoma,2023,1135,834
+29023,"Butler County, Missouri",Missouri,2023,1015,876
+13045,"Carroll County, Georgia",Georgia,2023,1630,946
+39121,"Noble County, Ohio",Ohio,2023,1365,1055
+47015,"Cannon County, Tennessee",Tennessee,2023,1114,1075
+31129,"Nuckolls County, Nebraska",Nebraska,2023,1270,1116
+56003,"Big Horn County, Wyoming",Wyoming,2023,1175,1127
+21101,"Henderson County, Kentucky",Kentucky,2023,1734,1155
+48145,"Falls County, Texas",Texas,2023,1822,1155
+31077,"Greeley County, Nebraska",Nebraska,2023,1548,1287
+22089,"St. Charles Parish, Louisiana",Louisiana,2023,1564,1333
+31107,"Knox County, Nebraska",Nebraska,2023,1488,1382
+17095,"Knox County, Illinois",Illinois,2023,2257,1807
+06089,"Shasta County, California",California,2023,2669,1935
+48409,"San Patricio County, Texas",Texas,2023,3563,2023
+31081,"Hamilton County, Nebraska",Nebraska,2023,2398,2093
+16001,"Ada County, Idaho",Idaho,2023,2607,2725
+48477,"Washington County, Texas",Texas,2023,3728,2730
+48053,"Burnet County, Texas",Texas,2023,4360,2854
+48261,"Kenedy County, Texas",Texas,2023,0,0
+22101,"St. Mary Parish, Louisiana",Louisiana,2023,614,395
+45059,"Laurens County, South Carolina",South Carolina,2023,980,488
+12133,"Washington County, Florida",Florida,2023,1116,596
+48505,"Zapata County, Texas",Texas,2023,1886,676
+18045,"Fountain County, Indiana",Indiana,2023,909,683
+47083,"Houston County, Tennessee",Tennessee,2023,986,727
+38043,"Kidder County, North Dakota",North Dakota,2023,1099,830
+18135,"Randolph County, Indiana",Indiana,2023,871,895
+21009,"Barren County, Kentucky",Kentucky,2023,1359,989
+37023,"Burke County, North Carolina",North Carolina,2023,1326,1010
+17059,"Gallatin County, Illinois",Illinois,2023,1429,1044
+37017,"Bladen County, North Carolina",North Carolina,2023,1328,1051
+20021,"Cherokee County, Kansas",Kansas,2023,1342,1108
+20203,"Wichita County, Kansas",Kansas,2023,2050,1179
+56045,"Weston County, Wyoming",Wyoming,2023,1585,1209
+20207,"Woodson County, Kansas",Kansas,2023,1849,1268
+42051,"Fayette County, Pennsylvania",Pennsylvania,2023,1737,1371
+48323,"Maverick County, Texas",Texas,2023,3181,1450
+16053,"Jerome County, Idaho",Idaho,2023,1625,1621
+31175,"Valley County, Nebraska",Nebraska,2023,2081,1745
+26103,"Marquette County, Michigan",Michigan,2023,2280,1767
+48349,"Navarro County, Texas",Texas,2023,2465,1818
+37067,"Forsyth County, North Carolina",North Carolina,2023,1988,1821
+17067,"Hancock County, Illinois",Illinois,2023,2086,1949
+27143,"Sibley County, Minnesota",Minnesota,2023,2451,2248
+38089,"Stark County, North Dakota",North Dakota,2023,2504,2259
+31001,"Adams County, Nebraska",Nebraska,2023,2774,2559
+12071,"Lee County, Florida",Florida,2023,2773,2593
+53045,"Mason County, Washington",Washington,2023,2834,2830
+46099,"Minnehaha County, South Dakota",South Dakota,2023,3151,2981
+19169,"Story County, Iowa",Iowa,2023,3740,3394
+50017,"Orange County, Vermont",Vermont,2023,4503,4190
+25011,"Franklin County, Massachusetts",Massachusetts,2023,4542,4672
+51153,"Prince William County, Virginia",Virginia,2023,4892,4978
+25027,"Worcester County, Massachusetts",Massachusetts,2023,5272,5046
+09170,"South Central Connecticut Planning Region, Connecticut",Connecticut,2023,6727,6576
+05103,"Ouachita County, Arkansas",Arkansas,2023,568,417
+54099,"Wayne County, West Virginia",West Virginia,2023,876,475
+05017,"Chicot County, Arkansas",Arkansas,2023,507,487
+05149,"Yell County, Arkansas",Arkansas,2023,875,590
+18171,"Warren County, Indiana",Indiana,2023,832,800
+54035,"Jackson County, West Virginia",West Virginia,2023,858,882
+29175,"Randolph County, Missouri",Missouri,2023,1331,954
+31169,"Thayer County, Nebraska",Nebraska,2023,1405,1060
+13119,"Franklin County, Georgia",Georgia,2023,1406,1061
+47113,"Madison County, Tennessee",Tennessee,2023,1212,1095
+48169,"Garza County, Texas",Texas,2023,3657,1171
+48399,"Runnels County, Texas",Texas,2023,2184,1175
+37115,"Madison County, North Carolina",North Carolina,2023,1412,1207
+40087,"McClain County, Oklahoma",Oklahoma,2023,2283,1238
+16011,"Bingham County, Idaho",Idaho,2023,1467,1255
+31123,"Morrill County, Nebraska",Nebraska,2023,2000,1258
+08087,"Morgan County, Colorado",Colorado,2023,1805,1273
+51115,"Mathews County, Virginia",Virginia,2023,1524,1423
+12113,"Santa Rosa County, Florida",Florida,2023,1980,1461
+05007,"Benton County, Arkansas",Arkansas,2023,1838,1477
+48095,"Concho County, Texas",Texas,2023,2233,1500
+17157,"Randolph County, Illinois",Illinois,2023,2263,1585
+17021,"Christian County, Illinois",Illinois,2023,2070,1588
+17151,"Pope County, Illinois",Illinois,2023,1755,1637
+16085,"Valley County, Idaho",Idaho,2023,1803,1710
+31035,"Clay County, Nebraska",Nebraska,2023,2090,1763
+20209,"Wyandotte County, Kansas",Kansas,2023,2517,1834
+51099,"King George County, Virginia",Virginia,2023,2314,1842
+19131,"Mitchell County, Iowa",Iowa,2023,1869,1959
+41013,"Crook County, Oregon",Oregon,2023,2841,2319
+51775,"Salem city, Virginia",Virginia,2023,2184,2322
+31167,"Stanton County, Nebraska",Nebraska,2023,2453,2347
+20179,"Sheridan County, Kansas",Kansas,2023,1950,2406
+48149,"Fayette County, Texas",Texas,2023,2997,2525
+48015,"Austin County, Texas",Texas,2023,3895,2771
+26093,"Livingston County, Michigan",Michigan,2023,3398,2949
+29165,"Platte County, Missouri",Missouri,2023,3429,3202
+39035,"Cuyahoga County, Ohio",Ohio,2023,4055,3453
+44007,"Providence County, Rhode Island",Rhode Island,2023,4722,4531
+36083,"Rensselaer County, New York",New York,2023,5767,4673
+44003,"Kent County, Rhode Island",Rhode Island,2023,4957,4778
+48491,"Williamson County, Texas",Texas,2023,7477,6101
+15005,"Kalawao County, Hawaii",Hawaii,2023,0,0
+45033,"Dillon County, South Carolina",South Carolina,2023,600,356
+01049,"DeKalb County, Alabama",Alabama,2023,527,399
+40055,"Greer County, Oklahoma",Oklahoma,2023,741,468
+28013,"Calhoun County, Mississippi",Mississippi,2023,943,468
+54083,"Randolph County, West Virginia",West Virginia,2023,608,499
+29223,"Wayne County, Missouri",Missouri,2023,646,532
+40081,"Lincoln County, Oklahoma",Oklahoma,2023,1102,621
+40013,"Bryan County, Oklahoma",Oklahoma,2023,1320,747
+13193,"Macon County, Georgia",Georgia,2023,1425,848
+29217,"Vernon County, Missouri",Missouri,2023,999,925
+28075,"Lauderdale County, Mississippi",Mississippi,2023,1437,931
+28059,"Jackson County, Mississippi",Mississippi,2023,1567,953
+13123,"Gilmer County, Georgia",Georgia,2023,1153,955
+18107,"Montgomery County, Indiana",Indiana,2023,1044,1053
+18159,"Tipton County, Indiana",Indiana,2023,1023,1141
+17061,"Greene County, Illinois",Illinois,2023,1820,1333
+48369,"Parmer County, Texas",Texas,2023,3584,1452
+48051,"Burleson County, Texas",Texas,2023,2498,1467
+29101,"Johnson County, Missouri",Missouri,2023,1549,1470
+20135,"Ness County, Kansas",Kansas,2023,1813,1640
+38055,"McLean County, North Dakota",North Dakota,2023,1833,1671
+19001,"Adair County, Iowa",Iowa,2023,1958,1759
+39137,"Putnam County, Ohio",Ohio,2023,1923,1809
+06043,"Mariposa County, California",California,2023,2798,1893
+47065,"Hamilton County, Tennessee",Tennessee,2023,1878,1905
+38093,"Stutsman County, North Dakota",North Dakota,2023,2365,1909
+48089,"Colorado County, Texas",Texas,2023,2343,1941
+48165,"Gaines County, Texas",Texas,2023,3952,2411
+02170,"Matanuska-Susitna Borough, Alaska",Alaska,2023,3768,2763
+32005,"Douglas County, Nevada",Nevada,2023,2549,2839
+19129,"Mills County, Iowa",Iowa,2023,3341,3320
+27139,"Scott County, Minnesota",Minnesota,2023,4271,3961
+19049,"Dallas County, Iowa",Iowa,2023,5168,4016
+48259,"Kendall County, Texas",Texas,2023,6813,4659
+50015,"Lamoille County, Vermont",Vermont,2023,4735,4836
+51107,"Loudoun County, Virginia",Virginia,2023,6296,5703
+24027,"Howard County, Maryland",Maryland,2023,6821,6795
+40061,"Haskell County, Oklahoma",Oklahoma,2023,751,433
+08111,"San Juan County, Colorado",Colorado,2023,1596,600
+45003,"Aiken County, South Carolina",South Carolina,2023,987,667
+45055,"Kershaw County, South Carolina",South Carolina,2023,1113,674
+47155,"Sevier County, Tennessee",Tennessee,2023,900,708
+13209,"Montgomery County, Georgia",Georgia,2023,1398,810
+28035,"Forrest County, Mississippi",Mississippi,2023,1616,863
+48455,"Trinity County, Texas",Texas,2023,1713,997
+29187,"St. Francois County, Missouri",Missouri,2023,1245,1041
+26095,"Luce County, Michigan",Michigan,2023,1181,1052
+19133,"Monona County, Iowa",Iowa,2023,1629,1204
+30097,"Sweet Grass County, Montana",Montana,2023,1918,1328
+41021,"Gilliam County, Oregon",Oregon,2023,1825,1346
+48331,"Milam County, Texas",Texas,2023,2400,1353
+51163,"Rockbridge County, Virginia",Virginia,2023,1483,1365
+18003,"Allen County, Indiana",Indiana,2023,1592,1492
+47125,"Montgomery County, Tennessee",Tennessee,2023,1715,1550
+06107,"Tulare County, California",California,2023,2469,1621
+48077,"Clay County, Texas",Texas,2023,2707,1647
+46019,"Butte County, South Dakota",South Dakota,2023,2636,1658
+06047,"Merced County, California",California,2023,2803,1891
+26009,"Antrim County, Michigan",Michigan,2023,2151,1918
+06063,"Plumas County, California",California,2023,2505,2151
+51840,"Winchester city, Virginia",Virginia,2023,2595,2403
+06045,"Mendocino County, California",California,2023,3867,2847
+51095,"James City County, Virginia",Virginia,2023,2680,3009
+24037,"St. Mary's County, Maryland",Maryland,2023,3446,3263
+08014,"Broomfield County, Colorado",Colorado,2023,4004,3541
+12087,"Monroe County, Florida",Florida,2023,4291,3585
+53061,"Snohomish County, Washington",Washington,2023,5200,4915
+09190,"Western Connecticut Planning Region, Connecticut",Connecticut,2023,9330,8954
+01075,"Lamar County, Alabama",Alabama,2023,389,199
+01093,"Marion County, Alabama",Alabama,2023,400,253
+22077,"Pointe Coupee Parish, Louisiana",Louisiana,2023,730,339
+21231,"Wayne County, Kentucky",Kentucky,2023,975,508
+47109,"McNairy County, Tennessee",Tennessee,2023,640,557
+45051,"Horry County, South Carolina",South Carolina,2023,956,756
+17069,"Hardin County, Illinois",Illinois,2023,1278,762
+01003,"Baldwin County, Alabama",Alabama,2023,945,770
+31113,"Logan County, Nebraska",Nebraska,2023,2528,1125
+39131,"Pike County, Ohio",Ohio,2023,1357,1156
+48483,"Wheeler County, Texas",Texas,2023,2602,1187
+48255,"Karnes County, Texas",Texas,2023,1676,1188
+20159,"Rice County, Kansas",Kansas,2023,1935,1236
+48173,"Glasscock County, Texas",Texas,2023,0,1270
+13285,"Troup County, Georgia",Georgia,2023,2125,1293
+46105,"Perkins County, South Dakota",South Dakota,2023,1489,1352
+21073,"Franklin County, Kentucky",Kentucky,2023,1857,1364
+48175,"Goliad County, Texas",Texas,2023,2686,1381
+13185,"Lowndes County, Georgia",Georgia,2023,1791,1409
+20029,"Cloud County, Kansas",Kansas,2023,1925,1446
+08079,"Mineral County, Colorado",Colorado,2023,1404,1568
+41015,"Curry County, Oregon",Oregon,2023,2264,1661
+19123,"Mahaska County, Iowa",Iowa,2023,2137,1748
+49003,"Box Elder County, Utah",Utah,2023,1842,1792
+55003,"Ashland County, Wisconsin",Wisconsin,2023,2547,2063
+55069,"Lincoln County, Wisconsin",Wisconsin,2023,2593,2457
+48329,"Midland County, Texas",Texas,2023,4517,2613
+24015,"Cecil County, Maryland",Maryland,2023,3123,2900
+17143,"Peoria County, Illinois",Illinois,2023,3721,2944
+48381,"Randall County, Texas",Texas,2023,3877,3157
+41041,"Lincoln County, Oregon",Oregon,2023,3265,3191
+09150,"Northeastern Connecticut Planning Region, Connecticut",Connecticut,2023,4371,4275
+51683,"Manassas city, Virginia",Virginia,2023,4741,4910
+34021,"Mercer County, New Jersey",New Jersey,2023,8934,8572
+21119,"Knott County, Kentucky",Kentucky,2023,1155,356
+35037,"Quay County, New Mexico",New Mexico,2023,664,449
+37015,"Bertie County, North Carolina",North Carolina,2023,983,532
+28009,"Benton County, Mississippi",Mississippi,2023,769,588
+37155,"Robeson County, North Carolina",North Carolina,2023,1134,661
+05025,"Cleveland County, Arkansas",Arkansas,2023,776,675
+28065,"Jefferson Davis County, Mississippi",Mississippi,2023,762,686
+29111,"Lewis County, Missouri",Missouri,2023,1054,737
+28027,"Coahoma County, Mississippi",Mississippi,2023,1607,789
+13099,"Early County, Georgia",Georgia,2023,1352,877
+51021,"Bland County, Virginia",Virginia,2023,831,892
+13079,"Crawford County, Georgia",Georgia,2023,1569,1013
+13047,"Catoosa County, Georgia",Georgia,2023,1605,1133
+21093,"Hardin County, Kentucky",Kentucky,2023,1643,1197
+20125,"Montgomery County, Kansas",Kansas,2023,1980,1215
+20099,"Labette County, Kansas",Kansas,2023,1978,1266
+56013,"Fremont County, Wyoming",Wyoming,2023,1706,1457
+20071,"Greeley County, Kansas",Kansas,2023,3022,1468
+48215,"Hidalgo County, Texas",Texas,2023,3243,1515
+20017,"Chase County, Kansas",Kansas,2023,1971,1533
+48293,"Limestone County, Texas",Texas,2023,2406,1638
+40109,"Oklahoma County, Oklahoma",Oklahoma,2023,2306,1660
+56021,"Laramie County, Wyoming",Wyoming,2023,1916,1836
+29043,"Christian County, Missouri",Missouri,2023,1890,1838
+55067,"Langlade County, Wisconsin",Wisconsin,2023,1981,1922
+47165,"Sumner County, Tennessee",Tennessee,2023,1952,1926
+21239,"Woodford County, Kentucky",Kentucky,2023,2055,1941
+51093,"Isle of Wight County, Virginia",Virginia,2023,2522,2090
+32031,"Washoe County, Nevada",Nevada,2023,2319,2248
+13059,"Clarke County, Georgia",Georgia,2023,2443,2444
+12011,"Broward County, Florida",Florida,2023,4168,2803
+41029,"Jackson County, Oregon",Oregon,2023,3078,2954
+39085,"Lake County, Ohio",Ohio,2023,3466,3289
+39055,"Geauga County, Ohio",Ohio,2023,4693,4268
+36059,"Nassau County, New York",New York,2023,10001,10001
+22115,"Vernon Parish, Louisiana",Louisiana,2023,1224,305
+18101,"Martin County, Indiana",Indiana,2023,961,640
+47029,"Cocke County, Tennessee",Tennessee,2023,1040,780
+31133,"Pawnee County, Nebraska",Nebraska,2023,1860,878
+29173,"Ralls County, Missouri",Missouri,2023,1291,1033
+28049,"Hinds County, Mississippi",Mississippi,2023,1602,1091
+29147,"Nodaway County, Missouri",Missouri,2023,1434,1245
+13195,"Madison County, Georgia",Georgia,2023,1822,1269
+21103,"Henry County, Kentucky",Kentucky,2023,1659,1274
+37141,"Pender County, North Carolina",North Carolina,2023,2105,1395
+56009,"Converse County, Wyoming",Wyoming,2023,1604,1493
+41025,"Harney County, Oregon",Oregon,2023,1986,1583
+28089,"Madison County, Mississippi",Mississippi,2023,2184,1812
+27121,"Pope County, Minnesota",Minnesota,2023,1913,1917
+26105,"Mason County, Michigan",Michigan,2023,2283,2104
+51121,"Montgomery County, Virginia",Virginia,2023,2221,2108
+46101,"Moody County, South Dakota",South Dakota,2023,2265,2200
+51161,"Roanoke County, Virginia",Virginia,2023,2336,2344
+23027,"Waldo County, Maine",Maine,2023,2649,2499
+55077,"Marquette County, Wisconsin",Wisconsin,2023,2697,2733
+41043,"Linn County, Oregon",Oregon,2023,3169,3040
+48031,"Blanco County, Texas",Texas,2023,5390,3175
+55097,"Portage County, Wisconsin",Wisconsin,2023,3520,3214
+24035,"Queen Anne's County, Maryland",Maryland,2023,3469,3599
+48079,"Cochran County, Texas",Texas,2023,1518,578
+48069,"Castro County, Texas",Texas,2023,1816,799
+13213,"Murray County, Georgia",Georgia,2023,1325,823
+13155,"Irwin County, Georgia",Georgia,2023,1361,925
+47171,"Unicoi County, Tennessee",Tennessee,2023,977,927
+12121,"Suwannee County, Florida",Florida,2023,1425,1000
+39105,"Meigs County, Ohio",Ohio,2023,1211,1036
+16071,"Oneida County, Idaho",Idaho,2023,1238,1068
+29161,"Phelps County, Missouri",Missouri,2023,1319,1135
+21077,"Gallatin County, Kentucky",Kentucky,2023,1562,1195
+13257,"Stephens County, Georgia",Georgia,2023,1482,1206
+56011,"Crook County, Wyoming",Wyoming,2023,1774,1259
+48273,"Kleberg County, Texas",Texas,2023,3753,1278
+32019,"Lyon County, Nevada",Nevada,2023,1684,1305
+13021,"Bibb County, Georgia",Georgia,2023,2173,1311
+17033,"Crawford County, Illinois",Illinois,2023,2113,1452
+19195,"Worth County, Iowa",Iowa,2023,1502,1563
+32001,"Churchill County, Nevada",Nevada,2023,1729,1605
+26117,"Montcalm County, Michigan",Michigan,2023,1977,1703
+19053,"Decatur County, Iowa",Iowa,2023,1914,1759
+48377,"Presidio County, Texas",Texas,2023,2235,1830
+39107,"Mercer County, Ohio",Ohio,2023,2232,2272
+27017,"Carlton County, Minnesota",Minnesota,2023,2805,2522
+08069,"Larimer County, Colorado",Colorado,2023,2695,2576
+55071,"Manitowoc County, Wisconsin",Wisconsin,2023,2663,2656
+27109,"Olmsted County, Minnesota",Minnesota,2023,3430,3156
+08097,"Pitkin County, Colorado",Colorado,2023,3915,5294
+22009,"Avoyelles Parish, Louisiana",Louisiana,2023,370,199
+08071,"Las Animas County, Colorado",Colorado,2023,597,383
+35023,"Hidalgo County, New Mexico",New Mexico,2023,554,512
+13309,"Wheeler County, Georgia",Georgia,2023,610,555
+21207,"Russell County, Kentucky",Kentucky,2023,1151,589
+35053,"Socorro County, New Mexico",New Mexico,2023,1303,662
+21087,"Green County, Kentucky",Kentucky,2023,746,765
+05031,"Craighead County, Arkansas",Arkansas,2023,1223,874
+51640,"Galax city, Virginia",Virginia,2023,917,1037
+48371,"Pecos County, Texas",Texas,2023,2507,1051
+19185,"Wayne County, Iowa",Iowa,2023,1644,1195
+29159,"Pettis County, Missouri",Missouri,2023,1313,1210
+20025,"Clark County, Kansas",Kansas,2023,1758,1426
+53043,"Lincoln County, Washington",Washington,2023,1785,1429
+40119,"Payne County, Oklahoma",Oklahoma,2023,2119,1451
+17127,"Massac County, Illinois",Illinois,2023,2104,1473
+45013,"Beaufort County, South Carolina",South Carolina,2023,2147,1854
+21111,"Jefferson County, Kentucky",Kentucky,2023,2120,1864
+13211,"Morgan County, Georgia",Georgia,2023,2425,2334
+27161,"Waseca County, Minnesota",Minnesota,2023,2603,2406
+17195,"Whiteside County, Illinois",Illinois,2023,2841,2425
+55137,"Waushara County, Wisconsin",Wisconsin,2023,2483,2427
+55119,"Taylor County, Wisconsin",Wisconsin,2023,2721,2563
+02180,"Nome Census Area, Alaska",Alaska,2023,3401,2618
+19191,"Winneshiek County, Iowa",Iowa,2023,2807,2754
+48029,"Bexar County, Texas",Texas,2023,5213,2968
+50005,"Caledonia County, Vermont",Vermont,2023,4204,3613
+08009,"Baca County, Colorado",Colorado,2023,670,417
+28127,"Simpson County, Mississippi",Mississippi,2023,968,567
+28003,"Alcorn County, Mississippi",Mississippi,2023,956,633
+46017,"Buffalo County, South Dakota",South Dakota,2023,0,816
+45043,"Georgetown County, South Carolina",South Carolina,2023,1280,861
+19151,"Pocahontas County, Iowa",Iowa,2023,1260,916
+48191,"Hall County, Texas",Texas,2023,1550,935
+20157,"Republic County, Kansas",Kansas,2023,1858,977
+48389,"Reeves County, Texas",Texas,2023,2000,1121
+40147,"Washington County, Oklahoma",Oklahoma,2023,1843,1173
+29021,"Buchanan County, Missouri",Missouri,2023,1299,1177
+29139,"Montgomery County, Missouri",Missouri,2023,1387,1194
+04003,"Cochise County, Arizona",Arizona,2023,1378,1246
+20083,"Hodgeman County, Kansas",Kansas,2023,1906,1260
+46109,"Roberts County, South Dakota",South Dakota,2023,2033,1283
+26113,"Missaukee County, Michigan",Michigan,2023,1798,1430
+37139,"Pasquotank County, North Carolina",North Carolina,2023,1601,1456
+06093,"Siskiyou County, California",California,2023,2253,1521
+56025,"Natrona County, Wyoming",Wyoming,2023,1631,1568
+41019,"Douglas County, Oregon",Oregon,2023,1938,1725
+48147,"Fannin County, Texas",Texas,2023,2828,1920
+42069,"Lackawanna County, Pennsylvania",Pennsylvania,2023,3047,2765
+26037,"Clinton County, Michigan",Michigan,2023,3275,2768
+25015,"Hampshire County, Massachusetts",Massachusetts,2023,5339,5305
+05137,"Stone County, Arkansas",Arkansas,2023,696,475
+29229,"Wright County, Missouri",Missouri,2023,636,549
+51167,"Russell County, Virginia",Virginia,2023,766,583
+21129,"Lee County, Kentucky",Kentucky,2023,923,588
+29067,"Douglas County, Missouri",Missouri,2023,719,632
+28117,"Prentiss County, Mississippi",Mississippi,2023,946,645
+08105,"Rio Grande County, Colorado",Colorado,2023,988,648
+56027,"Niobrara County, Wyoming",Wyoming,2023,1048,676
+18053,"Grant County, Indiana",Indiana,2023,861,716
+29155,"Pemiscot County, Missouri",Missouri,2023,1354,733
+17101,"Lawrence County, Illinois",Illinois,2023,1537,779
+46041,"Dewey County, South Dakota",South Dakota,2023,1308,810
+35027,"Lincoln County, New Mexico",New Mexico,2023,1435,882
+40097,"Mayes County, Oklahoma",Oklahoma,2023,1370,927
+37039,"Cherokee County, North Carolina",North Carolina,2023,1161,960
+47047,"Fayette County, Tennessee",Tennessee,2023,1144,1009
+37197,"Yadkin County, North Carolina",North Carolina,2023,1318,1043
+29145,"Newton County, Missouri",Missouri,2023,1276,1058
+31017,"Brown County, Nebraska",Nebraska,2023,1051,1121
+48307,"McCulloch County, Texas",Texas,2023,1703,1244
+48395,"Robertson County, Texas",Texas,2023,2584,1246
+39079,"Jackson County, Ohio",Ohio,2023,1394,1274
+12027,"DeSoto County, Florida",Florida,2023,1382,1291
+16043,"Fremont County, Idaho",Idaho,2023,1378,1320
+39029,"Columbiana County, Ohio",Ohio,2023,1607,1382
+20097,"Kiowa County, Kansas",Kansas,2023,2466,1397
+29107,"Lafayette County, Missouri",Missouri,2023,1589,1454
+13073,"Columbia County, Georgia",Georgia,2023,2622,1744
+30099,"Teton County, Montana",Montana,2023,2000,1857
+30095,"Stillwater County, Montana",Montana,2023,2340,1864
+20111,"Lyon County, Kansas",Kansas,2023,2363,2142
+39151,"Stark County, Ohio",Ohio,2023,2442,2183
+20171,"Scott County, Kansas",Kansas,2023,3342,2344
+39173,"Wood County, Ohio",Ohio,2023,3202,2482
+36009,"Cattaraugus County, New York",New York,2023,3383,2646
+36105,"Sullivan County, New York",New York,2023,5485,4639
+17111,"McHenry County, Illinois",Illinois,2023,7337,6725
+17043,"DuPage County, Illinois",Illinois,2023,8008,7489
+40067,"Jefferson County, Oklahoma",Oklahoma,2023,745,382
+45069,"Marlboro County, South Carolina",South Carolina,2023,697,399
+05133,"Sevier County, Arkansas",Arkansas,2023,641,476
+29085,"Hickory County, Missouri",Missouri,2023,759,477
+29215,"Texas County, Missouri",Missouri,2023,668,635
+38083,"Sheridan County, North Dakota",North Dakota,2023,842,715
+51037,"Charlotte County, Virginia",Virginia,2023,714,765
+22093,"St. James Parish, Louisiana",Louisiana,2023,1358,775
+13271,"Telfair County, Georgia",Georgia,2023,1600,970
+48391,"Refugio County, Texas",Texas,2023,1404,1259
+37001,"Alamance County, North Carolina",North Carolina,2023,1501,1331
+37053,"Currituck County, North Carolina",North Carolina,2023,1687,1351
+20195,"Trego County, Kansas",Kansas,2023,2317,1466
+27135,"Roseau County, Minnesota",Minnesota,2023,1792,1491
+26137,"Otsego County, Michigan",Michigan,2023,1785,1713
+18089,"Lake County, Indiana",Indiana,2023,2129,1777
+26123,"Newaygo County, Michigan",Michigan,2023,2266,1800
+51113,"Madison County, Virginia",Virginia,2023,2102,1835
+19097,"Jackson County, Iowa",Iowa,2023,2249,1981
+26049,"Genesee County, Michigan",Michigan,2023,2683,1988
+19135,"Monroe County, Iowa",Iowa,2023,2063,2067
+20197,"Wabaunsee County, Kansas",Kansas,2023,2408,2097
+31045,"Dawes County, Nebraska",Nebraska,2023,1888,2171
+17029,"Coles County, Illinois",Illinois,2023,2759,2186
+26155,"Shiawassee County, Michigan",Michigan,2023,2231,2192
+56029,"Park County, Wyoming",Wyoming,2023,2018,2200
+17041,"Douglas County, Illinois",Illinois,2023,2800,2295
+31131,"Otoe County, Nebraska",Nebraska,2023,2867,2496
+19125,"Marion County, Iowa",Iowa,2023,2778,2625
+19017,"Bremer County, Iowa",Iowa,2023,2644,3019
+36123,"Yates County, New York",New York,2023,3514,3307
+26065,"Ingham County, Michigan",Michigan,2023,3567,3328
+06113,"Yolo County, California",California,2023,5008,3741
+27163,"Washington County, Minnesota",Minnesota,2023,4006,4024
+36001,"Albany County, New York",New York,2023,5608,4604
+09180,"Southeastern Connecticut Planning Region, Connecticut",Connecticut,2023,5201,5061
+34001,"Atlantic County, New Jersey",New Jersey,2023,6830,6609
+22021,"Caldwell Parish, Louisiana",Louisiana,2023,1112,199
+38087,"Slope County, North Dakota",North Dakota,2023,377,513
+45085,"Sumter County, South Carolina",South Carolina,2023,1106,590
+47069,"Hardeman County, Tennessee",Tennessee,2023,828,693
+47111,"Macon County, Tennessee",Tennessee,2023,902,787
+18133,"Putnam County, Indiana",Indiana,2023,1056,852
+38103,"Wells County, North Dakota",North Dakota,2023,1178,1081
+51045,"Craig County, Virginia",Virginia,2023,809,1131
+48241,"Jasper County, Texas",Texas,2023,1835,1168
+51097,"King and Queen County, Virginia",Virginia,2023,1288,1174
+20043,"Doniphan County, Kansas",Kansas,2023,1556,1253
+13169,"Jones County, Georgia",Georgia,2023,2075,1297
+13109,"Evans County, Georgia",Georgia,2023,1744,1342
+02230,"Skagway Municipality, Alaska",Alaska,2023,1698,1384
+20153,"Rawlins County, Kansas",Kansas,2023,1864,1426
+27021,"Cass County, Minnesota",Minnesota,2023,1477,1574
+21179,"Nelson County, Kentucky",Kentucky,2023,1912,1594
+38077,"Richland County, North Dakota",North Dakota,2023,2116,1894
+39021,"Champaign County, Ohio",Ohio,2023,1931,1947
+12099,"Palm Beach County, Florida",Florida,2023,3871,3209
+55029,"Door County, Wisconsin",Wisconsin,2023,3146,3602
+39041,"Delaware County, Ohio",Ohio,2023,7152,6242
+53033,"King County, Washington",Washington,2023,6741,6900
+01053,"Escambia County, Alabama",Alabama,2023,593,399
+05123,"St. Francis County, Arkansas",Arkansas,2023,510,443
+40049,"Garvin County, Oklahoma",Oklahoma,2023,1042,580
+47133,"Overton County, Tennessee",Tennessee,2023,768,609
+45049,"Hampton County, South Carolina",South Carolina,2023,1191,697
+13279,"Toombs County, Georgia",Georgia,2023,1558,698
+38047,"Logan County, North Dakota",North Dakota,2023,1128,873
+29197,"Schuyler County, Missouri",Missouri,2023,1180,894
+51005,"Alleghany County, Virginia",Virginia,2023,1181,902
+29137,"Monroe County, Missouri",Missouri,2023,1216,995
+48353,"Nolan County, Texas",Texas,2023,2455,1030
+08043,"Fremont County, Colorado",Colorado,2023,1114,1052
+13131,"Grady County, Georgia",Georgia,2023,1492,1212
+27101,"Murray County, Minnesota",Minnesota,2023,1485,1243
+29075,"Gentry County, Missouri",Missouri,2023,1273,1260
+08027,"Custer County, Colorado",Colorado,2023,1367,1271
+37085,"Harnett County, North Carolina",North Carolina,2023,1796,1275
+12105,"Polk County, Florida",Florida,2023,2111,1291
+20185,"Stafford County, Kansas",Kansas,2023,1778,1300
+39175,"Wyandot County, Ohio",Ohio,2023,1462,1355
+56005,"Campbell County, Wyoming",Wyoming,2023,1498,1374
+31095,"Jefferson County, Nebraska",Nebraska,2023,2018,1517
+38081,"Sargent County, North Dakota",North Dakota,2023,1863,1557
+19067,"Floyd County, Iowa",Iowa,2023,2029,1663
+39027,"Clinton County, Ohio",Ohio,2023,1891,1701
+39149,"Shelby County, Ohio",Ohio,2023,1912,1929
+17017,"Cass County, Illinois",Illinois,2023,2036,1967
+19011,"Benton County, Iowa",Iowa,2023,2758,2417
+48493,"Wilson County, Texas",Texas,2023,4597,2625
+42025,"Carbon County, Pennsylvania",Pennsylvania,2023,2985,2793
+55121,"Trempealeau County, Wisconsin",Wisconsin,2023,3390,3106
+55117,"Sheboygan County, Wisconsin",Wisconsin,2023,3199,3298
+55015,"Calumet County, Wisconsin",Wisconsin,2023,3938,3677
+09160,"Northwest Hills Planning Region, Connecticut",Connecticut,2023,5661,5510
+01029,"Cleburne County, Alabama",Alabama,2023,508,341
+28031,"Covington County, Mississippi",Mississippi,2023,1178,389
+48109,"Culberson County, Texas",Texas,2023,0,645
+05051,"Garland County, Arkansas",Arkansas,2023,1031,778
+13093,"Dooly County, Georgia",Georgia,2023,1848,968
+48437,"Swisher County, Texas",Texas,2023,2710,994
+19093,"Ida County, Iowa",Iowa,2023,1243,1026
+51067,"Franklin County, Virginia",Virginia,2023,1270,1103
+29209,"Stone County, Missouri",Missouri,2023,1206,1117
+46089,"McPherson County, South Dakota",South Dakota,2023,1425,1166
+30103,"Treasure County, Montana",Montana,2023,1565,1233
+47141,"Putnam County, Tennessee",Tennessee,2023,1329,1262
+18157,"Tippecanoe County, Indiana",Indiana,2023,1381,1292
+26085,"Lake County, Michigan",Michigan,2023,1557,1307
+26109,"Menominee County, Michigan",Michigan,2023,1721,1313
+13291,"Union County, Georgia",Georgia,2023,1426,1331
+31147,"Richardson County, Nebraska",Nebraska,2023,1306,1354
+38025,"Dunn County, North Dakota",North Dakota,2023,1390,1543
+49025,"Kane County, Utah",Utah,2023,1425,1545
+27173,"Yellow Medicine County, Minnesota",Minnesota,2023,1515,1567
+56019,"Johnson County, Wyoming",Wyoming,2023,1641,1621
+13039,"Camden County, Georgia",Georgia,2023,2380,1771
+26027,"Cass County, Michigan",Michigan,2023,2091,1819
+08123,"Weld County, Colorado",Colorado,2023,2389,1862
+17039,"De Witt County, Illinois",Illinois,2023,2576,1925
+13051,"Chatham County, Georgia",Georgia,2023,2645,2035
+17009,"Brown County, Illinois",Illinois,2023,2060,2137
+06091,"Sierra County, California",California,2023,2969,2170
+48299,"Llano County, Texas",Texas,2023,2875,2328
+02100,"Haines Borough, Alaska",Alaska,2023,2647,2481
+27013,"Blue Earth County, Minnesota",Minnesota,2023,2479,2500
+13219,"Oconee County, Georgia",Georgia,2023,3118,2924
+24025,"Harford County, Maryland",Maryland,2023,3429,3412
+36095,"Schoharie County, New York",New York,2023,4334,3660
+53067,"Thurston County, Washington",Washington,2023,4057,4010
+17019,"Champaign County, Illinois",Illinois,2023,4362,4063
+36111,"Ulster County, New York",New York,2023,6543,5480
+48301,"Loving County, Texas",Texas,2023,0,0
+22091,"St. Helena Parish, Louisiana",Louisiana,2023,800,332
+05093,"Mississippi County, Arkansas",Arkansas,2023,781,465
+21201,"Robertson County, Kentucky",Kentucky,2023,1188,513
+40059,"Harper County, Oklahoma",Oklahoma,2023,834,621
+47135,"Perry County, Tennessee",Tennessee,2023,673,651
+13111,"Fannin County, Georgia",Georgia,2023,1128,743
+21221,"Trigg County, Kentucky",Kentucky,2023,1240,777
+18015,"Carroll County, Indiana",Indiana,2023,1098,790
+21107,"Hopkins County, Kentucky",Kentucky,2023,1238,795
+37185,"Warren County, North Carolina",North Carolina,2023,1226,950
+46097,"Miner County, South Dakota",South Dakota,2023,1899,991
+21081,"Grant County, Kentucky",Kentucky,2023,1571,1027
+16061,"Lewis County, Idaho",Idaho,2023,1470,1231
+19147,"Palo Alto County, Iowa",Iowa,2023,1598,1362
+13183,"Long County, Georgia",Georgia,2023,2189,1375
+21151,"Madison County, Kentucky",Kentucky,2023,1781,1382
+17045,"Edgar County, Illinois",Illinois,2023,1562,1383
+31005,"Arthur County, Nebraska",Nebraska,2023,1795,1417
+19115,"Louisa County, Iowa",Iowa,2023,1933,1443
+56001,"Albany County, Wyoming",Wyoming,2023,1922,1686
+17199,"Williamson County, Illinois",Illinois,2023,2924,1729
+20129,"Morton County, Kansas",Kansas,2023,2108,1828
+19057,"Des Moines County, Iowa",Iowa,2023,2224,1950
+36033,"Franklin County, New York",New York,2023,2780,2134
+31137,"Phelps County, Nebraska",Nebraska,2023,2351,2423
+51800,"Suffolk city, Virginia",Virginia,2023,3135,2869
+46127,"Union County, South Dakota",South Dakota,2023,3026,2954
+37063,"Durham County, North Carolina",North Carolina,2023,2939,2992
+12021,"Collier County, Florida",Florida,2023,3150,3306
+36053,"Madison County, New York",New York,2023,4304,3748
+50021,"Rutland County, Vermont",Vermont,2023,4091,4011
+25001,"Barnstable County, Massachusetts",Massachusetts,2023,3960,4275
+35019,"Guadalupe County, New Mexico",New Mexico,2023,0,370
+28155,"Webster County, Mississippi",Mississippi,2023,719,524
+40135,"Sequoyah County, Oklahoma",Oklahoma,2023,976,551
+28097,"Montgomery County, Mississippi",Mississippi,2023,1215,703
+49001,"Beaver County, Utah",Utah,2023,1159,992
+48203,"Harrison County, Texas",Texas,2023,2498,1168
+56037,"Sweetwater County, Wyoming",Wyoming,2023,1677,1190
+27167,"Wilkin County, Minnesota",Minnesota,2023,1306,1320
+27063,"Jackson County, Minnesota",Minnesota,2023,1331,1327
+29077,"Greene County, Missouri",Missouri,2023,1488,1437
+30079,"Prairie County, Montana",Montana,2023,0,1463
+17071,"Henderson County, Illinois",Illinois,2023,1957,1512
+08051,"Gunnison County, Colorado",Colorado,2023,1687,1671
+29051,"Cole County, Missouri",Missouri,2023,1713,1746
+53019,"Ferry County, Washington",Washington,2023,1818,1769
+55075,"Marinette County, Wisconsin",Wisconsin,2023,2070,1830
+42087,"Mifflin County, Pennsylvania",Pennsylvania,2023,2210,2246
+46081,"Lawrence County, South Dakota",South Dakota,2023,2929,2441
+53071,"Walla Walla County, Washington",Washington,2023,3475,3231
+51540,"Charlottesville city, Virginia",Virginia,2023,3685,3585
+33003,"Carroll County, New Hampshire",New Hampshire,2023,3729,3606
+55045,"Green County, Wisconsin",Wisconsin,2023,3988,3726
+37135,"Orange County, North Carolina",North Carolina,2023,4224,3937
+22053,"Jefferson Davis Parish, Louisiana",Louisiana,2023,842,236
+22067,"Morehouse Parish, Louisiana",Louisiana,2023,675,354
+40151,"Woods County, Oklahoma",Oklahoma,2023,1215,478
+35057,"Torrance County, New Mexico",New Mexico,2023,880,528
+32009,"Esmeralda County, Nevada",Nevada,2023,0,539
+05035,"Crittenden County, Arkansas",Arkansas,2023,1181,598
+01095,"Marshall County, Alabama",Alabama,2023,749,620
+28113,"Pike County, Mississippi",Mississippi,2023,1255,779
+18139,"Rush County, Indiana",Indiana,2023,1118,794
+18149,"Starke County, Indiana",Indiana,2023,903,876
+31015,"Boyd County, Nebraska",Nebraska,2023,2521,913
+21123,"Larue County, Kentucky",Kentucky,2023,1229,946
+13009,"Baldwin County, Georgia",Georgia,2023,1381,969
+38029,"Emmons County, North Dakota",North Dakota,2023,1085,985
+13173,"Lanier County, Georgia",Georgia,2023,1964,1039
+22075,"Plaquemines Parish, Louisiana",Louisiana,2023,1438,1081
+21079,"Garrard County, Kentucky",Kentucky,2023,1449,1177
+54003,"Berkeley County, West Virginia",West Virginia,2023,1426,1186
+37035,"Catawba County, North Carolina",North Carolina,2023,1382,1187
+13043,"Candler County, Georgia",Georgia,2023,1765,1236
+48225,"Houston County, Texas",Texas,2023,1476,1387
+16009,"Benewah County, Idaho",Idaho,2023,1410,1401
+27023,"Chippewa County, Minnesota",Minnesota,2023,1690,1414
+19003,"Adams County, Iowa",Iowa,2023,1483,1474
+08093,"Park County, Colorado",Colorado,2023,1806,1474
+38003,"Barnes County, North Dakota",North Dakota,2023,2069,1620
+19145,"Page County, Iowa",Iowa,2023,1785,1644
+19075,"Grundy County, Iowa",Iowa,2023,2049,1804
+06033,"Lake County, California",California,2023,2650,1859
+27057,"Hubbard County, Minnesota",Minnesota,2023,2046,2140
+51065,"Fluvanna County, Virginia",Virginia,2023,1639,2239
+53041,"Lewis County, Washington",Washington,2023,2488,2338
+51075,"Goochland County, Virginia",Virginia,2023,2426,2404
+17147,"Piatt County, Illinois",Illinois,2023,3386,2419
+41065,"Wasco County, Oregon",Oregon,2023,2943,2508
+19087,"Henry County, Iowa",Iowa,2023,2298,2531
+36073,"Orleans County, New York",New York,2023,4132,3282
+46083,"Lincoln County, South Dakota",South Dakota,2023,3851,3715
+22025,"Catahoula Parish, Louisiana",Louisiana,2023,314,199
+28101,"Newton County, Mississippi",Mississippi,2023,992,579
+48131,"Duval County, Texas",Texas,2023,1369,657
+45037,"Edgefield County, South Carolina",South Carolina,2023,1151,662
+37075,"Graham County, North Carolina",North Carolina,2023,1035,730
+47059,"Greene County, Tennessee",Tennessee,2023,804,801
+38079,"Rolette County, North Dakota",North Dakota,2023,1000,833
+08003,"Alamosa County, Colorado",Colorado,2023,1081,868
+46123,"Tripp County, South Dakota",South Dakota,2023,1404,1155
+04007,"Gila County, Arizona",Arizona,2023,1493,1177
+12017,"Citrus County, Florida",Florida,2023,1420,1220
+27073,"Lac qui Parle County, Minnesota",Minnesota,2023,1444,1285
+30085,"Roosevelt County, Montana",Montana,2023,1767,1431
+17175,"Stark County, Illinois",Illinois,2023,1856,1466
+02122,"Kenai Peninsula Borough, Alaska",Alaska,2023,2211,1602
+48449,"Titus County, Texas",Texas,2023,2430,1633
+48221,"Hood County, Texas",Texas,2023,3618,2427
+36005,"Bronx County, New York",New York,2023,5484,4916
+01039,"Covington County, Alabama",Alabama,2023,383,337
+01045,"Dale County, Alabama",Alabama,2023,480,374
+05107,"Phillips County, Arkansas",Arkansas,2023,970,375
+54023,"Grant County, West Virginia",West Virginia,2023,589,517
+12013,"Calhoun County, Florida",Florida,2023,1141,537
+21023,"Bracken County, Kentucky",Kentucky,2023,1279,591
+08109,"Saguache County, Colorado",Colorado,2023,733,594
+40139,"Texas County, Oklahoma",Oklahoma,2023,1300,634
+13147,"Hart County, Georgia",Georgia,2023,1366,807
+29115,"Linn County, Missouri",Missouri,2023,945,860
+28131,"Stone County, Mississippi",Mississippi,2023,1043,901
+13263,"Talbot County, Georgia",Georgia,2023,1994,962
+48431,"Sterling County, Texas",Texas,2023,2307,1113
+12033,"Escambia County, Florida",Florida,2023,1602,1131
+22121,"West Baton Rouge Parish, Louisiana",Louisiana,2023,1435,1167
+32021,"Mineral County, Nevada",Nevada,2023,1202,1247
+37049,"Craven County, North Carolina",North Carolina,2023,1434,1275
+17047,"Edwards County, Illinois",Illinois,2023,1780,1286
+48435,"Sutton County, Texas",Texas,2023,3390,1320
+39125,"Paulding County, Ohio",Ohio,2023,1410,1343
+56035,"Sublette County, Wyoming",Wyoming,2023,1487,1366
+26079,"Kalkaska County, Michigan",Michigan,2023,1610,1470
+39135,"Preble County, Ohio",Ohio,2023,1870,1791
+36003,"Allegany County, New York",New York,2023,3277,2616
+55123,"Vernon County, Wisconsin",Wisconsin,2023,3010,2722
+17163,"St. Clair County, Illinois",Illinois,2023,4082,2745
+36015,"Chemung County, New York",New York,2023,3737,2846
+48257,"Kaufman County, Texas",Texas,2023,5925,3066
+48473,"Waller County, Texas",Texas,2023,4746,3234
+08037,"Eagle County, Colorado",Colorado,2023,3213,3668
+34029,"Ocean County, New Jersey",New Jersey,2023,6776,5982
+36079,"Putnam County, New York",New York,2023,10001,10001
+05073,"Lafayette County, Arkansas",Arkansas,2023,574,371
+48033,"Borden County, Texas",Texas,2023,0,435
+21193,"Perry County, Kentucky",Kentucky,2023,945,458
+18131,"Pulaski County, Indiana",Indiana,2023,726,554
+01103,"Morgan County, Alabama",Alabama,2023,746,576
+51077,"Grayson County, Virginia",Virginia,2023,896,763
+13149,"Heard County, Georgia",Georgia,2023,1262,770
+35047,"San Miguel County, New Mexico",New Mexico,2023,1154,889
+29033,"Carroll County, Missouri",Missouri,2023,945,922
+47159,"Smith County, Tennessee",Tennessee,2023,1100,986
+13245,"Richmond County, Georgia",Georgia,2023,1695,1074
+16087,"Washington County, Idaho",Idaho,2023,1582,1118
+48117,"Deaf Smith County, Texas",Texas,2023,2765,1274
+13171,"Lamar County, Georgia",Georgia,2023,2184,1326
+51036,"Charles City County, Virginia",Virginia,2023,1371,1332
+48235,"Irion County, Texas",Texas,2023,1744,1334
+06015,"Del Norte County, California",California,2023,2322,1398
+51165,"Rockingham County, Virginia",Virginia,2023,1600,1462
+20101,"Lane County, Kansas",Kansas,2023,2339,1486
+30027,"Fergus County, Montana",Montana,2023,1756,1636
+42047,"Elk County, Pennsylvania",Pennsylvania,2023,1744,1651
+51073,"Gloucester County, Virginia",Virginia,2023,1726,1694
+30059,"Meagher County, Montana",Montana,2023,1523,1750
+48425,"Somervell County, Texas",Texas,2023,2723,2081
+26075,"Jackson County, Michigan",Michigan,2023,2391,2292
+46013,"Brown County, South Dakota",South Dakota,2023,2663,2365
+30067,"Park County, Montana",Montana,2023,2382,2555
+55043,"Grant County, Wisconsin",Wisconsin,2023,2707,2657
+27059,"Isanti County, Minnesota",Minnesota,2023,3079,2744
+20015,"Butler County, Kansas",Kansas,2023,2994,2748
+42075,"Lebanon County, Pennsylvania",Pennsylvania,2023,3252,3074
+55027,"Dodge County, Wisconsin",Wisconsin,2023,3388,3408
+27123,"Ramsey County, Minnesota",Minnesota,2023,3766,3770
+48041,"Brazos County, Texas",Texas,2023,5000,3840
+31177,"Washington County, Nebraska",Nebraska,2023,4132,4044
+33005,"Cheshire County, New Hampshire",New Hampshire,2023,6001,5900
+17097,"Lake County, Illinois",Illinois,2023,9173,7874
+01059,"Franklin County, Alabama",Alabama,2023,568,324
+54013,"Calhoun County, West Virginia",West Virginia,2023,614,391
+21033,"Caldwell County, Kentucky",Kentucky,2023,895,421
+08073,"Lincoln County, Colorado",Colorado,2023,970,592
+47121,"Meigs County, Tennessee",Tennessee,2023,907,598
+29119,"McDonald County, Missouri",Missouri,2023,805,637
+28163,"Yazoo County, Mississippi",Mississippi,2023,1366,673
+48155,"Foard County, Texas",Texas,2023,1313,791
+38049,"McHenry County, North Dakota",North Dakota,2023,1021,872
+38023,"Divide County, North Dakota",North Dakota,2023,1630,886
+29195,"Saline County, Missouri",Missouri,2023,1218,1045
+37145,"Person County, North Carolina",North Carolina,2023,1300,1246
+48445,"Terry County, Texas",Texas,2023,1930,1288
+13221,"Oglethorpe County, Georgia",Georgia,2023,1823,1317
+19009,"Audubon County, Iowa",Iowa,2023,1383,1331
+19021,"Buena Vista County, Iowa",Iowa,2023,1983,1529
+46015,"Brule County, South Dakota",South Dakota,2023,1930,1562
+39039,"Defiance County, Ohio",Ohio,2023,1668,1715
+48019,"Bandera County, Texas",Texas,2023,2882,1846
+19119,"Lyon County, Iowa",Iowa,2023,2078,1868
+27115,"Pine County, Minnesota",Minnesota,2023,1999,1932
+48099,"Coryell County, Texas",Texas,2023,2914,1944
+23009,"Hancock County, Maine",Maine,2023,2473,2395
+31053,"Dodge County, Nebraska",Nebraska,2023,2670,2453
+48479,"Webb County, Texas",Texas,2023,3946,2522
+36077,"Otsego County, New York",New York,2023,3286,2534
+41071,"Yamhill County, Oregon",Oregon,2023,3483,2766
+24005,"Baltimore County, Maryland",Maryland,2023,3648,3640
+55049,"Iowa County, Wisconsin",Wisconsin,2023,3940,3760
+24021,"Frederick County, Maryland",Maryland,2023,4535,4245
+36085,"Richmond County, New York",New York,2023,6074,6073
+01085,"Lowndes County, Alabama",Alabama,2023,343,327
+54089,"Summers County, West Virginia",West Virginia,2023,450,348
+54059,"Mingo County, West Virginia",West Virginia,2023,537,354
+47129,"Morgan County, Tennessee",Tennessee,2023,939,734
+51183,"Sussex County, Virginia",Virginia,2023,1084,785
+54061,"Monongalia County, West Virginia",West Virginia,2023,1348,993
+37013,"Beaufort County, North Carolina",North Carolina,2023,1539,1002
+12131,"Walton County, Florida",Florida,2023,2088,1073
+12003,"Baker County, Florida",Florida,2023,1610,1074
+23003,"Aroostook County, Maine",Maine,2023,1808,1396
+48001,"Anderson County, Texas",Texas,2023,1994,1398
+20031,"Coffey County, Kansas",Kansas,2023,1782,1399
+17145,"Perry County, Illinois",Illinois,2023,1897,1611
+31165,"Sioux County, Nebraska",Nebraska,2023,1692,1739
+27015,"Brown County, Minnesota",Minnesota,2023,1952,1822
+21215,"Spencer County, Kentucky",Kentucky,2023,2205,1849
+20009,"Barton County, Kansas",Kansas,2023,2016,1865
+26067,"Ionia County, Michigan",Michigan,2023,2288,2069
+48423,"Smith County, Texas",Texas,2023,3186,2193
+49049,"Utah County, Utah",Utah,2023,2232,2241
+39051,"Fulton County, Ohio",Ohio,2023,2364,2315
+19045,"Clinton County, Iowa",Iowa,2023,2419,2323
+19157,"Poweshiek County, Iowa",Iowa,2023,2341,2384
+51630,"Fredericksburg city, Virginia",Virginia,2023,2908,2749
+20103,"Leavenworth County, Kansas",Kansas,2023,3256,2914
+27003,"Anoka County, Minnesota",Minnesota,2023,3134,3019
+30063,"Missoula County, Montana",Montana,2023,3958,3521
+06097,"Sonoma County, California",California,2023,6048,4455
+06061,"Placer County, California",California,2023,5917,4768
+54005,"Boone County, West Virginia",West Virginia,2023,797,382
+01121,"Talladega County, Alabama",Alabama,2023,585,435
+35029,"Luna County, New Mexico",New Mexico,2023,697,588
+05083,"Logan County, Arkansas",Arkansas,2023,737,617
+45077,"Pickens County, South Carolina",South Carolina,2023,1015,634
+54029,"Hancock County, West Virginia",West Virginia,2023,848,657
+18153,"Sullivan County, Indiana",Indiana,2023,883,745
+45065,"McCormick County, South Carolina",South Carolina,2023,1547,793
+13049,"Charlton County, Georgia",Georgia,2023,1165,923
+38065,"Oliver County, North Dakota",North Dakota,2023,1438,1297
+38069,"Pierce County, North Dakota",North Dakota,2023,1467,1491
+37029,"Camden County, North Carolina",North Carolina,2023,1782,1788
+42035,"Clinton County, Pennsylvania",Pennsylvania,2023,2186,1831
+31027,"Cedar County, Nebraska",Nebraska,2023,1818,1834
+29037,"Cass County, Missouri",Missouri,2023,2451,2173
+35001,"Bernalillo County, New Mexico",New Mexico,2023,2607,2427
+17107,"Logan County, Illinois",Illinois,2023,2195,2503
+42049,"Erie County, Pennsylvania",Pennsylvania,2023,2868,2607
+36113,"Warren County, New York",New York,2023,4060,3341
+17141,"Ogle County, Illinois",Illinois,2023,3885,3480
+55139,"Winnebago County, Wisconsin",Wisconsin,2023,3522,3660
+50011,"Franklin County, Vermont",Vermont,2023,4404,3878
+19103,"Johnson County, Iowa",Iowa,2023,4708,4309
+50003,"Bennington County, Vermont",Vermont,2023,4442,4313
+28143,"Tunica County, Mississippi",Mississippi,2023,1116,338
+01055,"Etowah County, Alabama",Alabama,2023,674,494
+45075,"Orangeburg County, South Carolina",South Carolina,2023,996,548
+47039,"Decatur County, Tennessee",Tennessee,2023,721,612
+18143,"Scott County, Indiana",Indiana,2023,1214,652
+12047,"Hamilton County, Florida",Florida,2023,970,657
+04009,"Graham County, Arizona",Arizona,2023,1226,841
+49033,"Rich County, Utah",Utah,2023,812,870
+08047,"Gilpin County, Colorado",Colorado,2023,1225,1025
+31069,"Garden County, Nebraska",Nebraska,2023,1159,1109
+48317,"Martin County, Texas",Texas,2023,2337,1143
+39119,"Muskingum County, Ohio",Ohio,2023,1747,1387
+42061,"Huntingdon County, Pennsylvania",Pennsylvania,2023,1734,1542
+31059,"Fillmore County, Nebraska",Nebraska,2023,1431,1560
+20057,"Ford County, Kansas",Kansas,2023,2629,1707
+48183,"Gregg County, Texas",Texas,2023,2672,1759
+46047,"Fall River County, South Dakota",South Dakota,2023,1948,1787
+12069,"Lake County, Florida",Florida,2023,2560,1840
+37081,"Guilford County, North Carolina",North Carolina,2023,2186,1857
+49005,"Cache County, Utah",Utah,2023,1924,1939
+46087,"McCook County, South Dakota",South Dakota,2023,2232,2034
+39045,"Fairfield County, Ohio",Ohio,2023,3163,3049
+08013,"Boulder County, Colorado",Colorado,2023,3842,3779
+09110,"Capitol Planning Region, Connecticut",Connecticut,2023,6436,6303
+28135,"Tallahatchie County, Mississippi",Mississippi,2023,545,465
+51580,"Covington city, Virginia",Virginia,2023,755,502
+05101,"Newton County, Arkansas",Arkansas,2023,938,579
+12067,"Lafayette County, Florida",Florida,2023,1125,665
+47033,"Crockett County, Tennessee",Tennessee,2023,974,785
+18093,"Lawrence County, Indiana",Indiana,2023,1056,908
+29169,"Pulaski County, Missouri",Missouri,2023,1277,914
+51063,"Floyd County, Virginia",Virginia,2023,1157,1086
+17055,"Franklin County, Illinois",Illinois,2023,1599,1143
+26035,"Clare County, Michigan",Michigan,2023,1494,1272
+18111,"Newton County, Indiana",Indiana,2023,1337,1283
+15009,"Maui County, Hawaii",Hawaii,2023,1477,1390
+19107,"Keokuk County, Iowa",Iowa,2023,1550,1423
+51049,"Cumberland County, Virginia",Virginia,2023,1346,1486
+23029,"Washington County, Maine",Maine,2023,1815,1503
+19047,"Crawford County, Iowa",Iowa,2023,2099,1536
+20001,"Allen County, Kansas",Kansas,2023,1829,1553
+48441,"Taylor County, Texas",Texas,2023,3428,1668
+51680,"Lynchburg city, Virginia",Virginia,2023,1814,1717
+06027,"Inyo County, California",California,2023,2947,1866
+48231,"Hunt County, Texas",Texas,2023,3663,2048
+51041,"Chesterfield County, Virginia",Virginia,2023,2636,2636
+49029,"Morgan County, Utah",Utah,2023,3332,3112
+51003,"Albemarle County, Virginia",Virginia,2023,3395,3664
+27019,"Carver County, Minnesota",Minnesota,2023,4562,3966
+41051,"Multnomah County, Oregon",Oregon,2023,4965,5370
+42045,"Delaware County, Pennsylvania",Pennsylvania,2023,6210,5575
+51195,"Wise County, Virginia",Virginia,2023,826,536
+35015,"Eddy County, New Mexico",New Mexico,2023,1327,721
+28091,"Marion County, Mississippi",Mississippi,2023,1032,731
+13307,"Webster County, Georgia",Georgia,2023,1131,845
+18007,"Benton County, Indiana",Indiana,2023,1074,907
+37127,"Nash County, North Carolina",North Carolina,2023,1489,1024
+37157,"Rockingham County, North Carolina",North Carolina,2023,1358,1071
+48189,"Hale County, Texas",Texas,2023,2471,1081
+47163,"Sullivan County, Tennessee",Tennessee,2023,1288,1111
+29045,"Clark County, Missouri",Missouri,2023,1142,1137
+12045,"Gulf County, Florida",Florida,2023,1440,1187
+47093,"Knox County, Tennessee",Tennessee,2023,1364,1269
+47119,"Maury County, Tennessee",Tennessee,2023,1447,1539
+42057,"Fulton County, Pennsylvania",Pennsylvania,2023,2271,1948
+13157,"Jackson County, Georgia",Georgia,2023,2946,2250
+48143,"Erath County, Texas",Texas,2023,3395,2414
+17049,"Effingham County, Illinois",Illinois,2023,2892,2489
+31025,"Cass County, Nebraska",Nebraska,2023,3703,3267
+06037,"Los Angeles County, California",California,2023,6077,3985
+33019,"Sullivan County, New Hampshire",New Hampshire,2023,5710,5471
+48157,"Fort Bend County, Texas",Texas,2023,7553,5934
+02198,"Prince of Wales-Hyder Census Area, Alaska",Alaska,2023,1648,199
+05047,"Franklin County, Arkansas",Arkansas,2023,764,538
+54009,"Brooke County, West Virginia",West Virginia,2023,782,628
+45027,"Clarendon County, South Carolina",South Carolina,2023,1080,680
+28041,"Greene County, Mississippi",Mississippi,2023,1088,682
+18017,"Cass County, Indiana",Indiana,2023,970,692
+01097,"Mobile County, Alabama",Alabama,2023,936,695
+22073,"Ouachita Parish, Louisiana",Louisiana,2023,1177,696
+12077,"Liberty County, Florida",Florida,2023,1145,718
+47027,"Clay County, Tennessee",Tennessee,2023,1000,792
+47103,"Lincoln County, Tennessee",Tennessee,2023,981,1004
+37117,"Martin County, North Carolina",North Carolina,2023,1361,1022
+18119,"Owen County, Indiana",Indiana,2023,1119,1058
+13295,"Walker County, Georgia",Georgia,2023,1520,1089
+39163,"Vinton County, Ohio",Ohio,2023,1661,1238
+13153,"Houston County, Georgia",Georgia,2023,1958,1330
+29029,"Camden County, Missouri",Missouri,2023,1346,1365
+46051,"Grant County, South Dakota",South Dakota,2023,1764,1372
+17181,"Union County, Illinois",Illinois,2023,2433,1402
+37175,"Transylvania County, North Carolina",North Carolina,2023,1622,1468
+26061,"Houghton County, Michigan",Michigan,2023,1969,1602
+02275,"Wrangell City and Borough, Alaska",Alaska,2023,1797,1792
+40143,"Tulsa County, Oklahoma",Oklahoma,2023,2315,1892
+37129,"New Hanover County, North Carolina",North Carolina,2023,2093,2033
+19005,"Allamakee County, Iowa",Iowa,2023,2130,2078
+04019,"Pima County, Arizona",Arizona,2023,2293,2162
+41061,"Union County, Oregon",Oregon,2023,2287,2336
+17013,"Calhoun County, Illinois",Illinois,2023,2719,2462
+30111,"Yellowstone County, Montana",Montana,2023,2701,2612
+31119,"Madison County, Nebraska",Nebraska,2023,2520,2808
+26139,"Ottawa County, Michigan",Michigan,2023,3196,2921
+02016,"Aleutians West Census Area, Alaska",Alaska,2023,2971,2950
+17161,"Rock Island County, Illinois",Illinois,2023,3525,3097
+06017,"El Dorado County, California",California,2023,4947,3470
+55055,"Jefferson County, Wisconsin",Wisconsin,2023,4093,3833
+26161,"Washtenaw County, Michigan",Michigan,2023,5646,5218
+42029,"Chester County, Pennsylvania",Pennsylvania,2023,6350,5796
+48085,"Collin County, Texas",Texas,2023,7903,6514
+17089,"Kane County, Illinois",Illinois,2023,7537,6555
+54101,"Webster County, West Virginia",West Virginia,2023,351,279
+01025,"Clarke County, Alabama",Alabama,2023,477,334
+05095,"Monroe County, Arkansas",Arkansas,2023,385,433
+48475,"Ward County, Texas",Texas,2023,1676,554
+47175,"Van Buren County, Tennessee",Tennessee,2023,717,569
+35035,"Otero County, New Mexico",New Mexico,2023,976,672
+54033,"Harrison County, West Virginia",West Virginia,2023,1063,724
+05015,"Carroll County, Arkansas",Arkansas,2023,1115,920
+16063,"Lincoln County, Idaho",Idaho,2023,975,1017
+49055,"Wayne County, Utah",Utah,2023,1469,1126
+16051,"Jefferson County, Idaho",Idaho,2023,1982,1267
+26053,"Gogebic County, Michigan",Michigan,2023,1866,1290
+18047,"Franklin County, Indiana",Indiana,2023,1455,1469
+17057,"Fulton County, Illinois",Illinois,2023,2431,1944
+39123,"Ottawa County, Ohio",Ohio,2023,2295,1991
+48251,"Johnson County, Texas",Texas,2023,3946,2161
+17125,"Mason County, Illinois",Illinois,2023,2397,2178
+48181,"Grayson County, Texas",Texas,2023,3755,2191
+30081,"Ravalli County, Montana",Montana,2023,2361,2202
+55065,"Lafayette County, Wisconsin",Wisconsin,2023,3058,2886
+21185,"Oldham County, Kentucky",Kentucky,2023,3646,3056
+17063,"Grundy County, Illinois",Illinois,2023,5754,4237
+06087,"Santa Cruz County, California",California,2023,7178,4345
+02066,"Copper River Census Area, Alaska",Alaska,2023,199,199
+40029,"Coal County, Oklahoma",Oklahoma,2023,752,415
+21043,"Carter County, Kentucky",Kentucky,2023,935,451
+01031,"Coffee County, Alabama",Alabama,2023,721,486
+21051,"Clay County, Kentucky",Kentucky,2023,923,521
+21177,"Muhlenberg County, Kentucky",Kentucky,2023,1035,599
+54077,"Preston County, West Virginia",West Virginia,2023,942,603
+40043,"Dewey County, Oklahoma",Oklahoma,2023,859,624
+01077,"Lauderdale County, Alabama",Alabama,2023,736,638
+18117,"Orange County, Indiana",Indiana,2023,984,696
+21171,"Monroe County, Kentucky",Kentucky,2023,959,748
+05009,"Boone County, Arkansas",Arkansas,2023,936,862
+29201,"Scott County, Missouri",Missouri,2023,983,869
+47081,"Hickman County, Tennessee",Tennessee,2023,1135,1035
+46115,"Spink County, South Dakota",South Dakota,2023,2116,1270
+49027,"Millard County, Utah",Utah,2023,1345,1280
+47001,"Anderson County, Tennessee",Tennessee,2023,1356,1294
+46069,"Hyde County, South Dakota",South Dakota,2023,1983,1305
+13247,"Rockdale County, Georgia",Georgia,2023,2055,1372
+04021,"Pinal County, Arizona",Arizona,2023,1717,1384
+20039,"Decatur County, Kansas",Kansas,2023,1457,1395
+41055,"Sherman County, Oregon",Oregon,2023,1514,1412
+26143,"Roscommon County, Michigan",Michigan,2023,1679,1462
+13179,"Liberty County, Georgia",Georgia,2023,2094,1480
+20011,"Bourbon County, Kansas",Kansas,2023,1943,1664
+18029,"Dearborn County, Indiana",Indiana,2023,1722,1733
+17173,"Shelby County, Illinois",Illinois,2023,2174,1804
+42107,"Schuylkill County, Pennsylvania",Pennsylvania,2023,2475,1852
+42129,"Westmoreland County, Pennsylvania",Pennsylvania,2023,2646,2260
+15003,"Honolulu County, Hawaii",Hawaii,2023,2445,2553
+19163,"Scott County, Iowa",Iowa,2023,3273,3122
+39061,"Hamilton County, Ohio",Ohio,2023,3576,3255
+55039,"Fond du Lac County, Wisconsin",Wisconsin,2023,3311,3311
+33007,"Coos County, New Hampshire",New Hampshire,2023,3626,3397
+55025,"Dane County, Wisconsin",Wisconsin,2023,6286,6252
+22039,"Evangeline Parish, Louisiana",Louisiana,2023,417,257
+01099,"Monroe County, Alabama",Alabama,2023,383,345
+45011,"Barnwell County, South Carolina",South Carolina,2023,1003,487
+35025,"Lea County, New Mexico",New Mexico,2023,1439,555
+22109,"Terrebonne Parish, Louisiana",Louisiana,2023,1077,597
+05033,"Crawford County, Arkansas",Arkansas,2023,975,774
+47055,"Giles County, Tennessee",Tennessee,2023,1106,788
+13037,"Calhoun County, Georgia",Georgia,2023,1143,813
+18095,"Madison County, Indiana",Indiana,2023,1222,956
+20047,"Edwards County, Kansas",Kansas,2023,1571,992
+10005,"Sussex County, Delaware",Delaware,2023,1241,1041
+16045,"Gem County, Idaho",Idaho,2023,1561,1355
+37077,"Granville County, North Carolina",North Carolina,2023,1910,1386
+29510,"St. Louis city, Missouri",Missouri,2023,2161,1403
+12051,"Hendry County, Florida",Florida,2023,1905,1437
+19069,"Franklin County, Iowa",Iowa,2023,1651,1528
+31023,"Butler County, Nebraska",Nebraska,2023,2172,1779
+20191,"Sumner County, Kansas",Kansas,2023,2284,1783
+55013,"Burnett County, Wisconsin",Wisconsin,2023,2070,2033
+21067,"Fayette County, Kentucky",Kentucky,2023,2445,2375
+18063,"Hendricks County, Indiana",Indiana,2023,2316,2421
+39075,"Holmes County, Ohio",Ohio,2023,2691,2917
+53007,"Chelan County, Washington",Washington,2023,3268,3190
+55093,"Pierce County, Wisconsin",Wisconsin,2023,4669,4287
+01091,"Marengo County, Alabama",Alabama,2023,501,344
+22117,"Washington Parish, Louisiana",Louisiana,2023,806,372
+22007,"Assumption Parish, Louisiana",Louisiana,2023,929,374
+45039,"Fairfield County, South Carolina",South Carolina,2023,1123,533
+40115,"Ottawa County, Oklahoma",Oklahoma,2023,890,539
+05061,"Howard County, Arkansas",Arkansas,2023,896,556
+54085,"Ritchie County, West Virginia",West Virginia,2023,773,626
+28159,"Winston County, Mississippi",Mississippi,2023,1005,656
+35017,"Grant County, New Mexico",New Mexico,2023,842,688
+37103,"Jones County, North Carolina",North Carolina,2023,1109,751
+18175,"Washington County, Indiana",Indiana,2023,1197,794
+51029,"Buckingham County, Virginia",Virginia,2023,972,804
+40085,"Love County, Oklahoma",Oklahoma,2023,1292,817
+29091,"Howell County, Missouri",Missouri,2023,909,867
+13081,"Crisp County, Georgia",Georgia,2023,1747,968
+42053,"Forest County, Pennsylvania",Pennsylvania,2023,1372,1024
+22055,"Lafayette Parish, Louisiana",Louisiana,2023,1458,1087
+16075,"Payette County, Idaho",Idaho,2023,1444,1098
+18061,"Harrison County, Indiana",Indiana,2023,1228,1125
+31181,"Webster County, Nebraska",Nebraska,2023,1870,1151
+29083,"Henry County, Missouri",Missouri,2023,1276,1152
+16029,"Caribou County, Idaho",Idaho,2023,1348,1300
+29031,"Cape Girardeau County, Missouri",Missouri,2023,1467,1309
+26151,"Sanilac County, Michigan",Michigan,2023,1496,1479
+51103,"Lancaster County, Virginia",Virginia,2023,1431,1616
+13029,"Bryan County, Georgia",Georgia,2023,2750,1680
+26023,"Branch County, Michigan",Michigan,2023,1905,1707
+06031,"Kings County, California",California,2023,2468,1880
+53069,"Wahkiakum County, Washington",Washington,2023,2331,1920
+37021,"Buncombe County, North Carolina",North Carolina,2023,2272,1969
+13177,"Lee County, Georgia",Georgia,2023,2338,2079
+17023,"Clark County, Illinois",Illinois,2023,2061,2085
+16055,"Kootenai County, Idaho",Idaho,2023,2181,2252
+19059,"Dickinson County, Iowa",Iowa,2023,2356,2594
+42099,"Perry County, Pennsylvania",Pennsylvania,2023,2867,2618
+49035,"Salt Lake County, Utah",Utah,2023,2704,2784
+17091,"Kankakee County, Illinois",Illinois,2023,4615,3363
+20045,"Douglas County, Kansas",Kansas,2023,3504,3516
+31109,"Lancaster County, Nebraska",Nebraska,2023,4079,4016
+17203,"Woodford County, Illinois",Illinois,2023,4397,4045
+24031,"Montgomery County, Maryland",Maryland,2023,5287,5470
+34033,"Salem County, New Jersey",New Jersey,2023,6886,6551
+01119,"Sumter County, Alabama",Alabama,2023,335,278
+01027,"Clay County, Alabama",Alabama,2023,377,285
+01005,"Barbour County, Alabama",Alabama,2023,585,289
+04011,"Greenlee County, Arizona",Arizona,2023,610,446
+40065,"Jackson County, Oklahoma",Oklahoma,2023,1501,496
+51105,"Lee County, Virginia",Virginia,2023,778,506
+54091,"Taylor County, West Virginia",West Virginia,2023,951,523
+05043,"Drew County, Arkansas",Arkansas,2023,604,556
+18155,"Switzerland County, Indiana",Indiana,2023,967,563
+47077,"Henderson County, Tennessee",Tennessee,2023,866,676
+18055,"Greene County, Indiana",Indiana,2023,1041,757
+21137,"Lincoln County, Kentucky",Kentucky,2023,1165,771
+21149,"McLean County, Kentucky",Kentucky,2023,1020,900
+48489,"Willacy County, Texas",Texas,2023,2340,931
+13205,"Mitchell County, Georgia",Georgia,2023,1733,952
+27069,"Kittson County, Minnesota",Minnesota,2023,1483,1003
+39001,"Adams County, Ohio",Ohio,2023,1470,1082
+06049,"Modoc County, California",California,2023,1976,1222
+51019,"Bedford County, Virginia",Virginia,2023,1292,1227
+51520,"Bristol city, Virginia",Virginia,2023,1315,1252
+39013,"Belmont County, Ohio",Ohio,2023,1487,1333
+08119,"Teller County, Colorado",Colorado,2023,1637,1424
+37087,"Haywood County, North Carolina",North Carolina,2023,1543,1518
+21021,"Boyle County, Kentucky",Kentucky,2023,1817,1596
+37089,"Henderson County, North Carolina",North Carolina,2023,1682,1639
+13297,"Walton County, Georgia",Georgia,2023,2712,1689
+31097,"Johnson County, Nebraska",Nebraska,2023,2272,1725
+22071,"Orleans Parish, Louisiana",Louisiana,2023,2859,1735
+46061,"Hanson County, South Dakota",South Dakota,2023,2085,1883
+48093,"Comanche County, Texas",Texas,2023,2400,1932
+48325,"Medina County, Texas",Texas,2023,3565,1997
+16027,"Canyon County, Idaho",Idaho,2023,1994,2005
+55041,"Forest County, Wisconsin",Wisconsin,2023,1926,2067
+31101,"Keith County, Nebraska",Nebraska,2023,2198,2209
+17011,"Bureau County, Illinois",Illinois,2023,2613,2383
+12089,"Nassau County, Florida",Florida,2023,2627,2401
+36045,"Jefferson County, New York",New York,2023,3089,2515
+42131,"Wyoming County, Pennsylvania",Pennsylvania,2023,2759,2767
+26005,"Allegan County, Michigan",Michigan,2023,2819,2767
+06005,"Amador County, California",California,2023,3001,2814
+55111,"Sauk County, Wisconsin",Wisconsin,2023,3758,3397
+41067,"Washington County, Oregon",Oregon,2023,4863,4825
+36103,"Suffolk County, New York",New York,2023,10001,10001
+54109,"Wyoming County, West Virginia",West Virginia,2023,389,328
+17153,"Pulaski County, Illinois",Illinois,2023,1080,532
+28157,"Wilkinson County, Mississippi",Mississippi,2023,971,539
+48229,"Hudspeth County, Texas",Texas,2023,1027,660
+51173,"Smyth County, Virginia",Virginia,2023,872,688
+47023,"Chester County, Tennessee",Tennessee,2023,1020,724
+37095,"Hyde County, North Carolina",North Carolina,2023,619,798
+47073,"Hawkins County, Tennessee",Tennessee,2023,1009,852
+49015,"Emery County, Utah",Utah,2023,1251,1010
+21145,"McCracken County, Kentucky",Kentucky,2023,1476,1094
+18161,"Union County, Indiana",Indiana,2023,1151,1133
+38041,"Hettinger County, North Dakota",North Dakota,2023,1399,1150
+48271,"Kinney County, Texas",Texas,2023,2097,1198
+26069,"Iosco County, Michigan",Michigan,2023,1407,1217
+18001,"Adams County, Indiana",Indiana,2023,1310,1269
+45079,"Richland County, South Carolina",South Carolina,2023,1697,1284
+37149,"Polk County, North Carolina",North Carolina,2023,1677,1567
+20023,"Cheyenne County, Kansas",Kansas,2023,1637,1684
+48319,"Mason County, Texas",Texas,2023,3757,1832
+31127,"Nemaha County, Nebraska",Nebraska,2023,1606,1867
+39117,"Morrow County, Ohio",Ohio,2023,2278,2061
+06039,"Madera County, California",California,2023,2734,2244
+53013,"Columbia County, Washington",Washington,2023,2154,2312
+06023,"Humboldt County, California",California,2023,2983,2336
+53021,"Franklin County, Washington",Washington,2023,2701,2495
+08005,"Arapahoe County, Colorado",Colorado,2023,2789,2709
+08059,"Jefferson County, Colorado",Colorado,2023,2869,2862
+02090,"Fairbanks North Star Borough, Alaska",Alaska,2023,3829,2922
+28055,"Issaquena County, Mississippi",Mississippi,2023,1214,199
+05027,"Columbia County, Arkansas",Arkansas,2023,893,518
+05141,"Van Buren County, Arkansas",Arkansas,2023,636,527
+40105,"Nowata County, Oklahoma",Oklahoma,2023,1122,584
+47025,"Claiborne County, Tennessee",Tennessee,2023,831,631
+22063,"Livingston Parish, Louisiana",Louisiana,2023,1239,672
+21161,"Mason County, Kentucky",Kentucky,2023,1241,795
+48127,"Dimmit County, Texas",Texas,2023,1465,802
+22023,"Cameron Parish, Louisiana",Louisiana,2023,0,804
+21003,"Allen County, Kentucky",Kentucky,2023,1189,830
+05131,"Sebastian County, Arkansas",Arkansas,2023,1234,878
+48129,"Donley County, Texas",Texas,2023,2244,918
+37171,"Surry County, North Carolina",North Carolina,2023,1152,926
+16067,"Minidoka County, Idaho",Idaho,2023,1337,1053
+13277,"Tift County, Georgia",Georgia,2023,1435,1102
+48347,"Nacogdoches County, Texas",Texas,2023,2198,1134
+20205,"Wilson County, Kansas",Kansas,2023,1406,1142
+29089,"Howard County, Missouri",Missouri,2023,1388,1153
+21163,"Meade County, Kentucky",Kentucky,2023,1585,1166
+48443,"Terrell County, Texas",Texas,2023,1540,1208
+27043,"Faribault County, Minnesota",Minnesota,2023,1310,1220
+39065,"Hardin County, Ohio",Ohio,2023,1716,1245
+48415,"Scurry County, Texas",Texas,2023,2695,1246
+19173,"Taylor County, Iowa",Iowa,2023,1387,1250
+46085,"Lyman County, South Dakota",South Dakota,2023,2063,1250
+20163,"Rooks County, Kansas",Kansas,2023,1893,1376
+41045,"Malheur County, Oregon",Oregon,2023,2058,1538
+46119,"Sully County, South Dakota",South Dakota,2023,1813,1558
+08007,"Archuleta County, Colorado",Colorado,2023,1513,1562
+13225,"Peach County, Georgia",Georgia,2023,2408,1577
+48467,"Van Zandt County, Texas",Texas,2023,2833,1620
+51770,"Roanoke city, Virginia",Virginia,2023,1888,1742
+26165,"Wexford County, Michigan",Michigan,2023,1917,1797
+19091,"Humboldt County, Iowa",Iowa,2023,1933,1807
+13013,"Barrow County, Georgia",Georgia,2023,2246,1835
+40017,"Canadian County, Oklahoma",Oklahoma,2023,2374,1993
+55099,"Price County, Wisconsin",Wisconsin,2023,2211,2027
+26145,"Saginaw County, Michigan",Michigan,2023,2314,2045
+41011,"Coos County, Oregon",Oregon,2023,2315,2121
+39169,"Wayne County, Ohio",Ohio,2023,2541,2333
+24047,"Worcester County, Maryland",Maryland,2023,2652,2593
+35028,"Los Alamos County, New Mexico",New Mexico,2023,2570,2635
+26055,"Grand Traverse County, Michigan",Michigan,2023,2926,2845
+48265,"Kerr County, Texas",Texas,2023,3340,2903
+17167,"Sangamon County, Illinois",Illinois,2023,3651,2981
+24009,"Calvert County, Maryland",Maryland,2023,3841,3906
+02050,"Bethel Census Area, Alaska",Alaska,2023,0,199
+22027,"Claiborne Parish, Louisiana",Louisiana,2023,467,229
+22099,"St. Martin Parish, Louisiana",Louisiana,2023,984,332
+02068,"Denali Borough, Alaska",Alaska,2023,0,350
+40069,"Johnston County, Oklahoma",Oklahoma,2023,856,497
+21045,"Casey County, Kentucky",Kentucky,2023,1066,543
+51690,"Martinsville city, Virginia",Virginia,2023,797,673
+18083,"Knox County, Indiana",Indiana,2023,1028,714
+40091,"McIntosh County, Oklahoma",Oklahoma,2023,898,721
+54011,"Cabell County, West Virginia",West Virginia,2023,1160,784
+29131,"Miller County, Missouri",Missouri,2023,1196,908
+27089,"Marshall County, Minnesota",Minnesota,2023,1341,1191
+19109,"Kossuth County, Iowa",Iowa,2023,1544,1327
+13087,"Decatur County, Georgia",Georgia,2023,1353,1352
+42033,"Clearfield County, Pennsylvania",Pennsylvania,2023,1691,1352
+39059,"Guernsey County, Ohio",Ohio,2023,1659,1436
+18173,"Warrick County, Indiana",Indiana,2023,1536,1440
+20053,"Ellsworth County, Kansas",Kansas,2023,1978,1457
+08015,"Chaffee County, Colorado",Colorado,2023,1717,1597
+48285,"Lavaca County, Texas",Texas,2023,2791,1683
+39099,"Mahoning County, Ohio",Ohio,2023,2223,1687
+16077,"Power County, Idaho",Idaho,2023,1489,1690
+20127,"Morris County, Kansas",Kansas,2023,2142,1707
+42073,"Lawrence County, Pennsylvania",Pennsylvania,2023,2159,1768
+20155,"Reno County, Kansas",Kansas,2023,2381,1844
+19165,"Shelby County, Iowa",Iowa,2023,1942,2037
+30017,"Custer County, Montana",Montana,2023,2352,2117
+20061,"Geary County, Kansas",Kansas,2023,2817,2257
+06101,"Sutter County, California",California,2023,3323,2646
+39089,"Licking County, Ohio",Ohio,2023,3387,2754
+39025,"Clermont County, Ohio",Ohio,2023,3326,2834
+36051,"Livingston County, New York",New York,2023,4534,3676
+53029,"Island County, Washington",Washington,2023,3708,3873
+33017,"Strafford County, New Hampshire",New Hampshire,2023,6944,5841
+17197,"Will County, Illinois",Illinois,2023,7207,6467
+22065,"Madison Parish, Louisiana",Louisiana,2023,384,199
+51027,"Buchanan County, Virginia",Virginia,2023,611,383
+45005,"Allendale County, South Carolina",South Carolina,2023,585,454
+21011,"Bath County, Kentucky",Kentucky,2023,958,535
+21205,"Rowan County, Kentucky",Kentucky,2023,1104,550
+13003,"Atkinson County, Georgia",Georgia,2023,910,554
+51595,"Emporia city, Virginia",Virginia,2023,1399,766
+28067,"Jones County, Mississippi",Mississippi,2023,1384,884
+27117,"Pipestone County, Minnesota",Minnesota,2023,1106,1206
+19143,"Osceola County, Iowa",Iowa,2023,1312,1288
+27125,"Red Lake County, Minnesota",Minnesota,2023,1700,1301
+27165,"Watonwan County, Minnesota",Minnesota,2023,1854,1308
+29177,"Ray County, Missouri",Missouri,2023,1668,1327
+26133,"Osceola County, Michigan",Michigan,2023,1592,1394
+21005,"Anderson County, Kentucky",Kentucky,2023,1839,1445
+48003,"Andrews County, Texas",Texas,2023,3024,1541
+31039,"Cuming County, Nebraska",Nebraska,2023,2177,1619
+20109,"Logan County, Kansas",Kansas,2023,2352,1816
+30007,"Broadwater County, Montana",Montana,2023,2267,2083
+06029,"Kern County, California",California,2023,3142,2235
+51127,"New Kent County, Virginia",Virginia,2023,2591,2344
+55103,"Richland County, Wisconsin",Wisconsin,2023,2565,2598
+17119,"Madison County, Illinois",Illinois,2023,3604,2691
+17103,"Lee County, Illinois",Illinois,2023,3189,2766
+53015,"Cowlitz County, Washington",Washington,2023,3096,2768
+36121,"Wyoming County, New York",New York,2023,3830,3263
+50019,"Orleans County, Vermont",Vermont,2023,3635,3457
+49043,"Summit County, Utah",Utah,2023,3388,3770
+36027,"Dutchess County, New York",New York,2023,7498,6688
+40149,"Washita County, Oklahoma",Oklahoma,2023,753,460
+54067,"Nicholas County, West Virginia",West Virginia,2023,685,464
+05121,"Randolph County, Arkansas",Arkansas,2023,581,488
+28147,"Walthall County, Mississippi",Mississippi,2023,1275,690
+51017,"Bath County, Virginia",Virginia,2023,917,770
+32027,"Pershing County, Nevada",Nevada,2023,1288,857
+22087,"St. Bernard Parish, Louisiana",Louisiana,2023,1007,891
+45063,"Lexington County, South Carolina",South Carolina,2023,1235,893
+38075,"Renville County, North Dakota",North Dakota,2023,1193,988
+12107,"Putnam County, Florida",Florida,2023,1410,992
+39115,"Morgan County, Ohio",Ohio,2023,1383,1049
+48059,"Callahan County, Texas",Texas,2023,2047,1049
+38045,"LaMoure County, North Dakota",North Dakota,2023,1155,1133
+48133,"Eastland County, Texas",Texas,2023,2137,1161
+41037,"Lake County, Oregon",Oregon,2023,1947,1192
+13127,"Glynn County, Georgia",Georgia,2023,1984,1215
+18137,"Ripley County, Indiana",Indiana,2023,1153,1244
+37133,"Onslow County, North Carolina",North Carolina,2023,1451,1358
+48213,"Henderson County, Texas",Texas,2023,2670,1368
+26039,"Crawford County, Michigan",Michigan,2023,1550,1734
+23017,"Oxford County, Maine",Maine,2023,2293,1867
+31185,"York County, Nebraska",Nebraska,2023,2293,1947
+30093,"Silver Bow County, Montana",Montana,2023,2449,2227
+24011,"Caroline County, Maryland",Maryland,2023,2536,2478
+39113,"Montgomery County, Ohio",Ohio,2023,3192,2668
+51710,"Norfolk city, Virginia",Virginia,2023,2745,2720
+17099,"LaSalle County, Illinois",Illinois,2023,3692,2867
+31155,"Saunders County, Nebraska",Nebraska,2023,3272,3218
+44009,"Washington County, Rhode Island",Rhode Island,2023,4857,5182
+34009,"Cape May County, New Jersey",New Jersey,2023,5242,5218
+08011,"Bent County, Colorado",Colorado,2023,543,514
+48279,"Lamb County, Texas",Texas,2023,2234,627
+13301,"Warren County, Georgia",Georgia,2023,984,669
+54057,"Mineral County, West Virginia",West Virginia,2023,968,700
+47185,"White County, Tennessee",Tennessee,2023,919,709
+18025,"Crawford County, Indiana",Indiana,2023,1048,743
+47019,"Carter County, Tennessee",Tennessee,2023,867,803
+21155,"Marion County, Kentucky",Kentucky,2023,1237,940
+31115,"Loup County, Nebraska",Nebraska,2023,1000,959
+37007,"Anson County, North Carolina",North Carolina,2023,1219,1002
+13249,"Schley County, Georgia",Georgia,2023,1714,1041
+45035,"Dorchester County, South Carolina",South Carolina,2023,1882,1274
+13311,"White County, Georgia",Georgia,2023,1866,1398
+29113,"Lincoln County, Missouri",Missouri,2023,1845,1500
+48337,"Montague County, Texas",Texas,2023,2180,1517
+30003,"Big Horn County, Montana",Montana,2023,1432,1528
+49039,"Sanpete County, Utah",Utah,2023,1533,1542
+48375,"Potter County, Texas",Texas,2023,2615,1613
+02070,"Dillingham Census Area, Alaska",Alaska,2023,3410,1638
+48159,"Franklin County, Texas",Texas,2023,2488,1643
+30041,"Hill County, Montana",Montana,2023,2243,1709
+12019,"Clay County, Florida",Florida,2023,2273,1762
+26149,"St. Joseph County, Michigan",Michigan,2023,1909,1806
+51570,"Colonial Heights city, Virginia",Virginia,2023,2040,2246
+41027,"Hood River County, Oregon",Oregon,2023,3367,3345
+36093,"Schenectady County, New York",New York,2023,5888,4690
+34035,"Somerset County, New Jersey",New Jersey,2023,10001,10001
+04001,"Apache County, Arizona",Arizona,2023,793,520
+08115,"Sedgwick County, Colorado",Colorado,2023,788,568
+29093,"Iron County, Missouri",Missouri,2023,875,624
+22095,"St. John the Baptist Parish, Louisiana",Louisiana,2023,890,709
+29205,"Shelby County, Missouri",Missouri,2023,842,719
+51720,"Norton city, Virginia",Virginia,2023,1112,725
+21039,"Carlisle County, Kentucky",Kentucky,2023,1094,773
+04027,"Yuma County, Arizona",Arizona,2023,1469,979
+13129,"Gordon County, Georgia",Georgia,2023,1667,1057
+47167,"Tipton County, Tennessee",Tennessee,2023,1204,1060
+13273,"Terrell County, Georgia",Georgia,2023,1325,1130
+22033,"East Baton Rouge Parish, Louisiana",Louisiana,2023,1749,1209
+46045,"Edmunds County, South Dakota",South Dakota,2023,1742,1228
+39141,"Ross County, Ohio",Ohio,2023,1709,1399
+48037,"Bowie County, Texas",Texas,2023,2655,1518
+19065,"Fayette County, Iowa",Iowa,2023,1746,1678
+55051,"Iron County, Wisconsin",Wisconsin,2023,1783,1768
+27005,"Becker County, Minnesota",Minnesota,2023,2007,1850
+27137,"St. Louis County, Minnesota",Minnesota,2023,2317,1871
+51079,"Greene County, Virginia",Virginia,2023,1985,2079
+19055,"Delaware County, Iowa",Iowa,2023,2364,2116
+06011,"Colusa County, California",California,2023,2739,2203
+19193,"Woodbury County, Iowa",Iowa,2023,2643,2369
+13113,"Fayette County, Georgia",Georgia,2023,3499,2438
+39017,"Butler County, Ohio",Ohio,2023,3234,2657
+24510,"Baltimore city, Maryland",Maryland,2023,3521,2662
+37119,"Mecklenburg County, North Carolina",North Carolina,2023,2793,2733
+36075,"Oswego County, New York",New York,2023,4012,2851
+12086,"Miami-Dade County, Florida",Florida,2023,3816,2973
+16013,"Blaine County, Idaho",Idaho,2023,1961,3313
+24017,"Charles County, Maryland",Maryland,2023,4252,3950
+50027,"Windsor County, Vermont",Vermont,2023,5610,4884
+51510,"Alexandria city, Virginia",Virginia,2023,6848,6993

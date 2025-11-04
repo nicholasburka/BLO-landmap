@@ -1,0 +1,3145 @@
+GEOID,county_name,state_name,year,poverty_rate,poverty_rate_black,poverty_rate_white
+49029,"Morgan County, Utah",Utah,2023,1.7,,1.7
+46117,"Stanley County, South Dakota",South Dakota,2023,2.1,,2.1
+48431,"Sterling County, Texas",Texas,2023,2.7,,3.2
+35028,"Los Alamos County, New Mexico",New Mexico,2023,2.9,11.6,2.2
+25019,"Nantucket County, Massachusetts",Massachusetts,2023,3,4.4,3.1
+08035,"Douglas County, Colorado",Colorado,2023,3.2,10.8,3.1
+48105,"Crockett County, Texas",Texas,2023,3.3,,3.9
+51145,"Powhatan County, Virginia",Virginia,2023,3.3,7.2,3.1
+48211,"Hemphill County, Texas",Texas,2023,3.5,13.8,3.3
+51610,"Falls Church city, Virginia",Virginia,2023,3.6,1.6,3.3
+20075,"Hamilton County, Kansas",Kansas,2023,3.7,,4.9
+34019,"Hunterdon County, New Jersey",New Jersey,2023,3.8,7.6,3.5
+51075,"Goochland County, Virginia",Virginia,2023,3.9,7,3.5
+24009,"Calvert County, Maryland",Maryland,2023,4,8.7,3.3
+51107,"Loudoun County, Virginia",Virginia,2023,4,6.6,3.1
+21185,"Oldham County, Kentucky",Kentucky,2023,4,11.1,3.6
+20063,"Gove County, Kansas",Kansas,2023,4.1,,3.9
+27139,"Scott County, Minnesota",Minnesota,2023,4.1,16.2,3.2
+30055,"McCone County, Montana",Montana,2023,4.2,,4.6
+27019,"Carver County, Minnesota",Minnesota,2023,4.2,23.6,4.1
+48397,"Rockwall County, Texas",Texas,2023,4.3,7.9,3.9
+18057,"Hamilton County, Indiana",Indiana,2023,4.3,9.1,4.1
+08053,"Hinsdale County, Colorado",Colorado,2023,4.5,,4.8
+49043,"Summit County, Utah",Utah,2023,4.5,6.2,4.4
+18059,"Hancock County, Indiana",Indiana,2023,4.5,6.2,4.5
+13117,"Forsyth County, Georgia",Georgia,2023,4.5,4.9,4
+47187,"Williamson County, Tennessee",Tennessee,2023,4.5,12.5,4.2
+55089,"Ozaukee County, Wisconsin",Wisconsin,2023,4.6,9.6,4.4
+17133,"Monroe County, Illinois",Illinois,2023,4.6,78.7,4.2
+38065,"Oliver County, North Dakota",North Dakota,2023,4.7,,5.1
+49045,"Tooele County, Utah",Utah,2023,4.7,,4.2
+29183,"St. Charles County, Missouri",Missouri,2023,4.7,9.3,4.1
+31171,"Thomas County, Nebraska",Nebraska,2023,4.8,,4.2
+02063,"Chugach Census Area, Alaska",Alaska,2023,4.8,11.1,4.5
+48033,"Borden County, Texas",Texas,2023,4.8,,5.2
+27141,"Sherburne County, Minnesota",Minnesota,2023,4.8,7.9,4.4
+33015,"Rockingham County, New Hampshire",New Hampshire,2023,4.8,6.3,4.6
+27171,"Wright County, Minnesota",Minnesota,2023,4.9,2.3,4.5
+31025,"Cass County, Nebraska",Nebraska,2023,4.9,3.3,4.8
+17093,"Kendall County, Illinois",Illinois,2023,4.9,11.6,3.5
+26093,"Livingston County, Michigan",Michigan,2023,4.9,11.6,4.9
+08091,"Ouray County, Colorado",Colorado,2023,5,,3.5
+37029,"Camden County, North Carolina",North Carolina,2023,5,5.4,5.1
+08014,"Broomfield County, Colorado",Colorado,2023,5,6.1,4.3
+27163,"Washington County, Minnesota",Minnesota,2023,5,8.9,4.2
+39041,"Delaware County, Ohio",Ohio,2023,5,13.1,4.5
+18063,"Hendricks County, Indiana",Indiana,2023,5,11.4,3.9
+18011,"Boone County, Indiana",Indiana,2023,5.1,7.9,5.1
+39159,"Union County, Ohio",Ohio,2023,5.1,3.1,5.3
+49051,"Wasatch County, Utah",Utah,2023,5.1,,3.9
+48259,"Kendall County, Texas",Texas,2023,5.1,,4.2
+51179,"Stafford County, Virginia",Virginia,2023,5.1,4.6,3.5
+38013,"Burke County, North Dakota",North Dakota,2023,5.1,,4.2
+34027,"Morris County, New Jersey",New Jersey,2023,5.1,10.5,4.2
+24027,"Howard County, Maryland",Maryland,2023,5.1,11.7,3
+31183,"Wheeler County, Nebraska",Nebraska,2023,5.2,,5.4
+55133,"Waukesha County, Wisconsin",Wisconsin,2023,5.2,22.1,4.8
+31153,"Sarpy County, Nebraska",Nebraska,2023,5.2,11.2,4.5
+51085,"Hanover County, Virginia",Virginia,2023,5.2,13.5,3.9
+51127,"New Kent County, Virginia",Virginia,2023,5.2,14.6,3.9
+55131,"Washington County, Wisconsin",Wisconsin,2023,5.3,2.4,5.2
+36059,"Nassau County, New York",New York,2023,5.3,7.1,4.1
+20091,"Johnson County, Kansas",Kansas,2023,5.3,11.9,4.4
+19119,"Lyon County, Iowa",Iowa,2023,5.3,,5.3
+24013,"Carroll County, Maryland",Maryland,2023,5.3,14.3,4.4
+08039,"Elbert County, Colorado",Colorado,2023,5.3,8.1,5.1
+20163,"Rooks County, Kansas",Kansas,2023,5.3,9.9,4.2
+20067,"Grant County, Kansas",Kansas,2023,5.4,,5.2
+31093,"Howard County, Nebraska",Nebraska,2023,5.4,,5.8
+34037,"Sussex County, New Jersey",New Jersey,2023,5.4,7.3,5.5
+39165,"Warren County, Ohio",Ohio,2023,5.4,4.3,4.9
+51199,"York County, Virginia",Virginia,2023,5.4,9,4.1
+25007,"Dukes County, Massachusetts",Massachusetts,2023,5.4,8.7,4.2
+19181,"Warren County, Iowa",Iowa,2023,5.4,21.8,5.3
+27039,"Dodge County, Minnesota",Minnesota,2023,5.4,70.9,4.2
+34035,"Somerset County, New Jersey",New Jersey,2023,5.5,8.4,3.9
+13113,"Fayette County, Georgia",Georgia,2023,5.5,7.3,4.9
+24003,"Anne Arundel County, Maryland",Maryland,2023,5.5,8.4,4.1
+20195,"Trego County, Kansas",Kansas,2023,5.5,100,5.4
+41027,"Hood River County, Oregon",Oregon,2023,5.5,18.3,4.8
+46063,"Harding County, South Dakota",South Dakota,2023,5.6,,5.1
+27037,"Dakota County, Minnesota",Minnesota,2023,5.6,13.8,4.2
+12129,"Wakulla County, Florida",Florida,2023,5.6,6.5,5.5
+55015,"Calumet County, Wisconsin",Wisconsin,2023,5.7,19.6,4.6
+02195,"Petersburg Borough, Alaska",Alaska,2023,5.7,14,4.2
+18087,"LaGrange County, Indiana",Indiana,2023,5.7,15.4,5.7
+20097,"Kiowa County, Kansas",Kansas,2023,5.7,53.3,5.5
+48011,"Armstrong County, Texas",Texas,2023,5.8,,5.3
+17013,"Calhoun County, Illinois",Illinois,2023,5.8,,6.1
+39055,"Geauga County, Ohio",Ohio,2023,5.8,8.8,5.4
+51685,"Manassas Park city, Virginia",Virginia,2023,5.8,1,3.2
+19049,"Dallas County, Iowa",Iowa,2023,5.8,2.6,5.6
+51735,"Poquoson city, Virginia",Virginia,2023,5.8,12.4,6
+46083,"Lincoln County, South Dakota",South Dakota,2023,5.8,41,4.1
+48261,"Kenedy County, Texas",Texas,2023,5.9,,30
+17147,"Piatt County, Illinois",Illinois,2023,5.9,5.4,5.8
+27025,"Chisago County, Minnesota",Minnesota,2023,5.9,14.5,5.6
+42029,"Chester County, Pennsylvania",Pennsylvania,2023,5.9,18.1,4.7
+51059,"Fairfax County, Virginia",Virginia,2023,5.9,8.9,4.1
+20083,"Hodgeman County, Kansas",Kansas,2023,6,,5.7
+49011,"Davis County, Utah",Utah,2023,6,8.7,5.7
+02100,"Haines Borough, Alaska",Alaska,2023,6.1,,4.2
+51023,"Botetourt County, Virginia",Virginia,2023,6.1,3.6,6.1
+17111,"McHenry County, Illinois",Illinois,2023,6.1,8.4,5.4
+13223,"Paulding County, Georgia",Georgia,2023,6.1,7,5.4
+51061,"Fauquier County, Virginia",Virginia,2023,6.1,4,6.2
+39103,"Medina County, Ohio",Ohio,2023,6.1,27.2,5.6
+51153,"Prince William County, Virginia",Virginia,2023,6.1,6.1,4.7
+42017,"Bucks County, Pennsylvania",Pennsylvania,2023,6.1,12.1,5.3
+39107,"Mercer County, Ohio",Ohio,2023,6.1,30.7,5.9
+13219,"Oconee County, Georgia",Georgia,2023,6.1,26.9,4.7
+20093,"Kearny County, Kansas",Kansas,2023,6.1,58.7,6.7
+56011,"Crook County, Wyoming",Wyoming,2023,6.2,,6.1
+31027,"Cedar County, Nebraska",Nebraska,2023,6.2,,5.6
+46061,"Hanson County, South Dakota",South Dakota,2023,6.2,,6.5
+31143,"Polk County, Nebraska",Nebraska,2023,6.2,,5.4
+02230,"Skagway Municipality, Alaska",Alaska,2023,6.2,,8.8
+02090,"Fairbanks North Star Borough, Alaska",Alaska,2023,6.2,12.5,5.4
+19059,"Dickinson County, Iowa",Iowa,2023,6.3,,6
+48421,"Sherman County, Texas",Texas,2023,6.3,,6.7
+22023,"Cameron Parish, Louisiana",Louisiana,2023,6.3,,6.7
+17063,"Grundy County, Illinois",Illinois,2023,6.3,17,5.7
+48491,"Williamson County, Texas",Texas,2023,6.3,10.4,5.5
+24021,"Frederick County, Maryland",Maryland,2023,6.3,12.3,5
+48085,"Collin County, Texas",Texas,2023,6.3,10.2,5.3
+30077,"Powell County, Montana",Montana,2023,6.3,,6.7
+20087,"Jefferson County, Kansas",Kansas,2023,6.3,9.9,5.8
+30043,"Jefferson County, Montana",Montana,2023,6.3,35.7,5.6
+38087,"Slope County, North Dakota",North Dakota,2023,6.4,,6
+48393,"Roberts County, Texas",Texas,2023,6.4,,4.5
+48319,"Mason County, Texas",Texas,2023,6.4,,7.2
+18173,"Warrick County, Indiana",Indiana,2023,6.4,10.7,6.5
+55087,"Outagamie County, Wisconsin",Wisconsin,2023,6.4,21.4,5.3
+19167,"Sioux County, Iowa",Iowa,2023,6.4,,6.6
+17043,"DuPage County, Illinois",Illinois,2023,6.4,17,5.1
+34025,"Monmouth County, New Jersey",New Jersey,2023,6.4,13.8,5.3
+36103,"Suffolk County, New York",New York,2023,6.4,9.7,5.3
+19075,"Grundy County, Iowa",Iowa,2023,6.4,,6.5
+18161,"Union County, Indiana",Indiana,2023,6.4,,6.6
+48091,"Comal County, Texas",Texas,2023,6.4,7,6.1
+31155,"Saunders County, Nebraska",Nebraska,2023,6.4,14.7,5.3
+08107,"Routt County, Colorado",Colorado,2023,6.4,39.2,5.7
+30069,"Petroleum County, Montana",Montana,2023,6.5,,6.5
+27055,"Houston County, Minnesota",Minnesota,2023,6.5,,6.4
+48425,"Somervell County, Texas",Texas,2023,6.5,70.3,5.4
+13057,"Cherokee County, Georgia",Georgia,2023,6.5,7,6
+33011,"Hillsborough County, New Hampshire",New Hampshire,2023,6.5,12.2,6
+36079,"Putnam County, New York",New York,2023,6.5,8,5.6
+51099,"King George County, Virginia",Virginia,2023,6.5,8.2,5.7
+06081,"San Mateo County, California",California,2023,6.5,13,5.6
+29037,"Cass County, Missouri",Missouri,2023,6.5,12.6,6.2
+42091,"Montgomery County, Pennsylvania",Pennsylvania,2023,6.5,13.2,5.1
+51095,"James City County, Virginia",Virginia,2023,6.5,13.1,4.7
+46033,"Custer County, South Dakota",South Dakota,2023,6.6,18.8,6.1
+32017,"Lincoln County, Nevada",Nevada,2023,6.6,100,6
+46057,"Hamlin County, South Dakota",South Dakota,2023,6.6,,6.6
+27003,"Anoka County, Minnesota",Minnesota,2023,6.6,13.3,5.6
+21015,"Boone County, Kentucky",Kentucky,2023,6.6,9.2,6.3
+24017,"Charles County, Maryland",Maryland,2023,6.6,6,6.5
+25021,"Norfolk County, Massachusetts",Massachusetts,2023,6.6,11.7,5.6
+46059,"Hand County, South Dakota",South Dakota,2023,6.6,,6.8
+20119,"Meade County, Kansas",Kansas,2023,6.6,,5.3
+02068,"Denali Borough, Alaska",Alaska,2023,6.6,14.3,4.9
+18147,"Spencer County, Indiana",Indiana,2023,6.6,25.7,6.5
+55109,"St. Croix County, Wisconsin",Wisconsin,2023,6.6,45.8,5.9
+31099,"Kearney County, Nebraska",Nebraska,2023,6.7,,6.8
+16025,"Camas County, Idaho",Idaho,2023,6.7,,8
+46039,"Deuel County, South Dakota",South Dakota,2023,6.7,,7.1
+19015,"Boone County, Iowa",Iowa,2023,6.7,4.6,6.5
+12109,"St. Johns County, Florida",Florida,2023,6.7,9.7,5.9
+06061,"Placer County, California",California,2023,6.7,7.6,6.3
+36091,"Saratoga County, New York",New York,2023,6.7,11.3,6.5
+08059,"Jefferson County, Colorado",Colorado,2023,6.7,16.2,6
+34003,"Bergen County, New Jersey",New Jersey,2023,6.7,10,6.1
+51683,"Manassas city, Virginia",Virginia,2023,6.7,14.6,4.5
+31081,"Hamilton County, Nebraska",Nebraska,2023,6.7,19,4.9
+20121,"Miami County, Kansas",Kansas,2023,6.7,40.3,5.9
+30057,"Madison County, Montana",Montana,2023,6.8,,6.7
+48205,"Hartley County, Texas",Texas,2023,6.8,,3.1
+19121,"Madison County, Iowa",Iowa,2023,6.8,6.7,6.7
+44001,"Bristol County, Rhode Island",Rhode Island,2023,6.8,13,6.7
+29165,"Platte County, Missouri",Missouri,2023,6.8,10.3,6.3
+13073,"Columbia County, Georgia",Georgia,2023,6.8,8.4,5.5
+19149,"Plymouth County, Iowa",Iowa,2023,6.8,9.4,6
+51073,"Gloucester County, Virginia",Virginia,2023,6.8,13,6
+51003,"Albemarle County, Virginia",Virginia,2023,6.8,14.4,5.8
+51041,"Chesterfield County, Virginia",Virginia,2023,6.8,9,4.6
+34005,"Burlington County, New Jersey",New Jersey,2023,6.8,9.8,5.1
+08019,"Clear Creek County, Colorado",Colorado,2023,6.8,38.1,6.2
+31097,"Johnson County, Nebraska",Nebraska,2023,6.8,11.4,6.7
+09130,"Lower Connecticut River Valley Planning Region, Connecticut",Connecticut,2023,6.9,15.3,5.7
+19131,"Mitchell County, Iowa",Iowa,2023,6.9,20,6.4
+20069,"Gray County, Kansas",Kansas,2023,6.9,,6.7
+31177,"Washington County, Nebraska",Nebraska,2023,6.9,,6.6
+31159,"Seward County, Nebraska",Nebraska,2023,6.9,1.6,6.8
+38097,"Traill County, North Dakota",North Dakota,2023,6.9,32,6.4
+20193,"Thomas County, Kansas",Kansas,2023,6.9,,6.8
+01117,"Shelby County, Alabama",Alabama,2023,6.9,7.8,6
+06085,"Santa Clara County, California",California,2023,6.9,12.8,5.7
+19129,"Mills County, Iowa",Iowa,2023,6.9,3.6,7
+18073,"Jasper County, Indiana",Indiana,2023,6.9,6.3,6.9
+51043,"Clarke County, Virginia",Virginia,2023,6.9,29.8,5.6
+31073,"Gosper County, Nebraska",Nebraska,2023,7,,6.2
+51113,"Madison County, Virginia",Virginia,2023,7,7.5,6.7
+19019,"Buchanan County, Iowa",Iowa,2023,7,9,7
+13177,"Lee County, Georgia",Georgia,2023,7,12.2,5.4
+55045,"Green County, Wisconsin",Wisconsin,2023,7,11.1,7
+38059,"Morton County, North Dakota",North Dakota,2023,7,4.4,6.3
+24025,"Harford County, Maryland",Maryland,2023,7,11.9,5.8
+51177,"Spotsylvania County, Virginia",Virginia,2023,7,11.6,5.1
+48121,"Denton County, Texas",Texas,2023,7,11.5,6
+24035,"Queen Anne's County, Maryland",Maryland,2023,7,14.4,5.1
+17197,"Will County, Illinois",Illinois,2023,7,14.6,5.1
+53029,"Island County, Washington",Washington,2023,7,9.6,6.7
+56039,"Teton County, Wyoming",Wyoming,2023,7,23.4,6.6
+29199,"Scotland County, Missouri",Missouri,2023,7.1,,7.2
+31117,"McPherson County, Nebraska",Nebraska,2023,7.1,,7
+30083,"Richland County, Montana",Montana,2023,7.1,35.7,7.5
+38075,"Renville County, North Dakota",North Dakota,2023,7.1,,5.2
+32029,"Storey County, Nevada",Nevada,2023,7.1,1.3,7
+26089,"Leelanau County, Michigan",Michigan,2023,7.1,12.5,5.6
+31051,"Dixon County, Nebraska",Nebraska,2023,7.1,,7.1
+39137,"Putnam County, Ohio",Ohio,2023,7.1,27.5,5.9
+27079,"Le Sueur County, Minnesota",Minnesota,2023,7.1,55.9,5.8
+19037,"Chickasaw County, Iowa",Iowa,2023,7.1,18.8,6.6
+31167,"Stanton County, Nebraska",Nebraska,2023,7.1,,7.6
+20197,"Wabaunsee County, Kansas",Kansas,2023,7.1,,7
+23005,"Cumberland County, Maine",Maine,2023,7.1,27.9,6
+19125,"Marion County, Iowa",Iowa,2023,7.1,10.8,6.8
+25023,"Plymouth County, Massachusetts",Massachusetts,2023,7.1,15.3,5.6
+51013,"Arlington County, Virginia",Virginia,2023,7.1,14.6,4.5
+33013,"Merrimack County, New Hampshire",New Hampshire,2023,7.1,10.4,6.8
+56023,"Lincoln County, Wyoming",Wyoming,2023,7.1,,6.1
+24031,"Montgomery County, Maryland",Maryland,2023,7.1,11.4,4
+20149,"Pottawatomie County, Kansas",Kansas,2023,7.1,1,7.4
+51069,"Frederick County, Virginia",Virginia,2023,7.1,10.1,6.4
+46019,"Butte County, South Dakota",South Dakota,2023,7.2,,6.7
+08065,"Lake County, Colorado",Colorado,2023,7.2,,4.9
+31031,"Cherry County, Nebraska",Nebraska,2023,7.2,30.8,7.6
+19051,"Davis County, Iowa",Iowa,2023,7.2,,7.4
+27161,"Waseca County, Minnesota",Minnesota,2023,7.2,34.8,6.4
+18179,"Wells County, Indiana",Indiana,2023,7.2,1.1,7.4
+13029,"Bryan County, Georgia",Georgia,2023,7.2,8.1,6.4
+48157,"Fort Bend County, Texas",Texas,2023,7.2,8.3,5.4
+18081,"Johnson County, Indiana",Indiana,2023,7.2,15.5,7
+08097,"Pitkin County, Colorado",Colorado,2023,7.2,63.6,5.7
+38025,"Dunn County, North Dakota",North Dakota,2023,7.2,8.7,7.3
+19031,"Cedar County, Iowa",Iowa,2023,7.2,19.1,6.5
+48065,"Carson County, Texas",Texas,2023,7.2,19.2,7.8
+31083,"Harlan County, Nebraska",Nebraska,2023,7.2,40,7.2
+08093,"Park County, Colorado",Colorado,2023,7.2,45.7,7.4
+16029,"Caribou County, Idaho",Idaho,2023,7.3,,7.6
+19195,"Worth County, Iowa",Iowa,2023,7.3,,7.4
+48039,"Brazoria County, Texas",Texas,2023,7.3,6.5,7.1
+51161,"Roanoke County, Virginia",Virginia,2023,7.3,10.5,6.9
+46127,"Union County, South Dakota",South Dakota,2023,7.3,,7.6
+38023,"Divide County, North Dakota",North Dakota,2023,7.3,3.9,7.1
+51015,"Augusta County, Virginia",Virginia,2023,7.3,25.4,6
+09190,"Western Connecticut Planning Region, Connecticut",Connecticut,2023,7.4,14.5,4.7
+31129,"Nuckolls County, Nebraska",Nebraska,2023,7.4,,6.1
+46087,"McCook County, South Dakota",South Dakota,2023,7.4,,7.4
+16013,"Blaine County, Idaho",Idaho,2023,7.4,,7.3
+27147,"Steele County, Minnesota",Minnesota,2023,7.4,24.8,7.1
+13211,"Morgan County, Georgia",Georgia,2023,7.4,10.4,6.1
+25001,"Barnstable County, Massachusetts",Massachusetts,2023,7.4,8.5,6.5
+29003,"Andrew County, Missouri",Missouri,2023,7.4,,6.6
+13103,"Effingham County, Georgia",Georgia,2023,7.4,11.2,6.5
+48165,"Gaines County, Texas",Texas,2023,7.4,0.4,5.3
+27089,"Marshall County, Minnesota",Minnesota,2023,7.4,5.6,7.3
+44003,"Kent County, Rhode Island",Rhode Island,2023,7.4,4.2,6.9
+21215,"Spencer County, Kentucky",Kentucky,2023,7.4,4.7,7
+51093,"Isle of Wight County, Virginia",Virginia,2023,7.4,15,5.1
+24037,"St. Mary's County, Maryland",Maryland,2023,7.4,14.3,5.9
+13145,"Harris County, Georgia",Georgia,2023,7.4,15.6,5.6
+50001,"Addison County, Vermont",Vermont,2023,7.4,22.7,7.1
+20159,"Rice County, Kansas",Kansas,2023,7.4,26.9,7.5
+08117,"Summit County, Colorado",Colorado,2023,7.4,35.5,5.1
+48235,"Irion County, Texas",Texas,2023,7.5,,5.2
+19085,"Harrison County, Iowa",Iowa,2023,7.5,,7.5
+49001,"Beaver County, Utah",Utah,2023,7.5,,3.3
+18061,"Harrison County, Indiana",Indiana,2023,7.5,14,7.3
+17027,"Clinton County, Illinois",Illinois,2023,7.5,16,7.6
+33003,"Carroll County, New Hampshire",New Hampshire,2023,7.5,2.3,7.3
+39011,"Auglaize County, Ohio",Ohio,2023,7.5,11.7,6.9
+49057,"Weber County, Utah",Utah,2023,7.5,15.2,7.2
+19017,"Bremer County, Iowa",Iowa,2023,7.5,,7.2
+25017,"Middlesex County, Massachusetts",Massachusetts,2023,7.5,15.4,6
+41005,"Clackamas County, Oregon",Oregon,2023,7.5,12,7.4
+37055,"Dare County, North Carolina",North Carolina,2023,7.5,28,6
+39175,"Wyandot County, Ohio",Ohio,2023,7.5,21.4,7.5
+50013,"Grand Isle County, Vermont",Vermont,2023,7.6,20,7.5
+38009,"Bottineau County, North Dakota",North Dakota,2023,7.6,,6.5
+08121,"Washington County, Colorado",Colorado,2023,7.6,,6.4
+55061,"Kewaunee County, Wisconsin",Wisconsin,2023,7.6,,6.8
+17203,"Woodford County, Illinois",Illinois,2023,7.6,28.5,7.5
+37053,"Currituck County, North Carolina",North Carolina,2023,7.6,4.7,6.7
+47189,"Wilson County, Tennessee",Tennessee,2023,7.6,13.1,6.5
+05007,"Benton County, Arkansas",Arkansas,2023,7.6,6.5,7.2
+08119,"Teller County, Colorado",Colorado,2023,7.6,12.8,8
+34015,"Gloucester County, New Jersey",New Jersey,2023,7.6,15,6.2
+56041,"Uinta County, Wyoming",Wyoming,2023,7.6,,7.3
+46093,"Meade County, South Dakota",South Dakota,2023,7.6,7.3,7.4
+19071,"Fremont County, Iowa",Iowa,2023,7.6,27.8,7.3
+31023,"Butler County, Nebraska",Nebraska,2023,7.6,13.3,7.2
+31135,"Perkins County, Nebraska",Nebraska,2023,7.7,,6.3
+46107,"Potter County, South Dakota",South Dakota,2023,7.7,,5
+38019,"Cavalier County, North Dakota",North Dakota,2023,7.7,,7.6
+31091,"Hooker County, Nebraska",Nebraska,2023,7.7,27.3,6.9
+27015,"Brown County, Minnesota",Minnesota,2023,7.7,13.8,7.4
+27085,"McLeod County, Minnesota",Minnesota,2023,7.7,16.3,7.5
+48333,"Mills County, Texas",Texas,2023,7.7,70,8.4
+51049,"Cumberland County, Virginia",Virginia,2023,7.7,6.4,7.3
+20131,"Nemaha County, Kansas",Kansas,2023,7.7,,7.9
+02150,"Kodiak Island Borough, Alaska",Alaska,2023,7.7,12,6.2
+51065,"Fluvanna County, Virginia",Virginia,2023,7.7,15.7,5.8
+26125,"Oakland County, Michigan",Michigan,2023,7.7,14.8,6.3
+26045,"Eaton County, Michigan",Michigan,2023,7.7,17.2,6.9
+37179,"Union County, North Carolina",North Carolina,2023,7.7,15.9,5.1
+55049,"Iowa County, Wisconsin",Wisconsin,2023,7.7,58.7,7.2
+48195,"Hansford County, Texas",Texas,2023,7.8,,7
+31029,"Chase County, Nebraska",Nebraska,2023,7.8,6.3,8.6
+42055,"Franklin County, Pennsylvania",Pennsylvania,2023,7.8,4.2,7.2
+27059,"Isanti County, Minnesota",Minnesota,2023,7.8,34.3,7.4
+06005,"Amador County, California",California,2023,7.8,8.2,7.9
+17189,"Washington County, Illinois",Illinois,2023,7.8,13.2,7.5
+23031,"York County, Maine",Maine,2023,7.8,9.6,7.7
+41063,"Wallowa County, Oregon",Oregon,2023,7.8,34.8,6.7
+55021,"Columbia County, Wisconsin",Wisconsin,2023,7.8,23.6,7.2
+31039,"Cuming County, Nebraska",Nebraska,2023,7.8,,8
+30097,"Sweet Grass County, Montana",Montana,2023,7.8,,8.2
+42041,"Cumberland County, Pennsylvania",Pennsylvania,2023,7.8,31.1,6.1
+06069,"San Benito County, California",California,2023,7.8,7.4,7.9
+38101,"Ward County, North Dakota",North Dakota,2023,7.8,12.7,6.3
+48367,"Parker County, Texas",Texas,2023,7.8,20.4,7.2
+06041,"Marin County, California",California,2023,7.8,26.2,5.6
+40087,"McClain County, Oklahoma",Oklahoma,2023,7.8,23.8,6.8
+27125,"Red Lake County, Minnesota",Minnesota,2023,7.8,20.8,7.6
+20183,"Smith County, Kansas",Kansas,2023,7.8,100,7.2
+02282,"Yakutat City and Borough, Alaska",Alaska,2023,7.8,32.1,5
+46119,"Sully County, South Dakota",South Dakota,2023,7.9,,8.6
+19055,"Delaware County, Iowa",Iowa,2023,7.9,,7.3
+29186,"Ste. Genevieve County, Missouri",Missouri,2023,7.9,5.3,7.8
+19161,"Sac County, Iowa",Iowa,2023,7.9,,7.2
+55091,"Pepin County, Wisconsin",Wisconsin,2023,7.9,40,7.5
+38081,"Sargent County, North Dakota",North Dakota,2023,7.9,14.3,7.2
+51101,"King William County, Virginia",Virginia,2023,7.9,12.1,7.1
+53017,"Douglas County, Washington",Washington,2023,7.9,41.3,6.6
+27109,"Olmsted County, Minnesota",Minnesota,2023,7.9,31.9,5.7
+46091,"Marshall County, South Dakota",South Dakota,2023,7.9,,5.4
+37183,"Wake County, North Carolina",North Carolina,2023,7.9,13,5.6
+53061,"Snohomish County, Washington",Washington,2023,7.9,11.9,7.1
+51115,"Mathews County, Virginia",Virginia,2023,7.9,12.3,6.4
+19011,"Benton County, Iowa",Iowa,2023,7.9,14.7,7.8
+31059,"Fillmore County, Nebraska",Nebraska,2023,7.9,,8.2
+19191,"Winneshiek County, Iowa",Iowa,2023,7.9,1.1,7.3
+55027,"Dodge County, Wisconsin",Wisconsin,2023,7.9,20.9,7.2
+17131,"Mercer County, Illinois",Illinois,2023,7.9,64.1,7.5
+54073,"Pleasants County, West Virginia",West Virginia,2023,8,,7.5
+17085,"Jo Daviess County, Illinois",Illinois,2023,8,7.1,7.3
+51163,"Rockbridge County, Virginia",Virginia,2023,8,1.6,8
+48053,"Burnet County, Texas",Texas,2023,8,5.5,8
+51149,"Prince George County, Virginia",Virginia,2023,8,12.1,6.1
+20079,"Harvey County, Kansas",Kansas,2023,8,14.7,7.9
+41067,"Washington County, Oregon",Oregon,2023,8,17.4,7.4
+31139,"Pierce County, Nebraska",Nebraska,2023,8,,7.5
+42019,"Butler County, Pennsylvania",Pennsylvania,2023,8,23.7,7.4
+42099,"Perry County, Pennsylvania",Pennsylvania,2023,8,17.8,7.7
+27073,"Lac qui Parle County, Minnesota",Minnesota,2023,8,13.9,7.2
+44009,"Washington County, Rhode Island",Rhode Island,2023,8,52.6,6.8
+19079,"Hamilton County, Iowa",Iowa,2023,8,74.7,6.6
+27101,"Murray County, Minnesota",Minnesota,2023,8.1,20.4,7.6
+26015,"Barry County, Michigan",Michigan,2023,8.1,7.2,7.6
+20201,"Washington County, Kansas",Kansas,2023,8.1,,8.1
+17073,"Henry County, Illinois",Illinois,2023,8.1,7.7,8.1
+55055,"Jefferson County, Wisconsin",Wisconsin,2023,8.1,20.8,7.9
+24047,"Worcester County, Maryland",Maryland,2023,8.1,15.6,6.8
+34041,"Warren County, New Jersey",New Jersey,2023,8.1,16.1,7.4
+48139,"Ellis County, Texas",Texas,2023,8.1,9.5,7
+51019,"Bedford County, Virginia",Virginia,2023,8.1,13.4,7.8
+32027,"Pershing County, Nevada",Nevada,2023,8.1,93.8,6.1
+17097,"Lake County, Illinois",Illinois,2023,8.1,20.1,6
+18133,"Putnam County, Indiana",Indiana,2023,8.1,11.4,7.7
+31035,"Clay County, Nebraska",Nebraska,2023,8.1,,7.3
+48317,"Martin County, Texas",Texas,2023,8.1,,5.6
+16077,"Power County, Idaho",Idaho,2023,8.1,1.4,10.5
+18029,"Dearborn County, Indiana",Indiana,2023,8.1,24,8.1
+50015,"Lamoille County, Vermont",Vermont,2023,8.1,22.9,7.8
+55117,"Sheboygan County, Wisconsin",Wisconsin,2023,8.1,29.7,6.7
+47021,"Cheatham County, Tennessee",Tennessee,2023,8.1,28.5,7.4
+20101,"Lane County, Kansas",Kansas,2023,8.1,100,8.6
+46069,"Hyde County, South Dakota",South Dakota,2023,8.2,,9.4
+27077,"Lake of the Woods County, Minnesota",Minnesota,2023,8.2,,8.4
+46055,"Haakon County, South Dakota",South Dakota,2023,8.2,,7.1
+31115,"Loup County, Nebraska",Nebraska,2023,8.2,,9.5
+48443,"Terrell County, Texas",Texas,2023,8.2,,9
+55085,"Oneida County, Wisconsin",Wisconsin,2023,8.2,0.8,7.9
+48221,"Hood County, Texas",Texas,2023,8.2,19,8.2
+19021,"Buena Vista County, Iowa",Iowa,2023,8.2,14.6,7
+29071,"Franklin County, Missouri",Missouri,2023,8.2,22,7.9
+12115,"Sarasota County, Florida",Florida,2023,8.2,19.9,7.4
+48103,"Crane County, Texas",Texas,2023,8.2,,17.2
+39021,"Champaign County, Ohio",Ohio,2023,8.2,6.7,8.2
+19099,"Jasper County, Iowa",Iowa,2023,8.2,7.9,7.2
+13077,"Coweta County, Georgia",Georgia,2023,8.2,11.7,6.5
+39085,"Lake County, Ohio",Ohio,2023,8.2,17.4,7
+26139,"Ottawa County, Michigan",Michigan,2023,8.2,23,7.7
+51047,"Culpeper County, Virginia",Virginia,2023,8.2,6.2,6.8
+16015,"Boise County, Idaho",Idaho,2023,8.2,6.3,8.5
+39045,"Fairfield County, Ohio",Ohio,2023,8.2,8.4,8
+31113,"Logan County, Nebraska",Nebraska,2023,8.2,,8.2
+38015,"Burleigh County, North Dakota",North Dakota,2023,8.2,28.3,5.9
+02110,"Juneau City and Borough, Alaska",Alaska,2023,8.2,47,6.2
+51063,"Floyd County, Virginia",Virginia,2023,8.3,8.8,8.2
+19027,"Carroll County, Iowa",Iowa,2023,8.3,13,8.5
+30081,"Ravalli County, Montana",Montana,2023,8.3,3.7,8.4
+53035,"Kitsap County, Washington",Washington,2023,8.3,12.1,7.8
+17089,"Kane County, Illinois",Illinois,2023,8.3,17.3,6
+13157,"Jackson County, Georgia",Georgia,2023,8.3,20.4,7.1
+06013,"Contra Costa County, California",California,2023,8.3,14.3,6
+08007,"Archuleta County, Colorado",Colorado,2023,8.3,,6.7
+36027,"Dutchess County, New York",New York,2023,8.3,16.5,6.4
+02185,"North Slope Borough, Alaska",Alaska,2023,8.3,6,2.1
+27041,"Douglas County, Minnesota",Minnesota,2023,8.3,26.4,7.5
+27075,"Lake County, Minnesota",Minnesota,2023,8.3,63.9,7.9
+06017,"El Dorado County, California",California,2023,8.3,27.8,8.3
+55095,"Polk County, Wisconsin",Wisconsin,2023,8.3,41,7.8
+48129,"Donley County, Texas",Texas,2023,8.3,35.5,6.7
+08037,"Eagle County, Colorado",Colorado,2023,8.3,31.3,6.8
+53059,"Skamania County, Washington",Washington,2023,8.3,78.6,8.2
+32005,"Douglas County, Nevada",Nevada,2023,8.3,31.4,7.5
+38055,"McLean County, North Dakota",North Dakota,2023,8.3,50,7.3
+27093,"Meeker County, Minnesota",Minnesota,2023,8.3,75.9,7.7
+30095,"Stillwater County, Montana",Montana,2023,8.3,88.9,7
+56035,"Sublette County, Wyoming",Wyoming,2023,8.4,100,8.2
+48263,"Kent County, Texas",Texas,2023,8.4,100,5.1
+16041,"Franklin County, Idaho",Idaho,2023,8.4,,6.6
+38029,"Emmons County, North Dakota",North Dakota,2023,8.4,100,8.2
+27157,"Wabasha County, Minnesota",Minnesota,2023,8.4,13.9,8.3
+39069,"Henry County, Ohio",Ohio,2023,8.4,9.2,8.2
+02220,"Sitka City and Borough, Alaska",Alaska,2023,8.4,,5.5
+55083,"Oconto County, Wisconsin",Wisconsin,2023,8.4,8,7.9
+42001,"Adams County, Pennsylvania",Pennsylvania,2023,8.4,9.8,7.8
+32033,"White Pine County, Nevada",Nevada,2023,8.4,14.3,6.7
+18015,"Carroll County, Indiana",Indiana,2023,8.4,4.1,8.1
+53033,"King County, Washington",Washington,2023,8.4,18.5,6.4
+12113,"Santa Rosa County, Florida",Florida,2023,8.4,11.1,7.9
+49035,"Salt Lake County, Utah",Utah,2023,8.4,23.1,6.9
+51510,"Alexandria city, Virginia",Virginia,2023,8.4,13.3,4.1
+53011,"Clark County, Washington",Washington,2023,8.4,15.3,7.5
+39123,"Ottawa County, Ohio",Ohio,2023,8.4,16.9,8
+51087,"Henrico County, Virginia",Virginia,2023,8.4,12.6,6
+08113,"San Miguel County, Colorado",Colorado,2023,8.4,,6.7
+46003,"Aurora County, South Dakota",South Dakota,2023,8.4,,5.8
+51810,"Virginia Beach city, Virginia",Virginia,2023,8.4,15.4,6.2
+06055,"Napa County, California",California,2023,8.4,17.7,7.1
+19089,"Howard County, Iowa",Iowa,2023,8.4,100,7
+48043,"Brewster County, Texas",Texas,2023,8.4,50,9.1
+46021,"Campbell County, South Dakota",South Dakota,2023,8.5,,6.9
+30009,"Carbon County, Montana",Montana,2023,8.5,,7.9
+48173,"Glasscock County, Texas",Texas,2023,8.5,,10.4
+38083,"Sheridan County, North Dakota",North Dakota,2023,8.5,,8.7
+13083,"Dade County, Georgia",Georgia,2023,8.5,22.2,8.2
+27173,"Yellow Medicine County, Minnesota",Minnesota,2023,8.5,20.9,8
+18113,"Noble County, Indiana",Indiana,2023,8.5,21.6,7.8
+19183,"Washington County, Iowa",Iowa,2023,8.5,,8.2
+18023,"Clinton County, Indiana",Indiana,2023,8.5,20.7,8
+18109,"Morgan County, Indiana",Indiana,2023,8.5,50.7,8.1
+16001,"Ada County, Idaho",Idaho,2023,8.5,19.7,8.2
+29047,"Clay County, Missouri",Missouri,2023,8.5,15.9,7.5
+08041,"El Paso County, Colorado",Colorado,2023,8.5,11.6,7.5
+13067,"Cobb County, Georgia",Georgia,2023,8.5,10.1,6
+34023,"Middlesex County, New Jersey",New Jersey,2023,8.5,9.4,7.4
+19165,"Shelby County, Iowa",Iowa,2023,8.5,1.9,8.9
+08005,"Arapahoe County, Colorado",Colorado,2023,8.5,16.3,6.1
+20137,"Norton County, Kansas",Kansas,2023,8.5,,5.2
+55037,"Florence County, Wisconsin",Wisconsin,2023,8.5,,8.2
+18047,"Franklin County, Indiana",Indiana,2023,8.5,,8.1
+46125,"Turner County, South Dakota",South Dakota,2023,8.5,5.9,8.1
+20053,"Ellsworth County, Kansas",Kansas,2023,8.5,10.7,8.7
+23015,"Lincoln County, Maine",Maine,2023,8.5,27,8
+55121,"Trempealeau County, Wisconsin",Wisconsin,2023,8.5,65.6,7.4
+46045,"Edmunds County, South Dakota",South Dakota,2023,8.5,53.1,8
+09150,"Northeastern Connecticut Planning Region, Connecticut",Connecticut,2023,8.6,26.6,8.3
+18013,"Brown County, Indiana",Indiana,2023,8.6,,8.1
+42109,"Snyder County, Pennsylvania",Pennsylvania,2023,8.6,8.2,8.1
+21211,"Shelby County, Kentucky",Kentucky,2023,8.6,8.1,9.2
+29099,"Jefferson County, Missouri",Missouri,2023,8.6,21.2,7.9
+20103,"Leavenworth County, Kansas",Kansas,2023,8.6,10.4,7.1
+42133,"York County, Pennsylvania",Pennsylvania,2023,8.6,17.8,7.1
+39109,"Miami County, Ohio",Ohio,2023,8.6,18.4,7.8
+19025,"Calhoun County, Iowa",Iowa,2023,8.6,39.6,8.2
+26055,"Grand Traverse County, Michigan",Michigan,2023,8.6,15.9,8.1
+44005,"Newport County, Rhode Island",Rhode Island,2023,8.6,21.4,7.3
+19083,"Hardin County, Iowa",Iowa,2023,8.6,,8.6
+56029,"Park County, Wyoming",Wyoming,2023,8.6,44.8,7.6
+06097,"Sonoma County, California",California,2023,8.6,21.8,7.1
+31041,"Custer County, Nebraska",Nebraska,2023,8.6,18.9,8.4
+40017,"Canadian County, Oklahoma",Oklahoma,2023,8.6,20.9,6.8
+49003,"Box Elder County, Utah",Utah,2023,8.6,28.2,8
+56043,"Washakie County, Wyoming",Wyoming,2023,8.6,91.7,8.7
+26083,"Keweenaw County, Michigan",Michigan,2023,8.7,,8.1
+48433,"Stonewall County, Texas",Texas,2023,8.7,,7.5
+31121,"Merrick County, Nebraska",Nebraska,2023,8.7,,8.6
+31141,"Platte County, Nebraska",Nebraska,2023,8.7,4.2,7.3
+13047,"Catoosa County, Georgia",Georgia,2023,8.7,7.8,8.7
+26029,"Charlevoix County, Michigan",Michigan,2023,8.7,10.4,8.5
+39169,"Wayne County, Ohio",Ohio,2023,8.7,9.7,8.4
+39051,"Fulton County, Ohio",Ohio,2023,8.7,25.9,7.6
+48057,"Calhoun County, Texas",Texas,2023,8.7,13.6,7.2
+29043,"Christian County, Missouri",Missouri,2023,8.7,4.9,8.8
+31037,"Colfax County, Nebraska",Nebraska,2023,8.7,1.4,7.6
+55011,"Buffalo County, Wisconsin",Wisconsin,2023,8.7,7.8,8.6
+41009,"Columbia County, Oregon",Oregon,2023,8.7,7.4,9
+51175,"Southampton County, Virginia",Virginia,2023,8.7,13.1,7.5
+30049,"Lewis and Clark County, Montana",Montana,2023,8.7,8.4,8.7
+42071,"Lancaster County, Pennsylvania",Pennsylvania,2023,8.7,18.8,7
+29063,"DeKalb County, Missouri",Missouri,2023,8.7,35.8,7.8
+51550,"Chesapeake city, Virginia",Virginia,2023,8.7,14.9,5.5
+49049,"Utah County, Utah",Utah,2023,8.7,22.4,8.2
+34009,"Cape May County, New Jersey",New Jersey,2023,8.7,15.8,7.4
+55039,"Fond du Lac County, Wisconsin",Wisconsin,2023,8.7,46.5,7.8
+48031,"Blanco County, Texas",Texas,2023,8.7,2.9,8.6
+38067,"Pembina County, North Dakota",North Dakota,2023,8.7,8.3,7.5
+17179,"Tazewell County, Illinois",Illinois,2023,8.7,44.7,8.4
+50027,"Windsor County, Vermont",Vermont,2023,8.7,27.4,8.2
+17079,"Jasper County, Illinois",Illinois,2023,8.7,50,8.5
+19151,"Pocahontas County, Iowa",Iowa,2023,8.7,35.5,7.4
+55029,"Door County, Wisconsin",Wisconsin,2023,8.7,39.7,8.5
+37075,"Graham County, North Carolina",North Carolina,2023,8.7,100,9.5
+39075,"Holmes County, Ohio",Ohio,2023,8.8,,8.8
+20171,"Scott County, Kansas",Kansas,2023,8.8,,5.6
+30021,"Dawson County, Montana",Montana,2023,8.8,,8
+13133,"Greene County, Georgia",Georgia,2023,8.8,10.7,5.7
+38105,"Williams County, North Dakota",North Dakota,2023,8.8,30,6.9
+46099,"Minnehaha County, South Dakota",South Dakota,2023,8.8,17.9,6.9
+20041,"Dickinson County, Kansas",Kansas,2023,8.8,,8.5
+39025,"Clermont County, Ohio",Ohio,2023,8.8,13,8.6
+18151,"Steuben County, Indiana",Indiana,2023,8.8,3.6,9.2
+15007,"Kauai County, Hawaii",Hawaii,2023,8.8,4.5,11.1
+54037,"Jefferson County, West Virginia",West Virginia,2023,8.8,6.7,8.7
+33017,"Strafford County, New Hampshire",New Hampshire,2023,8.8,8,9
+23013,"Knox County, Maine",Maine,2023,8.8,25,8.3
+48187,"Guadalupe County, Texas",Texas,2023,8.8,7.1,8.2
+42095,"Northampton County, Pennsylvania",Pennsylvania,2023,8.8,17.6,7.1
+42093,"Montour County, Pennsylvania",Pennsylvania,2023,8.8,5.1,9
+33001,"Belknap County, New Hampshire",New Hampshire,2023,8.8,31.7,8.7
+48149,"Fayette County, Texas",Texas,2023,8.8,34.7,7
+55111,"Sauk County, Wisconsin",Wisconsin,2023,8.8,37.8,7.4
+49027,"Millard County, Utah",Utah,2023,8.8,47.4,9.2
+27111,"Otter Tail County, Minnesota",Minnesota,2023,8.9,14.8,8.1
+17009,"Brown County, Illinois",Illinois,2023,8.9,2.7,8.9
+17041,"Douglas County, Illinois",Illinois,2023,8.9,8.4,8.8
+33005,"Cheshire County, New Hampshire",New Hampshire,2023,8.9,5.6,8.8
+55073,"Marathon County, Wisconsin",Wisconsin,2023,8.9,26.7,7.6
+55007,"Bayfield County, Wisconsin",Wisconsin,2023,8.9,15.2,7
+47009,"Blount County, Tennessee",Tennessee,2023,8.9,17.6,8.1
+45091,"York County, South Carolina",South Carolina,2023,8.9,16.8,6.6
+37025,"Cabarrus County, North Carolina",North Carolina,2023,8.9,13.3,6.8
+34039,"Union County, New Jersey",New Jersey,2023,8.9,10.4,5.7
+53053,"Pierce County, Washington",Washington,2023,8.9,13.7,7.6
+36119,"Westchester County, New York",New York,2023,8.9,15,5.5
+27045,"Fillmore County, Minnesota",Minnesota,2023,8.9,46,8.9
+17141,"Ogle County, Illinois",Illinois,2023,8.9,29.7,8.4
+51071,"Giles County, Virginia",Virginia,2023,8.9,48.2,7.9
+18115,"Ohio County, Indiana",Indiana,2023,8.9,52.4,8.2
+19159,"Ringgold County, Iowa",Iowa,2023,9,,9.4
+08103,"Rio Blanco County, Colorado",Colorado,2023,9,,8.5
+31185,"York County, Nebraska",Nebraska,2023,9,1.4,8.7
+49023,"Juab County, Utah",Utah,2023,9,,8.4
+08123,"Weld County, Colorado",Colorado,2023,9,17.1,8.5
+16075,"Payette County, Idaho",Idaho,2023,9,,8.9
+20015,"Butler County, Kansas",Kansas,2023,9,1.4,9.1
+37109,"Lincoln County, North Carolina",North Carolina,2023,9,34.2,7.7
+06111,"Ventura County, California",California,2023,9,10.7,8.6
+48413,"Schleicher County, Texas",Texas,2023,9,,6.8
+31169,"Thayer County, Nebraska",Nebraska,2023,9,100,9
+53007,"Chelan County, Washington",Washington,2023,9,14.7,8.1
+47165,"Sumner County, Tennessee",Tennessee,2023,9,19.3,7.4
+53013,"Columbia County, Washington",Washington,2023,9,33.3,9.5
+08049,"Grand County, Colorado",Colorado,2023,9,26,9.1
+48311,"McMullen County, Texas",Texas,2023,9.1,,9.6
+08063,"Kit Carson County, Colorado",Colorado,2023,9.1,,8.5
+31049,"Deuel County, Nebraska",Nebraska,2023,9.1,,8.5
+49055,"Wayne County, Utah",Utah,2023,9.1,,8.7
+38031,"Foster County, North Dakota",North Dakota,2023,9.1,,8.2
+27063,"Jackson County, Minnesota",Minnesota,2023,9.1,,8.2
+08045,"Garfield County, Colorado",Colorado,2023,9.1,2.9,8.2
+32001,"Churchill County, Nevada",Nevada,2023,9.1,5.2,7
+37097,"Iredell County, North Carolina",North Carolina,2023,9.1,16.4,7.3
+48035,"Bosque County, Texas",Texas,2023,9.1,12,9.3
+36113,"Warren County, New York",New York,2023,9.1,25.7,8.7
+15003,"Honolulu County, Hawaii",Hawaii,2023,9.1,8.9,8.5
+48497,"Wise County, Texas",Texas,2023,9.1,3.7,8.9
+05125,"Saline County, Arkansas",Arkansas,2023,9.1,11.5,8.4
+12119,"Sumter County, Florida",Florida,2023,9.1,28.5,7.6
+12019,"Clay County, Florida",Florida,2023,9.1,13.9,8.5
+55075,"Marinette County, Wisconsin",Wisconsin,2023,9.1,39.4,8.7
+56005,"Campbell County, Wyoming",Wyoming,2023,9.1,17.1,9.5
+20085,"Jackson County, Kansas",Kansas,2023,9.1,7,8.7
+42047,"Elk County, Pennsylvania",Pennsylvania,2023,9.1,42.1,8.6
+20113,"McPherson County, Kansas",Kansas,2023,9.1,36.7,8.6
+09160,"Northwest Hills Planning Region, Connecticut",Connecticut,2023,9.2,14.3,8.2
+46065,"Hughes County, South Dakota",South Dakota,2023,9.2,,8.5
+13085,"Dawson County, Georgia",Georgia,2023,9.2,0.7,9.6
+48175,"Goliad County, Texas",Texas,2023,9.2,18.6,7.9
+02016,"Aleutians West Census Area, Alaska",Alaska,2023,9.2,11.3,4.5
+47149,"Rutherford County, Tennessee",Tennessee,2023,9.2,12.3,7.9
+36069,"Ontario County, New York",New York,2023,9.2,21.5,8.4
+18127,"Porter County, Indiana",Indiana,2023,9.2,17.7,8.4
+06001,"Alameda County, California",California,2023,9.2,17.6,7
+48281,"Lampasas County, Texas",Texas,2023,9.2,0.2,8.6
+12089,"Nassau County, Florida",Florida,2023,9.2,14,8.4
+12117,"Seminole County, Florida",Florida,2023,9.2,16.6,7.6
+16051,"Jefferson County, Idaho",Idaho,2023,9.2,,7.7
+27081,"Lincoln County, Minnesota",Minnesota,2023,9.2,,8.7
+46115,"Spink County, South Dakota",South Dakota,2023,9.2,,9.4
+55017,"Chippewa County, Wisconsin",Wisconsin,2023,9.2,21,9
+19095,"Iowa County, Iowa",Iowa,2023,9.2,87.6,8.1
+19135,"Monroe County, Iowa",Iowa,2023,9.2,88.9,8.7
+31011,"Boone County, Nebraska",Nebraska,2023,9.2,100,7.3
+31175,"Valley County, Nebraska",Nebraska,2023,9.3,,9.5
+38041,"Hettinger County, North Dakota",North Dakota,2023,9.3,,8.9
+48301,"Loving County, Texas",Texas,2023,9.3,,0
+29219,"Warren County, Missouri",Missouri,2023,9.3,7.2,8.4
+41017,"Deschutes County, Oregon",Oregon,2023,9.3,5.4,9
+27131,"Rice County, Minnesota",Minnesota,2023,9.3,31.8,6.9
+19077,"Guthrie County, Iowa",Iowa,2023,9.3,28.3,9
+16055,"Kootenai County, Idaho",Idaho,2023,9.3,5.6,8.8
+21149,"McLean County, Kentucky",Kentucky,2023,9.3,,9.1
+29051,"Cole County, Missouri",Missouri,2023,9.3,26.9,6.6
+31053,"Dodge County, Nebraska",Nebraska,2023,9.3,6,9.2
+26005,"Allegan County, Michigan",Michigan,2023,9.3,17.2,9.1
+12091,"Okaloosa County, Florida",Florida,2023,9.3,14.5,7.6
+48339,"Montgomery County, Texas",Texas,2023,9.3,12.9,7.9
+27049,"Goodhue County, Minnesota",Minnesota,2023,9.3,62.2,7.8
+40145,"Wagoner County, Oklahoma",Oklahoma,2023,9.3,18,7.1
+02020,"Anchorage Municipality, Alaska",Alaska,2023,9.3,17.6,6.2
+26047,"Emmet County, Michigan",Michigan,2023,9.3,18.4,9.1
+18019,"Clark County, Indiana",Indiana,2023,9.3,18.4,7.8
+51159,"Richmond County, Virginia",Virginia,2023,9.3,21,6.6
+42103,"Pike County, Pennsylvania",Pennsylvania,2023,9.3,15.3,8.9
+18031,"Decatur County, Indiana",Indiana,2023,9.3,45.3,9.3
+55119,"Taylor County, Wisconsin",Wisconsin,2023,9.3,44.4,8.9
+31007,"Banner County, Nebraska",Nebraska,2023,9.4,,10.2
+16063,"Lincoln County, Idaho",Idaho,2023,9.4,17.6,10.4
+16081,"Teton County, Idaho",Idaho,2023,9.4,,6.8
+20025,"Clark County, Kansas",Kansas,2023,9.4,,10.2
+30071,"Phillips County, Montana",Montana,2023,9.4,100,5.9
+46135,"Yankton County, South Dakota",South Dakota,2023,9.4,,8.4
+50017,"Orange County, Vermont",Vermont,2023,9.4,7.8,9.2
+29045,"Clark County, Missouri",Missouri,2023,9.4,70,8.8
+19061,"Dubuque County, Iowa",Iowa,2023,9.4,42.9,8.1
+19033,"Cerro Gordo County, Iowa",Iowa,2023,9.4,4.8,9.2
+26009,"Antrim County, Michigan",Michigan,2023,9.4,12.1,9
+37019,"Brunswick County, North Carolina",North Carolina,2023,9.4,14.9,7.8
+12035,"Flagler County, Florida",Florida,2023,9.4,11.9,8.3
+50023,"Washington County, Vermont",Vermont,2023,9.4,7.5,9.1
+08001,"Adams County, Colorado",Colorado,2023,9.4,16.9,7.3
+05117,"Prairie County, Arkansas",Arkansas,2023,9.4,24,6.7
+25009,"Essex County, Massachusetts",Massachusetts,2023,9.4,14.1,7.2
+26037,"Clinton County, Michigan",Michigan,2023,9.4,18,8.6
+13151,"Henry County, Georgia",Georgia,2023,9.4,10.1,7.6
+46079,"Lake County, South Dakota",South Dakota,2023,9.4,,8.8
+42125,"Washington County, Pennsylvania",Pennsylvania,2023,9.4,27.7,8.2
+48285,"Lavaca County, Texas",Texas,2023,9.4,27,6.9
+20117,"Marshall County, Kansas",Kansas,2023,9.4,50,9.5
+20095,"Kingman County, Kansas",Kansas,2023,9.4,50,8.8
+20151,"Pratt County, Kansas",Kansas,2023,9.5,3.3,9.1
+38011,"Bowman County, North Dakota",North Dakota,2023,9.5,,8.9
+27133,"Rock County, Minnesota",Minnesota,2023,9.5,,8.8
+49033,"Rich County, Utah",Utah,2023,9.5,,5.4
+31163,"Sherman County, Nebraska",Nebraska,2023,9.5,,8.9
+31151,"Saline County, Nebraska",Nebraska,2023,9.5,13.3,10.8
+39161,"Van Wert County, Ohio",Ohio,2023,9.5,0.6,9.3
+19003,"Adams County, Iowa",Iowa,2023,9.5,60,9.6
+51139,"Page County, Virginia",Virginia,2023,9.5,16.2,9.6
+16019,"Bonneville County, Idaho",Idaho,2023,9.5,13.1,8.7
+51119,"Middlesex County, Virginia",Virginia,2023,9.5,8.3,8.6
+02130,"Ketchikan Gateway Borough, Alaska",Alaska,2023,9.5,3.8,7.2
+12069,"Lake County, Florida",Florida,2023,9.5,14.1,8.9
+48381,"Randall County, Texas",Texas,2023,9.5,22.7,9.1
+06059,"Orange County, California",California,2023,9.5,13.4,7.8
+17023,"Clark County, Illinois",Illinois,2023,9.5,25.5,9.6
+24029,"Kent County, Maryland",Maryland,2023,9.5,24.7,6.2
+48171,"Gillespie County, Texas",Texas,2023,9.5,6.3,8.8
+55093,"Pierce County, Wisconsin",Wisconsin,2023,9.5,45.8,9.4
+21029,"Bullitt County, Kentucky",Kentucky,2023,9.5,18.8,8.3
+18037,"Dubois County, Indiana",Indiana,2023,9.5,12.7,8.5
+51157,"Rappahannock County, Virginia",Virginia,2023,9.5,48.6,7.8
+31131,"Otoe County, Nebraska",Nebraska,2023,9.5,55.9,8.9
+31005,"Arthur County, Nebraska",Nebraska,2023,9.6,,10.4
+20059,"Franklin County, Kansas",Kansas,2023,9.6,15.4,9.5
+26137,"Otsego County, Michigan",Michigan,2023,9.6,9.6,9.8
+39125,"Paulding County, Ohio",Ohio,2023,9.6,8.1,9.8
+48369,"Parmer County, Texas",Texas,2023,9.6,8.3,7
+51165,"Rockingham County, Virginia",Virginia,2023,9.6,15.6,8.5
+27103,"Nicollet County, Minnesota",Minnesota,2023,9.6,34.7,7.7
+51570,"Colonial Heights city, Virginia",Virginia,2023,9.6,16.2,7.1
+30029,"Flathead County, Montana",Montana,2023,9.6,19.9,9
+13231,"Pike County, Georgia",Georgia,2023,9.6,19.9,8.6
+12015,"Charlotte County, Florida",Florida,2023,9.6,14.5,9.3
+40131,"Rogers County, Oklahoma",Oklahoma,2023,9.6,9.2,8.5
+29189,"St. Louis County, Missouri",Missouri,2023,9.6,19.5,5.8
+20031,"Coffey County, Kansas",Kansas,2023,9.6,35.5,9.7
+18137,"Ripley County, Indiana",Indiana,2023,9.6,54.5,9.8
+19109,"Kossuth County, Iowa",Iowa,2023,9.6,62.3,9.2
+08027,"Custer County, Colorado",Colorado,2023,9.7,,9.9
+30075,"Powder River County, Montana",Montana,2023,9.7,,11
+46077,"Kingsbury County, South Dakota",South Dakota,2023,9.7,,9.8
+02060,"Bristol Bay Borough, Alaska",Alaska,2023,9.7,,12
+48345,"Motley County, Texas",Texas,2023,9.7,,7.3
+41013,"Crook County, Oregon",Oregon,2023,9.7,13,10.2
+27057,"Hubbard County, Minnesota",Minnesota,2023,9.7,27.2,9
+27069,"Kittson County, Minnesota",Minnesota,2023,9.7,,9.5
+55127,"Walworth County, Wisconsin",Wisconsin,2023,9.7,17,9.4
+39097,"Madison County, Ohio",Ohio,2023,9.7,25.1,9.5
+18085,"Kosciusko County, Indiana",Indiana,2023,9.7,15.8,8.5
+21179,"Nelson County, Kentucky",Kentucky,2023,9.7,13.1,9.1
+06095,"Solano County, California",California,2023,9.7,17.4,8.1
+29107,"Lafayette County, Missouri",Missouri,2023,9.7,5.3,9.3
+48257,"Kaufman County, Texas",Texas,2023,9.7,15.8,8.5
+53067,"Thurston County, Washington",Washington,2023,9.7,14.2,8.8
+36053,"Madison County, New York",New York,2023,9.7,28.6,9.3
+27035,"Crow Wing County, Minnesota",Minnesota,2023,9.7,32.2,9.5
+42119,"Union County, Pennsylvania",Pennsylvania,2023,9.7,62,9.2
+56025,"Natrona County, Wyoming",Wyoming,2023,9.7,54.6,9.2
+29197,"Schuyler County, Missouri",Missouri,2023,9.7,75,10.1
+40007,"Beaver County, Oklahoma",Oklahoma,2023,9.8,,8.6
+29087,"Holt County, Missouri",Missouri,2023,9.8,,9.3
+27065,"Kanabec County, Minnesota",Minnesota,2023,9.8,11,9.7
+20043,"Doniphan County, Kansas",Kansas,2023,9.8,3.7,9.8
+55071,"Manitowoc County, Wisconsin",Wisconsin,2023,9.8,10.3,9.2
+48493,"Wilson County, Texas",Texas,2023,9.8,4.5,8.8
+55009,"Brown County, Wisconsin",Wisconsin,2023,9.8,28.5,7
+15009,"Maui County, Hawaii",Hawaii,2023,9.8,18.5,11.3
+16043,"Fremont County, Idaho",Idaho,2023,9.8,20,8.1
+39057,"Greene County, Ohio",Ohio,2023,9.8,15.1,8.7
+26087,"Lapeer County, Michigan",Michigan,2023,9.8,30.9,8.9
+27047,"Freeborn County, Minnesota",Minnesota,2023,9.8,63.4,7.5
+26099,"Macomb County, Michigan",Michigan,2023,9.8,15.8,8.6
+17129,"Menard County, Illinois",Illinois,2023,9.8,,9.8
+48075,"Childress County, Texas",Texas,2023,9.8,8.3,10.6
+22089,"St. Charles Parish, Louisiana",Louisiana,2023,9.8,21.9,6.3
+56033,"Sheridan County, Wyoming",Wyoming,2023,9.8,5.5,9.6
+38049,"McHenry County, North Dakota",North Dakota,2023,9.8,51.4,9.2
+27009,"Benton County, Minnesota",Minnesota,2023,9.8,22.3,7.8
+26043,"Dickinson County, Michigan",Michigan,2023,9.8,16.2,9.2
+27121,"Pope County, Minnesota",Minnesota,2023,9.8,21.5,9.4
+48415,"Scurry County, Texas",Texas,2023,9.8,16.4,7.5
+19189,"Winnebago County, Iowa",Iowa,2023,9.8,46.5,8.8
+17139,"Moultrie County, Illinois",Illinois,2023,9.8,54.5,8.9
+17035,"Cumberland County, Illinois",Illinois,2023,9.9,,8.9
+31095,"Jefferson County, Nebraska",Nebraska,2023,9.9,,9
+31181,"Webster County, Nebraska",Nebraska,2023,9.9,,10.5
+27143,"Sibley County, Minnesota",Minnesota,2023,9.9,,9
+18129,"Posey County, Indiana",Indiana,2023,9.9,12.6,9.3
+17155,"Putnam County, Illinois",Illinois,2023,9.9,20,10.3
+12009,"Brevard County, Florida",Florida,2023,9.9,14.4,8.7
+47043,"Dickson County, Tennessee",Tennessee,2023,9.9,10.6,9.2
+49053,"Washington County, Utah",Utah,2023,9.9,13.7,8.5
+19115,"Louisa County, Iowa",Iowa,2023,9.9,22.4,10.2
+19113,"Linn County, Iowa",Iowa,2023,9.9,25.6,8
+47119,"Maury County, Tennessee",Tennessee,2023,9.9,24.3,7
+51800,"Suffolk city, Virginia",Virginia,2023,9.9,15,5.2
+27113,"Pennington County, Minnesota",Minnesota,2023,9.9,0.7,10
+48099,"Coryell County, Texas",Texas,2023,9.9,14.3,9.4
+51600,"Fairfax city, Virginia",Virginia,2023,9.9,9.1,7.7
+46101,"Moody County, South Dakota",South Dakota,2023,9.9,4.3,4.1
+55005,"Barron County, Wisconsin",Wisconsin,2023,9.9,12.7,9.3
+56021,"Laramie County, Wyoming",Wyoming,2023,9.9,40,9.1
+08015,"Chaffee County, Colorado",Colorado,2023,10,,9.8
+20071,"Greeley County, Kansas",Kansas,2023,10,,11.4
+41069,"Wheeler County, Oregon",Oregon,2023,10,,10
+38063,"Nelson County, North Dakota",North Dakota,2023,10,,10.4
+30091,"Sheridan County, Montana",Montana,2023,10,,8.8
+27097,"Morrison County, Minnesota",Minnesota,2023,10,28.3,9.7
+27067,"Kandiyohi County, Minnesota",Minnesota,2023,10,44.9,7.2
+31013,"Box Butte County, Nebraska",Nebraska,2023,10,,10.5
+21239,"Woodford County, Kentucky",Kentucky,2023,10,8.5,7.8
+37125,"Moore County, North Carolina",North Carolina,2023,10,19.9,8.1
+29121,"Macon County, Missouri",Missouri,2023,10,27.7,9.3
+48111,"Dallam County, Texas",Texas,2023,10,,10.1
+42129,"Westmoreland County, Pennsylvania",Pennsylvania,2023,10,24.1,9.4
+55105,"Rock County, Wisconsin",Wisconsin,2023,10,21.6,9
+20181,"Sherman County, Kansas",Kansas,2023,10,,9.1
+42067,"Juniata County, Pennsylvania",Pennsylvania,2023,10,2.4,9
+37031,"Carteret County, North Carolina",North Carolina,2023,10,16.5,9
+37139,"Pasquotank County, North Carolina",North Carolina,2023,10,13.3,6.9
+18043,"Floyd County, Indiana",Indiana,2023,10,29.1,8.2
+27053,"Hennepin County, Minnesota",Minnesota,2023,10,24.8,6.5
+36041,"Hamilton County, New York",New York,2023,10,31.3,9.8
+37059,"Davie County, North Carolina",North Carolina,2023,10,10.5,9.4
+35043,"Sandoval County, New Mexico",New Mexico,2023,10,8.1,6.7
+46067,"Hutchinson County, South Dakota",South Dakota,2023,10,,7.6
+08047,"Gilpin County, Colorado",Colorado,2023,10,,10.4
+24005,"Baltimore County, Maryland",Maryland,2023,10,11.8,8.1
+28033,"DeSoto County, Mississippi",Mississippi,2023,10,15,7
+28121,"Rankin County, Mississippi",Mississippi,2023,10,17.2,7.5
+18181,"White County, Indiana",Indiana,2023,10,5.3,9
+20115,"Marion County, Kansas",Kansas,2023,10,31.1,9.7
+17083,"Jersey County, Illinois",Illinois,2023,10,59.4,10
+39039,"Defiance County, Ohio",Ohio,2023,10,49.3,9
+31003,"Antelope County, Nebraska",Nebraska,2023,10,22.4,9.7
+17105,"Livingston County, Illinois",Illinois,2023,10,45.9,9.2
+17173,"Shelby County, Illinois",Illinois,2023,10,60,10.2
+49009,"Daggett County, Utah",Utah,2023,10.1,,10.4
+20153,"Rawlins County, Kansas",Kansas,2023,10.1,,9.1
+27155,"Traverse County, Minnesota",Minnesota,2023,10.1,,7.4
+38039,"Griggs County, North Dakota",North Dakota,2023,10.1,,9.4
+18033,"DeKalb County, Indiana",Indiana,2023,10.1,22.1,9.9
+55135,"Waupaca County, Wisconsin",Wisconsin,2023,10.1,12.9,9.2
+18069,"Huntington County, Indiana",Indiana,2023,10.1,11.2,9.7
+13153,"Houston County, Georgia",Georgia,2023,10.1,13.4,6.9
+17039,"De Witt County, Illinois",Illinois,2023,10.1,5.2,10.1
+37069,"Franklin County, North Carolina",North Carolina,2023,10.1,14.4,7.3
+01083,"Limestone County, Alabama",Alabama,2023,10.1,11,9.6
+51031,"Campbell County, Virginia",Virginia,2023,10.1,10.6,9.8
+16027,"Canyon County, Idaho",Idaho,2023,10.1,14.1,8.2
+42007,"Beaver County, Pennsylvania",Pennsylvania,2023,10.1,30.1,8.4
+13015,"Bartow County, Georgia",Georgia,2023,10.1,21.5,8.7
+19153,"Polk County, Iowa",Iowa,2023,10.1,32.5,7.3
+48059,"Callahan County, Texas",Texas,2023,10.1,,10.3
+51137,"Orange County, Virginia",Virginia,2023,10.1,21.5,8.8
+51109,"Louisa County, Virginia",Virginia,2023,10.1,19.7,6.6
+50011,"Franklin County, Vermont",Vermont,2023,10.1,9,9.7
+39089,"Licking County, Ohio",Ohio,2023,10.1,19.5,9.7
+33009,"Grafton County, New Hampshire",New Hampshire,2023,10.1,21.1,9.5
+29151,"Osage County, Missouri",Missouri,2023,10.1,88.9,9.3
+56031,"Platte County, Wyoming",Wyoming,2023,10.2,,11
+26003,"Alger County, Michigan",Michigan,2023,10.2,,10.6
+46029,"Codington County, South Dakota",South Dakota,2023,10.2,11,8.7
+26019,"Benzie County, Michigan",Michigan,2023,10.2,30.5,9.4
+16007,"Bear Lake County, Idaho",Idaho,2023,10.2,,8.9
+47147,"Robertson County, Tennessee",Tennessee,2023,10.2,13,8.7
+23009,"Hancock County, Maine",Maine,2023,10.2,25.9,9.9
+30111,"Yellowstone County, Montana",Montana,2023,10.2,9.2,9.2
+18051,"Gibson County, Indiana",Indiana,2023,10.2,9.1,10.2
+13013,"Barrow County, Georgia",Georgia,2023,10.2,14.7,9.7
+30031,"Gallatin County, Montana",Montana,2023,10.2,22.9,10.1
+10003,"New Castle County, Delaware",Delaware,2023,10.2,14.3,7.4
+42045,"Delaware County, Pennsylvania",Pennsylvania,2023,10.2,20,6.1
+24041,"Talbot County, Maryland",Maryland,2023,10.2,22.5,8
+55097,"Portage County, Wisconsin",Wisconsin,2023,10.2,22.7,9.1
+24033,"Prince George's County, Maryland",Maryland,2023,10.2,8.8,9.2
+31015,"Boyd County, Nebraska",Nebraska,2023,10.2,60,10.6
+20029,"Cloud County, Kansas",Kansas,2023,10.2,72.7,9
+09140,"Naugatuck Valley Planning Region, Connecticut",Connecticut,2023,10.3,19.7,7.8
+08073,"Lincoln County, Colorado",Colorado,2023,10.3,,9.5
+51091,"Highland County, Virginia",Virginia,2023,10.3,,8.4
+09110,"Capitol Planning Region, Connecticut",Connecticut,2023,10.3,14.7,7.6
+38043,"Kidder County, North Dakota",North Dakota,2023,10.3,,10.2
+38017,"Cass County, North Dakota",North Dakota,2023,10.3,21.1,8.4
+27107,"Norman County, Minnesota",Minnesota,2023,10.3,,9.9
+51133,"Northumberland County, Virginia",Virginia,2023,10.3,8.3,11.8
+02170,"Matanuska-Susitna Borough, Alaska",Alaska,2023,10.3,7.1,9.5
+39063,"Hancock County, Ohio",Ohio,2023,10.3,17,9.7
+55141,"Wood County, Wisconsin",Wisconsin,2023,10.3,13.8,9.6
+01051,"Elmore County, Alabama",Alabama,2023,10.3,19.3,7.7
+25027,"Worcester County, Massachusetts",Massachusetts,2023,10.3,16.5,8.5
+45015,"Berkeley County, South Carolina",South Carolina,2023,10.3,14.7,8.8
+22005,"Ascension Parish, Louisiana",Louisiana,2023,10.3,18.4,6.8
+16031,"Cassia County, Idaho",Idaho,2023,10.3,21.4,9.4
+48151,"Fisher County, Texas",Texas,2023,10.3,39.7,7.4
+47169,"Trousdale County, Tennessee",Tennessee,2023,10.3,21.5,10.6
+19097,"Jackson County, Iowa",Iowa,2023,10.3,75.5,9.1
+19001,"Adair County, Iowa",Iowa,2023,10.3,79.4,9.6
+27149,"Stevens County, Minnesota",Minnesota,2023,10.3,66.5,8.2
+46097,"Miner County, South Dakota",South Dakota,2023,10.3,78.3,9.1
+16045,"Gem County, Idaho",Idaho,2023,10.4,,9.2
+49025,"Kane County, Utah",Utah,2023,10.4,,10.8
+19173,"Taylor County, Iowa",Iowa,2023,10.4,,11
+20179,"Sheridan County, Kansas",Kansas,2023,10.4,,10.1
+46073,"Jerauld County, South Dakota",South Dakota,2023,10.4,,9.7
+31103,"Keya Paha County, Nebraska",Nebraska,2023,10.4,,11.1
+30039,"Granite County, Montana",Montana,2023,10.4,,10.9
+53043,"Lincoln County, Washington",Washington,2023,10.4,,10.1
+13291,"Union County, Georgia",Georgia,2023,10.4,33.9,9.9
+48077,"Clay County, Texas",Texas,2023,10.4,,10.8
+19105,"Jones County, Iowa",Iowa,2023,10.4,11,10.3
+21209,"Scott County, Kentucky",Kentucky,2023,10.4,17.8,9
+48399,"Runnels County, Texas",Texas,2023,10.4,9.3,10.8
+19093,"Ida County, Iowa",Iowa,2023,10.4,6.3,10.3
+12081,"Manatee County, Florida",Florida,2023,10.4,17.1,8.6
+18027,"Daviess County, Indiana",Indiana,2023,10.4,21.4,9.5
+37119,"Mecklenburg County, North Carolina",North Carolina,2023,10.4,13.8,6.2
+34029,"Ocean County, New Jersey",New Jersey,2023,10.4,12.6,10.4
+12087,"Monroe County, Florida",Florida,2023,10.4,16.1,9.1
+06073,"San Diego County, California",California,2023,10.4,19,9
+50007,"Chittenden County, Vermont",Vermont,2023,10.4,25.3,9.4
+19063,"Emmet County, Iowa",Iowa,2023,10.4,4.1,9
+55031,"Douglas County, Wisconsin",Wisconsin,2023,10.4,39.4,10.1
+41071,"Yamhill County, Oregon",Oregon,2023,10.4,23,10.4
+29135,"Moniteau County, Missouri",Missouri,2023,10.4,31.1,10.9
+38077,"Richland County, North Dakota",North Dakota,2023,10.4,39.6,7.7
+19073,"Greene County, Iowa",Iowa,2023,10.4,100,10
+30099,"Teton County, Montana",Montana,2023,10.5,16.7,10.2
+46015,"Brule County, South Dakota",South Dakota,2023,10.5,35.5,11
+56045,"Weston County, Wyoming",Wyoming,2023,10.5,,10.6
+20017,"Chase County, Kansas",Kansas,2023,10.5,,10.9
+40025,"Cimarron County, Oklahoma",Oklahoma,2023,10.5,,11.3
+38103,"Wells County, North Dakota",North Dakota,2023,10.5,,9.3
+49041,"Sevier County, Utah",Utah,2023,10.5,,10.5
+53055,"San Juan County, Washington",Washington,2023,10.5,,10.3
+13171,"Lamar County, Georgia",Georgia,2023,10.5,14.9,8.7
+55059,"Kenosha County, Wisconsin",Wisconsin,2023,10.5,23.8,9.1
+17007,"Boone County, Illinois",Illinois,2023,10.5,4.4,8.2
+55025,"Dane County, Wisconsin",Wisconsin,2023,10.5,19.5,8.7
+55069,"Lincoln County, Wisconsin",Wisconsin,2023,10.5,12.9,10.3
+12021,"Collier County, Florida",Florida,2023,10.5,15,8.2
+21113,"Jessamine County, Kentucky",Kentucky,2023,10.5,26.6,9.1
+06027,"Inyo County, California",California,2023,10.5,4.5,9.5
+01089,"Madison County, Alabama",Alabama,2023,10.5,18.2,7.2
+22093,"St. James Parish, Louisiana",Louisiana,2023,10.5,18.2,3.2
+13135,"Gwinnett County, Georgia",Georgia,2023,10.5,10,7
+31149,"Rock County, Nebraska",Nebraska,2023,10.5,,10.7
+45013,"Beaufort County, South Carolina",South Carolina,2023,10.5,27.1,6.4
+37037,"Chatham County, North Carolina",North Carolina,2023,10.5,23.5,6.3
+01003,"Baldwin County, Alabama",Alabama,2023,10.5,32.2,7.9
+27115,"Pine County, Minnesota",Minnesota,2023,10.5,10.6,9.5
+38099,"Walsh County, North Dakota",North Dakota,2023,10.5,48.9,9.1
+27095,"Mille Lacs County, Minnesota",Minnesota,2023,10.5,40.4,9.2
+17069,"Hardin County, Illinois",Illinois,2023,10.5,100,10.1
+31009,"Blaine County, Nebraska",Nebraska,2023,10.6,,10.6
+09180,"Southeastern Connecticut Planning Region, Connecticut",Connecticut,2023,10.6,17.8,8.5
+17171,"Scott County, Illinois",Illinois,2023,10.6,,11
+36037,"Genesee County, New York",New York,2023,10.6,28.9,9.9
+21143,"Lyon County, Kentucky",Kentucky,2023,10.6,7.7,11
+36121,"Wyoming County, New York",New York,2023,10.6,36.3,10.3
+56019,"Johnson County, Wyoming",Wyoming,2023,10.6,,9.3
+06075,"San Francisco County, California",California,2023,10.6,25.4,7.8
+26081,"Kent County, Michigan",Michigan,2023,10.6,26.5,7.5
+46013,"Brown County, South Dakota",South Dakota,2023,10.6,10.5,8
+31147,"Richardson County, Nebraska",Nebraska,2023,10.6,,11.4
+06057,"Nevada County, California",California,2023,10.6,16.2,10.6
+42075,"Lebanon County, Pennsylvania",Pennsylvania,2023,10.6,16.6,7.7
+48329,"Midland County, Texas",Texas,2023,10.6,20.6,7.9
+17049,"Effingham County, Illinois",Illinois,2023,10.6,80.5,10.3
+30059,"Meagher County, Montana",Montana,2023,10.7,,10.4
+27051,"Grant County, Minnesota",Minnesota,2023,10.7,3.2,10.4
+06063,"Plumas County, California",California,2023,10.7,41.6,8.8
+38057,"Mercer County, North Dakota",North Dakota,2023,10.7,,8.9
+18021,"Clay County, Indiana",Indiana,2023,10.7,23.2,10.7
+19023,"Butler County, Iowa",Iowa,2023,10.7,,10.5
+48251,"Johnson County, Texas",Texas,2023,10.7,9.3,10.1
+27071,"Koochiching County, Minnesota",Minnesota,2023,10.7,87.5,10.4
+37141,"Pender County, North Carolina",North Carolina,2023,10.7,20.9,8.3
+48089,"Colorado County, Texas",Texas,2023,10.7,16.7,8.4
+55065,"Lafayette County, Wisconsin",Wisconsin,2023,10.7,23,9.9
+55033,"Dunn County, Wisconsin",Wisconsin,2023,10.7,23.8,10.7
+01001,"Autauga County, Alabama",Alabama,2023,10.7,16.6,9
+13247,"Rockdale County, Georgia",Georgia,2023,10.7,9.2,11.2
+18183,"Whitley County, Indiana",Indiana,2023,10.7,23.1,10.7
+29113,"Lincoln County, Missouri",Missouri,2023,10.7,30.1,10.5
+32031,"Washoe County, Nevada",Nevada,2023,10.7,23.9,9.6
+51053,"Dinwiddie County, Virginia",Virginia,2023,10.7,14.8,8.9
+06109,"Tuolumne County, California",California,2023,10.7,31.2,10
+30007,"Broadwater County, Montana",Montana,2023,10.7,,9.4
+16017,"Bonner County, Idaho",Idaho,2023,10.7,,11
+18169,"Wabash County, Indiana",Indiana,2023,10.7,24.6,10.5
+16083,"Twin Falls County, Idaho",Idaho,2023,10.7,38.6,9
+54079,"Putnam County, West Virginia",West Virginia,2023,10.7,39.5,10.1
+20107,"Linn County, Kansas",Kansas,2023,10.7,32,10.3
+31161,"Sheridan County, Nebraska",Nebraska,2023,10.7,45.2,9.3
+27129,"Renville County, Minnesota",Minnesota,2023,10.7,64.9,8.4
+31101,"Keith County, Nebraska",Nebraska,2023,10.7,77.4,8.5
+53023,"Garfield County, Washington",Washington,2023,10.8,13.3,11.4
+20081,"Haskell County, Kansas",Kansas,2023,10.8,,10.4
+31075,"Grant County, Nebraska",Nebraska,2023,10.8,,10.9
+30103,"Treasure County, Montana",Montana,2023,10.8,,7.7
+27151,"Swift County, Minnesota",Minnesota,2023,10.8,7.9,9.6
+53009,"Clallam County, Washington",Washington,2023,10.8,3.1,9.9
+29033,"Carroll County, Missouri",Missouri,2023,10.8,29.6,10.6
+36115,"Washington County, New York",New York,2023,10.8,8.8,10.3
+21037,"Campbell County, Kentucky",Kentucky,2023,10.8,24.4,10.1
+20191,"Sumner County, Kansas",Kansas,2023,10.8,23.3,10.6
+36095,"Schoharie County, New York",New York,2023,10.8,14,10.6
+29053,"Cooper County, Missouri",Missouri,2023,10.8,15,9.8
+28057,"Itawamba County, Mississippi",Mississippi,2023,10.8,16.5,10.5
+06011,"Colusa County, California",California,2023,10.8,20.1,10.6
+55101,"Racine County, Wisconsin",Wisconsin,2023,10.8,22.7,7.6
+51009,"Amherst County, Virginia",Virginia,2023,10.8,12.2,8.7
+51141,"Patrick County, Virginia",Virginia,2023,10.8,15.2,10.4
+47047,"Fayette County, Tennessee",Tennessee,2023,10.8,22.2,6.5
+38021,"Dickey County, North Dakota",North Dakota,2023,10.8,,10.1
+04011,"Greenlee County, Arizona",Arizona,2023,10.8,,8.8
+38045,"LaMoure County, North Dakota",North Dakota,2023,10.8,,11
+50019,"Orleans County, Vermont",Vermont,2023,10.8,6.4,10.9
+33019,"Sullivan County, New Hampshire",New Hampshire,2023,10.8,5.3,10.3
+26113,"Missaukee County, Michigan",Michigan,2023,10.8,57.4,10.6
+16049,"Idaho County, Idaho",Idaho,2023,10.8,100,10.1
+31089,"Holt County, Nebraska",Nebraska,2023,10.8,40,10.1
+20185,"Stafford County, Kansas",Kansas,2023,10.8,66.7,8.9
+02275,"Wrangell City and Borough, Alaska",Alaska,2023,10.9,,4.4
+25015,"Hampshire County, Massachusetts",Massachusetts,2023,10.9,26.6,9.6
+42115,"Susquehanna County, Pennsylvania",Pennsylvania,2023,10.9,10.6,10.7
+20003,"Anderson County, Kansas",Kansas,2023,10.9,,11.4
+30063,"Missoula County, Montana",Montana,2023,10.9,15.3,10.1
+26111,"Midland County, Michigan",Michigan,2023,10.9,17.6,10.4
+19155,"Pottawattamie County, Iowa",Iowa,2023,10.9,20.1,10.3
+04021,"Pinal County, Arizona",Arizona,2023,10.9,11.1,9.9
+48439,"Tarrant County, Texas",Texas,2023,10.9,15.7,8
+17017,"Cass County, Illinois",Illinois,2023,10.9,19,11.3
+51775,"Salem city, Virginia",Virginia,2023,10.9,23.1,9.5
+24015,"Cecil County, Maryland",Maryland,2023,10.9,15.5,9.6
+39117,"Morrow County, Ohio",Ohio,2023,10.9,15.3,10.9
+55139,"Winnebago County, Wisconsin",Wisconsin,2023,10.9,42.9,9.3
+36085,"Richmond County, New York",New York,2023,10.9,24.6,7.2
+38073,"Ransom County, North Dakota",North Dakota,2023,10.9,20.8,8.7
+18099,"Marshall County, Indiana",Indiana,2023,10.9,45.5,9.5
+55125,"Vilas County, Wisconsin",Wisconsin,2023,10.9,34.3,8.4
+06051,"Mono County, California",California,2023,11,,8.9
+24023,"Garrett County, Maryland",Maryland,2023,11,10.1,10.7
+27135,"Roseau County, Minnesota",Minnesota,2023,11,7.1,9.7
+31019,"Buffalo County, Nebraska",Nebraska,2023,11,3.2,11
+42009,"Bedford County, Pennsylvania",Pennsylvania,2023,11,17.1,10.7
+42113,"Sullivan County, Pennsylvania",Pennsylvania,2023,11,52,9.5
+54065,"Morgan County, West Virginia",West Virginia,2023,11,2.3,11.3
+42061,"Huntingdon County, Pennsylvania",Pennsylvania,2023,11,22.3,11
+36039,"Greene County, New York",New York,2023,11,8.6,11.1
+38089,"Stark County, North Dakota",North Dakota,2023,11,1.3,9.3
+37011,"Avery County, North Carolina",North Carolina,2023,11,42.1,10.3
+25003,"Berkshire County, Massachusetts",Massachusetts,2023,11,25.8,10.1
+39083,"Knox County, Ohio",Ohio,2023,11,13.4,10.5
+16011,"Bingham County, Idaho",Idaho,2023,11,6.7,9.5
+51191,"Washington County, Virginia",Virginia,2023,11,23.7,10.9
+48453,"Travis County, Texas",Texas,2023,11,15.5,9.4
+28089,"Madison County, Mississippi",Mississippi,2023,11,18.3,5.2
+45045,"Greenville County, South Carolina",South Carolina,2023,11,21.7,6.7
+26147,"St. Clair County, Michigan",Michigan,2023,11,28.4,10.1
+27005,"Becker County, Minnesota",Minnesota,2023,11,43.6,8.4
+46053,"Gregory County, South Dakota",South Dakota,2023,11,,7.7
+32019,"Lyon County, Nevada",Nevada,2023,11,23.7,11.1
+55115,"Shawano County, Wisconsin",Wisconsin,2023,11,29.5,9.3
+32007,"Elko County, Nevada",Nevada,2023,11,26.9,10.9
+20139,"Osage County, Kansas",Kansas,2023,11,25.7,10
+29157,"Perry County, Missouri",Missouri,2023,11,35.2,10.6
+18155,"Switzerland County, Indiana",Indiana,2023,11.1,,11.3
+49017,"Garfield County, Utah",Utah,2023,11.1,,8.8
+31105,"Kimball County, Nebraska",Nebraska,2023,11.1,,10.1
+49031,"Piute County, Utah",Utah,2023,11.1,,10.8
+46025,"Clark County, South Dakota",South Dakota,2023,11.1,,10.8
+48159,"Franklin County, Texas",Texas,2023,11.1,2.7,11.3
+31033,"Cheyenne County, Nebraska",Nebraska,2023,11.1,,11.1
+55137,"Waushara County, Wisconsin",Wisconsin,2023,11.1,2.1,10.4
+19127,"Marshall County, Iowa",Iowa,2023,11.1,10.6,10.1
+19157,"Poweshiek County, Iowa",Iowa,2023,11.1,1.2,11.1
+51007,"Amelia County, Virginia",Virginia,2023,11.1,7.5,9.7
+48383,"Reagan County, Texas",Texas,2023,11.1,,9.6
+48181,"Grayson County, Texas",Texas,2023,11.1,23.2,9.7
+17021,"Christian County, Illinois",Illinois,2023,11.1,47.5,10
+32510,"Carson City, Nevada",Nevada,2023,11.1,13.9,9.1
+40153,"Woodward County, Oklahoma",Oklahoma,2023,11.1,,8.5
+39149,"Shelby County, Ohio",Ohio,2023,11.1,17.7,10.9
+12099,"Palm Beach County, Florida",Florida,2023,11.1,16.5,8.3
+53005,"Benton County, Washington",Washington,2023,11.1,14.7,7.9
+06065,"Riverside County, California",California,2023,11.1,14.2,9.9
+12101,"Pasco County, Florida",Florida,2023,11.1,13.3,10.9
+05085,"Lonoke County, Arkansas",Arkansas,2023,11.1,23.7,9.8
+34021,"Mercer County, New Jersey",New Jersey,2023,11.1,18.1,7.3
+08069,"Larimer County, Colorado",Colorado,2023,11.1,20.3,10.7
+27017,"Carlton County, Minnesota",Minnesota,2023,11.1,49.1,10.2
+26115,"Monroe County, Michigan",Michigan,2023,11.1,30.2,10.4
+23023,"Sagadahoc County, Maine",Maine,2023,11.1,32.6,10.7
+27091,"Martin County, Minnesota",Minnesota,2023,11.1,64.3,10.3
+49047,"Uintah County, Utah",Utah,2023,11.1,95.7,8.7
+20033,"Comanche County, Kansas",Kansas,2023,11.2,,10.7
+19133,"Monona County, Iowa",Iowa,2023,11.2,,11.1
+31077,"Greeley County, Nebraska",Nebraska,2023,11.2,,10.6
+31043,"Dakota County, Nebraska",Nebraska,2023,11.2,21.9,13.1
+18071,"Jackson County, Indiana",Indiana,2023,11.2,1.9,9.1
+39037,"Darke County, Ohio",Ohio,2023,11.2,24.1,10.6
+39135,"Preble County, Ohio",Ohio,2023,11.2,29.5,11.1
+08077,"Mesa County, Colorado",Colorado,2023,11.2,24.2,10.4
+12041,"Gilchrist County, Florida",Florida,2023,11.2,30.6,10.3
+06087,"Santa Cruz County, California",California,2023,11.2,14.7,9.9
+08031,"Denver County, Colorado",Colorado,2023,11.2,22.5,7.9
+48167,"Galveston County, Texas",Texas,2023,11.2,19.7,8.8
+31055,"Douglas County, Nebraska",Nebraska,2023,11.2,26.3,8.2
+42003,"Allegheny County, Pennsylvania",Pennsylvania,2023,11.2,28.5,7.9
+37101,"Johnston County, North Carolina",North Carolina,2023,11.2,18.1,7.2
+01115,"St. Clair County, Alabama",Alabama,2023,11.2,16.4,10.7
+42111,"Somerset County, Pennsylvania",Pennsylvania,2023,11.2,36.4,10.9
+13221,"Oglethorpe County, Georgia",Georgia,2023,11.2,20.9,8.8
+46051,"Grant County, South Dakota",South Dakota,2023,11.2,100,7.2
+05039,"Dallas County, Arkansas",Arkansas,2023,11.2,16.2,6.7
+20145,"Pawnee County, Kansas",Kansas,2023,11.2,53.6,9.3
+18077,"Jefferson County, Indiana",Indiana,2023,11.2,40.2,9.6
+27029,"Clearwater County, Minnesota",Minnesota,2023,11.2,75,9
+37087,"Haywood County, North Carolina",North Carolina,2023,11.3,9.6,11.1
+39091,"Logan County, Ohio",Ohio,2023,11.3,11.6,11.2
+51187,"Warren County, Virginia",Virginia,2023,11.3,12.6,11.1
+04013,"Maricopa County, Arizona",Arizona,2023,11.3,17.8,9.2
+17119,"Madison County, Illinois",Illinois,2023,11.3,30.9,8.9
+13097,"Douglas County, Georgia",Georgia,2023,11.3,13,8.7
+48325,"Medina County, Texas",Texas,2023,11.3,13.3,10.2
+29073,"Gasconade County, Missouri",Missouri,2023,11.3,,11.1
+27031,"Cook County, Minnesota",Minnesota,2023,11.3,,9.1
+42089,"Monroe County, Pennsylvania",Pennsylvania,2023,11.3,13.7,10.1
+10001,"Kent County, Delaware",Delaware,2023,11.3,17.9,8.1
+20065,"Graham County, Kansas",Kansas,2023,11.3,3.3,10.5
+36117,"Wayne County, New York",New York,2023,11.3,36.4,10
+47127,"Moore County, Tennessee",Tennessee,2023,11.3,22.9,11.2
+42005,"Armstrong County, Pennsylvania",Pennsylvania,2023,11.3,36.3,11
+18093,"Lawrence County, Indiana",Indiana,2023,11.3,34.1,11.3
+56009,"Converse County, Wyoming",Wyoming,2023,11.3,40.6,10.8
+38003,"Barnes County, North Dakota",North Dakota,2023,11.3,86.4,10.4
+49015,"Emery County, Utah",Utah,2023,11.3,100,10.7
+48271,"Kinney County, Texas",Texas,2023,11.3,100,9.4
+20135,"Ness County, Kansas",Kansas,2023,11.4,,11.2
+46111,"Sanborn County, South Dakota",South Dakota,2023,11.4,,9.9
+02066,"Copper River Census Area, Alaska",Alaska,2023,11.4,,7.4
+40093,"Major County, Oklahoma",Oklahoma,2023,11.4,,9.9
+20165,"Rush County, Kansas",Kansas,2023,11.4,,10.5
+27159,"Wadena County, Minnesota",Minnesota,2023,11.4,17.5,11.8
+42131,"Wyoming County, Pennsylvania",Pennsylvania,2023,11.4,13,11.2
+37115,"Madison County, North Carolina",North Carolina,2023,11.4,,11.3
+50003,"Bennington County, Vermont",Vermont,2023,11.4,21.6,10.9
+19067,"Floyd County, Iowa",Iowa,2023,11.4,13,10.7
+13207,"Monroe County, Georgia",Georgia,2023,11.4,14.4,9.8
+37143,"Perquimans County, North Carolina",North Carolina,2023,11.4,23.4,7.2
+39133,"Portage County, Ohio",Ohio,2023,11.4,28.1,9.3
+32015,"Lander County, Nevada",Nevada,2023,11.4,90.6,10.4
+12103,"Pinellas County, Florida",Florida,2023,11.4,20.7,9.9
+12131,"Walton County, Florida",Florida,2023,11.4,23.9,10.1
+48275,"Knox County, Texas",Texas,2023,11.4,24.2,11.6
+51036,"Charles City County, Virginia",Virginia,2023,11.4,14.3,11.3
+45063,"Lexington County, South Carolina",South Carolina,2023,11.4,17.5,9.4
+12085,"Martin County, Florida",Florida,2023,11.4,28.3,9
+21167,"Mercer County, Kentucky",Kentucky,2023,11.4,18.7,10.9
+54003,"Berkeley County, West Virginia",West Virginia,2023,11.4,22.4,10.6
+08013,"Boulder County, Colorado",Colorado,2023,11.4,20.8,11.1
+31165,"Sioux County, Nebraska",Nebraska,2023,11.4,,10.6
+08017,"Cheyenne County, Colorado",Colorado,2023,11.4,,10.1
+12061,"Indian River County, Florida",Florida,2023,11.4,30.4,9.1
+36021,"Columbia County, New York",New York,2023,11.4,32,10.5
+27117,"Pipestone County, Minnesota",Minnesota,2023,11.4,86.2,8.4
+26067,"Ionia County, Michigan",Michigan,2023,11.4,28.9,11
+42123,"Warren County, Pennsylvania",Pennsylvania,2023,11.4,48.6,11.2
+38095,"Towner County, North Dakota",North Dakota,2023,11.5,,12.2
+16037,"Custer County, Idaho",Idaho,2023,11.5,100,12.3
+40103,"Noble County, Oklahoma",Oklahoma,2023,11.5,,10
+13147,"Hart County, Georgia",Georgia,2023,11.5,16.7,10.1
+55035,"Eau Claire County, Wisconsin",Wisconsin,2023,11.5,26.6,11.4
+18159,"Tipton County, Indiana",Indiana,2023,11.5,,9.9
+51067,"Franklin County, Virginia",Virginia,2023,11.5,14.4,10.7
+10005,"Sussex County, Delaware",Delaware,2023,11.5,19.9,8.3
+48467,"Van Zandt County, Texas",Texas,2023,11.5,12.6,11
+45035,"Dorchester County, South Carolina",South Carolina,2023,11.5,21.3,7.8
+38047,"Logan County, North Dakota",North Dakota,2023,11.5,100,9.9
+47089,"Jefferson County, Tennessee",Tennessee,2023,11.5,19.3,11.3
+29027,"Callaway County, Missouri",Missouri,2023,11.5,24.2,10.4
+19041,"Clay County, Iowa",Iowa,2023,11.5,11.8,11.2
+18145,"Shelby County, Indiana",Indiana,2023,11.5,55.1,10.3
+27011,"Big Stone County, Minnesota",Minnesota,2023,11.5,100,11.3
+55051,"Iron County, Wisconsin",Wisconsin,2023,11.6,,11.5
+48417,"Shackelford County, Texas",Texas,2023,11.6,,12.9
+31087,"Hitchcock County, Nebraska",Nebraska,2023,11.6,,10.3
+09170,"South Central Connecticut Planning Region, Connecticut",Connecticut,2023,11.6,21.2,7.5
+36051,"Livingston County, New York",New York,2023,11.6,20,11.1
+06015,"Del Norte County, California",California,2023,11.6,21.2,10.1
+02122,"Kenai Peninsula Borough, Alaska",Alaska,2023,11.6,0.8,11.2
+53057,"Skagit County, Washington",Washington,2023,11.6,22.6,9.4
+53049,"Pacific County, Washington",Washington,2023,11.6,52.2,9.5
+12111,"St. Lucie County, Florida",Florida,2023,11.6,18.5,9.2
+45019,"Charleston County, South Carolina",South Carolina,2023,11.6,19.8,7.7
+19139,"Muscatine County, Iowa",Iowa,2023,11.6,23.6,10
+51033,"Caroline County, Virginia",Virginia,2023,11.6,14,8.1
+42073,"Lawrence County, Pennsylvania",Pennsylvania,2023,11.6,37.9,9.8
+47125,"Montgomery County, Tennessee",Tennessee,2023,11.6,17.7,8.9
+22125,"West Feliciana Parish, Louisiana",Louisiana,2023,11.6,21.9,5.4
+25005,"Bristol County, Massachusetts",Massachusetts,2023,11.6,19.1,9.1
+48233,"Hutchinson County, Texas",Texas,2023,11.6,46.2,9.9
+47167,"Tipton County, Tennessee",Tennessee,2023,11.6,23.5,8.4
+01037,"Coosa County, Alabama",Alabama,2023,11.6,22.3,7.8
+19163,"Scott County, Iowa",Iowa,2023,11.6,33.7,8.9
+17071,"Henderson County, Illinois",Illinois,2023,11.6,,11.7
+12045,"Gulf County, Florida",Florida,2023,11.6,17.7,11.7
+51181,"Surry County, Virginia",Virginia,2023,11.6,18.3,7.1
+17033,"Crawford County, Illinois",Illinois,2023,11.6,17.6,11.4
+26091,"Lenawee County, Michigan",Michigan,2023,11.6,33.4,10.8
+48435,"Sutton County, Texas",Texas,2023,11.6,100,8.5
+46105,"Perkins County, South Dakota",South Dakota,2023,11.7,,10.7
+17123,"Marshall County, Illinois",Illinois,2023,11.7,100,11.5
+30017,"Custer County, Montana",Montana,2023,11.7,,11.7
+31071,"Garfield County, Nebraska",Nebraska,2023,11.7,,11.3
+08081,"Moffat County, Colorado",Colorado,2023,11.7,,11.4
+26155,"Shiawassee County, Michigan",Michigan,2023,11.7,9.4,11.6
+19187,"Webster County, Iowa",Iowa,2023,11.7,14.5,10.9
+48265,"Kerr County, Texas",Texas,2023,11.7,22.1,10
+37089,"Henderson County, North Carolina",North Carolina,2023,11.7,13.5,9.7
+42057,"Fulton County, Pennsylvania",Pennsylvania,2023,11.7,2.1,11.5
+48009,"Archer County, Texas",Texas,2023,11.7,4.9,10.2
+39121,"Noble County, Ohio",Ohio,2023,11.7,,11.8
+41031,"Jefferson County, Oregon",Oregon,2023,11.7,8.3,9.9
+39017,"Butler County, Ohio",Ohio,2023,11.7,16.5,10.1
+42011,"Berks County, Pennsylvania",Pennsylvania,2023,11.7,19.3,8.2
+31109,"Lancaster County, Nebraska",Nebraska,2023,11.7,24.2,10.3
+12005,"Bay County, Florida",Florida,2023,11.7,18.9,9.9
+12071,"Lee County, Florida",Florida,2023,11.7,21.4,9.4
+19147,"Palo Alto County, Iowa",Iowa,2023,11.7,5.9,12.1
+51820,"Waynesboro city, Virginia",Virginia,2023,11.7,17.1,10.3
+37133,"Onslow County, North Carolina",North Carolina,2023,11.7,16.6,9.9
+21093,"Hardin County, Kentucky",Kentucky,2023,11.7,19.7,9.7
+55129,"Washburn County, Wisconsin",Wisconsin,2023,11.7,40,11
+48299,"Llano County, Texas",Texas,2023,11.7,3.4,10.1
+48451,"Tom Green County, Texas",Texas,2023,11.7,27.6,10.1
+13311,"White County, Georgia",Georgia,2023,11.7,11.9,10.9
+42105,"Potter County, Pennsylvania",Pennsylvania,2023,11.7,21.7,10.9
+20055,"Finney County, Kansas",Kansas,2023,11.7,31.7,9.9
+17103,"Lee County, Illinois",Illinois,2023,11.7,30.9,11.3
+40073,"Kingfisher County, Oklahoma",Oklahoma,2023,11.7,15,10.1
+51079,"Greene County, Virginia",Virginia,2023,11.7,38.4,7.6
+27119,"Polk County, Minnesota",Minnesota,2023,11.7,65.8,9.4
+53071,"Walla Walla County, Washington",Washington,2023,11.7,52.9,10.4
+16071,"Oneida County, Idaho",Idaho,2023,11.8,100,11.8
+16059,"Lemhi County, Idaho",Idaho,2023,11.8,,11
+26101,"Manistee County, Michigan",Michigan,2023,11.8,8,11.5
+17045,"Edgar County, Illinois",Illinois,2023,11.8,8.7,11.7
+20011,"Bourbon County, Kansas",Kansas,2023,11.8,13.9,11.6
+31119,"Madison County, Nebraska",Nebraska,2023,11.8,,9.4
+27153,"Todd County, Minnesota",Minnesota,2023,11.8,3.6,11.1
+23007,"Franklin County, Maine",Maine,2023,11.8,38.7,11.8
+55077,"Marquette County, Wisconsin",Wisconsin,2023,11.8,23.5,10.9
+31079,"Hall County, Nebraska",Nebraska,2023,11.8,29.2,9.4
+55081,"Monroe County, Wisconsin",Wisconsin,2023,11.8,10.1,11.9
+36083,"Rensselaer County, New York",New York,2023,11.8,31.4,9.2
+37021,"Buncombe County, North Carolina",North Carolina,2023,11.8,25.6,9.7
+37073,"Gates County, North Carolina",North Carolina,2023,11.8,19.6,8
+46009,"Bon Homme County, South Dakota",South Dakota,2023,11.8,,11.8
+42117,"Tioga County, Pennsylvania",Pennsylvania,2023,11.8,34.4,11.6
+36031,"Essex County, New York",New York,2023,11.8,57.8,11
+46081,"Lawrence County, South Dakota",South Dakota,2023,11.8,64.1,10
+27043,"Faribault County, Minnesota",Minnesota,2023,11.8,18.8,10.7
+18131,"Pulaski County, Indiana",Indiana,2023,11.8,50,11.7
+19009,"Audubon County, Iowa",Iowa,2023,11.8,100,10.2
+30019,"Daniels County, Montana",Montana,2023,11.9,100,10.6
+17159,"Richland County, Illinois",Illinois,2023,11.9,4.3,11.5
+20105,"Lincoln County, Kansas",Kansas,2023,11.9,,11.1
+39171,"Williams County, Ohio",Ohio,2023,11.9,23.8,11.9
+08085,"Montrose County, Colorado",Colorado,2023,11.9,5.1,11.2
+19123,"Mahaska County, Iowa",Iowa,2023,11.9,3.5,11.9
+39147,"Seneca County, Ohio",Ohio,2023,11.9,49.7,10.8
+29101,"Johnson County, Missouri",Missouri,2023,11.9,23.5,11.2
+21117,"Kenton County, Kentucky",Kentucky,2023,11.9,31,9.5
+18119,"Owen County, Indiana",Indiana,2023,11.9,,11.9
+42077,"Lehigh County, Pennsylvania",Pennsylvania,2023,11.9,23.3,7.2
+29041,"Chariton County, Missouri",Missouri,2023,11.9,67.6,9.6
+48365,"Panola County, Texas",Texas,2023,11.9,33.2,8.9
+18107,"Montgomery County, Indiana",Indiana,2023,11.9,56.8,9.7
+19107,"Keokuk County, Iowa",Iowa,2023,12,17.5,11.6
+19137,"Montgomery County, Iowa",Iowa,2023,12,,12.1
+48501,"Yoakum County, Texas",Texas,2023,12,,4.8
+31057,"Dundy County, Nebraska",Nebraska,2023,12,100,11.5
+13111,"Fannin County, Georgia",Georgia,2023,12,,12
+29177,"Ray County, Missouri",Missouri,2023,12,14,12
+39173,"Wood County, Ohio",Ohio,2023,12,13.8,11.3
+47161,"Stewart County, Tennessee",Tennessee,2023,12,14.2,11.9
+55019,"Clark County, Wisconsin",Wisconsin,2023,12,8.6,11.4
+42025,"Carbon County, Pennsylvania",Pennsylvania,2023,12,25.5,11.3
+26149,"St. Joseph County, Michigan",Michigan,2023,12,21.3,11.3
+12053,"Hernando County, Florida",Florida,2023,12,18.5,11.2
+37063,"Durham County, North Carolina",North Carolina,2023,12,14.6,7.7
+50025,"Windham County, Vermont",Vermont,2023,12,19.9,11.3
+46103,"Pennington County, South Dakota",South Dakota,2023,12,22.8,8.7
+41057,"Tillamook County, Oregon",Oregon,2023,12,4.2,12.7
+27127,"Redwood County, Minnesota",Minnesota,2023,12,7,10.1
+37169,"Stokes County, North Carolina",North Carolina,2023,12,21.3,11.3
+56003,"Big Horn County, Wyoming",Wyoming,2023,12,3.3,12.1
+48209,"Hays County, Texas",Texas,2023,12,19.4,11.2
+17175,"Stark County, Illinois",Illinois,2023,12,32.7,11
+39077,"Huron County, Ohio",Ohio,2023,12,32.5,11.3
+18005,"Bartholomew County, Indiana",Indiana,2023,12,18,10.3
+26117,"Montcalm County, Michigan",Michigan,2023,12,13.4,11.8
+50021,"Rutland County, Vermont",Vermont,2023,12,21.9,11.7
+48495,"Winkler County, Texas",Texas,2023,12,50.3,12.6
+30025,"Fallon County, Montana",Montana,2023,12.1,,10.4
+31017,"Brown County, Nebraska",Nebraska,2023,12.1,,12.3
+20143,"Ottawa County, Kansas",Kansas,2023,12.1,,11.1
+55067,"Langlade County, Wisconsin",Wisconsin,2023,12.1,,11.9
+31063,"Frontier County, Nebraska",Nebraska,2023,12.1,13.3,11.5
+51183,"Sussex County, Virginia",Virginia,2023,12.1,8.3,17.4
+17195,"Whiteside County, Illinois",Illinois,2023,12.1,15.6,10.6
+27099,"Mower County, Minnesota",Minnesota,2023,12.1,27.7,8.7
+54009,"Brooke County, West Virginia",West Virginia,2023,12.1,11.7,12.3
+19081,"Hancock County, Iowa",Iowa,2023,12.1,82.8,10.8
+18007,"Benton County, Indiana",Indiana,2023,12.1,14.1,10.6
+19087,"Henry County, Iowa",Iowa,2023,12.1,39.8,10.1
+39129,"Pickaway County, Ohio",Ohio,2023,12.1,34.2,11.8
+19005,"Allamakee County, Iowa",Iowa,2023,12.1,49.2,10.6
+37003,"Alexander County, North Carolina",North Carolina,2023,12.1,40.6,11.6
+30033,"Garfield County, Montana",Montana,2023,12.2,,12.2
+38069,"Pierce County, North Dakota",North Dakota,2023,12.2,,11.3
+18125,"Pike County, Indiana",Indiana,2023,12.2,12.5,11.3
+26141,"Presque Isle County, Michigan",Michigan,2023,12.2,,12.4
+29017,"Bollinger County, Missouri",Missouri,2023,12.2,57.4,11.4
+29117,"Livingston County, Missouri",Missouri,2023,12.2,,12
+36017,"Chenango County, New York",New York,2023,12.2,27.4,11.9
+27145,"Stearns County, Minnesota",Minnesota,2023,12.2,32.5,9.3
+16005,"Bannock County, Idaho",Idaho,2023,12.2,17.2,11.6
+13125,"Glascock County, Georgia",Georgia,2023,12.2,6.5,12.7
+26075,"Jackson County, Michigan",Michigan,2023,12.2,30,10.6
+19177,"Van Buren County, Iowa",Iowa,2023,12.2,30,11.4
+53063,"Spokane County, Washington",Washington,2023,12.2,16.3,11.1
+48423,"Smith County, Texas",Texas,2023,12.2,16.6,10.5
+47093,"Knox County, Tennessee",Tennessee,2023,12.2,23.5,10.4
+18003,"Allen County, Indiana",Indiana,2023,12.2,26.2,8.5
+32013,"Humboldt County, Nevada",Nevada,2023,12.2,2.5,10
+12127,"Volusia County, Florida",Florida,2023,12.2,23.1,9.9
+36107,"Tioga County, New York",New York,2023,12.2,16.1,11.5
+13297,"Walton County, Georgia",Georgia,2023,12.2,24.1,8.9
+12011,"Broward County, Florida",Florida,2023,12.2,16.4,10.1
+34007,"Camden County, New Jersey",New Jersey,2023,12.2,18.2,7.2
+42097,"Northumberland County, Pennsylvania",Pennsylvania,2023,12.2,37.7,11.3
+48287,"Lee County, Texas",Texas,2023,12.2,25.5,7.7
+25011,"Franklin County, Massachusetts",Massachusetts,2023,12.2,52.5,9.9
+42127,"Wayne County, Pennsylvania",Pennsylvania,2023,12.2,20.1,12.1
+22103,"St. Tammany Parish, Louisiana",Louisiana,2023,12.2,19.7,9.6
+36081,"Queens County, New York",New York,2023,12.2,12.5,10.1
+41053,"Polk County, Oregon",Oregon,2023,12.2,22,11.9
+41065,"Wasco County, Oregon",Oregon,2023,12.2,29.1,11.6
+26063,"Huron County, Michigan",Michigan,2023,12.2,27.4,11.4
+36049,"Lewis County, New York",New York,2023,12.2,50.5,12
+26109,"Menominee County, Michigan",Michigan,2023,12.2,59.2,10.9
+30101,"Toole County, Montana",Montana,2023,12.3,,12.1
+06003,"Alpine County, California",California,2023,12.3,,7.9
+20207,"Woodson County, Kansas",Kansas,2023,12.3,,12.1
+31085,"Hayes County, Nebraska",Nebraska,2023,12.3,,11.6
+06091,"Sierra County, California",California,2023,12.3,,13.5
+23011,"Kennebec County, Maine",Maine,2023,12.3,11.2,12.2
+48199,"Hardin County, Texas",Texas,2023,12.3,24,11.2
+13217,"Newton County, Georgia",Georgia,2023,12.3,12.4,10.5
+45057,"Lancaster County, South Carolina",South Carolina,2023,12.3,21.4,8.9
+20169,"Saline County, Kansas",Kansas,2023,12.3,10.9,10.7
+31047,"Dawson County, Nebraska",Nebraska,2023,12.3,20.8,9
+51011,"Appomattox County, Virginia",Virginia,2023,12.3,18,8.5
+17001,"Adams County, Illinois",Illinois,2023,12.3,28.5,11.4
+42043,"Dauphin County, Pennsylvania",Pennsylvania,2023,12.3,23.1,8.3
+17157,"Randolph County, Illinois",Illinois,2023,12.3,35.4,11.4
+56015,"Goshen County, Wyoming",Wyoming,2023,12.3,,10.8
+48223,"Hopkins County, Texas",Texas,2023,12.3,33.7,9.9
+08087,"Morgan County, Colorado",Colorado,2023,12.3,23.9,11.1
+40051,"Grady County, Oklahoma",Oklahoma,2023,12.3,27.4,11.1
+51171,"Shenandoah County, Virginia",Virginia,2023,12.3,36.3,11.8
+27001,"Aitkin County, Minnesota",Minnesota,2023,12.3,43.7,11.6
+41007,"Clatsop County, Oregon",Oregon,2023,12.3,59.4,11.2
+05053,"Grant County, Arkansas",Arkansas,2023,12.3,63.9,11.5
+31065,"Furnas County, Nebraska",Nebraska,2023,12.3,100,11.4
+21081,"Grant County, Kentucky",Kentucky,2023,12.3,85.4,11.7
+31123,"Morrill County, Nebraska",Nebraska,2023,12.4,,12.7
+18001,"Adams County, Indiana",Indiana,2023,12.4,17.1,11.7
+38093,"Stutsman County, North Dakota",North Dakota,2023,12.4,5.3,12.7
+18045,"Fountain County, Indiana",Indiana,2023,12.4,25,11.8
+13101,"Echols County, Georgia",Georgia,2023,12.4,,10.3
+47103,"Lincoln County, Tennessee",Tennessee,2023,12.4,11.2,12
+06021,"Glenn County, California",California,2023,12.4,,11.8
+55063,"La Crosse County, Wisconsin",Wisconsin,2023,12.4,23.6,12.1
+02013,"Aleutians East Borough, Alaska",Alaska,2023,12.4,21.5,3.1
+27123,"Ramsey County, Minnesota",Minnesota,2023,12.4,25.6,7.9
+41029,"Jackson County, Oregon",Oregon,2023,12.4,31.1,12.3
+48231,"Hunt County, Texas",Texas,2023,12.4,23.9,10.4
+24011,"Caroline County, Maryland",Maryland,2023,12.4,20.7,9.8
+37129,"New Hanover County, North Carolina",North Carolina,2023,12.4,26.7,10
+37135,"Orange County, North Carolina",North Carolina,2023,12.4,18.9,11.6
+48021,"Bastrop County, Texas",Texas,2023,12.4,14.9,7.9
+20177,"Shawnee County, Kansas",Kansas,2023,12.4,23.4,10.1
+30015,"Chouteau County, Montana",Montana,2023,12.4,,7
+37137,"Pamlico County, North Carolina",North Carolina,2023,12.4,24.8,9.4
+56013,"Fremont County, Wyoming",Wyoming,2023,12.4,38.5,9.4
+16039,"Elmore County, Idaho",Idaho,2023,12.4,6,12.2
+20155,"Reno County, Kansas",Kansas,2023,12.4,36.5,11.7
+35015,"Eddy County, New Mexico",New Mexico,2023,12.4,27.9,11.6
+08067,"La Plata County, Colorado",Colorado,2023,12.4,50.8,11
+46035,"Davison County, South Dakota",South Dakota,2023,12.4,32.7,9.7
+17065,"Hamilton County, Illinois",Illinois,2023,12.5,,12.9
+42107,"Schuylkill County, Pennsylvania",Pennsylvania,2023,12.5,19.4,11.3
+18079,"Jennings County, Indiana",Indiana,2023,12.5,24.4,11.3
+19065,"Fayette County, Iowa",Iowa,2023,12.5,77.6,11.1
+18067,"Howard County, Indiana",Indiana,2023,12.5,27.1,11.3
+39019,"Carroll County, Ohio",Ohio,2023,12.5,24.9,12.7
+12097,"Osceola County, Florida",Florida,2023,12.5,14.8,10.9
+41051,"Multnomah County, Oregon",Oregon,2023,12.5,29.1,10.2
+24043,"Washington County, Maryland",Maryland,2023,12.5,23.8,9.7
+17091,"Kankakee County, Illinois",Illinois,2023,12.5,33.3,8.6
+18039,"Elkhart County, Indiana",Indiana,2023,12.5,29.3,9.5
+47065,"Hamilton County, Tennessee",Tennessee,2023,12.5,22.9,8.5
+36093,"Schenectady County, New York",New York,2023,12.5,27.6,8.2
+20141,"Osborne County, Kansas",Kansas,2023,12.5,,12.8
+16035,"Clearwater County, Idaho",Idaho,2023,12.5,,11.7
+20123,"Mitchell County, Kansas",Kansas,2023,12.5,100,12.5
+55107,"Rusk County, Wisconsin",Wisconsin,2023,12.5,48.2,12
+39043,"Erie County, Ohio",Ohio,2023,12.5,28.4,9.5
+42081,"Lycoming County, Pennsylvania",Pennsylvania,2023,12.5,41,11
+29005,"Atchison County, Missouri",Missouri,2023,12.5,17.6,11.8
+17137,"Morgan County, Illinois",Illinois,2023,12.5,31.6,10.7
+42059,"Greene County, Pennsylvania",Pennsylvania,2023,12.5,16.1,12.6
+21005,"Anderson County, Kentucky",Kentucky,2023,12.5,31.8,10.9
+27083,"Lyon County, Minnesota",Minnesota,2023,12.5,49.1,9.5
+35049,"Santa Fe County, New Mexico",New Mexico,2023,12.5,37.6,9.8
+41021,"Gilliam County, Oregon",Oregon,2023,12.6,,7.8
+40149,"Washita County, Oklahoma",Oklahoma,2023,12.6,8.4,11.4
+55023,"Crawford County, Wisconsin",Wisconsin,2023,12.6,9.2,12.4
+53031,"Jefferson County, Washington",Washington,2023,12.6,37.2,11.6
+55053,"Jackson County, Wisconsin",Wisconsin,2023,12.6,5.7,10.7
+53045,"Mason County, Washington",Washington,2023,12.6,21.9,11.1
+48219,"Hockley County, Texas",Texas,2023,12.6,23.3,9.4
+18049,"Fulton County, Indiana",Indiana,2023,12.6,11.4,11.3
+48253,"Jones County, Texas",Texas,2023,12.6,44.9,9.9
+26121,"Muskegon County, Michigan",Michigan,2023,12.6,31.5,9.3
+48051,"Burleson County, Texas",Texas,2023,12.6,11.3,12
+06077,"San Joaquin County, California",California,2023,12.6,16.6,12
+22095,"St. John the Baptist Parish, Louisiana",Louisiana,2023,12.6,12.6,13.6
+27105,"Nobles County, Minnesota",Minnesota,2023,12.6,14.6,10.6
+50005,"Caledonia County, Vermont",Vermont,2023,12.6,20.1,12.2
+06067,"Sacramento County, California",California,2023,12.6,19.7,9.8
+41059,"Umatilla County, Oregon",Oregon,2023,12.6,15.4,11.4
+40123,"Pontotoc County, Oklahoma",Oklahoma,2023,12.6,16.1,11.4
+06053,"Monterey County, California",California,2023,12.6,14.4,8.2
+21229,"Washington County, Kentucky",Kentucky,2023,12.6,15.4,12.2
+47105,"Loudon County, Tennessee",Tennessee,2023,12.6,10.2,11.2
+39153,"Summit County, Ohio",Ohio,2023,12.6,27.7,9.1
+17011,"Bureau County, Illinois",Illinois,2023,12.6,16.2,11.9
+48477,"Washington County, Texas",Texas,2023,12.6,29.6,7.1
+40113,"Osage County, Oklahoma",Oklahoma,2023,12.6,18.8,9.7
+02105,"Hoonah-Angoon Census Area, Alaska",Alaska,2023,12.6,,7.8
+56007,"Carbon County, Wyoming",Wyoming,2023,12.6,36.6,12.6
+26131,"Ontonagon County, Michigan",Michigan,2023,12.6,63.6,13
+26157,"Tuscola County, Michigan",Michigan,2023,12.6,40.1,12.4
+48499,"Wood County, Texas",Texas,2023,12.6,24.2,11.8
+51790,"Staunton city, Virginia",Virginia,2023,12.6,36.9,9.7
+04025,"Yavapai County, Arizona",Arizona,2023,12.6,28,11.7
+29173,"Ralls County, Missouri",Missouri,2023,12.6,41.3,11.8
+17057,"Fulton County, Illinois",Illinois,2023,12.6,45,12.2
+31045,"Dawes County, Nebraska",Nebraska,2023,12.6,80,10.1
+19175,"Union County, Iowa",Iowa,2023,12.6,88,10.9
+46089,"McPherson County, South Dakota",South Dakota,2023,12.6,78.9,10.7
+16033,"Clark County, Idaho",Idaho,2023,12.7,,13.3
+27021,"Cass County, Minnesota",Minnesota,2023,12.7,10.3,9.9
+37027,"Caldwell County, North Carolina",North Carolina,2023,12.7,14.5,11.5
+13139,"Hall County, Georgia",Georgia,2023,12.7,12.6,11.2
+53073,"Whatcom County, Washington",Washington,2023,12.7,13.8,12
+47145,"Roane County, Tennessee",Tennessee,2023,12.7,11.2,13
+39151,"Stark County, Ohio",Ohio,2023,12.7,32.3,10.1
+18171,"Warren County, Indiana",Indiana,2023,12.7,100,11.5
+48361,"Orange County, Texas",Texas,2023,12.7,31.9,9.6
+18017,"Cass County, Indiana",Indiana,2023,12.7,38.6,11.6
+40047,"Garfield County, Oklahoma",Oklahoma,2023,12.7,17.1,10.7
+47051,"Franklin County, Tennessee",Tennessee,2023,12.7,26.8,12.1
+27061,"Itasca County, Minnesota",Minnesota,2023,12.7,41.6,11.2
+17005,"Bond County, Illinois",Illinois,2023,12.7,79.2,10.5
+51021,"Bland County, Virginia",Virginia,2023,12.7,58.1,12.2
+17053,"Ford County, Illinois",Illinois,2023,12.7,58.2,11.9
+17067,"Hancock County, Illinois",Illinois,2023,12.7,71.7,12.4
+20127,"Morris County, Kansas",Kansas,2023,12.8,,13.5
+08061,"Kiowa County, Colorado",Colorado,2023,12.8,,13.2
+41025,"Harney County, Oregon",Oregon,2023,12.8,,12
+20199,"Wallace County, Kansas",Kansas,2023,12.8,,14.1
+38027,"Eddy County, North Dakota",North Dakota,2023,12.8,,11.8
+40099,"Murray County, Oklahoma",Oklahoma,2023,12.8,,12.9
+48197,"Hardeman County, Texas",Texas,2023,12.8,2.5,15.4
+17187,"Warren County, Illinois",Illinois,2023,12.8,3.3,10.6
+42039,"Crawford County, Pennsylvania",Pennsylvania,2023,12.8,17.8,12.7
+42063,"Indiana County, Pennsylvania",Pennsylvania,2023,12.8,35.1,12.6
+29049,"Clinton County, Missouri",Missouri,2023,12.8,15.8,12.4
+37071,"Gaston County, North Carolina",North Carolina,2023,12.8,15.1,10.7
+45051,"Horry County, South Carolina",South Carolina,2023,12.8,25.7,10
+31111,"Lincoln County, Nebraska",Nebraska,2023,12.8,15.6,12
+23027,"Waldo County, Maine",Maine,2023,12.8,43.5,12.6
+48379,"Rains County, Texas",Texas,2023,12.8,13.8,10
+36023,"Cortland County, New York",New York,2023,12.8,14,12.5
+06079,"San Luis Obispo County, California",California,2023,12.8,23,11.3
+42121,"Venango County, Pennsylvania",Pennsylvania,2023,12.8,44.3,12.1
+37035,"Catawba County, North Carolina",North Carolina,2023,12.8,25.4,10.1
+34033,"Salem County, New Jersey",New Jersey,2023,12.8,28,10
+29089,"Howard County, Missouri",Missouri,2023,12.8,16.4,11.5
+39093,"Lorain County, Ohio",Ohio,2023,12.8,34.5,9.5
+40027,"Cleveland County, Oklahoma",Oklahoma,2023,12.8,16.8,11.7
+29169,"Pulaski County, Missouri",Missouri,2023,12.8,32.3,10.2
+42085,"Mercer County, Pennsylvania",Pennsylvania,2023,12.8,37.9,11
+46011,"Brookings County, South Dakota",South Dakota,2023,12.8,31.2,11.9
+20005,"Atchison County, Kansas",Kansas,2023,12.8,23.4,11.1
+13011,"Banks County, Georgia",Georgia,2023,12.8,34.6,12.7
+38053,"McKenzie County, North Dakota",North Dakota,2023,12.8,12.5,10.1
+41043,"Linn County, Oregon",Oregon,2023,12.8,23.2,12
+20089,"Jewell County, Kansas",Kansas,2023,12.8,18.8,11.9
+26031,"Cheboygan County, Michigan",Michigan,2023,12.8,66.3,12.6
+31001,"Adams County, Nebraska",Nebraska,2023,12.8,63.4,11.2
+18123,"Perry County, Indiana",Indiana,2023,12.8,87.5,11.9
+20187,"Stanton County, Kansas",Kansas,2023,12.9,,17.1
+13281,"Towns County, Georgia",Georgia,2023,12.9,,13.1
+54021,"Gilmer County, West Virginia",West Virginia,2023,12.9,26.3,11.9
+13129,"Gordon County, Georgia",Georgia,2023,12.9,7.3,12.2
+21049,"Clark County, Kentucky",Kentucky,2023,12.9,9.7,12.4
+20027,"Clay County, Kansas",Kansas,2023,12.9,,13
+13035,"Butts County, Georgia",Georgia,2023,12.9,27.6,8.5
+26165,"Wexford County, Michigan",Michigan,2023,12.9,17.6,12.4
+13121,"Fulton County, Georgia",Georgia,2023,12.9,20,5.9
+39167,"Washington County, Ohio",Ohio,2023,12.9,18.9,12.4
+33007,"Coos County, New Hampshire",New Hampshire,2023,12.9,27.3,12.2
+18095,"Madison County, Indiana",Indiana,2023,12.9,29.5,11.5
+36001,"Albany County, New York",New York,2023,12.9,25.9,8.5
+30105,"Valley County, Montana",Montana,2023,12.9,,10.9
+17167,"Sangamon County, Illinois",Illinois,2023,12.9,40.3,8.2
+53065,"Stevens County, Washington",Washington,2023,12.9,56,11.9
+08079,"Mineral County, Colorado",Colorado,2023,13,,14.3
+27165,"Watonwan County, Minnesota",Minnesota,2023,13,,9.6
+38007,"Billings County, North Dakota",North Dakota,2023,13,,13.1
+37121,"Mitchell County, North Carolina",North Carolina,2023,13,45.2,12.6
+23001,"Androscoggin County, Maine",Maine,2023,13,30.3,11.9
+55099,"Price County, Wisconsin",Wisconsin,2023,13,,12
+39157,"Tuscarawas County, Ohio",Ohio,2023,13,27.4,12.8
+29025,"Caldwell County, Missouri",Missouri,2023,13,16.5,13.2
+42013,"Blair County, Pennsylvania",Pennsylvania,2023,13,27.9,11.7
+18139,"Rush County, Indiana",Indiana,2023,13,,13.2
+13213,"Murray County, Georgia",Georgia,2023,13,9.8,13.5
+36063,"Niagara County, New York",New York,2023,13,27.2,10.1
+19111,"Lee County, Iowa",Iowa,2023,13,18.9,12.5
+12095,"Orange County, Florida",Florida,2023,13,17,10.2
+44007,"Providence County, Rhode Island",Rhode Island,2023,13,17.9,9.3
+53041,"Lewis County, Washington",Washington,2023,13,17.7,12
+20175,"Seward County, Kansas",Kansas,2023,13,17.5,13.8
+51650,"Hampton city, Virginia",Virginia,2023,13,16.8,9.2
+06089,"Shasta County, California",California,2023,13,26.9,11.8
+17113,"McLean County, Illinois",Illinois,2023,13,33.2,11.5
+53021,"Franklin County, Washington",Washington,2023,13,24.8,9.6
+36071,"Orange County, New York",New York,2023,13,14.6,12.8
+20039,"Decatur County, Kansas",Kansas,2023,13,,11.7
+53015,"Cowlitz County, Washington",Washington,2023,13,27.2,12
+36073,"Orleans County, New York",New York,2023,13,28.7,12.9
+31127,"Nemaha County, Nebraska",Nebraska,2023,13,68.4,12.6
+18065,"Henry County, Indiana",Indiana,2023,13,49.3,12.1
+30067,"Park County, Montana",Montana,2023,13.1,,12.4
+16069,"Nez Perce County, Idaho",Idaho,2023,13.1,,12.5
+49005,"Cache County, Utah",Utah,2023,13.1,18.7,11.9
+08075,"Logan County, Colorado",Colorado,2023,13.1,4,13.7
+12003,"Baker County, Florida",Florida,2023,13.1,6.9,14.3
+22063,"Livingston Parish, Louisiana",Louisiana,2023,13.1,10.1,12.2
+06099,"Stanislaus County, California",California,2023,13.1,15.1,11.3
+55013,"Burnett County, Wisconsin",Wisconsin,2023,13.1,26.2,12.7
+51005,"Alleghany County, Virginia",Virginia,2023,13.1,26.4,11.9
+47011,"Bradley County, Tennessee",Tennessee,2023,13.1,16.9,12
+34001,"Atlantic County, New Jersey",New Jersey,2023,13.1,21,8.5
+36055,"Monroe County, New York",New York,2023,13.1,28.4,8.4
+39003,"Allen County, Ohio",Ohio,2023,13.1,30.7,9.7
+21183,"Ohio County, Kentucky",Kentucky,2023,13.1,3.4,11.7
+41047,"Marion County, Oregon",Oregon,2023,13.1,27.6,11.1
+20001,"Allen County, Kansas",Kansas,2023,13.1,23.3,11.8
+17177,"Stephenson County, Illinois",Illinois,2023,13.1,38.3,9.5
+51103,"Lancaster County, Virginia",Virginia,2023,13.1,24.5,8.2
+48071,"Chambers County, Texas",Texas,2023,13.1,31.2,10.1
+19045,"Clinton County, Iowa",Iowa,2023,13.1,61.6,11.9
+20021,"Cherokee County, Kansas",Kansas,2023,13.1,63.6,12
+08051,"Gunnison County, Colorado",Colorado,2023,13.1,95.2,12.6
+20109,"Logan County, Kansas",Kansas,2023,13.2,,13.7
+09120,"Greater Bridgeport Planning Region, Connecticut",Connecticut,2023,13.2,16.9,8.9
+54093,"Tucker County, West Virginia",West Virginia,2023,13.2,,12.7
+21223,"Trimble County, Kentucky",Kentucky,2023,13.2,10,13.9
+31179,"Wayne County, Nebraska",Nebraska,2023,13.2,,14
+01029,"Cleburne County, Alabama",Alabama,2023,13.2,3.8,13.3
+39033,"Crawford County, Ohio",Ohio,2023,13.2,21.8,13
+13229,"Pierce County, Georgia",Georgia,2023,13.2,30.5,11.4
+26027,"Cass County, Michigan",Michigan,2023,13.2,17.6,13
+18075,"Jay County, Indiana",Indiana,2023,13.2,19.5,12.4
+13249,"Schley County, Georgia",Georgia,2023,13.2,30.6,8.8
+29029,"Camden County, Missouri",Missouri,2023,13.2,32.2,12.6
+12057,"Hillsborough County, Florida",Florida,2023,13.2,18.7,10
+32003,"Clark County, Nevada",Nevada,2023,13.2,20.5,10.8
+31067,"Gage County, Nebraska",Nebraska,2023,13.2,43,12.9
+48335,"Mitchell County, Texas",Texas,2023,13.2,23.1,12.2
+31107,"Knox County, Nebraska",Nebraska,2023,13.2,,11
+30013,"Cascade County, Montana",Montana,2023,13.2,12.1,11.3
+39143,"Sandusky County, Ohio",Ohio,2023,13.2,37.3,12
+08083,"Montezuma County, Colorado",Colorado,2023,13.2,54.7,9.3
+38061,"Mountrail County, North Dakota",North Dakota,2023,13.2,13.5,8.1
+29061,"Daviess County, Missouri",Missouri,2023,13.2,47.5,13
+26051,"Gladwin County, Michigan",Michigan,2023,13.2,58.6,13
+48095,"Concho County, Texas",Texas,2023,13.3,,12.3
+05101,"Newton County, Arkansas",Arkansas,2023,13.3,,13.4
+38091,"Steele County, North Dakota",North Dakota,2023,13.3,,13.6
+18165,"Vermillion County, Indiana",Indiana,2023,13.3,,13.3
+26127,"Oceana County, Michigan",Michigan,2023,13.3,11.9,12.6
+47139,"Polk County, Tennessee",Tennessee,2023,13.3,1.3,13.7
+18117,"Orange County, Indiana",Indiana,2023,13.3,2.5,13.7
+05149,"Yell County, Arkansas",Arkansas,2023,13.3,12.7,14.3
+05013,"Calhoun County, Arkansas",Arkansas,2023,13.3,22,8
+47107,"McMinn County, Tennessee",Tennessee,2023,13.3,18.5,12.5
+36043,"Herkimer County, New York",New York,2023,13.3,32.2,12.6
+26077,"Kalamazoo County, Michigan",Michigan,2023,13.3,28.2,10.5
+17031,"Cook County, Illinois",Illinois,2023,13.3,23.9,8.2
+19193,"Woodbury County, Iowa",Iowa,2023,13.3,26.3,10.7
+49013,"Duchesne County, Utah",Utah,2023,13.3,,12.2
+13079,"Crawford County, Georgia",Georgia,2023,13.3,30.8,8.3
+48185,"Grimes County, Texas",Texas,2023,13.3,41.9,8.8
+28045,"Hancock County, Mississippi",Mississippi,2023,13.3,28.6,12
+18055,"Greene County, Indiana",Indiana,2023,13.3,4.3,13.2
+48459,"Upshur County, Texas",Texas,2023,13.3,22.6,12.1
+41015,"Curry County, Oregon",Oregon,2023,13.3,5.6,12.9
+13227,"Pickens County, Georgia",Georgia,2023,13.3,25.8,12.5
+02240,"Southeast Fairbanks Census Area, Alaska",Alaska,2023,13.3,11.7,11.2
+55047,"Green Lake County, Wisconsin",Wisconsin,2023,13.3,48.6,13
+47159,"Smith County, Tennessee",Tennessee,2023,13.3,33.1,12
+36099,"Seneca County, New York",New York,2023,13.3,53,12.1
+16073,"Owyhee County, Idaho",Idaho,2023,13.4,,11.8
+56037,"Sweetwater County, Wyoming",Wyoming,2023,13.4,16.2,12.8
+17075,"Iroquois County, Illinois",Illinois,2023,13.4,7.2,12.6
+48313,"Madison County, Texas",Texas,2023,13.4,12.7,10.8
+21157,"Marshall County, Kentucky",Kentucky,2023,13.4,0.5,13.2
+27137,"St. Louis County, Minnesota",Minnesota,2023,13.4,32.7,12.5
+22075,"Plaquemines Parish, Louisiana",Louisiana,2023,13.4,16.4,13
+47053,"Gibson County, Tennessee",Tennessee,2023,13.4,15.4,11.6
+19145,"Page County, Iowa",Iowa,2023,13.4,11.1,13.3
+26011,"Arenac County, Michigan",Michigan,2023,13.4,57.5,12.9
+29145,"Newton County, Missouri",Missouri,2023,13.4,24.5,12
+29159,"Pettis County, Missouri",Missouri,2023,13.4,30.7,12.7
+18083,"Knox County, Indiana",Indiana,2023,13.4,27.3,12.7
+21073,"Franklin County, Kentucky",Kentucky,2023,13.4,26.2,11.4
+55043,"Grant County, Wisconsin",Wisconsin,2023,13.4,53,12.8
+36045,"Jefferson County, New York",New York,2023,13.4,21.8,12.8
+42015,"Bradford County, Pennsylvania",Pennsylvania,2023,13.4,31.2,13.2
+27169,"Winona County, Minnesota",Minnesota,2023,13.4,61,11.7
+54023,"Grant County, West Virginia",West Virginia,2023,13.4,61.3,12.7
+05009,"Boone County, Arkansas",Arkansas,2023,13.4,58.6,12.7
+06009,"Calaveras County, California",California,2023,13.4,41.1,11.5
+47035,"Cumberland County, Tennessee",Tennessee,2023,13.4,38,13.3
+18175,"Washington County, Indiana",Indiana,2023,13.5,33.3,13.2
+37043,"Clay County, North Carolina",North Carolina,2023,13.5,22.6,13.7
+48429,"Stephens County, Texas",Texas,2023,13.5,,11.6
+40053,"Grant County, Oklahoma",Oklahoma,2023,13.5,3.9,13.5
+28117,"Prentiss County, Mississippi",Mississippi,2023,13.5,17.7,13.8
+23019,"Penobscot County, Maine",Maine,2023,13.5,18.1,13.3
+17099,"LaSalle County, Illinois",Illinois,2023,13.5,20.9,12.9
+51595,"Emporia city, Virginia",Virginia,2023,13.5,16.7,4.3
+18111,"Newton County, Indiana",Indiana,2023,13.5,,13.1
+13169,"Jones County, Georgia",Georgia,2023,13.5,10.2,15
+48473,"Waller County, Texas",Texas,2023,13.5,25.7,7.5
+48337,"Montague County, Texas",Texas,2023,13.5,,13.4
+13089,"DeKalb County, Georgia",Georgia,2023,13.5,16.2,6.6
+51081,"Greensville County, Virginia",Virginia,2023,13.5,17,8.1
+48441,"Taylor County, Texas",Texas,2023,13.5,25.2,11.1
+22037,"East Feliciana Parish, Louisiana",Louisiana,2023,13.5,22.7,8
+26013,"Baraga County, Michigan",Michigan,2023,13.5,63.4,11
+48237,"Jack County, Texas",Texas,2023,13.5,83.5,12.8
+18153,"Sullivan County, Indiana",Indiana,2023,13.5,92.1,12.3
+19043,"Clayton County, Iowa",Iowa,2023,13.6,8.3,13.6
+31137,"Phelps County, Nebraska",Nebraska,2023,13.6,,12.1
+53051,"Pend Oreille County, Washington",Washington,2023,13.6,16.7,13.1
+01021,"Chilton County, Alabama",Alabama,2023,13.6,20.2,12.6
+49021,"Iron County, Utah",Utah,2023,13.6,27,13.3
+47155,"Sevier County, Tennessee",Tennessee,2023,13.6,7.7,12.2
+54049,"Marion County, West Virginia",West Virginia,2023,13.6,26.8,12.2
+17163,"St. Clair County, Illinois",Illinois,2023,13.6,24.5,8.1
+17015,"Carroll County, Illinois",Illinois,2023,13.6,51.5,13.3
+01103,"Morgan County, Alabama",Alabama,2023,13.6,25.1,11.2
+54033,"Harrison County, West Virginia",West Virginia,2023,13.6,22.2,12.6
+48017,"Bailey County, Texas",Texas,2023,13.6,,11.6
+47003,"Bedford County, Tennessee",Tennessee,2023,13.6,15.4,12.4
+06071,"San Bernardino County, California",California,2023,13.6,22.6,11.6
+29127,"Marion County, Missouri",Missouri,2023,13.6,23.2,13
+06037,"Los Angeles County, California",California,2023,13.6,19.8,11.4
+26103,"Marquette County, Michigan",Michigan,2023,13.6,34,13.3
+37197,"Yadkin County, North Carolina",North Carolina,2023,13.6,21.7,11
+13137,"Habersham County, Georgia",Georgia,2023,13.6,20.8,12.3
+48295,"Lipscomb County, Texas",Texas,2023,13.6,,14
+01077,"Lauderdale County, Alabama",Alabama,2023,13.6,30.1,11.7
+29055,"Crawford County, Missouri",Missouri,2023,13.6,77.8,13
+56017,"Hot Springs County, Wyoming",Wyoming,2023,13.7,,15
+46043,"Douglas County, South Dakota",South Dakota,2023,13.7,100,12.2
+53039,"Klickitat County, Washington",Washington,2023,13.7,13.7,15
+37149,"Polk County, North Carolina",North Carolina,2023,13.7,19.9,12.4
+21017,"Bourbon County, Kentucky",Kentucky,2023,13.7,11.8,13.8
+13313,"Whitfield County, Georgia",Georgia,2023,13.7,19.7,12.2
+06035,"Lassen County, California",California,2023,13.7,14.9,14.1
+01079,"Lawrence County, Alabama",Alabama,2023,13.7,16.5,14.3
+34031,"Passaic County, New Jersey",New Jersey,2023,13.7,19.4,8.4
+21163,"Meade County, Kentucky",Kentucky,2023,13.7,9.6,13.4
+42083,"McKean County, Pennsylvania",Pennsylvania,2023,13.7,17.5,14
+51029,"Buckingham County, Virginia",Virginia,2023,13.7,22.1,8.1
+31021,"Burt County, Nebraska",Nebraska,2023,13.7,30.4,12.3
+40083,"Logan County, Oklahoma",Oklahoma,2023,13.7,40,11.3
+47085,"Humphreys County, Tennessee",Tennessee,2023,13.7,48.5,12.1
+36101,"Steuben County, New York",New York,2023,13.7,42.9,13.2
+17107,"Logan County, Illinois",Illinois,2023,13.7,65.6,12.2
+19091,"Humboldt County, Iowa",Iowa,2023,13.7,51.7,11.8
+40045,"Ellis County, Oklahoma",Oklahoma,2023,13.8,42.9,12.7
+30011,"Carter County, Montana",Montana,2023,13.8,100,13.4
+05023,"Cleburne County, Arkansas",Arkansas,2023,13.8,9.1,13.7
+17191,"Wayne County, Illinois",Illinois,2023,13.8,44.4,12.8
+08021,"Conejos County, Colorado",Colorado,2023,13.8,,13.5
+47083,"Houston County, Tennessee",Tennessee,2023,13.8,5,14.1
+26159,"Van Buren County, Michigan",Michigan,2023,13.8,32,12.5
+37057,"Davidson County, North Carolina",North Carolina,2023,13.8,20.5,12.3
+42033,"Clearfield County, Pennsylvania",Pennsylvania,2023,13.8,36.1,13.6
+28081,"Lee County, Mississippi",Mississippi,2023,13.8,25.1,8.1
+26161,"Washtenaw County, Michigan",Michigan,2023,13.8,21.6,11.8
+29095,"Jackson County, Missouri",Missouri,2023,13.8,23.8,9.5
+51193,"Westmoreland County, Virginia",Virginia,2023,13.8,15.3,13.2
+06083,"Santa Barbara County, California",California,2023,13.8,18.6,11.5
+41001,"Baker County, Oregon",Oregon,2023,13.8,,13.2
+47175,"Van Buren County, Tennessee",Tennessee,2023,13.8,,12.8
+13295,"Walker County, Georgia",Georgia,2023,13.8,28.5,13
+36019,"Clinton County, New York",New York,2023,13.8,45.6,13
+17135,"Montgomery County, Illinois",Illinois,2023,13.8,34.4,13.2
+36011,"Cayuga County, New York",New York,2023,13.8,34.3,12.7
+39005,"Ashland County, Ohio",Ohio,2023,13.8,39,13.4
+46005,"Beadle County, South Dakota",South Dakota,2023,13.8,75,9.9
+55001,"Adams County, Wisconsin",Wisconsin,2023,13.8,57.9,13.2
+21007,"Ballard County, Kentucky",Kentucky,2023,13.8,63.2,11.5
+19039,"Clarke County, Iowa",Iowa,2023,13.8,50,14.5
+19141,"O'Brien County, Iowa",Iowa,2023,13.8,86.6,11.5
+20147,"Phillips County, Kansas",Kansas,2023,13.8,88,13
+47173,"Union County, Tennessee",Tennessee,2023,13.9,15.9,13.6
+16053,"Jerome County, Idaho",Idaho,2023,13.9,,13.9
+42031,"Clarion County, Pennsylvania",Pennsylvania,2023,13.9,23.3,13.7
+21033,"Caldwell County, Kentucky",Kentucky,2023,13.9,26.4,12.9
+39029,"Columbiana County, Ohio",Ohio,2023,13.9,15.1,13.5
+40037,"Creek County, Oklahoma",Oklahoma,2023,13.9,7.5,13.2
+31157,"Scotts Bluff County, Nebraska",Nebraska,2023,13.9,1.4,11.1
+38035,"Grand Forks County, North Dakota",North Dakota,2023,13.9,21.4,12.4
+01043,"Cullman County, Alabama",Alabama,2023,13.9,11.7,13.2
+22007,"Assumption Parish, Louisiana",Louisiana,2023,13.9,21.2,11.2
+37049,"Craven County, North Carolina",North Carolina,2023,13.9,22.4,10.9
+47037,"Davidson County, Tennessee",Tennessee,2023,13.9,19.9,10
+13257,"Stephens County, Georgia",Georgia,2023,13.9,26.4,11.3
+39139,"Richland County, Ohio",Ohio,2023,13.9,32.8,11.4
+06043,"Mariposa County, California",California,2023,13.9,26.8,12
+48055,"Caldwell County, Texas",Texas,2023,13.9,38.4,12.6
+45003,"Aiken County, South Carolina",South Carolina,2023,13.9,23.1,10.4
+36067,"Onondaga County, New York",New York,2023,13.9,34.9,9.8
+20035,"Cowley County, Kansas",Kansas,2023,13.9,22.2,12.3
+21233,"Webster County, Kentucky",Kentucky,2023,13.9,20.3,14.3
+51045,"Craig County, Virginia",Virginia,2023,14,,14.7
+46037,"Day County, South Dakota",South Dakota,2023,14,,10.6
+48447,"Throckmorton County, Texas",Texas,2023,14,,10.4
+29209,"Stone County, Missouri",Missouri,2023,14,12.8,13
+48069,"Castro County, Texas",Texas,2023,14,,8.7
+48119,"Delta County, Texas",Texas,2023,14,29.7,13.1
+26151,"Sanilac County, Michigan",Michigan,2023,14,14.6,13.7
+17125,"Mason County, Illinois",Illinois,2023,14,12.5,13.1
+21141,"Logan County, Kentucky",Kentucky,2023,14,23.6,12.7
+48169,"Garza County, Texas",Texas,2023,14,17.2,16
+08043,"Fremont County, Colorado",Colorado,2023,14,11.7,13.8
+18091,"LaPorte County, Indiana",Indiana,2023,14,29.1,10.8
+37111,"McDowell County, North Carolina",North Carolina,2023,14,27.7,11.7
+26017,"Bay County, Michigan",Michigan,2023,14,22.7,13.3
+36029,"Erie County, New York",New York,2023,14,27.2,9.3
+42069,"Lackawanna County, Pennsylvania",Pennsylvania,2023,14,30.3,12.2
+26041,"Delta County, Michigan",Michigan,2023,14,55.1,13.9
+37127,"Nash County, North Carolina",North Carolina,2023,14,21.7,7.8
+48113,"Dallas County, Texas",Texas,2023,14,19.6,10.6
+20173,"Sedgwick County, Kansas",Kansas,2023,14,27.2,10.1
+24045,"Wicomico County, Maryland",Maryland,2023,14,17.5,12.5
+13159,"Jasper County, Georgia",Georgia,2023,14,23.9,10.6
+29123,"Madison County, Missouri",Missouri,2023,14,25.9,13.1
+40003,"Alfalfa County, Oklahoma",Oklahoma,2023,14,100,13.6
+31133,"Pawnee County, Nebraska",Nebraska,2023,14.1,,14.5
+48081,"Coke County, Texas",Texas,2023,14.1,4,10.8
+37009,"Ashe County, North Carolina",North Carolina,2023,14.1,6.7,13.9
+19057,"Des Moines County, Iowa",Iowa,2023,14.1,27.6,13.6
+45001,"Abbeville County, South Carolina",South Carolina,2023,14.1,24.2,9.1
+36077,"Otsego County, New York",New York,2023,14.1,29.7,13.7
+29031,"Cape Girardeau County, Missouri",Missouri,2023,14.1,28.1,12.1
+31145,"Red Willow County, Nebraska",Nebraska,2023,14.1,62.9,13.5
+51830,"Williamsburg city, Virginia",Virginia,2023,14.1,21.8,12.4
+37001,"Alamance County, North Carolina",North Carolina,2023,14.1,21.9,10.9
+45055,"Kershaw County, South Carolina",South Carolina,2023,14.1,22.8,9
+37077,"Granville County, North Carolina",North Carolina,2023,14.1,21.8,9
+22011,"Beauregard Parish, Louisiana",Louisiana,2023,14.1,28.3,11.7
+47081,"Hickman County, Tennessee",Tennessee,2023,14.1,20.8,14.3
+28059,"Jackson County, Mississippi",Mississippi,2023,14.1,27.2,9.8
+31069,"Garden County, Nebraska",Nebraska,2023,14.1,100,14.2
+26079,"Kalkaska County, Michigan",Michigan,2023,14.1,66.7,13.9
+01009,"Blount County, Alabama",Alabama,2023,14.1,12.5,13.3
+17185,"Wabash County, Illinois",Illinois,2023,14.1,11.1,13.5
+29057,"Dade County, Missouri",Missouri,2023,14.1,80,13.6
+48239,"Jackson County, Texas",Texas,2023,14.1,33.8,11.8
+54077,"Preston County, West Virginia",West Virginia,2023,14.1,16,13.5
+53027,"Grays Harbor County, Washington",Washington,2023,14.1,46.2,12.6
+36123,"Yates County, New York",New York,2023,14.1,64,12.6
+48097,"Cooke County, Texas",Texas,2023,14.1,54.5,10.8
+31061,"Franklin County, Nebraska",Nebraska,2023,14.1,100,13.5
+48093,"Comanche County, Texas",Texas,2023,14.1,100,11.3
+16085,"Valley County, Idaho",Idaho,2023,14.2,,14.6
+08029,"Delta County, Colorado",Colorado,2023,14.2,9.9,14.2
+42035,"Clinton County, Pennsylvania",Pennsylvania,2023,14.2,6.2,14.1
+23017,"Oxford County, Maine",Maine,2023,14.2,6.6,13.7
+48003,"Andrews County, Texas",Texas,2023,14.2,0.3,17.8
+27033,"Cottonwood County, Minnesota",Minnesota,2023,14.2,14.4,12.3
+12121,"Suwannee County, Florida",Florida,2023,14.2,12.6,13.7
+54027,"Hampshire County, West Virginia",West Virginia,2023,14.2,28.4,13.5
+42021,"Cambria County, Pennsylvania",Pennsylvania,2023,14.2,42,12.5
+48213,"Henderson County, Texas",Texas,2023,14.2,14.6,14.5
+21021,"Boyle County, Kentucky",Kentucky,2023,14.2,22.8,13.7
+26025,"Calhoun County, Michigan",Michigan,2023,14.2,29.2,11.9
+48217,"Hill County, Texas",Texas,2023,14.2,34.1,12.2
+37175,"Transylvania County, North Carolina",North Carolina,2023,14.2,33,12.4
+47117,"Marshall County, Tennessee",Tennessee,2023,14.2,29.4,11.8
+48147,"Fannin County, Texas",Texas,2023,14.2,46,12.1
+37167,"Stanly County, North Carolina",North Carolina,2023,14.2,37.5,11.3
+17081,"Jefferson County, Illinois",Illinois,2023,14.2,39.5,12.8
+17061,"Greene County, Illinois",Illinois,2023,14.2,31.8,14.2
+48207,"Haskell County, Texas",Texas,2023,14.2,39.4,12.4
+41049,"Morrow County, Oregon",Oregon,2023,14.2,32.5,14
+20013,"Brown County, Kansas",Kansas,2023,14.2,40.5,11.7
+48483,"Wheeler County, Texas",Texas,2023,14.2,80,13.4
+47171,"Unicoi County, Tennessee",Tennessee,2023,14.2,75.7,14.8
+50009,"Essex County, Vermont",Vermont,2023,14.3,,13.9
+21191,"Pendleton County, Kentucky",Kentucky,2023,14.3,6,14.8
+26001,"Alcona County, Michigan",Michigan,2023,14.3,7.7,14.2
+26057,"Gratiot County, Michigan",Michigan,2023,14.3,25.4,13.4
+48403,"Sabine County, Texas",Texas,2023,14.3,21.4,14.8
+39115,"Morgan County, Ohio",Ohio,2023,14.3,22.3,14.2
+54057,"Mineral County, West Virginia",West Virginia,2023,14.3,27.9,13.8
+26123,"Newaygo County, Michigan",Michigan,2023,14.3,21.3,13.4
+48161,"Freestone County, Texas",Texas,2023,14.3,13.5,12.9
+39013,"Belmont County, Ohio",Ohio,2023,14.3,19.5,12.8
+48401,"Rusk County, Texas",Texas,2023,14.3,22,10.1
+47055,"Giles County, Tennessee",Tennessee,2023,14.3,18.8,11.6
+36111,"Ulster County, New York",New York,2023,14.3,24.6,12.4
+13051,"Chatham County, Georgia",Georgia,2023,14.3,19.9,9.6
+28145,"Union County, Mississippi",Mississippi,2023,14.3,27.2,10.1
+47121,"Meigs County, Tennessee",Tennessee,2023,14.3,17.7,14.6
+17199,"Williamson County, Illinois",Illinois,2023,14.3,36.5,13.1
+17151,"Pope County, Illinois",Illinois,2023,14.3,27.8,11.8
+55057,"Juneau County, Wisconsin",Wisconsin,2023,14.3,63.1,12.9
+53037,"Kittitas County, Washington",Washington,2023,14.3,50.6,13.1
+29065,"Dent County, Missouri",Missouri,2023,14.3,84.8,13.4
+40043,"Dewey County, Oklahoma",Oklahoma,2023,14.4,,13.9
+05083,"Logan County, Arkansas",Arkansas,2023,14.4,24.2,13.7
+23003,"Aroostook County, Maine",Maine,2023,14.4,15.7,14.1
+20057,"Ford County, Kansas",Kansas,2023,14.4,21.5,11.9
+37113,"Macon County, North Carolina",North Carolina,2023,14.4,17.1,12.9
+18163,"Vanderburgh County, Indiana",Indiana,2023,14.4,28.3,11.9
+29077,"Greene County, Missouri",Missouri,2023,14.4,24.2,13.6
+04019,"Pima County, Arizona",Arizona,2023,14.4,19.4,12.2
+45043,"Georgetown County, South Carolina",South Carolina,2023,14.4,30,6.8
+51125,"Nelson County, Virginia",Virginia,2023,14.4,15.1,13.4
+45007,"Anderson County, South Carolina",South Carolina,2023,14.4,24.6,12.1
+27027,"Clay County, Minnesota",Minnesota,2023,14.4,48.6,11.4
+12059,"Holmes County, Florida",Florida,2023,14.4,49.4,13
+21077,"Gallatin County, Kentucky",Kentucky,2023,14.4,43.7,14.3
+48289,"Leon County, Texas",Texas,2023,14.4,34.3,9.1
+29213,"Taney County, Missouri",Missouri,2023,14.4,43.9,13.1
+17117,"Macoupin County, Illinois",Illinois,2023,14.4,32.5,14.3
+27023,"Chippewa County, Minnesota",Minnesota,2023,14.4,89.2,10.2
+39071,"Highland County, Ohio",Ohio,2023,14.4,63.4,14
+35055,"Taos County, New Mexico",New Mexico,2023,14.4,75.8,13
+48411,"San Saba County, Texas",Texas,2023,14.5,,13.9
+37085,"Harnett County, North Carolina",North Carolina,2023,14.5,19.4,12.5
+01019,"Cherokee County, Alabama",Alabama,2023,14.5,18.4,13.4
+13179,"Liberty County, Georgia",Georgia,2023,14.5,15.3,12.9
+39049,"Franklin County, Ohio",Ohio,2023,14.5,24.1,10.3
+21111,"Jefferson County, Kentucky",Kentucky,2023,14.5,24.9,10.4
+48125,"Dickens County, Texas",Texas,2023,14.5,38.5,11.3
+11001,"District of Columbia, District of Columbia",District of Columbia,2023,14.5,23.7,5
+45083,"Spartanburg County, South Carolina",South Carolina,2023,14.5,24,11
+48177,"Gonzales County, Texas",Texas,2023,14.5,36.8,13.2
+12033,"Escambia County, Florida",Florida,2023,14.5,24.6,10.8
+08115,"Sedgwick County, Colorado",Colorado,2023,14.5,,13
+48481,"Wharton County, Texas",Texas,2023,14.5,36,10.2
+54017,"Doddridge County, West Virginia",West Virginia,2023,14.5,,13.7
+38001,"Adams County, North Dakota",North Dakota,2023,14.5,,15.4
+55103,"Richland County, Wisconsin",Wisconsin,2023,14.5,46.7,13.9
+29201,"Scott County, Missouri",Missouri,2023,14.5,36.6,11.3
+48049,"Brown County, Texas",Texas,2023,14.5,38.5,12.2
+48015,"Austin County, Texas",Texas,2023,14.5,43.3,8.6
+29139,"Montgomery County, Missouri",Missouri,2023,14.5,55.3,13.6
+36035,"Fulton County, New York",New York,2023,14.5,46.2,14.2
+55123,"Vernon County, Wisconsin",Wisconsin,2023,14.5,54.7,14.3
+05005,"Baxter County, Arkansas",Arkansas,2023,14.5,62.3,13.6
+26105,"Mason County, Michigan",Michigan,2023,14.6,2.9,14.4
+19101,"Jefferson County, Iowa",Iowa,2023,14.6,15.1,11.8
+48145,"Falls County, Texas",Texas,2023,14.6,22,11.9
+40147,"Washington County, Oklahoma",Oklahoma,2023,14.6,17.2,13.2
+37039,"Cherokee County, North Carolina",North Carolina,2023,14.6,36.8,13.9
+17115,"Macon County, Illinois",Illinois,2023,14.6,29.7,10.1
+12083,"Marion County, Florida",Florida,2023,14.6,22,12.4
+18141,"St. Joseph County, Indiana",Indiana,2023,14.6,31.4,10.6
+18089,"Lake County, Indiana",Indiana,2023,14.6,27.7,8.3
+12031,"Duval County, Florida",Florida,2023,14.6,22.7,10.5
+15001,"Hawaii County, Hawaii",Hawaii,2023,14.6,26.1,12.7
+48027,"Bell County, Texas",Texas,2023,14.6,18.7,13
+48133,"Eastland County, Texas",Texas,2023,14.6,12.5,14.2
+51155,"Pulaski County, Virginia",Virginia,2023,14.6,25.1,14
+36065,"Oneida County, New York",New York,2023,14.6,48,10.6
+48307,"McCulloch County, Texas",Texas,2023,14.6,14.3,16.4
+39067,"Harrison County, Ohio",Ohio,2023,14.6,55.7,13.4
+48475,"Ward County, Texas",Texas,2023,14.6,44.3,9.2
+29131,"Miller County, Missouri",Missouri,2023,14.6,64.8,14.1
+20157,"Republic County, Kansas",Kansas,2023,14.6,44.8,14.9
+42053,"Forest County, Pennsylvania",Pennsylvania,2023,14.7,,13.8
+27167,"Wilkin County, Minnesota",Minnesota,2023,14.7,,13.3
+13123,"Gilmer County, Georgia",Georgia,2023,14.7,10,14.4
+40055,"Greer County, Oklahoma",Oklahoma,2023,14.7,37.8,12.9
+39127,"Perry County, Ohio",Ohio,2023,14.7,11.1,14.7
+54091,"Taylor County, West Virginia",West Virginia,2023,14.7,0.6,14.8
+29195,"Saline County, Missouri",Missouri,2023,14.7,7.4,16
+47185,"White County, Tennessee",Tennessee,2023,14.7,0.6,15.1
+37067,"Forsyth County, North Carolina",North Carolina,2023,14.7,20.3,9.7
+20009,"Barton County, Kansas",Kansas,2023,14.7,16.8,12.2
+19013,"Black Hawk County, Iowa",Iowa,2023,14.7,28.5,12.5
+29129,"Mercer County, Missouri",Missouri,2023,14.7,60,15.1
+40143,"Tulsa County, Oklahoma",Oklahoma,2023,14.7,27.4,10.8
+12105,"Polk County, Florida",Florida,2023,14.7,23.7,11.5
+05001,"Arkansas County, Arkansas",Arkansas,2023,14.7,28.8,9.1
+48029,"Bexar County, Texas",Texas,2023,14.7,20.7,12.6
+54083,"Randolph County, West Virginia",West Virginia,2023,14.7,29,14.6
+36057,"Montgomery County, New York",New York,2023,14.7,36.1,12.2
+29211,"Sullivan County, Missouri",Missouri,2023,14.7,36.1,14.4
+18143,"Scott County, Indiana",Indiana,2023,14.7,84.6,15
+17101,"Lawrence County, Illinois",Illinois,2023,14.7,41.8,14
+30001,"Beaverhead County, Montana",Montana,2023,14.7,100,14.7
+29103,"Knox County, Missouri",Missouri,2023,14.7,95.7,13.9
+05049,"Fulton County, Arkansas",Arkansas,2023,14.8,58.3,14.6
+05143,"Washington County, Arkansas",Arkansas,2023,14.8,22.9,12.9
+39053,"Gallia County, Ohio",Ohio,2023,14.8,29.3,13.7
+19197,"Wright County, Iowa",Iowa,2023,14.8,,10.1
+51089,"Henry County, Virginia",Virginia,2023,14.8,16.3,13.8
+06101,"Sutter County, California",California,2023,14.8,19.8,12.6
+34017,"Hudson County, New Jersey",New Jersey,2023,14.8,20.8,12
+40085,"Love County, Oklahoma",Oklahoma,2023,14.8,1.4,14.9
+20129,"Morton County, Kansas",Kansas,2023,14.8,,13.2
+47033,"Crockett County, Tennessee",Tennessee,2023,14.8,19.6,11.4
+54107,"Wood County, West Virginia",West Virginia,2023,14.8,32.2,14.2
+18149,"Starke County, Indiana",Indiana,2023,14.8,35.6,14.4
+37151,"Randolph County, North Carolina",North Carolina,2023,14.8,32.3,12.7
+26039,"Crawford County, Michigan",Michigan,2023,14.8,82.4,13.3
+47001,"Anderson County, Tennessee",Tennessee,2023,14.8,27.4,14.4
+39027,"Clinton County, Ohio",Ohio,2023,14.8,35.8,13.4
+13241,"Rabun County, Georgia",Georgia,2023,14.8,73,12.6
+26153,"Schoolcraft County, Michigan",Michigan,2023,14.8,84.6,15.1
+20073,"Greenwood County, Kansas",Kansas,2023,14.9,74.2,13.5
+08105,"Rio Grande County, Colorado",Colorado,2023,14.9,16.7,13.6
+13289,"Twiggs County, Georgia",Georgia,2023,14.9,19.9,8.3
+29125,"Maries County, Missouri",Missouri,2023,14.9,85.7,13.5
+16067,"Minidoka County, Idaho",Idaho,2023,14.9,,12.4
+36025,"Delaware County, New York",New York,2023,14.9,29.9,13.6
+51001,"Accomack County, Virginia",Virginia,2023,14.9,20.5,11.2
+12086,"Miami-Dade County, Florida",Florida,2023,14.9,21.4,13.1
+17127,"Massac County, Illinois",Illinois,2023,14.9,20.8,14.3
+39113,"Montgomery County, Ohio",Ohio,2023,14.9,26.5,10.5
+39061,"Hamilton County, Ohio",Ohio,2023,14.9,27.4,9.2
+28115,"Pontotoc County, Mississippi",Mississippi,2023,14.9,21.4,12.7
+47163,"Sullivan County, Tennessee",Tennessee,2023,14.9,32.6,14.3
+37199,"Yancey County, North Carolina",North Carolina,2023,14.9,22.8,13.6
+30027,"Fergus County, Montana",Montana,2023,14.9,51.4,14.7
+53003,"Asotin County, Washington",Washington,2023,14.9,77,13.6
+48267,"Kimble County, Texas",Texas,2023,15,,15.1
+05087,"Madison County, Arkansas",Arkansas,2023,15,,14.4
+08125,"Yuma County, Colorado",Colorado,2023,15,30,8.4
+54051,"Marshall County, West Virginia",West Virginia,2023,15,41.7,13.9
+48083,"Coleman County, Texas",Texas,2023,15,6,15.8
+55041,"Forest County, Wisconsin",Wisconsin,2023,15,30,11.3
+54029,"Hancock County, West Virginia",West Virginia,2023,15,5.7,14.5
+55113,"Sawyer County, Wisconsin",Wisconsin,2023,15,51.2,12.1
+16009,"Benewah County, Idaho",Idaho,2023,15,45,13.7
+34013,"Essex County, New Jersey",New Jersey,2023,15,20.6,7.9
+05045,"Faulkner County, Arkansas",Arkansas,2023,15,26.2,12.8
+16003,"Adams County, Idaho",Idaho,2023,15,,14.3
+13039,"Camden County, Georgia",Georgia,2023,15,31.5,9.6
+51143,"Pittsylvania County, Virginia",Virginia,2023,15,24.8,12.3
+53025,"Grant County, Washington",Washington,2023,15,21.6,13.5
+26053,"Gogebic County, Michigan",Michigan,2023,15,80.7,14.3
+19185,"Wayne County, Iowa",Iowa,2023,15,100,15.2
+21003,"Allen County, Kentucky",Kentucky,2023,15,69.3,14.5
+18135,"Randolph County, Indiana",Indiana,2023,15,89.1,12.5
+30089,"Sanders County, Montana",Montana,2023,15.1,3.3,14.8
+19069,"Franklin County, Iowa",Iowa,2023,15.1,,11.9
+21089,"Greenup County, Kentucky",Kentucky,2023,15.1,14.3,15.4
+28155,"Webster County, Mississippi",Mississippi,2023,15.1,25.6,12.1
+39111,"Monroe County, Ohio",Ohio,2023,15.1,2.4,14.6
+21213,"Simpson County, Kentucky",Kentucky,2023,15.1,19.6,13.7
+13143,"Haralson County, Georgia",Georgia,2023,15.1,6.3,15.6
+16079,"Shoshone County, Idaho",Idaho,2023,15.1,21.3,14.5
+01075,"Lamar County, Alabama",Alabama,2023,15.1,34.3,13.4
+18097,"Marion County, Indiana",Indiana,2023,15.1,22.3,10.6
+51700,"Newport News city, Virginia",Virginia,2023,15.1,20.1,9.5
+48409,"San Patricio County, Texas",Texas,2023,15.1,20.9,10.9
+40019,"Carter County, Oklahoma",Oklahoma,2023,15.1,23.5,13.5
+36097,"Schuyler County, New York",New York,2023,15.1,28.2,15
+48227,"Howard County, Texas",Texas,2023,15.1,29.7,12.6
+02198,"Prince of Wales-Hyder Census Area, Alaska",Alaska,2023,15.1,23.8,13.2
+41023,"Grant County, Oregon",Oregon,2023,15.2,,15.3
+19053,"Decatur County, Iowa",Iowa,2023,15.2,6.3,15.1
+21059,"Daviess County, Kentucky",Kentucky,2023,15.2,24.4,13.7
+01123,"Tallapoosa County, Alabama",Alabama,2023,15.2,29.8,8.7
+06045,"Mendocino County, California",California,2023,15.2,26.2,13.5
+37081,"Guilford County, North Carolina",North Carolina,2023,15.2,22.9,8.9
+26021,"Berrien County, Michigan",Michigan,2023,15.2,37.4,11.2
+20045,"Douglas County, Kansas",Kansas,2023,15.2,21.8,13.8
+47059,"Greene County, Tennessee",Tennessee,2023,15.2,33.1,14.9
+36105,"Sullivan County, New York",New York,2023,15.2,28.5,12.9
+18103,"Miami County, Indiana",Indiana,2023,15.2,28.9,15
+02164,"Lake and Peninsula Borough, Alaska",Alaska,2023,15.2,,1.2
+21173,"Montgomery County, Kentucky",Kentucky,2023,15.2,27.7,15.4
+20111,"Lyon County, Kansas",Kansas,2023,15.2,40.8,15
+19035,"Cherokee County, Iowa",Iowa,2023,15.2,65.2,14
+47111,"Macon County, Tennessee",Tennessee,2023,15.2,100,13.6
+20189,"Stevens County, Kansas",Kansas,2023,15.3,,4.6
+16087,"Washington County, Idaho",Idaho,2023,15.3,,14.1
+20167,"Russell County, Kansas",Kansas,2023,15.3,,14.3
+46129,"Walworth County, South Dakota",South Dakota,2023,15.3,,9.5
+30065,"Musselshell County, Montana",Montana,2023,15.3,,13.5
+48269,"King County, Texas",Texas,2023,15.3,,19
+20077,"Harper County, Kansas",Kansas,2023,15.3,10.5,13.8
+16057,"Latah County, Idaho",Idaho,2023,15.3,27.2,13.9
+39101,"Marion County, Ohio",Ohio,2023,15.3,18.7,13.9
+42065,"Jefferson County, Pennsylvania",Pennsylvania,2023,15.3,30.9,14.9
+17149,"Pike County, Illinois",Illinois,2023,15.3,19.4,15
+48135,"Ector County, Texas",Texas,2023,15.3,15,11.9
+21145,"McCracken County, Kentucky",Kentucky,2023,15.3,27.3,13.6
+51025,"Brunswick County, Virginia",Virginia,2023,15.3,21.1,8.5
+06115,"Yuba County, California",California,2023,15.3,21.2,14
+36109,"Tompkins County, New York",New York,2023,15.3,37.2,13.9
+29111,"Lewis County, Missouri",Missouri,2023,15.3,34.6,15.1
+41039,"Lane County, Oregon",Oregon,2023,15.3,32.6,14.5
+48341,"Moore County, Texas",Texas,2023,15.3,5.8,13.2
+47177,"Warren County, Tennessee",Tennessee,2023,15.3,44.6,13.8
+48045,"Briscoe County, Texas",Texas,2023,15.3,53,12.6
+40011,"Blaine County, Oklahoma",Oklahoma,2023,15.3,8.3,13.1
+40049,"Garvin County, Oklahoma",Oklahoma,2023,15.3,26.7,13.1
+47143,"Rhea County, Tennessee",Tennessee,2023,15.3,30.1,14.4
+49039,"Sanpete County, Utah",Utah,2023,15.3,64.9,14.2
+47099,"Lawrence County, Tennessee",Tennessee,2023,15.3,66.4,14
+16047,"Gooding County, Idaho",Idaho,2023,15.3,66.7,15.9
+40129,"Roger Mills County, Oklahoma",Oklahoma,2023,15.4,,12.8
+26143,"Roscommon County, Michigan",Michigan,2023,15.4,8.5,15.2
+20133,"Neosho County, Kansas",Kansas,2023,15.4,4.9,15.3
+26023,"Branch County, Michigan",Michigan,2023,15.4,34.4,15.2
+06103,"Tehama County, California",California,2023,15.4,3.6,15.2
+53077,"Yakima County, Washington",Washington,2023,15.4,16.3,12.3
+42079,"Luzerne County, Pennsylvania",Pennsylvania,2023,15.4,35.5,11.9
+12055,"Highlands County, Florida",Florida,2023,15.4,20.5,13.6
+08101,"Pueblo County, Colorado",Colorado,2023,15.4,25.3,14.2
+17143,"Peoria County, Illinois",Illinois,2023,15.4,32.3,10
+42049,"Erie County, Pennsylvania",Pennsylvania,2023,15.4,33.9,13
+38051,"McIntosh County, North Dakota",North Dakota,2023,15.4,,13.5
+17161,"Rock Island County, Illinois",Illinois,2023,15.4,34.3,11.2
+21101,"Henderson County, Kentucky",Kentucky,2023,15.4,35.3,13.7
+19171,"Tama County, Iowa",Iowa,2023,15.4,15.3,13.6
+48357,"Ochiltree County, Texas",Texas,2023,15.5,,19.5
+32023,"Nye County, Nevada",Nevada,2023,15.5,17.1,14.9
+13303,"Washington County, Georgia",Georgia,2023,15.5,20,7.1
+22059,"LaSalle Parish, Louisiana",Louisiana,2023,15.5,23.1,15.5
+13239,"Quitman County, Georgia",Georgia,2023,15.5,17.2,12.6
+01017,"Chambers County, Alabama",Alabama,2023,15.5,16.8,14.6
+40071,"Kay County, Oklahoma",Oklahoma,2023,15.5,30.5,13.2
+22047,"Iberville Parish, Louisiana",Louisiana,2023,15.5,20.7,8.3
+04003,"Cochise County, Arizona",Arizona,2023,15.5,11.2,13.5
+37105,"Lee County, North Carolina",North Carolina,2023,15.5,26.2,12.7
+51057,"Essex County, Virginia",Virginia,2023,15.5,20.7,13
+26059,"Hillsdale County, Michigan",Michigan,2023,15.5,31.8,15.4
+12017,"Citrus County, Florida",Florida,2023,15.5,30.1,14.7
+29205,"Shelby County, Missouri",Missouri,2023,15.6,15.2,14.5
+41011,"Coos County, Oregon",Oregon,2023,15.6,28.6,15.2
+53019,"Ferry County, Washington",Washington,2023,15.6,11.1,13.5
+51197,"Wythe County, Virginia",Virginia,2023,15.6,18.9,14.6
+05105,"Perry County, Arkansas",Arkansas,2023,15.6,,15.1
+13045,"Carroll County, Georgia",Georgia,2023,15.6,22.3,13
+36087,"Rockland County, New York",New York,2023,15.6,9.1,17.2
+39023,"Clark County, Ohio",Ohio,2023,15.6,33.6,12.8
+39119,"Muskingum County, Ohio",Ohio,2023,15.6,33,14.9
+47023,"Chester County, Tennessee",Tennessee,2023,15.6,41.7,12.3
+23025,"Somerset County, Maine",Maine,2023,15.6,30.5,15.6
+05025,"Cleveland County, Arkansas",Arkansas,2023,15.6,59.3,8.7
+26033,"Chippewa County, Michigan",Michigan,2023,15.6,57.8,13.4
+29075,"Gentry County, Missouri",Missouri,2023,15.6,52.9,15.9
+41019,"Douglas County, Oregon",Oregon,2023,15.6,51.7,15
+17059,"Gallatin County, Illinois",Illinois,2023,15.6,66.7,15.5
+53069,"Wahkiakum County, Washington",Washington,2023,15.7,37.5,17
+08095,"Phillips County, Colorado",Colorado,2023,15.7,,14.1
+13187,"Lumpkin County, Georgia",Georgia,2023,15.7,30,15.4
+54099,"Wayne County, West Virginia",West Virginia,2023,15.7,8.6,16
+54063,"Monroe County, West Virginia",West Virginia,2023,15.7,,15.8
+42037,"Columbia County, Pennsylvania",Pennsylvania,2023,15.7,19.1,15.4
+22123,"West Carroll Parish, Louisiana",Louisiana,2023,15.7,32.7,12.2
+54069,"Ohio County, West Virginia",West Virginia,2023,15.7,38.4,14.5
+37033,"Caswell County, North Carolina",North Carolina,2023,15.7,17.6,13.6
+21067,"Fayette County, Kentucky",Kentucky,2023,15.7,26.2,12.3
+40125,"Pottawatomie County, Oklahoma",Oklahoma,2023,15.7,32.4,14.6
+40109,"Oklahoma County, Oklahoma",Oklahoma,2023,15.7,26.3,11.8
+25013,"Hampden County, Massachusetts",Massachusetts,2023,15.7,22.1,10.4
+41041,"Lincoln County, Oregon",Oregon,2023,15.7,67.2,15.3
+30045,"Judith Basin County, Montana",Montana,2023,15.8,,15.7
+39059,"Guernsey County, Ohio",Ohio,2023,15.8,20.1,15.5
+26133,"Osceola County, Michigan",Michigan,2023,15.8,36.2,15.5
+29175,"Randolph County, Missouri",Missouri,2023,15.8,12.5,15.6
+21151,"Madison County, Kentucky",Kentucky,2023,15.8,19.5,15.3
+36015,"Chemung County, New York",New York,2023,15.8,30.6,14
+47179,"Washington County, Tennessee",Tennessee,2023,15.8,25.5,14.5
+48117,"Deaf Smith County, Texas",Texas,2023,15.8,,13.4
+20205,"Wilson County, Kansas",Kansas,2023,15.8,71.4,15.6
+48331,"Milam County, Texas",Texas,2023,15.8,31.9,13.9
+35001,"Bernalillo County, New Mexico",New Mexico,2023,15.8,22.4,13.7
+37159,"Rowan County, North Carolina",North Carolina,2023,15.8,27.9,12.1
+36061,"New York County, New York",New York,2023,15.8,29.4,8.6
+46075,"Jones County, South Dakota",South Dakota,2023,15.8,,11.7
+26135,"Oscoda County, Michigan",Michigan,2023,15.8,22.7,15.8
+01067,"Henry County, Alabama",Alabama,2023,15.8,31.9,9.5
+41061,"Union County, Oregon",Oregon,2023,15.8,54.3,15
+41033,"Josephine County, Oregon",Oregon,2023,15.8,50.7,15.2
+30109,"Wibaux County, Montana",Montana,2023,15.9,,17
+40059,"Harper County, Oklahoma",Oklahoma,2023,15.9,,12.3
+48279,"Lamb County, Texas",Texas,2023,15.9,20.1,14.5
+21091,"Hancock County, Kentucky",Kentucky,2023,15.9,,14.8
+28019,"Choctaw County, Mississippi",Mississippi,2023,15.9,29.3,10.1
+26061,"Houghton County, Michigan",Michigan,2023,15.9,33.1,15.3
+48143,"Erath County, Texas",Texas,2023,15.9,43.4,13.4
+48485,"Wichita County, Texas",Texas,2023,15.9,24.7,14.2
+26049,"Genesee County, Michigan",Michigan,2023,15.9,29.8,12.1
+48123,"DeWitt County, Texas",Texas,2023,15.9,22.5,14
+51678,"Lexington city, Virginia",Virginia,2023,15.9,8.2,17.1
+17095,"Knox County, Illinois",Illinois,2023,15.9,48.9,12.7
+51111,"Lunenburg County, Virginia",Virginia,2023,15.9,29,8.2
+17037,"DeKalb County, Illinois",Illinois,2023,15.9,45.6,11.6
+48201,"Harris County, Texas",Texas,2023,15.9,20.8,11.4
+47101,"Lewis County, Tennessee",Tennessee,2023,15.9,21.9,16.5
+29137,"Monroe County, Missouri",Missouri,2023,16,16.9,15.9
+39047,"Fayette County, Ohio",Ohio,2023,16,17.6,15.6
+22121,"West Baton Rouge Parish, Louisiana",Louisiana,2023,16,29.2,7.5
+17201,"Winnebago County, Illinois",Illinois,2023,16,37.5,11.4
+13183,"Long County, Georgia",Georgia,2023,16,18.1,12.4
+42023,"Cameron County, Pennsylvania",Pennsylvania,2023,16,100,15
+35027,"Lincoln County, New Mexico",New Mexico,2023,16,16.8,12.9
+45071,"Newberry County, South Carolina",South Carolina,2023,16,30.5,7.1
+40065,"Jackson County, Oklahoma",Oklahoma,2023,16,34.4,12.5
+48469,"Victoria County, Texas",Texas,2023,16,32.9,14.5
+42087,"Mifflin County, Pennsylvania",Pennsylvania,2023,16,46.7,15.1
+27007,"Beltrami County, Minnesota",Minnesota,2023,16,57.3,11.5
+31125,"Nance County, Nebraska",Nebraska,2023,16.1,,15.8
+29081,"Harrison County, Missouri",Missouri,2023,16.1,44.2,15.7
+48019,"Bandera County, Texas",Texas,2023,16.1,65.1,15.9
+47109,"McNairy County, Tennessee",Tennessee,2023,16.1,12.4,16.3
+37123,"Montgomery County, North Carolina",North Carolina,2023,16.1,21,13.4
+22043,"Grant Parish, Louisiana",Louisiana,2023,16.1,20.9,13.7
+47123,"Monroe County, Tennessee",Tennessee,2023,16.1,9.6,15.6
+20099,"Labette County, Kansas",Kansas,2023,16.1,36.3,14.8
+29225,"Webster County, Missouri",Missouri,2023,16.1,1.1,15.6
+48013,"Atascosa County, Texas",Texas,2023,16.1,5.7,12.6
+54039,"Kanawha County, West Virginia",West Virginia,2023,16.1,27.1,15
+28073,"Lamar County, Mississippi",Mississippi,2023,16.1,30.5,12.2
+48455,"Trinity County, Texas",Texas,2023,16.1,38.4,11.2
+47031,"Coffee County, Tennessee",Tennessee,2023,16.1,32.4,13.7
+29171,"Putnam County, Missouri",Missouri,2023,16.2,,15.5
+30093,"Silver Bow County, Montana",Montana,2023,16.2,35.7,14.7
+51035,"Carroll County, Virginia",Virginia,2023,16.2,25.5,15.7
+30053,"Lincoln County, Montana",Montana,2023,16.2,46.7,15.8
+39035,"Cuyahoga County, Ohio",Ohio,2023,16.2,28.1,9.4
+13053,"Chattahoochee County, Georgia",Georgia,2023,16.2,13.1,16.2
+17121,"Marion County, Illinois",Illinois,2023,16.2,40.1,14.6
+05119,"Pulaski County, Arkansas",Arkansas,2023,16.2,26.3,9.5
+01041,"Crenshaw County, Alabama",Alabama,2023,16.2,26.9,11.6
+29115,"Linn County, Missouri",Missouri,2023,16.2,4.9,15.8
+29185,"St. Clair County, Missouri",Missouri,2023,16.3,11.8,14.8
+38071,"Ramsey County, North Dakota",North Dakota,2023,16.3,27.1,13.7
+05015,"Carroll County, Arkansas",Arkansas,2023,16.3,3.7,13.3
+19143,"Osceola County, Iowa",Iowa,2023,16.3,,14.9
+29083,"Henry County, Missouri",Missouri,2023,16.3,8.7,16.2
+27013,"Blue Earth County, Minnesota",Minnesota,2023,16.3,27,15.4
+05131,"Sebastian County, Arkansas",Arkansas,2023,16.3,26.5,13
+20125,"Montgomery County, Kansas",Kansas,2023,16.3,22.2,14.9
+48225,"Houston County, Texas",Texas,2023,16.3,28.6,12
+48037,"Bowie County, Texas",Texas,2023,16.3,28,12.7
+06113,"Yolo County, California",California,2023,16.3,25.1,13.6
+48179,"Gray County, Texas",Texas,2023,16.3,10.7,12.7
+29163,"Pike County, Missouri",Missouri,2023,16.3,11.3,16
+01095,"Marshall County, Alabama",Alabama,2023,16.3,31,14.1
+54071,"Pendleton County, West Virginia",West Virginia,2023,16.3,,15.2
+13127,"Glynn County, Georgia",Georgia,2023,16.3,26.6,9.6
+48005,"Angelina County, Texas",Texas,2023,16.3,25.4,13.8
+01097,"Mobile County, Alabama",Alabama,2023,16.3,25.3,10.3
+45017,"Calhoun County, South Carolina",South Carolina,2023,16.3,23.4,9.6
+22051,"Jefferson Parish, Louisiana",Louisiana,2023,16.3,23.5,11.2
+01073,"Jefferson County, Alabama",Alabama,2023,16.3,23.8,9
+24019,"Dorchester County, Maryland",Maryland,2023,16.3,31,10.3
+20203,"Wichita County, Kansas",Kansas,2023,16.3,,9.4
+34011,"Cumberland County, New Jersey",New Jersey,2023,16.3,27.4,11.6
+02070,"Dillingham Census Area, Alaska",Alaska,2023,16.3,86.2,3.8
+20047,"Edwards County, Kansas",Kansas,2023,16.4,,14.1
+55003,"Ashland County, Wisconsin",Wisconsin,2023,16.4,40.9,15.2
+28109,"Pearl River County, Mississippi",Mississippi,2023,16.4,23.8,14.8
+47057,"Grainger County, Tennessee",Tennessee,2023,16.4,64.8,15.3
+47017,"Carroll County, Tennessee",Tennessee,2023,16.4,22.6,15.8
+05145,"White County, Arkansas",Arkansas,2023,16.4,28.6,15.7
+13209,"Montgomery County, Georgia",Georgia,2023,16.4,28.7,10
+45073,"Oconee County, South Carolina",South Carolina,2023,16.4,13.5,15.5
+26065,"Ingham County, Michigan",Michigan,2023,16.4,30,13.4
+45085,"Sumter County, South Carolina",South Carolina,2023,16.4,24.5,7.9
+37193,"Wilkes County, North Carolina",North Carolina,2023,16.4,23.4,14.9
+22015,"Bossier Parish, Louisiana",Louisiana,2023,16.4,28.2,12.2
+45037,"Edgefield County, South Carolina",South Carolina,2023,16.4,25.4,10.8
+21097,"Harrison County, Kentucky",Kentucky,2023,16.4,38.6,14.8
+51630,"Fredericksburg city, Virginia",Virginia,2023,16.4,25,12.7
+19047,"Crawford County, Iowa",Iowa,2023,16.4,82.6,13.8
+48191,"Hall County, Texas",Texas,2023,16.4,65.5,10
+40105,"Nowata County, Oklahoma",Oklahoma,2023,16.4,60.7,15.3
+17193,"White County, Illinois",Illinois,2023,16.4,52,16.3
+18101,"Martin County, Indiana",Indiana,2023,16.4,50,15.3
+36033,"Franklin County, New York",New York,2023,16.5,37,15.4
+17051,"Fayette County, Illinois",Illinois,2023,16.5,8.2,16.7
+22109,"Terrebonne Parish, Louisiana",Louisiana,2023,16.5,26.6,12.9
+25025,"Suffolk County, Massachusetts",Massachusetts,2023,16.5,19.7,11.6
+04027,"Yuma County, Arizona",Arizona,2023,16.5,20.4,16.4
+51173,"Smyth County, Virginia",Virginia,2023,16.5,25.1,16.4
+05051,"Garland County, Arkansas",Arkansas,2023,16.5,43.5,13.4
+48395,"Robertson County, Texas",Texas,2023,16.5,36.4,11.6
+29109,"Lawrence County, Missouri",Missouri,2023,16.5,12.5,15.3
+40095,"Marshall County, Oklahoma",Oklahoma,2023,16.5,39.5,15.3
+40039,"Custer County, Oklahoma",Oklahoma,2023,16.5,37.9,16.1
+36075,"Oswego County, New York",New York,2023,16.5,50.6,15.6
+47015,"Cannon County, Tennessee",Tennessee,2023,16.5,49.3,15.7
+01027,"Clay County, Alabama",Alabama,2023,16.5,38.9,11.4
+05081,"Little River County, Arkansas",Arkansas,2023,16.5,36.9,11.1
+40081,"Lincoln County, Oklahoma",Oklahoma,2023,16.5,44.3,15.4
+23021,"Piscataquis County, Maine",Maine,2023,16.5,94.6,16.2
+19117,"Lucas County, Iowa",Iowa,2023,16.5,100,16.8
+54103,"Wetzel County, West Virginia",West Virginia,2023,16.6,,16
+06093,"Siskiyou County, California",California,2023,16.6,26.3,15.3
+26069,"Iosco County, Michigan",Michigan,2023,16.6,40.3,16.7
+21103,"Henry County, Kentucky",Kentucky,2023,16.6,13.2,16
+21217,"Taylor County, Kentucky",Kentucky,2023,16.6,33.4,15.5
+22099,"St. Martin Parish, Louisiana",Louisiana,2023,16.6,30.9,10.1
+20049,"Elk County, Kansas",Kansas,2023,16.7,,17.3
+39163,"Vinton County, Ohio",Ohio,2023,16.7,,16.9
+18041,"Fayette County, Indiana",Indiana,2023,16.7,2.9,17.1
+19103,"Johnson County, Iowa",Iowa,2023,16.7,23.4,15
+29015,"Benton County, Missouri",Missouri,2023,16.7,21.8,15.7
+48503,"Young County, Texas",Texas,2023,16.7,23,15.6
+28095,"Monroe County, Mississippi",Mississippi,2023,16.7,25.1,12.4
+01125,"Tuscaloosa County, Alabama",Alabama,2023,16.7,21.5,13.1
+19179,"Wapello County, Iowa",Iowa,2023,16.7,31.3,15.8
+17025,"Clay County, Illinois",Illinois,2023,16.7,76.9,17
+51620,"Franklin city, Virginia",Virginia,2023,16.7,25.6,4.5
+06033,"Lake County, California",California,2023,16.7,48,16.4
+37171,"Surry County, North Carolina",North Carolina,2023,16.7,36.5,15.8
+17087,"Johnson County, Illinois",Illinois,2023,16.7,30,14.3
+29009,"Barry County, Missouri",Missouri,2023,16.7,20.3,16
+21039,"Carlisle County, Kentucky",Kentucky,2023,16.7,34.3,15.6
+29203,"Shannon County, Missouri",Missouri,2023,16.7,87.5,16.7
+08111,"San Juan County, Colorado",Colorado,2023,16.8,,10.3
+29079,"Grundy County, Missouri",Missouri,2023,16.8,13.8,17
+01093,"Marion County, Alabama",Alabama,2023,16.8,17.1,16.4
+04015,"Mohave County, Arizona",Arizona,2023,16.8,13.9,15.2
+39141,"Ross County, Ohio",Ohio,2023,16.8,14.1,16.3
+21061,"Edmonson County, Kentucky",Kentucky,2023,16.8,45.1,15.5
+47077,"Henderson County, Tennessee",Tennessee,2023,16.8,16.2,16.3
+37157,"Rockingham County, North Carolina",North Carolina,2023,16.8,22.5,13.6
+13063,"Clayton County, Georgia",Georgia,2023,16.8,16.9,16.5
+01071,"Jackson County, Alabama",Alabama,2023,16.8,29.3,15.2
+48349,"Navarro County, Texas",Texas,2023,16.8,33.9,10.7
+21227,"Warren County, Kentucky",Kentucky,2023,16.8,32.9,12.8
+39155,"Trumbull County, Ohio",Ohio,2023,16.8,38.9,13.9
+05033,"Crawford County, Arkansas",Arkansas,2023,16.8,13,17.3
+06031,"Kings County, California",California,2023,16.8,28.4,13.8
+13115,"Floyd County, Georgia",Georgia,2023,16.8,36.6,12.4
+28137,"Tate County, Mississippi",Mississippi,2023,16.8,34.7,9.5
+36003,"Allegany County, New York",New York,2023,16.8,50.6,16.7
+49007,"Carbon County, Utah",Utah,2023,16.8,48.3,16.2
+17145,"Perry County, Illinois",Illinois,2023,16.9,9.4,16.3
+47141,"Putnam County, Tennessee",Tennessee,2023,16.9,17.8,15.2
+20019,"Chautauqua County, Kansas",Kansas,2023,16.9,59.4,14.1
+13025,"Brantley County, Georgia",Georgia,2023,16.9,11.8,16.6
+13197,"Marion County, Georgia",Georgia,2023,16.9,27.5,14
+45039,"Fairfield County, South Carolina",South Carolina,2023,16.9,22.5,9.3
+28087,"Lowndes County, Mississippi",Mississippi,2023,16.9,27.9,8.3
+37191,"Wayne County, North Carolina",North Carolina,2023,16.9,23.3,11.9
+42027,"Centre County, Pennsylvania",Pennsylvania,2023,16.9,31.9,15.6
+48343,"Morris County, Texas",Texas,2023,16.9,30.5,14.3
+45079,"Richland County, South Carolina",South Carolina,2023,16.9,20.6,11.5
+18177,"Wayne County, Indiana",Indiana,2023,16.9,33.9,14.8
+29067,"Douglas County, Missouri",Missouri,2023,16.9,,15.9
+39081,"Jefferson County, Ohio",Ohio,2023,16.9,39.1,15
+26097,"Mackinac County, Michigan",Michigan,2023,16.9,69.3,11.9
+47115,"Marion County, Tennessee",Tennessee,2023,16.9,30.2,17
+29021,"Buchanan County, Missouri",Missouri,2023,16.9,43.9,14
+26071,"Iron County, Michigan",Michigan,2023,16.9,83.7,16.1
+01033,"Colbert County, Alabama",Alabama,2023,16.9,35.4,12.1
+17055,"Franklin County, Illinois",Illinois,2023,16.9,50.8,16.5
+49019,"Grand County, Utah",Utah,2023,17,,16.7
+29187,"St. Francois County, Missouri",Missouri,2023,17,40,16.5
+26007,"Alpena County, Michigan",Michigan,2023,17,43.5,16.4
+13317,"Wilkes County, Georgia",Georgia,2023,17,22.7,10.5
+36013,"Chautauqua County, New York",New York,2023,17,30.6,15.6
+47131,"Obion County, Tennessee",Tennessee,2023,17,24,13
+40057,"Harmon County, Oklahoma",Oklahoma,2023,17,6.2,15.4
+48363,"Palo Pinto County, Texas",Texas,2023,17,23,16.3
+48183,"Gregg County, Texas",Texas,2023,17,21.5,12
+12023,"Columbia County, Florida",Florida,2023,17,26.6,13.3
+29207,"Stoddard County, Missouri",Missouri,2023,17,54.5,16.3
+35007,"Colfax County, New Mexico",New Mexico,2023,17,59,15.7
+29141,"Morgan County, Missouri",Missouri,2023,17,53.8,17.1
+17047,"Edwards County, Illinois",Illinois,2023,17,42.9,17
+48025,"Bee County, Texas",Texas,2023,17,45.7,16.8
+40117,"Pawnee County, Oklahoma",Oklahoma,2023,17,72.2,14.8
+29039,"Cedar County, Missouri",Missouri,2023,17,100,16.2
+05055,"Greene County, Arkansas",Arkansas,2023,17,76.6,15
+39073,"Hocking County, Ohio",Ohio,2023,17.1,18.5,16.1
+17165,"Saline County, Illinois",Illinois,2023,17.1,24.4,17.2
+51131,"Northampton County, Virginia",Virginia,2023,17.1,25.7,10
+21079,"Garrard County, Kentucky",Kentucky,2023,17.1,13.8,16.2
+45047,"Greenwood County, South Carolina",South Carolina,2023,17.1,25.7,12.6
+47073,"Hawkins County, Tennessee",Tennessee,2023,17.1,2.7,16.3
+05059,"Hot Spring County, Arkansas",Arkansas,2023,17.1,21.8,16.1
+48001,"Anderson County, Texas",Texas,2023,17.1,25.8,13.2
+01055,"Etowah County, Alabama",Alabama,2023,17.1,28.9,13.4
+48309,"McLennan County, Texas",Texas,2023,17.1,33.1,12.8
+29019,"Boone County, Missouri",Missouri,2023,17.1,35.8,14
+48461,"Upton County, Texas",Texas,2023,17.1,42.1,18.8
+05021,"Clay County, Arkansas",Arkansas,2023,17.2,,16.9
+18121,"Parke County, Indiana",Indiana,2023,17.2,3.9,17.5
+48297,"Live Oak County, Texas",Texas,2023,17.2,12.1,19.1
+29161,"Phelps County, Missouri",Missouri,2023,17.2,17.4,15.8
+28055,"Issaquena County, Mississippi",Mississippi,2023,17.2,18.8,8.3
+08099,"Prowers County, Colorado",Colorado,2023,17.2,,12.2
+29119,"McDonald County, Missouri",Missouri,2023,17.2,25.1,16.5
+16021,"Boundary County, Idaho",Idaho,2023,17.2,,16.3
+17183,"Vermilion County, Illinois",Illinois,2023,17.2,37.4,13.8
+21047,"Christian County, Kentucky",Kentucky,2023,17.2,25.3,15.8
+47063,"Hamblen County, Tennessee",Tennessee,2023,17.2,40.7,13.8
+48303,"Lubbock County, Texas",Texas,2023,17.2,27.4,15.3
+24001,"Allegany County, Maryland",Maryland,2023,17.2,38.9,16.5
+37051,"Cumberland County, North Carolina",North Carolina,2023,17.2,21.9,12
+37045,"Cleveland County, North Carolina",North Carolina,2023,17.2,31,14.2
+26095,"Luce County, Michigan",Michigan,2023,17.2,100,17.7
+05127,"Scott County, Arkansas",Arkansas,2023,17.2,,19.9
+12075,"Levy County, Florida",Florida,2023,17.2,32.7,16.3
+45077,"Pickens County, South Carolina",South Carolina,2023,17.2,27.6,15.8
+21035,"Calloway County, Kentucky",Kentucky,2023,17.2,46,15.9
+40141,"Tillman County, Oklahoma",Oklahoma,2023,17.2,43.3,11.1
+21187,"Owen County, Kentucky",Kentucky,2023,17.2,16.7,15.4
+05135,"Sharp County, Arkansas",Arkansas,2023,17.3,44,16.8
+46109,"Roberts County, South Dakota",South Dakota,2023,17.3,11.8,7.6
+54005,"Boone County, West Virginia",West Virginia,2023,17.3,,17.5
+48449,"Titus County, Texas",Texas,2023,17.3,12.7,13.9
+12123,"Taylor County, Florida",Florida,2023,17.3,16.2,16.9
+48067,"Cass County, Texas",Texas,2023,17.3,27.5,14.3
+47069,"Hardeman County, Tennessee",Tennessee,2023,17.3,22.7,13.2
+51710,"Norfolk city, Virginia",Virginia,2023,17.3,25.7,9.7
+12037,"Franklin County, Florida",Florida,2023,17.3,25.1,17.8
+48391,"Refugio County, Texas",Texas,2023,17.3,41.1,14.6
+20023,"Cheyenne County, Kansas",Kansas,2023,17.4,,15.6
+38037,"Grant County, North Dakota",North Dakota,2023,17.4,,18.1
+21225,"Union County, Kentucky",Kentucky,2023,17.4,42.4,14.4
+51680,"Lynchburg city, Virginia",Virginia,2023,17.4,27.4,12.5
+48203,"Harrison County, Texas",Texas,2023,17.4,24.5,12.5
+28047,"Harrison County, Mississippi",Mississippi,2023,17.4,30.7,10.7
+37093,"Hoke County, North Carolina",North Carolina,2023,17.4,20.3,11.5
+39015,"Brown County, Ohio",Ohio,2023,17.4,22.8,17.2
+36089,"St. Lawrence County, New York",New York,2023,17.4,28,17.1
+51117,"Mecklenburg County, Virginia",Virginia,2023,17.4,27,12.7
+08071,"Las Animas County, Colorado",Colorado,2023,17.4,,15.2
+22055,"Lafayette Parish, Louisiana",Louisiana,2023,17.4,32,11.6
+01059,"Franklin County, Alabama",Alabama,2023,17.4,14.4,15.2
+40013,"Bryan County, Oklahoma",Oklahoma,2023,17.4,34.3,16.8
+42051,"Fayette County, Pennsylvania",Pennsylvania,2023,17.4,46.3,15.8
+28003,"Alcorn County, Mississippi",Mississippi,2023,17.4,43.5,14.2
+19029,"Cass County, Iowa",Iowa,2023,17.4,68.8,16.8
+37005,"Alleghany County, North Carolina",North Carolina,2023,17.4,41.5,16.7
+16061,"Lewis County, Idaho",Idaho,2023,17.4,82.3,16.2
+08055,"Huerfano County, Colorado",Colorado,2023,17.5,,17.4
+26129,"Ogemaw County, Michigan",Michigan,2023,17.5,37.2,16.7
+39087,"Lawrence County, Ohio",Ohio,2023,17.5,16.6,17.7
+13043,"Candler County, Georgia",Georgia,2023,17.5,16.6,15.6
+01015,"Calhoun County, Alabama",Alabama,2023,17.5,25.4,13.9
+40137,"Stephens County, Oklahoma",Oklahoma,2023,17.5,15.3,16.6
+55079,"Milwaukee County, Wisconsin",Wisconsin,2023,17.5,29.3,10.5
+48305,"Lynn County, Texas",Texas,2023,17.5,9.9,9.6
+13167,"Johnson County, Georgia",Georgia,2023,17.5,28.5,13.1
+20209,"Wyandotte County, Kansas",Kansas,2023,17.5,24.7,14.4
+47157,"Shelby County, Tennessee",Tennessee,2023,17.5,23.6,8
+18009,"Blackford County, Indiana",Indiana,2023,17.5,65.4,17.3
+54035,"Jackson County, West Virginia",West Virginia,2023,17.5,68.2,17.2
+56027,"Niobrara County, Wyoming",Wyoming,2023,17.6,,17.7
+08109,"Saguache County, Colorado",Colorado,2023,17.6,100,17.8
+29227,"Worth County, Missouri",Missouri,2023,17.6,100,16.7
+20007,"Barber County, Kansas",Kansas,2023,17.6,14.3,18.5
+40005,"Atoka County, Oklahoma",Oklahoma,2023,17.6,11.8,17.6
+05115,"Pope County, Arkansas",Arkansas,2023,17.6,9.6,17
+36009,"Cattaraugus County, New York",New York,2023,17.6,15,16.9
+54031,"Hardy County, West Virginia",West Virginia,2023,17.6,8.9,16.9
+40097,"Mayes County, Oklahoma",Oklahoma,2023,17.6,8.3,16.9
+28009,"Benton County, Mississippi",Mississippi,2023,17.6,23.8,14.6
+40111,"Okmulgee County, Oklahoma",Oklahoma,2023,17.6,22.5,16.1
+51740,"Portsmouth city, Virginia",Virginia,2023,17.6,22.2,9.7
+29229,"Wright County, Missouri",Missouri,2023,17.6,4.5,17.6
+45059,"Laurens County, South Carolina",South Carolina,2023,17.6,25.6,14.6
+01031,"Coffee County, Alabama",Alabama,2023,17.6,38.4,11.6
+37161,"Rutherford County, North Carolina",North Carolina,2023,17.6,38.5,15.1
+48359,"Oldham County, Texas",Texas,2023,17.7,100,15.2
+48109,"Culberson County, Texas",Texas,2023,17.7,,4.1
+47135,"Perry County, Tennessee",Tennessee,2023,17.7,,18.6
+51195,"Wise County, Virginia",Virginia,2023,17.7,4.2,17.9
+54095,"Tyler County, West Virginia",West Virginia,2023,17.7,5.2,16.1
+28031,"Covington County, Mississippi",Mississippi,2023,17.7,22.5,11.9
+48115,"Dawson County, Texas",Texas,2023,17.7,33.1,12.1
+21019,"Boyd County, Kentucky",Kentucky,2023,17.7,28.8,16.3
+01121,"Talladega County, Alabama",Alabama,2023,17.7,22.8,14.6
+13225,"Peach County, Georgia",Georgia,2023,17.7,24.4,13.1
+48407,"San Jacinto County, Texas",Texas,2023,17.7,19.9,14.5
+40031,"Comanche County, Oklahoma",Oklahoma,2023,17.7,24.7,14
+05079,"Lincoln County, Arkansas",Arkansas,2023,17.7,35.5,15.3
+04005,"Coconino County, Arizona",Arizona,2023,17.7,28,13
+48291,"Liberty County, Texas",Texas,2023,17.7,22.7,15.8
+39079,"Jackson County, Ohio",Ohio,2023,17.7,50.3,17.4
+48355,"Nueces County, Texas",Texas,2023,17.7,31.1,14.2
+30047,"Lake County, Montana",Montana,2023,17.7,36.4,12.6
+04009,"Graham County, Arizona",Arizona,2023,17.7,45.5,12.9
+20051,"Ellis County, Kansas",Kansas,2023,17.7,80,15.7
+41037,"Lake County, Oregon",Oregon,2023,17.8,,19.7
+21177,"Muhlenberg County, Kentucky",Kentucky,2023,17.8,12.4,18.3
+12067,"Lafayette County, Florida",Florida,2023,17.8,12.3,19.2
+06107,"Tulare County, California",California,2023,17.8,24.2,15.2
+39095,"Lucas County, Ohio",Ohio,2023,17.8,32.9,12.1
+04007,"Gila County, Arizona",Arizona,2023,17.8,55.7,12.4
+22053,"Jefferson Davis Parish, Louisiana",Louisiana,2023,17.8,30.7,15.4
+22077,"Pointe Coupee Parish, Louisiana",Louisiana,2023,17.8,26.9,14
+23029,"Washington County, Maine",Maine,2023,17.8,13.8,17
+22019,"Calcasieu Parish, Louisiana",Louisiana,2023,17.8,30.7,12.5
+05089,"Marion County, Arkansas",Arkansas,2023,17.8,100,17.2
+41045,"Malheur County, Oregon",Oregon,2023,17.8,91.4,18.7
+54067,"Nicholas County, West Virginia",West Virginia,2023,17.8,76.7,17.4
+30061,"Mineral County, Montana",Montana,2023,17.9,6.9,18.1
+29167,"Polk County, Missouri",Missouri,2023,17.9,19.3,17.2
+26119,"Montmorency County, Michigan",Michigan,2023,17.9,44.4,17.3
+41055,"Sherman County, Oregon",Oregon,2023,17.9,,17.6
+05103,"Ouachita County, Arkansas",Arkansas,2023,17.9,23,13.5
+37061,"Duplin County, North Carolina",North Carolina,2023,17.9,22.7,12.9
+48471,"Walker County, Texas",Texas,2023,17.9,25.1,15.6
+48073,"Cherokee County, Texas",Texas,2023,17.9,31.4,13
+13275,"Thomas County, Georgia",Georgia,2023,17.9,27.4,12.5
+51083,"Halifax County, Virginia",Virginia,2023,17.9,26.9,12.6
+37023,"Burke County, North Carolina",North Carolina,2023,17.9,28.9,15.1
+47045,"Dyer County, Tennessee",Tennessee,2023,17.9,33.2,14.6
+28131,"Stone County, Mississippi",Mississippi,2023,17.9,43.4,13.1
+29179,"Reynolds County, Missouri",Missouri,2023,17.9,33.3,17.6
+54053,"Mason County, West Virginia",West Virginia,2023,17.9,30,17
+38033,"Golden Valley County, North Dakota",North Dakota,2023,18,,15
+51169,"Scott County, Virginia",Virginia,2023,18,25.2,17.7
+31173,"Thurston County, Nebraska",Nebraska,2023,18,50,4
+47019,"Carter County, Tennessee",Tennessee,2023,18,31,17.6
+17019,"Champaign County, Illinois",Illinois,2023,18,24.1,13.3
+32021,"Mineral County, Nevada",Nevada,2023,18,37.7,19.7
+21001,"Adair County, Kentucky",Kentucky,2023,18,5.3,17.9
+01039,"Covington County, Alabama",Alabama,2023,18,31.1,16.6
+45065,"McCormick County, South Carolina",South Carolina,2023,18,24.7,13.3
+51077,"Grayson County, Virginia",Virginia,2023,18,46.3,17.1
+54055,"Mercer County, West Virginia",West Virginia,2023,18,30.2,16.9
+01069,"Houston County, Alabama",Alabama,2023,18,32.5,11.3
+01127,"Walker County, Alabama",Alabama,2023,18,34.9,15.8
+29007,"Audrain County, Missouri",Missouri,2023,18,25.3,17.7
+30037,"Golden Valley County, Montana",Montana,2023,18,,17.7
+37013,"Beaufort County, North Carolina",North Carolina,2023,18,33.7,11.4
+06105,"Trinity County, California",California,2023,18,1.6,20.2
+22057,"Lafourche Parish, Louisiana",Louisiana,2023,18,45.6,12.9
+47133,"Overton County, Tennessee",Tennessee,2023,18,19.1,17.7
+21055,"Crittenden County, Kentucky",Kentucky,2023,18.1,,18.2
+51167,"Russell County, Virginia",Virginia,2023,18.1,5.4,18
+13155,"Irwin County, Georgia",Georgia,2023,18.1,23.6,18
+13181,"Lincoln County, Georgia",Georgia,2023,18.1,24.1,15.2
+28111,"Perry County, Mississippi",Mississippi,2023,18.1,22,16
+26145,"Saginaw County, Michigan",Michigan,2023,18.1,34.9,12.7
+28147,"Walthall County, Mississippi",Mississippi,2023,18.1,29.8,9.7
+30023,"Deer Lodge County, Montana",Montana,2023,18.1,7.7,16.7
+13251,"Screven County, Georgia",Georgia,2023,18.1,28.7,11.4
+48153,"Floyd County, Texas",Texas,2023,18.1,29.6,18.6
+48373,"Polk County, Texas",Texas,2023,18.1,39.2,16.8
+08057,"Jackson County, Colorado",Colorado,2023,18.2,,20.3
+08003,"Alamosa County, Colorado",Colorado,2023,18.2,5,18.7
+39065,"Hardin County, Ohio",Ohio,2023,18.2,11,17.4
+29221,"Washington County, Missouri",Missouri,2023,18.2,5.7,17.8
+21175,"Morgan County, Kentucky",Kentucky,2023,18.2,,18.9
+08025,"Crowley County, Colorado",Colorado,2023,18.2,,21.2
+47025,"Claiborne County, Tennessee",Tennessee,2023,18.2,41.2,17.4
+40121,"Pittsburg County, Oklahoma",Oklahoma,2023,18.2,43.3,16.2
+05075,"Lawrence County, Arkansas",Arkansas,2023,18.2,59.7,17.8
+13235,"Pulaski County, Georgia",Georgia,2023,18.3,23.8,12.8
+45053,"Jasper County, South Carolina",South Carolina,2023,18.3,26.1,10
+39007,"Ashtabula County, Ohio",Ohio,2023,18.3,28.2,17.5
+41035,"Klamath County, Oregon",Oregon,2023,18.3,31.8,17.3
+45041,"Florence County, South Carolina",South Carolina,2023,18.3,27.8,9.1
+39099,"Mahoning County, Ohio",Ohio,2023,18.3,39.4,12.3
+51520,"Bristol city, Virginia",Virginia,2023,18.3,17,17.6
+47079,"Henry County, Tennessee",Tennessee,2023,18.3,36.3,16.4
+48465,"Val Verde County, Texas",Texas,2023,18.3,4.5,17.1
+06007,"Butte County, California",California,2023,18.3,47.6,15.7
+22115,"Vernon Parish, Louisiana",Louisiana,2023,18.3,31.3,16.5
+54097,"Upshur County, West Virginia",West Virginia,2023,18.3,56.8,18.1
+54105,"Wirt County, West Virginia",West Virginia,2023,18.3,100,16.7
+49037,"San Juan County, Utah",Utah,2023,18.4,,6.2
+21053,"Clinton County, Kentucky",Kentucky,2023,18.4,,18.6
+48193,"Hamilton County, Texas",Texas,2023,18.4,,18.9
+04012,"La Paz County, Arizona",Arizona,2023,18.4,,14.1
+29097,"Jasper County, Missouri",Missouri,2023,18.4,29.7,17.3
+01111,"Randolph County, Alabama",Alabama,2023,18.4,15.3,18.5
+02188,"Northwest Arctic Borough, Alaska",Alaska,2023,18.4,2.4,3.2
+48315,"Marion County, Texas",Texas,2023,18.4,30.7,15.8
+21161,"Mason County, Kentucky",Kentucky,2023,18.4,19.7,16.5
+13109,"Evans County, Georgia",Georgia,2023,18.4,28,12.5
+17029,"Coles County, Illinois",Illinois,2023,18.4,60.2,16.2
+37145,"Person County, North Carolina",North Carolina,2023,18.4,28.6,11
+06047,"Merced County, California",California,2023,18.4,30,15
+01129,"Washington County, Alabama",Alabama,2023,18.4,37.1,14.1
+35061,"Valencia County, New Mexico",New Mexico,2023,18.4,29.2,15.7
+47181,"Wayne County, Tennessee",Tennessee,2023,18.5,6.3,18
+40139,"Texas County, Oklahoma",Oklahoma,2023,18.5,14,16.8
+47005,"Benton County, Tennessee",Tennessee,2023,18.5,16.7,18.2
+45027,"Clarendon County, South Carolina",South Carolina,2023,18.5,27.6,10.6
+21137,"Lincoln County, Kentucky",Kentucky,2023,18.5,22.4,17.5
+45021,"Cherokee County, South Carolina",South Carolina,2023,18.5,30.7,15.1
+12073,"Leon County, Florida",Florida,2023,18.5,26.1,13.9
+13285,"Troup County, Georgia",Georgia,2023,18.5,26.9,12.8
+21181,"Nicholas County, Kentucky",Kentucky,2023,18.5,15.9,19
+51097,"King and Queen County, Virginia",Virginia,2023,18.5,28.7,11
+53047,"Okanogan County, Washington",Washington,2023,18.5,76.9,15
+21031,"Butler County, Kentucky",Kentucky,2023,18.6,,17.6
+29143,"New Madrid County, Missouri",Missouri,2023,18.6,24.3,17.1
+19169,"Story County, Iowa",Iowa,2023,18.6,24.6,17
+29147,"Nodaway County, Missouri",Missouri,2023,18.6,37,17.6
+22033,"East Baton Rouge Parish, Louisiana",Louisiana,2023,18.6,24.5,10.9
+40041,"Delaware County, Oklahoma",Oklahoma,2023,18.6,23.3,15.6
+47113,"Madison County, Tennessee",Tennessee,2023,18.6,28.9,11
+13237,"Putnam County, Georgia",Georgia,2023,18.6,34.9,12.3
+29105,"Laclede County, Missouri",Missouri,2023,18.6,52,17.7
+35021,"Harding County, New Mexico",New Mexico,2023,18.7,84.6,7.9
+48007,"Aransas County, Texas",Texas,2023,18.7,14.9,18.9
+35025,"Lea County, New Mexico",New Mexico,2023,18.7,30.8,17
+06019,"Fresno County, California",California,2023,18.7,26.9,15.1
+28071,"Lafayette County, Mississippi",Mississippi,2023,18.7,21.3,17.8
+48277,"Lamar County, Texas",Texas,2023,18.7,30.1,17.1
+47097,"Lauderdale County, Tennessee",Tennessee,2023,18.7,27.5,12.7
+01045,"Dale County, Alabama",Alabama,2023,18.7,32.1,14.9
+13255,"Spalding County, Georgia",Georgia,2023,18.7,29.9,12.5
+13149,"Heard County, Georgia",Georgia,2023,18.7,17.2,19.2
+28013,"Calhoun County, Mississippi",Mississippi,2023,18.7,34.7,10.4
+12125,"Union County, Florida",Florida,2023,18.7,28,18.3
+01057,"Fayette County, Alabama",Alabama,2023,18.7,37.1,15.8
+45029,"Colleton County, South Carolina",South Carolina,2023,18.7,29.5,12.1
+28039,"George County, Mississippi",Mississippi,2023,18.7,50.2,16.5
+29013,"Bates County, Missouri",Missouri,2023,18.7,56.3,17.5
+35033,"Mora County, New Mexico",New Mexico,2023,18.8,,21.8
+08033,"Dolores County, Colorado",Colorado,2023,18.8,,14.6
+54007,"Braxton County, West Virginia",West Virginia,2023,18.8,,18.2
+13163,"Jefferson County, Georgia",Georgia,2023,18.8,23.3,14.3
+48487,"Wilbarger County, Texas",Texas,2023,18.8,19.7,17
+12063,"Jackson County, Florida",Florida,2023,18.8,22,17.6
+51760,"Richmond city, Virginia",Virginia,2023,18.8,26.4,11.1
+37047,"Columbus County, North Carolina",North Carolina,2023,18.8,29,15.2
+13215,"Muscogee County, Georgia",Georgia,2023,18.8,24.6,11.3
+48245,"Jefferson County, Texas",Texas,2023,18.8,27,11.3
+54019,"Fayette County, West Virginia",West Virginia,2023,18.8,25.8,17.8
+18053,"Grant County, Indiana",Indiana,2023,18.8,48.4,15.3
+48353,"Nolan County, Texas",Texas,2023,18.8,32.9,15.1
+05109,"Pike County, Arkansas",Arkansas,2023,18.8,61.7,16.5
+39031,"Coshocton County, Ohio",Ohio,2023,18.8,42.8,17.5
+47129,"Morgan County, Tennessee",Tennessee,2023,18.8,100,18.9
+46123,"Tripp County, South Dakota",South Dakota,2023,18.9,100,13.1
+21041,"Carroll County, Kentucky",Kentucky,2023,18.9,2.8,19.9
+28139,"Tippah County, Mississippi",Mississippi,2023,18.9,7.4,18.2
+12133,"Washington County, Florida",Florida,2023,18.9,23.1,19
+06023,"Humboldt County, California",California,2023,18.9,39.9,16.7
+01081,"Lee County, Alabama",Alabama,2023,18.9,25.3,17.6
+22079,"Rapides Parish, Louisiana",Louisiana,2023,18.9,30.4,13
+36047,"Kings County, New York",New York,2023,18.9,19.9,16
+28061,"Jasper County, Mississippi",Mississippi,2023,18.9,25.9,11
+36007,"Broome County, New York",New York,2023,18.9,41.9,15.3
+48141,"El Paso County, Texas",Texas,2023,18.9,15.7,16.3
+51135,"Nottoway County, Virginia",Virginia,2023,18.9,28.8,11.9
+13195,"Madison County, Georgia",Georgia,2023,18.9,29.3,16.6
+21123,"Larue County, Kentucky",Kentucky,2023,18.9,60.8,17.3
+05047,"Franklin County, Arkansas",Arkansas,2023,18.9,78.6,19.3
+21139,"Livingston County, Kentucky",Kentucky,2023,18.9,66.7,17.6
+40015,"Caddo County, Oklahoma",Oklahoma,2023,19,16.2,13.2
+48189,"Hale County, Texas",Texas,2023,19,16.7,18.5
+18157,"Tippecanoe County, Indiana",Indiana,2023,19,35.3,16.5
+13189,"McDuffie County, Georgia",Georgia,2023,19,29.8,11.1
+37181,"Vance County, North Carolina",North Carolina,2023,19,24.3,12.2
+06029,"Kern County, California",California,2023,19,28.6,17.4
+12093,"Okeechobee County, Florida",Florida,2023,19,40.9,16.9
+13253,"Seminole County, Georgia",Georgia,2023,19,32.9,11.8
+29217,"Vernon County, Missouri",Missouri,2023,19,36,18.4
+05057,"Hempstead County, Arkansas",Arkansas,2023,19,29.9,11.6
+48229,"Hudspeth County, Texas",Texas,2023,19,,17
+05113,"Polk County, Arkansas",Arkansas,2023,19,100,18.4
+40151,"Woods County, Oklahoma",Oklahoma,2023,19.1,46.8,18.9
+01061,"Geneva County, Alabama",Alabama,2023,19.1,29.3,16.3
+12007,"Bradford County, Florida",Florida,2023,19.1,39.7,15.2
+05031,"Craighead County, Arkansas",Arkansas,2023,19.1,40.6,13.4
+29035,"Carter County, Missouri",Missouri,2023,19.2,,18.1
+47061,"Grundy County, Tennessee",Tennessee,2023,19.2,43.5,19.8
+13033,"Burke County, Georgia",Georgia,2023,19.2,27.4,11
+40077,"Latimer County, Oklahoma",Oklahoma,2023,19.2,13.5,17.4
+47013,"Campbell County, Tennessee",Tennessee,2023,19.2,16.5,19.2
+54089,"Summers County, West Virginia",West Virginia,2023,19.2,36.6,18.8
+21107,"Hopkins County, Kentucky",Kentucky,2023,19.2,28.1,17.1
+28023,"Clarke County, Mississippi",Mississippi,2023,19.2,34.3,10.9
+22113,"Vermilion Parish, Louisiana",Louisiana,2023,19.2,42.3,15.5
+41003,"Benton County, Oregon",Oregon,2023,19.2,48.5,16.9
+26107,"Mecosta County, Michigan",Michigan,2023,19.2,70.5,17.9
+21085,"Grayson County, Kentucky",Kentucky,2023,19.3,5.7,19.3
+37099,"Jackson County, North Carolina",North Carolina,2023,19.3,40.5,16.8
+17169,"Schuyler County, Illinois",Illinois,2023,19.3,67.9,15.8
+40021,"Cherokee County, Oklahoma",Oklahoma,2023,19.3,25.9,19
+12029,"Dixie County, Florida",Florida,2023,19.3,29.6,18.3
+01101,"Montgomery County, Alabama",Alabama,2023,19.3,25,8.5
+45023,"Chester County, South Carolina",South Carolina,2023,19.3,27,14.1
+47183,"Weakley County, Tennessee",Tennessee,2023,19.3,37.9,18.4
+28129,"Smith County, Mississippi",Mississippi,2023,19.3,37.5,12.3
+51840,"Winchester city, Virginia",Virginia,2023,19.3,21.9,13.4
+29215,"Texas County, Missouri",Missouri,2023,19.3,15.8,18.9
+51185,"Tazewell County, Virginia",Virginia,2023,19.3,36.5,18.7
+20061,"Geary County, Kansas",Kansas,2023,19.3,25.6,15.9
+32009,"Esmeralda County, Nevada",Nevada,2023,19.4,,21.1
+54041,"Lewis County, West Virginia",West Virginia,2023,19.4,2,17.7
+45081,"Saluda County, South Carolina",South Carolina,2023,19.4,22.1,13.2
+28127,"Simpson County, Mississippi",Mississippi,2023,19.4,31.1,12.5
+48293,"Limestone County, Texas",Texas,2023,19.4,24.1,16.6
+37147,"Pitt County, North Carolina",North Carolina,2023,19.4,24.9,15.7
+05139,"Union County, Arkansas",Arkansas,2023,19.4,26.2,15.2
+22105,"Tangipahoa Parish, Louisiana",Louisiana,2023,19.4,32.6,13.6
+13233,"Polk County, Georgia",Georgia,2023,19.4,32.1,16
+17181,"Union County, Illinois",Illinois,2023,19.4,35,18.7
+05071,"Johnson County, Arkansas",Arkansas,2023,19.4,51.1,20
+29085,"Hickory County, Missouri",Missouri,2023,19.5,,19.2
+35059,"Union County, New Mexico",New Mexico,2023,19.5,,16.4
+35017,"Grant County, New Mexico",New Mexico,2023,19.5,19.3,18.1
+21155,"Marion County, Kentucky",Kentucky,2023,19.5,7,19.4
+01023,"Choctaw County, Alabama",Alabama,2023,19.5,28.7,11.5
+40035,"Craig County, Oklahoma",Oklahoma,2023,19.5,37.9,19.2
+01133,"Winston County, Alabama",Alabama,2023,19.5,39.3,19.3
+05141,"Van Buren County, Arkansas",Arkansas,2023,19.5,87.9,18.6
+21043,"Carter County, Kentucky",Kentucky,2023,19.6,13.9,20
+05063,"Independence County, Arkansas",Arkansas,2023,19.6,12.2,18.3
+05133,"Sevier County, Arkansas",Arkansas,2023,19.6,18.8,20.7
+06025,"Imperial County, California",California,2023,19.6,30.5,21.4
+48163,"Frio County, Texas",Texas,2023,19.6,4,17.9
+37117,"Martin County, North Carolina",North Carolina,2023,19.6,29.8,10.1
+48457,"Tyler County, Texas",Texas,2023,19.6,51.1,17.2
+30041,"Hill County, Montana",Montana,2023,19.7,68.4,13.4
+51770,"Roanoke city, Virginia",Virginia,2023,19.7,25.8,14.1
+12001,"Alachua County, Florida",Florida,2023,19.7,27.5,16.8
+13093,"Dooly County, Georgia",Georgia,2023,19.7,30,7.2
+13279,"Toombs County, Georgia",Georgia,2023,19.7,39.5,11.4
+13199,"Meriwether County, Georgia",Georgia,2023,19.7,27.4,15
+29181,"Ripley County, Missouri",Missouri,2023,19.7,,19.7
+46047,"Fall River County, South Dakota",South Dakota,2023,19.7,100,15.1
+46027,"Clay County, South Dakota",South Dakota,2023,19.8,45.3,18.4
+13069,"Coffee County, Georgia",Georgia,2023,19.8,25.7,16.4
+29510,"St. Louis city, Missouri",Missouri,2023,19.8,27.5,12.6
+54011,"Cabell County, West Virginia",West Virginia,2023,19.8,39.4,18.4
+05061,"Howard County, Arkansas",Arkansas,2023,19.8,29.3,14.8
+37015,"Bertie County, North Carolina",North Carolina,2023,19.8,28.2,7.3
+17109,"McDonough County, Illinois",Illinois,2023,19.9,31.8,18.8
+06039,"Madera County, California",California,2023,19.9,17.4,13.8
+28079,"Leake County, Mississippi",Mississippi,2023,19.9,24.8,11.3
+28141,"Tishomingo County, Mississippi",Mississippi,2023,19.9,33.5,19.6
+18035,"Delaware County, Indiana",Indiana,2023,19.9,33.6,18.2
+39131,"Pike County, Ohio",Ohio,2023,19.9,12.6,20
+40079,"Le Flore County, Oklahoma",Oklahoma,2023,20,31.1,18.7
+35035,"Otero County, New Mexico",New Mexico,2023,20,15.7,16.4
+37131,"Northampton County, North Carolina",North Carolina,2023,20,27.4,9.3
+40061,"Haskell County, Oklahoma",Oklahoma,2023,20,40,17.4
+18167,"Vigo County, Indiana",Indiana,2023,20,32.6,19.1
+45049,"Hampton County, South Carolina",South Carolina,2023,20,25.1,13.3
+21023,"Bracken County, Kentucky",Kentucky,2023,20.1,19,20.7
+05111,"Poinsett County, Arkansas",Arkansas,2023,20.1,30.2,18.8
+26163,"Wayne County, Michigan",Michigan,2023,20.1,29.2,13.3
+13055,"Chattooga County, Georgia",Georgia,2023,20.1,19,19.6
+24510,"Baltimore city, Maryland",Maryland,2023,20.1,23.6,12.1
+24039,"Somerset County, Maryland",Maryland,2023,20.1,28.6,12
+05011,"Bradley County, Arkansas",Arkansas,2023,20.1,39.7,14.4
+05037,"Cross County, Arkansas",Arkansas,2023,20.1,33,15.9
+35039,"Rio Arriba County, New Mexico",New Mexico,2023,20.1,25.3,22
+51051,"Dickenson County, Virginia",Virginia,2023,20.2,1.3,20.1
+18105,"Monroe County, Indiana",Indiana,2023,20.2,30.1,18
+45025,"Chesterfield County, South Carolina",South Carolina,2023,20.2,27.5,15.5
+37163,"Sampson County, North Carolina",North Carolina,2023,20.2,28.9,12.9
+05019,"Clark County, Arkansas",Arkansas,2023,20.2,32,14.6
+13321,"Worth County, Georgia",Georgia,2023,20.2,34.2,14
+04023,"Santa Cruz County, Arizona",Arizona,2023,20.2,57.6,15.6
+54087,"Roane County, West Virginia",West Virginia,2023,20.2,66.7,19.2
+30005,"Blaine County, Montana",Montana,2023,20.2,93.5,9.2
+47029,"Cocke County, Tennessee",Tennessee,2023,20.3,8.7,20
+21199,"Pulaski County, Kentucky",Kentucky,2023,20.3,14.7,20
+40135,"Sequoyah County, Oklahoma",Oklahoma,2023,20.3,19.6,19.4
+13185,"Lowndes County, Georgia",Georgia,2023,20.3,31.4,12.3
+39001,"Adams County, Ohio",Ohio,2023,20.3,25,20.1
+45031,"Darlington County, South Carolina",South Carolina,2023,20.3,27.2,13.8
+28149,"Warren County, Mississippi",Mississippi,2023,20.3,32.6,7.2
+13319,"Wilkinson County, Georgia",Georgia,2023,20.3,29.8,13.8
+40101,"Muskogee County, Oklahoma",Oklahoma,2023,20.3,33.5,17.3
+29023,"Butler County, Missouri",Missouri,2023,20.3,36.6,18.6
+12065,"Jefferson County, Florida",Florida,2023,20.3,42.7,8.9
+06049,"Modoc County, California",California,2023,20.3,73.2,18.8
+28091,"Marion County, Mississippi",Mississippi,2023,20.4,30.4,14.7
+35057,"Torrance County, New Mexico",New Mexico,2023,20.4,0.6,17.8
+13119,"Franklin County, Georgia",Georgia,2023,20.4,25.2,18.4
+21221,"Trigg County, Kentucky",Kentucky,2023,20.4,30.2,18.9
+01049,"DeKalb County, Alabama",Alabama,2023,20.4,28.8,16.3
+22003,"Allen Parish, Louisiana",Louisiana,2023,20.4,32,17.8
+19007,"Appanoose County, Iowa",Iowa,2023,20.4,76,20.5
+35023,"Hidalgo County, New Mexico",New Mexico,2023,20.5,,18.2
+48385,"Real County, Texas",Texas,2023,20.5,,19.1
+21083,"Graves County, Kentucky",Kentucky,2023,20.5,23.9,17.9
+54061,"Monongalia County, West Virginia",West Virginia,2023,20.5,23.2,19.8
+37041,"Chowan County, North Carolina",North Carolina,2023,20.5,32.8,15.5
+13305,"Wayne County, Georgia",Georgia,2023,20.5,31.6,16.8
+13023,"Bleckley County, Georgia",Georgia,2023,20.5,44.7,12
+13075,"Cook County, Georgia",Georgia,2023,20.5,29.2,17.3
+01025,"Clarke County, Alabama",Alabama,2023,20.5,30,11.2
+28041,"Greene County, Mississippi",Mississippi,2023,20.5,39.5,17
+01007,"Bibb County, Alabama",Alabama,2023,20.5,41.7,15.1
+53001,"Adams County, Washington",Washington,2023,20.5,58.8,12.8
+35011,"De Baca County, New Mexico",New Mexico,2023,20.6,,27.6
+26085,"Lake County, Michigan",Michigan,2023,20.6,22.5,19.6
+13131,"Grady County, Georgia",Georgia,2023,20.6,25.1,15.4
+05069,"Jefferson County, Arkansas",Arkansas,2023,20.6,23.4,15.6
+05029,"Conway County, Arkansas",Arkansas,2023,20.6,28.7,20
+13105,"Elbert County, Georgia",Georgia,2023,20.6,39,15.1
+54043,"Lincoln County, West Virginia",West Virginia,2023,20.6,100,19.4
+29093,"Iron County, Missouri",Missouri,2023,20.7,15.9,20.8
+40115,"Ottawa County, Oklahoma",Oklahoma,2023,20.7,24.4,18.7
+28007,"Attala County, Mississippi",Mississippi,2023,20.7,28.9,13.5
+28123,"Scott County, Mississippi",Mississippi,2023,20.7,26.1,12.7
+05035,"Crittenden County, Arkansas",Arkansas,2023,20.7,29.5,10.8
+54025,"Greenbrier County, West Virginia",West Virginia,2023,20.7,18.1,20.1
+47087,"Jackson County, Tennessee",Tennessee,2023,20.7,33.3,20.7
+54075,"Pocahontas County, West Virginia",West Virginia,2023,20.8,,20
+20037,"Crawford County, Kansas",Kansas,2023,20.8,10.8,19.8
+37177,"Tyrrell County, North Carolina",North Carolina,2023,20.8,21.5,21.3
+47071,"Hardin County, Tennessee",Tennessee,2023,20.8,37.6,20.4
+12077,"Liberty County, Florida",Florida,2023,20.8,27.3,21.2
+28067,"Jones County, Mississippi",Mississippi,2023,20.8,40.2,12.5
+02290,"Yukon-Koyukuk Census Area, Alaska",Alaska,2023,20.8,,13
+21105,"Hickman County, Kentucky",Kentucky,2023,20.8,29.5,18.9
+05097,"Montgomery County, Arkansas",Arkansas,2023,20.8,26.7,18.8
+54001,"Barbour County, West Virginia",West Virginia,2023,20.8,52.9,19.1
+48023,"Baylor County, Texas",Texas,2023,20.8,100,18.6
+47049,"Fentress County, Tennessee",Tennessee,2023,20.9,78.9,20.6
+48155,"Foard County, Texas",Texas,2023,20.9,,3.8
+27087,"Mahnomen County, Minnesota",Minnesota,2023,20.9,27.3,10
+13005,"Bacon County, Georgia",Georgia,2023,20.9,17.1,16.9
+35009,"Curry County, New Mexico",New Mexico,2023,20.9,22.1,18.7
+13277,"Tift County, Georgia",Georgia,2023,20.9,27.8,15.2
+40091,"McIntosh County, Oklahoma",Oklahoma,2023,20.9,23.3,21.8
+12079,"Madison County, Florida",Florida,2023,20.9,32.5,10.8
+40063,"Hughes County, Oklahoma",Oklahoma,2023,20.9,34,21.1
+48375,"Potter County, Texas",Texas,2023,20.9,47.1,17.5
+48387,"Red River County, Texas",Texas,2023,20.9,46.6,15.3
+17003,"Alexander County, Illinois",Illinois,2023,21,17.8,23.1
+21009,"Barren County, Kentucky",Kentucky,2023,21,23.9,19.7
+05093,"Mississippi County, Arkansas",Arkansas,2023,21,32.8,13.8
+48479,"Webb County, Texas",Texas,2023,21,12.8,20.6
+01013,"Butler County, Alabama",Alabama,2023,21,32.4,11.7
+37195,"Wilson County, North Carolina",North Carolina,2023,21,31.3,9.7
+05091,"Miller County, Arkansas",Arkansas,2023,21,36.3,15.2
+56001,"Albany County, Wyoming",Wyoming,2023,21,61.1,21.2
+48327,"Menard County, Texas",Texas,2023,21.1,,15.4
+05065,"Izard County, Arkansas",Arkansas,2023,21.1,,19.8
+37173,"Swain County, North Carolina",North Carolina,2023,21.1,56.3,18.9
+13099,"Early County, Georgia",Georgia,2023,21.1,26.9,15.5
+51730,"Petersburg city, Virginia",Virginia,2023,21.1,22.2,12.6
+13245,"Richmond County, Georgia",Georgia,2023,21.1,26.1,13.1
+05121,"Randolph County, Arkansas",Arkansas,2023,21.1,32.7,19.7
+02180,"Nome Census Area, Alaska",Alaska,2023,21.1,9.1,5.2
+40089,"McCurtain County, Oklahoma",Oklahoma,2023,21.1,44.1,17.5
+26035,"Clare County, Michigan",Michigan,2023,21.1,32.8,20.4
+51017,"Bath County, Virginia",Virginia,2023,21.1,63.6,20.7
+55078,"Menominee County, Wisconsin",Wisconsin,2023,21.2,7.7,2.9
+29001,"Adair County, Missouri",Missouri,2023,21.2,9,21.6
+05067,"Jackson County, Arkansas",Arkansas,2023,21.2,32.5,19
+37017,"Bladen County, North Carolina",North Carolina,2023,21.2,29.2,14.7
+12043,"Glades County, Florida",Florida,2023,21.2,26.5,20.6
+37007,"Anson County, North Carolina",North Carolina,2023,21.2,25.8,15.5
+01053,"Escambia County, Alabama",Alabama,2023,21.2,39.4,13.6
+35003,"Catron County, New Mexico",New Mexico,2023,21.2,100,21.3
+21099,"Hart County, Kentucky",Kentucky,2023,21.2,42,20.1
+12013,"Calhoun County, Florida",Florida,2023,21.2,43.3,16.3
+16023,"Butte County, Idaho",Idaho,2023,21.3,,19.8
+21125,"Laurel County, Kentucky",Kentucky,2023,21.3,11.8,21.5
+28085,"Lincoln County, Mississippi",Mississippi,2023,21.3,25.3,19.6
+21027,"Breckinridge County, Kentucky",Kentucky,2023,21.3,19.1,20.8
+13293,"Upson County, Georgia",Georgia,2023,21.3,28.7,17.2
+40029,"Coal County, Oklahoma",Oklahoma,2023,21.3,,21.1
+48255,"Karnes County, Texas",Texas,2023,21.3,27.9,18.9
+37103,"Jones County, North Carolina",North Carolina,2023,21.3,36.4,14.8
+54045,"Logan County, West Virginia",West Virginia,2023,21.4,33.6,20.7
+13265,"Taliaferro County, Georgia",Georgia,2023,21.4,26.7,15
+37091,"Hertford County, North Carolina",North Carolina,2023,21.4,24.9,13.1
+29069,"Dunklin County, Missouri",Missouri,2023,21.4,42.5,20.2
+47041,"DeKalb County, Tennessee",Tennessee,2023,21.4,57.5,19.3
+29059,"Dallas County, Missouri",Missouri,2023,21.4,100,22.1
+29091,"Howell County, Missouri",Missouri,2023,21.4,67.1,20.9
+13309,"Wheeler County, Georgia",Georgia,2023,21.5,20,22.4
+28035,"Forrest County, Mississippi",Mississippi,2023,21.5,32.8,13.9
+21087,"Green County, Kentucky",Kentucky,2023,21.5,30,20.9
+40001,"Adair County, Oklahoma",Oklahoma,2023,21.5,42.4,18.8
+05137,"Stone County, Arkansas",Arkansas,2023,21.6,100,19.8
+35041,"Roosevelt County, New Mexico",New Mexico,2023,21.6,,24.7
+12051,"Hendry County, Florida",Florida,2023,21.6,13.9,17.8
+45009,"Bamberg County, South Carolina",South Carolina,2023,21.6,22.2,19.9
+13287,"Turner County, Georgia",Georgia,2023,21.6,35.7,11.8
+28049,"Hinds County, Mississippi",Mississippi,2023,21.6,24.9,9.8
+13263,"Talbot County, Georgia",Georgia,2023,21.6,24,16.6
+47039,"Decatur County, Tennessee",Tennessee,2023,21.6,15.4,22.5
+30087,"Rosebud County, Montana",Montana,2023,21.6,,8.6
+54081,"Raleigh County, West Virginia",West Virginia,2023,21.6,41,19.9
+51147,"Prince Edward County, Virginia",Virginia,2023,21.6,37.4,14.4
+21219,"Todd County, Kentucky",Kentucky,2023,21.7,35.2,19.9
+29153,"Ozark County, Missouri",Missouri,2023,21.7,,20.6
+54085,"Ritchie County, West Virginia",West Virginia,2023,21.7,,21.4
+47027,"Clay County, Tennessee",Tennessee,2023,21.7,30.6,22.1
+21197,"Powell County, Kentucky",Kentucky,2023,21.7,77.6,19.4
+17077,"Jackson County, Illinois",Illinois,2023,21.8,39.2,18.7
+51690,"Martinsville city, Virginia",Virginia,2023,21.8,22.5,17.9
+48445,"Terry County, Texas",Texas,2023,21.8,26.7,25.4
+22031,"De Soto Parish, Louisiana",Louisiana,2023,21.8,38.7,12.5
+13301,"Warren County, Georgia",Georgia,2023,21.8,28.2,10.8
+48321,"Matagorda County, Texas",Texas,2023,21.8,36.9,16.2
+29149,"Oregon County, Missouri",Missouri,2023,21.9,100,21
+48463,"Uvalde County, Texas",Texas,2023,21.9,48.5,20.1
+01005,"Barbour County, Alabama",Alabama,2023,21.9,29.3,10.1
+40069,"Johnston County, Oklahoma",Oklahoma,2023,21.9,26.9,21.3
+37065,"Edgecombe County, North Carolina",North Carolina,2023,21.9,27.7,13.4
+48389,"Reeves County, Texas",Texas,2023,21.9,64,27.4
+48283,"La Salle County, Texas",Texas,2023,22,,6
+22127,"Winn Parish, Louisiana",Louisiana,2023,22,30.8,18.9
+40023,"Choctaw County, Oklahoma",Oklahoma,2023,22,41,19.6
+13009,"Baldwin County, Georgia",Georgia,2023,22,27.2,17.8
+42101,"Philadelphia County, Pennsylvania",Pennsylvania,2023,22,26.2,13.1
+28101,"Newton County, Mississippi",Mississippi,2023,22,31.7,12.4
+51530,"Buena Vista city, Virginia",Virginia,2023,22,,22.5
+21127,"Lawrence County, Kentucky",Kentucky,2023,22,,22
+35047,"San Miguel County, New Mexico",New Mexico,2023,22,39.1,21.3
+39105,"Meigs County, Ohio",Ohio,2023,22,15.5,22.5
+20161,"Riley County, Kansas",Kansas,2023,22,26.1,20.4
+21065,"Estill County, Kentucky",Kentucky,2023,22,61.5,22.6
+32011,"Eureka County, Nevada",Nevada,2023,22.1,,22.4
+48107,"Crosby County, Texas",Texas,2023,22.1,,23.7
+39009,"Athens County, Ohio",Ohio,2023,22.1,33.2,21.5
+47091,"Johnson County, Tennessee",Tennessee,2023,22.1,16,22.3
+13019,"Berrien County, Georgia",Georgia,2023,22.1,20.6,22.4
+01087,"Macon County, Alabama",Alabama,2023,22.1,23.9,9.7
+22101,"St. Mary Parish, Louisiana",Louisiana,2023,22.1,32.8,16.8
+54101,"Webster County, West Virginia",West Virginia,2023,22.1,18.8,20.9
+38005,"Benson County, North Dakota",North Dakota,2023,22.2,40,15
+29011,"Barton County, Missouri",Missouri,2023,22.2,,21.9
+37185,"Warren County, North Carolina",North Carolina,2023,22.2,27.7,14.8
+13091,"Dodge County, Georgia",Georgia,2023,22.2,29.3,18.2
+01113,"Russell County, Alabama",Alabama,2023,22.2,26.2,16.3
+05095,"Monroe County, Arkansas",Arkansas,2023,22.2,40.3,9.5
+35013,"Doña Ana County, New Mexico",New Mexico,2023,22.2,26.3,19.4
+48241,"Jasper County, Texas",Texas,2023,22.2,41.6,17.7
+21171,"Monroe County, Kentucky",Kentucky,2023,22.2,32.5,21.9
+08023,"Costilla County, Colorado",Colorado,2023,22.3,3.4,19.6
+35005,"Chaves County, New Mexico",New Mexico,2023,22.3,11.5,21.3
+48347,"Nacogdoches County, Texas",Texas,2023,22.3,34.6,17.4
+28043,"Grenada County, Mississippi",Mississippi,2023,22.3,28,17.7
+22017,"Caddo Parish, Louisiana",Louisiana,2023,22.3,31.1,13
+13175,"Laurens County, Georgia",Georgia,2023,22.4,35.5,13.5
+37095,"Hyde County, North Carolina",North Carolina,2023,22.4,22.7,19.2
+39145,"Scioto County, Ohio",Ohio,2023,22.4,30.5,21.7
+40133,"Seminole County, Oklahoma",Oklahoma,2023,22.4,29.1,19.3
+37079,"Greene County, North Carolina",North Carolina,2023,22.4,28.6,16.3
+13191,"McIntosh County, Georgia",Georgia,2023,22.4,38.4,15.8
+28015,"Carroll County, Mississippi",Mississippi,2023,22.4,44.4,9.4
+48063,"Camp County, Texas",Texas,2023,22.4,34.2,18.6
+48351,"Newton County, Texas",Texas,2023,22.4,50.7,14.8
+13031,"Bulloch County, Georgia",Georgia,2023,22.5,29.9,19.7
+37107,"Lenoir County, North Carolina",North Carolina,2023,22.5,30.8,15.5
+13049,"Charlton County, Georgia",Georgia,2023,22.5,30.2,21.3
+21135,"Lewis County, Kentucky",Kentucky,2023,22.6,,22.9
+54109,"Wyoming County, West Virginia",West Virginia,2023,22.6,,22.7
+01099,"Monroe County, Alabama",Alabama,2023,22.6,31.6,14.6
+48323,"Maverick County, Texas",Texas,2023,22.6,,25.2
+01107,"Pickens County, Alabama",Alabama,2023,22.6,33.8,13.4
+01091,"Marengo County, Alabama",Alabama,2023,22.6,36.1,6.2
+22071,"Orleans Parish, Louisiana",Louisiana,2023,22.6,30,11.2
+22087,"St. Bernard Parish, Louisiana",Louisiana,2023,22.6,29.9,18.5
+22045,"Iberia Parish, Louisiana",Louisiana,2023,22.6,33.9,14.1
+51540,"Charlottesville city, Virginia",Virginia,2023,22.6,37.1,17
+05043,"Drew County, Arkansas",Arkansas,2023,22.7,30.9,19.3
+13261,"Sumter County, Georgia",Georgia,2023,22.7,30.4,14.1
+13267,"Tattnall County, Georgia",Georgia,2023,22.7,25.5,21.5
+13037,"Calhoun County, Georgia",Georgia,2023,22.7,31,12.3
+45087,"Union County, South Carolina",South Carolina,2023,22.7,21.5,22.3
+05003,"Ashley County, Arkansas",Arkansas,2023,22.7,32.7,18.5
+05027,"Columbia County, Arkansas",Arkansas,2023,22.7,36.4,14.7
+22085,"Sabine Parish, Louisiana",Louisiana,2023,22.7,46.1,18.2
+28161,"Yalobusha County, Mississippi",Mississippi,2023,22.7,38.1,13.4
+48101,"Cottle County, Texas",Texas,2023,22.8,28.1,20.5
+40067,"Jefferson County, Oklahoma",Oklahoma,2023,22.8,12.3,22.4
+13299,"Ware County, Georgia",Georgia,2023,22.8,30.8,16.6
+47075,"Haywood County, Tennessee",Tennessee,2023,22.8,29.3,17.1
+05147,"Woodruff County, Arkansas",Arkansas,2023,22.8,39.9,15.4
+28093,"Marshall County, Mississippi",Mississippi,2023,22.8,29.8,15.9
+46023,"Charles Mix County, South Dakota",South Dakota,2023,22.8,87.5,14.2
+13065,"Clinch County, Georgia",Georgia,2023,22.9,42.7,10.1
+28153,"Wayne County, Mississippi",Mississippi,2023,22.9,32.8,16.4
+30073,"Pondera County, Montana",Montana,2023,22.9,,18.1
+40033,"Cotton County, Oklahoma",Oklahoma,2023,22.9,12.7,20.4
+21069,"Fleming County, Kentucky",Kentucky,2023,22.9,54.2,22.9
+35019,"Guadalupe County, New Mexico",New Mexico,2023,23,,15.6
+13061,"Clay County, Georgia",Georgia,2023,23,33,8.2
+29133,"Mississippi County, Missouri",Missouri,2023,23,36.8,18.6
+22039,"Evangeline Parish, Louisiana",Louisiana,2023,23,38.4,15.4
+28029,"Copiah County, Mississippi",Mississippi,2023,23,30,12.9
+21109,"Jackson County, Kentucky",Kentucky,2023,23,66.7,23.5
+12027,"DeSoto County, Florida",Florida,2023,23.1,40.3,18.8
+13315,"Wilcox County, Georgia",Georgia,2023,23.1,47.7,14
+26073,"Isabella County, Michigan",Michigan,2023,23.2,20.1,23.1
+48249,"Jim Wells County, Texas",Texas,2023,23.2,15.2,24
+35045,"San Juan County, New Mexico",New Mexico,2023,23.2,37.7,14.7
+40009,"Beckham County, Oklahoma",Oklahoma,2023,23.2,34.1,22.7
+45061,"Lee County, South Carolina",South Carolina,2023,23.3,28.1,14.2
+28037,"Franklin County, Mississippi",Mississippi,2023,23.3,38.6,13.2
+21115,"Johnson County, Kentucky",Kentucky,2023,23.4,50,22.8
+01109,"Pike County, Alabama",Alabama,2023,23.4,32.2,15.1
+51640,"Galax city, Virginia",Virginia,2023,23.4,61.5,21.5
+21207,"Russell County, Kentucky",Kentucky,2023,23.4,80.1,22.3
+21011,"Bath County, Kentucky",Kentucky,2023,23.5,7.4,24.4
+22083,"Richland Parish, Louisiana",Louisiana,2023,23.5,43.3,12.8
+48419,"Shelby County, Texas",Texas,2023,23.5,42.5,18.1
+30003,"Big Horn County, Montana",Montana,2023,23.6,,7.9
+08089,"Otero County, Colorado",Colorado,2023,23.6,28,18.5
+13165,"Jenkins County, Georgia",Georgia,2023,23.6,37.5,16.5
+45089,"Williamsburg County, South Carolina",South Carolina,2023,23.6,28,15
+51580,"Covington city, Virginia",Virginia,2023,23.6,29.9,21.6
+47153,"Sequatchie County, Tennessee",Tennessee,2023,23.6,100,23.7
+30107,"Wheatland County, Montana",Montana,2023,23.7,,23
+40127,"Pushmataha County, Oklahoma",Oklahoma,2023,23.7,20.4,23.8
+53075,"Whitman County, Washington",Washington,2023,23.7,48.2,22
+51121,"Montgomery County, Virginia",Virginia,2023,23.8,27.1,22.5
+28077,"Lawrence County, Mississippi",Mississippi,2023,23.8,33.6,19
+51670,"Hopewell city, Virginia",Virginia,2023,23.8,33.6,15.3
+13001,"Appling County, Georgia",Georgia,2023,23.8,40.9,17.4
+18025,"Crawford County, Indiana",Indiana,2023,23.8,47.8,24
+30079,"Prairie County, Montana",Montana,2023,23.9,,23.2
+12107,"Putnam County, Florida",Florida,2023,23.9,35,20.7
+01065,"Hale County, Alabama",Alabama,2023,23.9,31.8,9.6
+40119,"Payne County, Oklahoma",Oklahoma,2023,23.9,33.3,22.6
+45075,"Orangeburg County, South Carolina",South Carolina,2023,23.9,27.7,16.8
+48041,"Brazos County, Texas",Texas,2023,23.9,34.4,21.8
+13071,"Colquitt County, Georgia",Georgia,2023,23.9,42,11
+51027,"Buchanan County, Virginia",Virginia,2023,23.9,96.4,23.7
+22097,"St. Landry Parish, Louisiana",Louisiana,2023,24,34.2,16.1
+22073,"Ouachita Parish, Louisiana",Louisiana,2023,24,39.5,14.2
+02050,"Bethel Census Area, Alaska",Alaska,2023,24,17,6.5
+08009,"Baca County, Colorado",Colorado,2023,24.1,,23.3
+13081,"Crisp County, Georgia",Georgia,2023,24.1,41.7,8
+13201,"Miller County, Georgia",Georgia,2023,24.1,43,16.6
+22069,"Natchitoches Parish, Louisiana",Louisiana,2023,24.1,34.9,16.5
+28017,"Chickasaw County, Mississippi",Mississippi,2023,24.1,33.2,17.6
+28107,"Panola County, Mississippi",Mississippi,2023,24.1,34.9,11.4
+22117,"Washington Parish, Louisiana",Louisiana,2023,24.2,35.7,18.8
+22049,"Jackson Parish, Louisiana",Louisiana,2023,24.3,34.6,19.1
+12049,"Hardee County, Florida",Florida,2023,24.3,58.2,21.4
+21231,"Wayne County, Kentucky",Kentucky,2023,24.3,93.3,22.2
+21045,"Casey County, Kentucky",Kentucky,2023,24.4,42.9,24
+05017,"Chicot County, Arkansas",Arkansas,2023,24.4,31.9,16.2
+22001,"Acadia Parish, Louisiana",Louisiana,2023,24.4,40,19.3
+48061,"Cameron County, Texas",Texas,2023,24.4,29.6,24.8
+21203,"Rockcastle County, Kentucky",Kentucky,2023,24.4,25,24.8
+05129,"Searcy County, Arkansas",Arkansas,2023,24.5,,24.3
+21205,"Rowan County, Kentucky",Kentucky,2023,24.5,2.4,24.7
+46085,"Lyman County, South Dakota",South Dakota,2023,24.6,,7.9
+28069,"Kemper County, Mississippi",Mississippi,2023,24.6,32.3,11.6
+51037,"Charlotte County, Virginia",Virginia,2023,24.6,25.3,23.4
+48489,"Willacy County, Texas",Texas,2023,24.6,100,20.6
+13107,"Emanuel County, Georgia",Georgia,2023,24.7,30.6,20.3
+37187,"Washington County, North Carolina",North Carolina,2023,24.7,35.9,13.7
+04017,"Navajo County, Arizona",Arizona,2023,24.7,25.1,11.4
+37189,"Watauga County, North Carolina",North Carolina,2023,24.7,69.6,23.8
+13087,"Decatur County, Georgia",Georgia,2023,24.8,31.6,19.7
+13021,"Bibb County, Georgia",Georgia,2023,24.8,33.1,12.1
+28025,"Clay County, Mississippi",Mississippi,2023,24.8,34.9,8.4
+21189,"Owsley County, Kentucky",Kentucky,2023,24.9,,26.2
+47151,"Scott County, Tennessee",Tennessee,2023,24.9,27.8,24.7
+54015,"Clay County, West Virginia",West Virginia,2023,24.9,100,24.6
+35051,"Sierra County, New Mexico",New Mexico,2023,24.9,100,25.4
+21195,"Pike County, Kentucky",Kentucky,2023,25,24.1,24.8
+28065,"Jefferson Davis County, Mississippi",Mississippi,2023,25,26.6,20.5
+13283,"Treutlen County, Georgia",Georgia,2023,25,39.9,19.1
+51590,"Danville city, Virginia",Virginia,2023,25,28.2,20.7
+47007,"Bledsoe County, Tennessee",Tennessee,2023,25,10.3,23.8
+40075,"Kiowa County, Oklahoma",Oklahoma,2023,25,52.2,25.2
+13003,"Atkinson County, Georgia",Georgia,2023,25,39.3,16.4
+38079,"Rolette County, North Dakota",North Dakota,2023,25.1,5.3,10.3
+21235,"Whitley County, Kentucky",Kentucky,2023,25.1,48.2,24.6
+28075,"Lauderdale County, Mississippi",Mississippi,2023,25.1,40.7,14.3
+28099,"Neshoba County, Mississippi",Mississippi,2023,25.1,45.9,15.2
+29223,"Wayne County, Missouri",Missouri,2023,25.1,100,24
+37083,"Halifax County, North Carolina",North Carolina,2023,25.2,32.7,14.6
+37153,"Richmond County, North Carolina",North Carolina,2023,25.2,35.8,18.7
+48137,"Edwards County, Texas",Texas,2023,25.3,,21.2
+13027,"Brooks County, Georgia",Georgia,2023,25.4,38.4,16.8
+35037,"Quay County, New Mexico",New Mexico,2023,25.4,,16.2
+22021,"Caldwell Parish, Louisiana",Louisiana,2023,25.4,53.2,20.5
+30051,"Liberty County, Montana",Montana,2023,25.5,,25
+13193,"Macon County, Georgia",Georgia,2023,25.5,30.8,14.4
+13205,"Mitchell County, Georgia",Georgia,2023,25.5,33.4,17
+21193,"Perry County, Kentucky",Kentucky,2023,25.5,25.1,25.3
+46049,"Faulk County, South Dakota",South Dakota,2023,25.6,,24.7
+22041,"Franklin Parish, Louisiana",Louisiana,2023,25.6,42.5,18
+28103,"Noxubee County, Mississippi",Mississippi,2023,25.6,32.8,4.4
+28097,"Montgomery County, Mississippi",Mississippi,2023,25.6,40.7,13.6
+51660,"Harrisonburg city, Virginia",Virginia,2023,25.6,35.2,27.8
+21169,"Metcalfe County, Kentucky",Kentucky,2023,25.7,8.7,25.5
+13017,"Ben Hill County, Georgia",Georgia,2023,25.7,40.5,15.2
+01011,"Bullock County, Alabama",Alabama,2023,25.7,28.3,15.2
+21075,"Fulton County, Kentucky",Kentucky,2023,25.7,46.9,19.2
+51720,"Norton city, Virginia",Virginia,2023,25.7,73.8,25.4
+47137,"Pickett County, Tennessee",Tennessee,2023,25.8,,24.5
+21119,"Knott County, Kentucky",Kentucky,2023,25.9,49.5,26.1
+13059,"Clarke County, Georgia",Georgia,2023,25.9,27.1,25.2
+35029,"Luna County, New Mexico",New Mexico,2023,26.1,23.1,21.2
+17153,"Pulaski County, Illinois",Illinois,2023,26.1,44.7,18.2
+45069,"Marlboro County, South Carolina",South Carolina,2023,26.2,25.9,25.4
+48087,"Collingsworth County, Texas",Texas,2023,26.2,49.8,18.3
+28053,"Humphreys County, Mississippi",Mississippi,2023,26.4,29.9,11.6
+13095,"Dougherty County, Georgia",Georgia,2023,26.4,30.5,13.4
+13307,"Webster County, Georgia",Georgia,2023,26.4,35.1,16.4
+28135,"Tallahatchie County, Mississippi",Mississippi,2023,26.5,32.6,15
+45005,"Allendale County, South Carolina",South Carolina,2023,26.5,35.4,13
+21071,"Floyd County, Kentucky",Kentucky,2023,26.6,60.1,26.4
+37165,"Scotland County, North Carolina",North Carolina,2023,26.6,35.9,16
+13161,"Jeff Davis County, Georgia",Georgia,2023,26.6,35.9,26.7
+16065,"Madison County, Idaho",Idaho,2023,26.8,19.8,27.2
+13243,"Randolph County, Georgia",Georgia,2023,26.8,32.3,11
+21133,"Letcher County, Kentucky",Kentucky,2023,26.8,54.1,26.3
+36005,"Bronx County, New York",New York,2023,26.9,26.6,22.7
+22119,"Webster Parish, Louisiana",Louisiana,2023,26.9,44.5,18.1
+28005,"Amite County, Mississippi",Mississippi,2023,27,49.3,12.2
+21013,"Bell County, Kentucky",Kentucky,2023,27.1,56.2,25.7
+21063,"Elliott County, Kentucky",Kentucky,2023,27.2,,27.9
+28021,"Claiborne County, Mississippi",Mississippi,2023,27.2,27.8,23.1
+05073,"Lafayette County, Arkansas",Arkansas,2023,27.2,43.3,17
+48215,"Hidalgo County, Texas",Texas,2023,27.2,23,24.3
+21095,"Harlan County, Kentucky",Kentucky,2023,27.2,49.9,26.3
+48079,"Cochran County, Texas",Texas,2023,27.3,39.4,24.9
+21131,"Leslie County, Kentucky",Kentucky,2023,27.3,85.7,27.9
+45067,"Marion County, South Carolina",South Carolina,2023,27.3,33.7,16.9
+12047,"Hamilton County, Florida",Florida,2023,27.3,40.2,20.3
+48371,"Pecos County, Texas",Texas,2023,27.4,,28.2
+40107,"Okfuskee County, Oklahoma",Oklahoma,2023,27.4,30,23.3
+29155,"Pemiscot County, Missouri",Missouri,2023,27.4,43.8,21.5
+21201,"Robertson County, Kentucky",Kentucky,2023,27.4,,27.3
+22009,"Avoyelles Parish, Louisiana",Louisiana,2023,27.4,43.8,19
+28113,"Pike County, Mississippi",Mississippi,2023,27.5,35.7,16.9
+48405,"San Augustine County, Texas",Texas,2023,27.5,38,21.4
+01035,"Conecuh County, Alabama",Alabama,2023,27.6,43.1,11.6
+35006,"Cibola County, New Mexico",New Mexico,2023,27.6,9.5,24.9
+51105,"Lee County, Virginia",Virginia,2023,27.6,75.6,27.3
+13173,"Lanier County, Georgia",Georgia,2023,27.7,44.4,21.5
+05077,"Lee County, Arkansas",Arkansas,2023,27.7,38,14.4
+12039,"Gadsden County, Florida",Florida,2023,27.7,34.4,13.2
+13259,"Stewart County, Georgia",Georgia,2023,27.8,35.9,9.9
+05123,"St. Francis County, Arkansas",Arkansas,2023,27.8,34.3,17.8
+01119,"Sumter County, Alabama",Alabama,2023,28.1,32,13.6
+22025,"Catahoula Parish, Louisiana",Louisiana,2023,28.1,47.4,18.6
+21025,"Breathitt County, Kentucky",Kentucky,2023,28.2,85.7,27.8
+28157,"Wilkinson County, Mississippi",Mississippi,2023,28.2,38.7,6.8
+28001,"Adams County, Mississippi",Mississippi,2023,28.2,40.6,8.7
+21165,"Menifee County, Kentucky",Kentucky,2023,28.2,80,27
+28063,"Jefferson County, Mississippi",Mississippi,2023,28.5,34.7,0
+45011,"Barnwell County, South Carolina",South Carolina,2023,28.5,38.9,20.1
+05099,"Nevada County, Arkansas",Arkansas,2023,28.5,42.5,22.5
+28105,"Oktibbeha County, Mississippi",Mississippi,2023,28.6,34,25.6
+22111,"Union Parish, Louisiana",Louisiana,2023,28.6,49.3,20.8
+05107,"Phillips County, Arkansas",Arkansas,2023,28.7,38.8,12.2
+28151,"Washington County, Mississippi",Mississippi,2023,28.8,36,9.1
+48273,"Kleberg County, Texas",Texas,2023,28.8,23.8,23.3
+37155,"Robeson County, North Carolina",North Carolina,2023,28.8,37.3,17.9
+21129,"Lee County, Kentucky",Kentucky,2023,28.9,49.2,29.1
+05041,"Desha County, Arkansas",Arkansas,2023,28.9,38,16.6
+35053,"Socorro County, New Mexico",New Mexico,2023,29,,22.4
+48131,"Duval County, Texas",Texas,2023,29,,24.5
+01047,"Dallas County, Alabama",Alabama,2023,29,34,12.9
+01131,"Wilcox County, Alabama",Alabama,2023,29,38.6,5.8
+45033,"Dillon County, South Carolina",South Carolina,2023,29.2,34.9,21.4
+21159,"Martin County, Kentucky",Kentucky,2023,29.2,86.4,27.7
+13269,"Taylor County, Georgia",Georgia,2023,29.4,36.7,24.1
+22081,"Red River Parish, Louisiana",Louisiana,2023,29.4,49.9,12.9
+13007,"Baker County, Georgia",Georgia,2023,29.4,35,14.1
+48437,"Swisher County, Texas",Texas,2023,29.5,67.3,28.9
+01085,"Lowndes County, Alabama",Alabama,2023,29.6,36.1,8.7
+28133,"Sunflower County, Mississippi",Mississippi,2023,29.9,35.3,11.6
+54059,"Mingo County, West Virginia",West Virginia,2023,29.9,67.8,29.7
+22091,"St. Helena Parish, Louisiana",Louisiana,2023,30,46.4,10.8
+30035,"Glacier County, Montana",Montana,2023,30.3,,17.4
+28159,"Winston County, Mississippi",Mississippi,2023,30.4,43.1,17.3
+30085,"Roosevelt County, Montana",Montana,2023,30.6,,8.3
+48047,"Brooks County, Texas",Texas,2023,30.7,4.5,33.8
+22061,"Lincoln Parish, Louisiana",Louisiana,2023,30.7,42.3,21.3
+22067,"Morehouse Parish, Louisiana",Louisiana,2023,30.7,42.3,19.3
+54047,"McDowell County, West Virginia",West Virginia,2023,30.9,50.1,30.4
+13271,"Telfair County, Georgia",Georgia,2023,31,40.2,18.8
+48243,"Jeff Davis County, Texas",Texas,2023,31.2,,34.6
+04001,"Apache County, Arizona",Arizona,2023,31.2,15.9,14.2
+01105,"Perry County, Alabama",Alabama,2023,31.2,36.5,15.6
+02158,"Kusilvak Census Area, Alaska",Alaska,2023,31.2,,3.1
+48247,"Jim Hogg County, Texas",Texas,2023,31.4,,37.1
+28163,"Yazoo County, Mississippi",Mississippi,2023,31.4,43.5,10.6
+47067,"Hancock County, Tennessee",Tennessee,2023,31.5,19,30.8
+13141,"Hancock County, Georgia",Georgia,2023,31.5,41.1,6.4
+08011,"Bent County, Colorado",Colorado,2023,31.7,,32.2
+15005,"Kalawao County, Hawaii",Hawaii,2023,31.7,,45.5
+21051,"Clay County, Kentucky",Kentucky,2023,31.8,50,29.9
+28125,"Sharkey County, Mississippi",Mississippi,2023,31.8,37,16
+46007,"Bennett County, South Dakota",South Dakota,2023,31.9,,25.2
+28083,"Leflore County, Mississippi",Mississippi,2023,31.9,38.4,9.3
+22013,"Bienville Parish, Louisiana",Louisiana,2023,32.1,47,19.8
+46041,"Dewey County, South Dakota",South Dakota,2023,32.3,,4.1
+47095,"Lake County, Tennessee",Tennessee,2023,32.3,44.9,31.1
+46017,"Buffalo County, South Dakota",South Dakota,2023,32.5,,13.9
+22107,"Tensas Parish, Louisiana",Louisiana,2023,32.8,49.5,10.5
+13273,"Terrell County, Georgia",Georgia,2023,33,50,7.4
+21153,"Magoffin County, Kentucky",Kentucky,2023,33.4,,33
+54013,"Calhoun County, West Virginia",West Virginia,2023,33.4,,32.2
+48427,"Starr County, Texas",Texas,2023,33.5,6.1,28.8
+28119,"Quitman County, Mississippi",Mississippi,2023,33.5,34.8,25.2
+28011,"Bolivar County, Mississippi",Mississippi,2023,33.7,44.8,15.3
+51750,"Radford city, Virginia",Virginia,2023,33.7,55.5,31.7
+28143,"Tunica County, Mississippi",Mississippi,2023,33.8,36.1,16.8
+21057,"Cumberland County, Kentucky",Kentucky,2023,33.9,20.4,33.3
+22029,"Concordia Parish, Louisiana",Louisiana,2023,34.8,46.5,26.6
+22027,"Claiborne Parish, Louisiana",Louisiana,2023,35,47.7,19.7
+21147,"McCreary County, Kentucky",Kentucky,2023,35.1,75,34.7
+22035,"East Carroll Parish, Louisiana",Louisiana,2023,35.7,47.3,14.5
+35031,"McKinley County, New Mexico",New Mexico,2023,35.7,13.1,11.1
+01063,"Greene County, Alabama",Alabama,2023,35.9,41.6,9.9
+48377,"Presidio County, Texas",Texas,2023,36.3,100,43.1
+28027,"Coahoma County, Mississippi",Mississippi,2023,36.3,42.2,12.8
+48507,"Zavala County, Texas",Texas,2023,36.3,100,32.7
+22065,"Madison Parish, Louisiana",Louisiana,2023,36.7,47.4,16.3
+21121,"Knox County, Kentucky",Kentucky,2023,36.7,73.4,35.5
+48505,"Zapata County, Texas",Texas,2023,37.4,,35.9
+46071,"Jackson County, South Dakota",South Dakota,2023,37.5,100,13.3
+28051,"Holmes County, Mississippi",Mississippi,2023,38,42.4,15.9
+21237,"Wolfe County, Kentucky",Kentucky,2023,38.1,,37.6
+46137,"Ziebach County, South Dakota",South Dakota,2023,38.2,,8.7
+38085,"Sioux County, North Dakota",North Dakota,2023,42.7,100,5.4
+48127,"Dimmit County, Texas",Texas,2023,44.8,96,34.2
+46031,"Corson County, South Dakota",South Dakota,2023,45.2,,16.9
+46095,"Mellette County, South Dakota",South Dakota,2023,46.2,,4.8
+46121,"Todd County, South Dakota",South Dakota,2023,49,25,7
+46102,"Oglala Lakota County, South Dakota",South Dakota,2023,52.8,,27.7

@@ -7,16 +7,19 @@ import MapComponent from './components/Map.vue'
   <div class="app-container">
     <header>
       <nav>
-        <RouterLink to="/">Home</RouterLink>
+        <a href="https://blacklandownership.com" target="_blank" rel="noopener noreferrer" class="logo-link">
+          <img src="/BLO-FAVICON.png" alt="BLO Logo" class="logo" />
+        </a>
+        <RouterLink to="/">Map</RouterLink>
         <RouterLink to="/about">About</RouterLink>
       </nav>
     </header>
 
     <main>
-      <MapComponent />
+      <RouterView v-slot="{ Component }">
+        <component :is="Component || MapComponent" />
+      </RouterView>
     </main>
-
-    <!--<RouterView />-->
   </div>
 </template>
 
@@ -34,7 +37,24 @@ header {
 
 nav {
   display: flex;
+  align-items: center;
   gap: 1rem;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  margin-right: 0.5rem;
+}
+
+.logo {
+  height: 32px;
+  width: 32px;
+  transition: opacity 0.2s;
+}
+
+.logo:hover {
+  opacity: 0.8;
 }
 
 main {

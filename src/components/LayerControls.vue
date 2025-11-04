@@ -19,15 +19,9 @@
       v-show="expanded"
       @click.stop
       class="layer-control-content"
-      style="
-        background: white;
-        padding: 10px;
-        border-radius: 4px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      "
     >
-      <h3 style="color: black">Demographic Layers</h3>
-      <div v-for="layer in demographicLayers" :key="layer.id" class="layer-item">
+      <!-- BLO Liveability Index (no category) -->
+      <div v-for="layer in demographicLayers.filter(l => !l.category)" :key="layer.id" class="layer-item">
         <input
           type="checkbox"
           :id="layer.id"
@@ -40,27 +34,147 @@
           <span class="tooltip-text">{{ layer.tooltip }}</span>
         </span>
       </div>
-      <template v-if="!devModeOnly">
-        <h3 style="color: black">EPA - Sites of Land Toxicity</h3>
-        <div class="layer-item">
-          <label style="color: black">
+
+      <!-- Demographics Category -->
+      <template v-if="demographicLayers.filter(l => l.category === 'Demographics').length > 0">
+        <h3 class="category-header" @click="toggleCategory('demographics')">
+          <span class="arrow" :class="{ expanded: expandedCategories.demographics }">▶</span>
+          Demographics
+        </h3>
+        <div v-show="expandedCategories.demographics">
+          <div v-for="layer in demographicLayers.filter(l => l.category === 'Demographics')" :key="layer.id" class="layer-item">
             <input
               type="checkbox"
-              :checked="showContaminationLayers"
-              @change="$emit('toggle-contamination-layers')"
+              :id="layer.id"
+              :checked="selectedDemographicLayers.includes(layer.id)"
+              @change="$emit('toggle-demographic', layer.id)"
             />
-            Show All Sites
-          </label>
+            <label :for="layer.id">{{ layer.name }}</label>
+            <span class="tooltip-icon" v-if="layer.tooltip" :title="layer.tooltip">
+              ⓘ
+            </span>
+          </div>
         </div>
-        <div class="layer-item">
-          <label style="color: black">
+      </template>
+
+      <template v-if="economicLayers && economicLayers.length > 0">
+        <h3 class="category-header" @click="toggleCategory('economic')">
+          <span class="arrow" :class="{ expanded: expandedCategories.economic }">▶</span>
+          Economic Indicators
+        </h3>
+        <div v-show="expandedCategories.economic">
+          <div v-for="layer in economicLayers" :key="layer.id" class="layer-item">
             <input
               type="checkbox"
-              :checked="showContaminationChoropleth"
-              @click="$emit('toggle-contamination-choropleth')"
+              :id="layer.id"
+              :checked="selectedEconomicLayers?.includes(layer.id)"
+              @change="$emit('toggle-economic', layer.id)"
             />
-            County-Level Breakdown
-          </label>
+            <label :for="layer.id">{{ layer.name }}</label>
+            <span class="tooltip-icon" v-if="layer.tooltip" :title="layer.tooltip">
+              ⓘ
+            </span>
+          </div>
+        </div>
+      </template>
+
+      <template v-if="housingLayers && housingLayers.length > 0">
+        <h3 class="category-header" @click="toggleCategory('housing')">
+          <span class="arrow" :class="{ expanded: expandedCategories.housing }">▶</span>
+          Housing & Affordability
+        </h3>
+        <div v-show="expandedCategories.housing">
+          <div v-for="layer in housingLayers" :key="layer.id" class="layer-item">
+            <input
+              type="checkbox"
+              :id="layer.id"
+              :checked="selectedHousingLayers?.includes(layer.id)"
+              @change="$emit('toggle-housing', layer.id)"
+            />
+            <label :for="layer.id">{{ layer.name }}</label>
+            <span class="tooltip-icon" v-if="layer.tooltip" :title="layer.tooltip">
+              ⓘ
+            </span>
+          </div>
+        </div>
+      </template>
+
+      <template v-if="equityLayers && equityLayers.length > 0">
+        <h3 class="category-header" @click="toggleCategory('equity')">
+          <span class="arrow" :class="{ expanded: expandedCategories.equity }">▶</span>
+          Racial Equity
+        </h3>
+        <div v-show="expandedCategories.equity">
+          <div v-for="layer in equityLayers" :key="layer.id" class="layer-item">
+            <input
+              type="checkbox"
+              :id="layer.id"
+              :checked="selectedEquityLayers?.includes(layer.id)"
+              @change="$emit('toggle-equity', layer.id)"
+            />
+            <label :for="layer.id">{{ layer.name }}</label>
+            <span class="tooltip-icon" v-if="layer.tooltip" :title="layer.tooltip">
+              ⓘ
+            </span>
+          </div>
+        </div>
+      </template>
+
+      <template v-if="!devModeOnly">
+        <h3 class="category-header" @click="toggleCategory('epa')">
+          <span class="arrow" :class="{ expanded: expandedCategories.epa }">▶</span>
+          Environment
+        </h3>
+        <div v-show="expandedCategories.epa">
+          <div class="layer-item">
+            <label style="color: black">
+              <input
+                type="checkbox"
+                :checked="showContaminationLayers"
+                @change="$emit('toggle-contamination-layers')"
+              />
+              Individual Sites of Pollution
+            </label>
+            <span class="tooltip-icon" title="Individual EPA contamination sites (Superfund, hazardous waste, toxic release, brownfields, air pollution).">
+              ⓘ
+            </span>
+          </div>
+          <div class="layer-item">
+            <label style="color: black">
+              <input
+                type="checkbox"
+                :checked="showContaminationChoropleth"
+                @click="$emit('toggle-contamination-choropleth')"
+              />
+              County-Level Polluted Site Comparison
+            </label>
+            <span class="tooltip-icon">
+              ⓘ
+              <span class="tooltip-text">Total EPA contamination sites per county (lower is better).</span>
+            </span>
+          </div>
+        </div>
+      </template>
+
+      <!-- Health Category -->
+      <template v-if="demographicLayers.filter(l => l.category === 'Health').length > 0">
+        <h3 class="category-header" @click="toggleCategory('health')">
+          <span class="arrow" :class="{ expanded: expandedCategories.health }">▶</span>
+          Health
+        </h3>
+        <div v-show="expandedCategories.health">
+          <div v-for="layer in demographicLayers.filter(l => l.category === 'Health')" :key="layer.id" class="layer-item">
+            <input
+              type="checkbox"
+              :id="layer.id"
+              :checked="selectedDemographicLayers.includes(layer.id)"
+              @change="$emit('toggle-demographic', layer.id)"
+            />
+            <label :for="layer.id">{{ layer.name }}</label>
+            <span class="tooltip-icon" v-if="layer.tooltip" :title="layer.tooltip">
+              ⓘ
+            </span>
+          </div>
         </div>
       </template>
     </div>
@@ -69,12 +183,24 @@
 </template>
 
 <script setup lang="ts">
-import type { DemographicLayer } from '@/config/layerConfig'
+import { ref } from 'vue'
+import type {
+  DemographicLayer,
+  EconomicLayer,
+  HousingLayer,
+  EquityLayer,
+} from '@/config/layerConfig'
 
 interface Props {
   expanded: boolean
   demographicLayers: DemographicLayer[]
+  economicLayers?: EconomicLayer[]
+  housingLayers?: HousingLayer[]
+  equityLayers?: EquityLayer[]
   selectedDemographicLayers: string[]
+  selectedEconomicLayers?: string[]
+  selectedHousingLayers?: string[]
+  selectedEquityLayers?: string[]
   showContaminationLayers: boolean
   showContaminationChoropleth: boolean
   devModeOnly?: boolean
@@ -85,9 +211,26 @@ defineProps<Props>()
 defineEmits<{
   toggle: []
   'toggle-demographic': [layerId: string]
+  'toggle-economic': [layerId: string]
+  'toggle-housing': [layerId: string]
+  'toggle-equity': [layerId: string]
   'toggle-contamination-layers': []
   'toggle-contamination-choropleth': []
 }>()
+
+// Category expansion state
+const expandedCategories = ref({
+  demographics: false,
+  economic: false,
+  housing: false,
+  equity: false,
+  epa: false,
+  health: false,
+})
+
+const toggleCategory = (category: keyof typeof expandedCategories.value) => {
+  expandedCategories.value[category] = !expandedCategories.value[category]
+}
 </script>
 
 <style scoped>
@@ -95,8 +238,53 @@ defineEmits<{
   max-width: 250px;
 }
 
+.layer-control-content {
+  background: white;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-height: 70vh;
+  overflow-y: auto;
+  overflow-x: visible;
+  position: relative;
+}
+
 .layer-control-collapsed #layer-control {
   display: none;
+}
+
+.category-header {
+  color: black;
+  margin-top: 15px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 4px 0;
+  transition: color 0.2s;
+}
+
+.category-header:hover {
+  color: #4a90e2;
+}
+
+.category-header:first-child {
+  margin-top: 5px;
+}
+
+.arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+  font-size: 12px;
+  color: #666;
+}
+
+.arrow.expanded {
+  transform: rotate(90deg);
 }
 
 .layer-control-toggle {
@@ -186,6 +374,7 @@ defineEmits<{
   margin: 10px 0;
   color: black;
   position: relative;
+  overflow: visible;
 }
 
 .layer-item label {
@@ -200,6 +389,8 @@ defineEmits<{
   font-size: 14px;
   color: #666;
   position: relative;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .tooltip-icon:hover .tooltip-text {
@@ -211,28 +402,34 @@ defineEmits<{
   visibility: hidden;
   opacity: 0;
   width: 200px;
-  background-color: #555;
+  background-color: #333;
   color: #fff;
-  text-align: center;
+  text-align: left;
   border-radius: 6px;
-  padding: 5px;
+  padding: 8px 10px;
   position: absolute;
-  z-index: 1;
-  bottom: 125%;
-  left: 50%;
-  margin-left: -100px;
-  transition: opacity 0.3s;
-  font-size: 12px;
+  z-index: 10000;
+  transition: opacity 0.2s;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: normal;
+  word-wrap: break-word;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  /* Position to the left of the icon */
+  right: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .tooltip-text::after {
   content: '';
   position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
+  top: 50%;
+  left: 100%;
+  margin-top: -5px;
   border-width: 5px;
   border-style: solid;
-  border-color: #555 transparent transparent transparent;
+  border-color: transparent transparent transparent #333;
 }
 </style>

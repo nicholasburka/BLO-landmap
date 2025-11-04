@@ -15,11 +15,16 @@
       {{ expanded ? '▼' : '▲' }} County Averages
     </button>
     <div v-show="expanded" id="averages-content" class="averages-content">
-      <p>BLO Combined Score: 2.84 of 5</p>
-      <p>Black Population: 9.05%</p>
-      <p>Diversity Index: 0.33 of 1</p>
-      <p>Sites of Land Toxicity: 8.77</p>
-      <p>Life Expectancy: 77.74 years</p>
+      <div class="average-section">
+        <p class="section-header">National Averages</p>
+        <p class="highlight-score">BLO Liveability Index: 2.42 of 5</p>
+      </div>
+      <div class="average-section">
+        <p>Black Population: 9.47%</p>
+        <p>Diversity Index: 0.3289 of 1</p>
+        <p>Sites of Land Toxicity: 8.77</p>
+        <p>Life Expectancy: 77.74 years</p>
+      </div>
     </div>
   </div>
 </template>
@@ -79,6 +84,31 @@ defineEmits<{
 .averages-content p {
   margin: 5px 0;
   font-size: 14px;
+}
+
+.average-section {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.average-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.section-header {
+  font-weight: 600;
+  font-size: 15px;
+  color: #2c3e50;
+  margin-bottom: 8px !important;
+}
+
+.highlight-score {
+  font-weight: 600;
+  color: #667eea;
+  font-size: 15px;
 }
 
 @media (max-width: 768px) {

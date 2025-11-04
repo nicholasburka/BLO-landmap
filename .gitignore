@@ -31,8 +31,15 @@ coverage
 
 # Project specific
 archive/
+
+# Large source data files (processed versions in public/datasets/)
 source-data/zip-codes/
 source-data/census/
+source-data/AVG WEEKLY WAGES/
+source-data/MEDIAN REAL ESTATE TAXES OF OWNER - OCCUPIED MORTGAGES/
+source-data/MEDIAN VALUE of OWNER OCCUPIED MORTGAGES/
+source-data/RACIAL PROGRESS/
+source-data/SVI2022_US_county.gdb/
 
 # Python virtual environment
 .env

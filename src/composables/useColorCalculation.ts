@@ -130,11 +130,15 @@ export function useColorCalculation(
 
     // Pre-calculate colors for each county
     Object.entries(diversityData.value).forEach(([geoID, data]) => {
+      // Check if diversity data exists, return 0 alpha if missing
       const diversityValue =
-        maxDiversityIndex > 0
-          ? (data.diversityIndex || 0) / maxDiversityIndex
+        data.diversityIndex != null && maxDiversityIndex > 0
+          ? data.diversityIndex / maxDiversityIndex
           : 0
-      const blackPctValue = (data.pct_Black || 0) / 100
+      const hasDiversityData = data.diversityIndex != null
+
+      const blackPctValue = data.pct_Black != null ? data.pct_Black / 100 : 0
+      const hasBlackPctData = data.pct_Black != null
 
       const contaminationValue =
         typeof countyContaminationCounts[geoID] === 'number'
@@ -143,14 +147,12 @@ export function useColorCalculation(
       const contaminationNormalized =
         maxContamination > 0 ? (contaminationValue as number) / maxContamination : 0
 
-      // Linear normalization to [0,1] range
-      const lifeExpectancyValue =
-        lifeExpectancyData.value[geoID]?.lifeExpectancy || minLifeExpectancy
-      const lifeExpectancyNormalized = normalizeValue(
-        lifeExpectancyValue,
-        minLifeExpectancy,
-        maxLifeExpectancy
-      )
+      // Linear normalization to [0,1] range - check if life expectancy data exists
+      const lifeExpectancyValue = lifeExpectancyData.value[geoID]?.lifeExpectancy
+      const hasLifeExpectancyData = lifeExpectancyValue != null
+      const lifeExpectancyNormalized = hasLifeExpectancyData
+        ? normalizeValue(lifeExpectancyValue, minLifeExpectancy, maxLifeExpectancy)
+        : 0
 
       // Calculate combined score color
       const combinedScore =
@@ -163,19 +165,19 @@ export function useColorCalculation(
 
       preCalculatedColors.value[geoID] = {
         geoID,
-        diversityColor: [
-          ...colors.diversity_index,
-          diversityValue,
-        ] as RGBAColor,
-        blackPctColor: [...colors.pct_Black, blackPctValue] as RGBAColor,
+        diversityColor: hasDiversityData
+          ? [...colors.diversity_index, diversityValue] as RGBAColor
+          : [0, 0, 0, 0] as RGBAColor,
+        blackPctColor: hasBlackPctData
+          ? [...colors.pct_Black, blackPctValue] as RGBAColor
+          : [0, 0, 0, 0] as RGBAColor,
         contaminationColor: [
           ...colors.contamination,
           contaminationNormalized,
         ] as RGBAColor,
-        lifeExpectancyColor: [
-          ...colors.life_expectancy,
-          lifeExpectancyNormalized,
-        ] as RGBAColor,
+        lifeExpectancyColor: hasLifeExpectancyData
+          ? [...colors.life_expectancy, lifeExpectancyNormalized] as RGBAColor
+          : [0, 0, 0, 0] as RGBAColor,
         blendedColors: {
           diversityAndContamination: blendColors(
             colors.diversity_index,

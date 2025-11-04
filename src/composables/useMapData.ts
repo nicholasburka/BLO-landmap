@@ -6,6 +6,10 @@ import type {
   LifeExpectancyDataMap,
   ContaminationDataMap,
   CombinedScoresDataMap,
+  BLOScoreV2DataMap,
+  EconomicDataMap,
+  HousingDataMap,
+  EquityDataMap,
   CountiesGeoJSON,
 } from '@/types/mapTypes'
 
@@ -16,6 +20,10 @@ export function useMapData() {
   const lifeExpectancyData = ref<LifeExpectancyDataMap>({})
   const countyContaminationCounts = reactive<ContaminationDataMap>({})
   const combinedScoresData = ref<CombinedScoresDataMap>({})
+  const combinedScoresV2Data = ref<BLOScoreV2DataMap>({})
+  const economicData = ref<EconomicDataMap>({})
+  const housingData = ref<HousingDataMap>({})
+  const equityData = ref<EquityDataMap>({})
 
   /**
    * Load counties GeoJSON data
@@ -178,6 +186,233 @@ export function useMapData() {
   }
 
   /**
+   * Load BLO v2.0 combined scores data
+   */
+  const loadCombinedScoresV2 = async (): Promise<void> => {
+    try {
+      const response = await fetch(DATA_PATHS.COMBINED_SCORES_V2)
+      combinedScoresV2Data.value = await response.json()
+
+      debugLog('BLO v2.0 scores loaded:', {
+        totalCounties: Object.keys(combinedScoresV2Data.value).length,
+      })
+    } catch (error) {
+      console.error('Error loading BLO v2.0 scores:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Load economic data from CSV files
+   */
+  const loadEconomicData = async (): Promise<void> => {
+    try {
+      // Load average weekly wages
+      const wagesResponse = await fetch(DATA_PATHS.AVG_WEEKLY_WAGES)
+      const wagesText = await wagesResponse.text()
+      const wagesResults = Papa.parse(wagesText, {
+        header: true,
+        dynamicTyping: true,
+      })
+
+      // Load median income by race
+      const incomeResponse = await fetch(DATA_PATHS.MEDIAN_INCOME_BY_RACE)
+      const incomeText = await incomeResponse.text()
+      const incomeResults = Papa.parse(incomeText, {
+        header: true,
+        dynamicTyping: true,
+      })
+
+      // Merge data by GEOID
+      wagesResults.data.forEach((row: any) => {
+        if (!row.GEOID) return
+        const geoID = row.GEOID.toString().padStart(5, '0')
+
+        economicData.value[geoID] = {
+          GEOID: geoID,
+          county_name: row.county_name,
+          state_name: row.state_name,
+          year: row.year,
+          avg_weekly_wage: row.avg_weekly_wage,
+        }
+      })
+
+      incomeResults.data.forEach((row: any) => {
+        if (!row.GEOID) return
+        const geoID = row.GEOID.toString().padStart(5, '0')
+
+        if (economicData.value[geoID]) {
+          economicData.value[geoID].median_income_black = row.median_income_black
+        } else {
+          economicData.value[geoID] = {
+            GEOID: geoID,
+            county_name: row.county_name,
+            state_name: row.state_name,
+            year: row.year,
+            avg_weekly_wage: 0,
+            median_income_black: row.median_income_black,
+          }
+        }
+      })
+
+      debugLog('Economic data loaded:', {
+        totalCounties: Object.keys(economicData.value).length,
+      })
+    } catch (error) {
+      console.error('Error loading economic data:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Load housing data from CSV files
+   */
+  const loadHousingData = async (): Promise<void> => {
+    try {
+      // Load median home value
+      const homeValueResponse = await fetch(DATA_PATHS.MEDIAN_HOME_VALUE)
+      const homeValueText = await homeValueResponse.text()
+      const homeValueResults = Papa.parse(homeValueText, {
+        header: true,
+        dynamicTyping: true,
+      })
+
+      // Load median property tax
+      const propertyTaxResponse = await fetch(DATA_PATHS.MEDIAN_PROPERTY_TAX)
+      const propertyTaxText = await propertyTaxResponse.text()
+      const propertyTaxResults = Papa.parse(propertyTaxText, {
+        header: true,
+        dynamicTyping: true,
+      })
+
+      // Load homeownership by race
+      const homeownershipResponse = await fetch(DATA_PATHS.HOMEOWNERSHIP_BY_RACE)
+      const homeownershipText = await homeownershipResponse.text()
+      const homeownershipResults = Papa.parse(homeownershipText, {
+        header: true,
+        dynamicTyping: true,
+      })
+
+      // Merge data by GEOID
+      homeValueResults.data.forEach((row: any) => {
+        if (!row.GEOID) return
+        const geoID = row.GEOID.toString().padStart(5, '0')
+
+        housingData.value[geoID] = {
+          GEOID: geoID,
+          county_name: row.county_name,
+          state_name: row.state_name,
+          year: row.year,
+          median_home_value: row.median_home_value_with_mortgage,
+        }
+      })
+
+      propertyTaxResults.data.forEach((row: any) => {
+        if (!row.GEOID) return
+        const geoID = row.GEOID.toString().padStart(5, '0')
+
+        if (housingData.value[geoID]) {
+          housingData.value[geoID].median_property_tax =
+            row.median_property_tax_with_mortgage
+        } else {
+          housingData.value[geoID] = {
+            GEOID: geoID,
+            county_name: row.county_name,
+            state_name: row.state_name,
+            year: row.year,
+            median_property_tax: row.median_property_tax_with_mortgage,
+          }
+        }
+      })
+
+      homeownershipResults.data.forEach((row: any) => {
+        if (!row.GEOID) return
+        const geoID = row.GEOID.toString().padStart(5, '0')
+
+        if (housingData.value[geoID]) {
+          housingData.value[geoID].homeownership_rate_black =
+            row.homeownership_rate_black
+        } else {
+          housingData.value[geoID] = {
+            GEOID: geoID,
+            county_name: row.county_name,
+            state_name: row.state_name,
+            year: row.year,
+            homeownership_rate_black: row.homeownership_rate_black,
+          }
+        }
+      })
+
+      debugLog('Housing data loaded:', {
+        totalCounties: Object.keys(housingData.value).length,
+      })
+    } catch (error) {
+      console.error('Error loading housing data:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Load equity data from CSV files
+   */
+  const loadEquityData = async (): Promise<void> => {
+    try {
+      // Load poverty by race
+      const povertyResponse = await fetch(DATA_PATHS.POVERTY_BY_RACE)
+      const povertyText = await povertyResponse.text()
+      const povertyResults = Papa.parse(povertyText, {
+        header: true,
+        dynamicTyping: true,
+      })
+
+      // Load Black Progress Index
+      const blackProgressResponse = await fetch(DATA_PATHS.BLACK_PROGRESS_INDEX)
+      const blackProgressText = await blackProgressResponse.text()
+      const blackProgressResults = Papa.parse(blackProgressText, {
+        header: true,
+        dynamicTyping: true,
+      })
+
+      // Merge data by GEOID
+      povertyResults.data.forEach((row: any) => {
+        if (!row.GEOID) return
+        const geoID = row.GEOID.toString().padStart(5, '0')
+
+        equityData.value[geoID] = {
+          GEOID: geoID,
+          county_name: row.county_name,
+          state_name: row.state_name,
+          year: row.year,
+          poverty_rate_black: row.poverty_rate_black,
+        }
+      })
+
+      blackProgressResults.data.forEach((row: any) => {
+        if (!row.GEOID) return
+        const geoID = row.GEOID.toString().padStart(5, '0')
+
+        if (equityData.value[geoID]) {
+          equityData.value[geoID].black_progress_index = row.black_progress_index
+        } else {
+          equityData.value[geoID] = {
+            GEOID: geoID,
+            county_name: row.county_name,
+            state: row.state,
+            black_progress_index: row.black_progress_index,
+          }
+        }
+      })
+
+      debugLog('Equity data loaded:', {
+        totalCounties: Object.keys(equityData.value).length,
+      })
+    } catch (error) {
+      console.error('Error loading equity data:', error)
+      throw error
+    }
+  }
+
+  /**
    * Load all county data
    */
   const loadAllCountyData = async (): Promise<void> => {
@@ -187,6 +422,10 @@ export function useMapData() {
       await loadDiversityData()
       await loadLifeExpectancyData()
       await loadCombinedScores()
+      await loadCombinedScoresV2()
+      await loadEconomicData()
+      await loadHousingData()
+      await loadEquityData()
 
       debugLog('All data loaded successfully')
     } catch (error) {
@@ -202,6 +441,10 @@ export function useMapData() {
     lifeExpectancyData,
     countyContaminationCounts,
     combinedScoresData,
+    combinedScoresV2Data,
+    economicData,
+    housingData,
+    equityData,
 
     // Loading functions
     loadCountiesGeoJSON,
@@ -209,6 +452,10 @@ export function useMapData() {
     loadDiversityData,
     loadLifeExpectancyData,
     loadCombinedScores,
+    loadCombinedScoresV2,
+    loadEconomicData,
+    loadHousingData,
+    loadEquityData,
     loadAllCountyData,
   }
 }

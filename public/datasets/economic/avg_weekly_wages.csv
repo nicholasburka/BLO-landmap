@@ -1,0 +1,3135 @@
+GEOID,county_name,state_name,year,avg_weekly_wage,quarterly_establishments
+38083,"Sheridan County, North Dakota",,2025,690,51
+46053,"Gregory County, South Dakota",,2025,758,228
+20105,"Lincoln County, Kansas",,2025,832,110
+54027,"Hampshire County, West Virginia",,2025,845,550
+40085,"Love County, Oklahoma",,2025,897,255
+19007,"Appanoose County, Iowa",,2025,914,398
+13169,"Jones County, Georgia",,2025,918,416
+01035,"Conecuh County, Alabama",,2025,915,294
+48281,"Lampasas County, Texas",,2025,930,489
+37131,"Northampton County, North Carolina",,2025,981,355
+51029,"Buckingham County, Virginia",,2025,978,481
+22015,"Bossier Parish, Louisiana",,2025,1018,3736
+12069,"Lake County, Florida",,2025,1034,10980
+39175,"Wyandot County, Ohio",,2025,1063,595
+37035,"Catawba County, North Carolina",,2025,1157,5162
+12061,"Indian River County, Florida",,2025,1306,5907
+40035,"Craig County, Oklahoma",,2025,863,426
+20065,"Graham County, Kansas",,2025,923,113
+46031,"Corson County, South Dakota",,2025,938,66
+01051,"Elmore County, Alabama",,2025,955,1851
+35039,"Rio Arriba County, New Mexico",,2025,942,850
+18179,"Wells County, Indiana",,2025,979,717
+21005,"Anderson County, Kentucky",,2025,946,574
+38095,"Towner County, North Dakota",,2025,980,95
+31157,"Scotts Bluff County, Nebraska",,2025,1018,1219
+46123,"Tripp County, South Dakota",,2025,988,261
+48477,"Washington County, Texas",,2025,1014,1082
+29157,"Perry County, Missouri",,2025,1019,595
+39125,"Paulding County, Ohio",,2025,1031,422
+20189,"Stevens County, Kansas",,2025,1061,206
+39047,"Fayette County, Ohio",,2025,1022,702
+30023,"Deer Lodge County, Montana",,2025,1050,363
+21049,"Clark County, Kentucky",,2025,1090,1087
+46091,"Marshall County, South Dakota",,2025,1106,216
+48469,"Victoria County, Texas",,2025,1089,2387
+48181,"Grayson County, Texas",,2025,1174,3202
+54017,"Doddridge County, West Virginia",,2025,1388,128
+20089,"Jewell County, Kansas",,2025,702,111
+20201,"Washington County, Kansas",,2025,767,292
+20029,"Cloud County, Kansas",,2025,807,313
+20191,"Sumner County, Kansas",,2025,861,642
+20135,"Ness County, Kansas",,2025,912,141
+37003,"Alexander County, North Carolina",,2025,900,722
+48337,"Montague County, Texas",,2025,932,510
+37091,"Hertford County, North Carolina",,2025,941,466
+18069,"Huntington County, Indiana",,2025,985,996
+20043,"Doniphan County, Kansas",,2025,987,237
+46011,"Brookings County, South Dakota",,2025,1109,1405
+38093,"Stutsman County, North Dakota",,2025,1129,875
+30071,"Phillips County, Montana",,2025,750,193
+38027,"Eddy County, North Dakota",,2025,755,104
+20163,"Rooks County, Kansas",,2025,866,199
+01021,"Chilton County, Alabama",,2025,910,948
+40021,"Cherokee County, Oklahoma",,2025,924,939
+39029,"Columbiana County, Ohio",,2025,969,2244
+48249,"Jim Wells County, Texas",,2025,944,861
+20059,"Franklin County, Kansas",,2025,1015,730
+18153,"Sullivan County, Indiana",,2025,1031,368
+55121,"Trempealeau County, Wisconsin",,2025,1033,839
+51071,"Giles County, Virginia",,2025,1025,448
+48357,"Ochiltree County, Texas",,2025,1095,389
+17157,"Randolph County, Illinois",,2025,1118,598
+39167,"Washington County, Ohio",,2025,1181,1633
+38055,"McLean County, North Dakota",,2025,1320,396
+48475,"Ward County, Texas",,2025,1698,397
+54025,"Greenbrier County, West Virginia",,2025,803,1406
+17023,"Clark County, Illinois",,2025,900,352
+16067,"Minidoka County, Idaho",,2025,936,763
+13235,"Pulaski County, Georgia",,2025,909,233
+17185,"Wabash County, Illinois",,2025,965,287
+29097,"Jasper County, Missouri",,2025,970,3597
+13179,"Liberty County, Georgia",,2025,1024,1114
+17053,"Ford County, Illinois",,2025,1059,375
+45043,"Georgetown County, South Carolina",,2025,1059,2480
+45017,"Calhoun County, South Carolina",,2025,1311,298
+51163,"Rockbridge County, Virginia",,2025,864,583
+20017,"Chase County, Kansas",,2025,857,85
+26141,"Presque Isle County, Michigan",,2025,883,340
+01063,"Greene County, Alabama",,2025,876,180
+21035,"Calloway County, Kentucky",,2025,901,1343
+37115,"Madison County, North Carolina",,2025,920,585
+46125,"Turner County, South Dakota",,2025,912,351
+51067,"Franklin County, Virginia",,2025,919,1628
+19035,"Cherokee County, Iowa",,2025,974,446
+26063,"Huron County, Michigan",,2025,985,1012
+40007,"Beaver County, Oklahoma",,2025,1002,177
+39161,"Van Wert County, Ohio",,2025,984,669
+20155,"Reno County, Kansas",,2025,1008,1708
+37107,"Lenoir County, North Carolina",,2025,994,1380
+46135,"Yankton County, South Dakota",,2025,1093,864
+12033,"Escambia County, Florida",,2025,1247,9792
+47161,"Stewart County, Tennessee",,2025,1245,255
+48383,"Reagan County, Texas",,2025,1453,151
+29131,"Miller County, Missouri",,2025,829,787
+48243,"Jeff Davis County, Texas",,2025,836,87
+35031,"McKinley County, New Mexico",,2025,922,1186
+35035,"Otero County, New Mexico",,2025,941,1303
+38051,"McIntosh County, North Dakota",,2025,903,136
+40139,"Texas County, Oklahoma",,2025,1006,583
+17159,"Richland County, Illinois",,2025,992,390
+48159,"Franklin County, Texas",,2025,1015,507
+51045,"Craig County, Virginia",,2025,1021,145
+47169,"Trousdale County, Tennessee",,2025,1049,172
+12105,"Polk County, Florida",,2025,1111,17466
+48211,"Hemphill County, Texas",,2025,1279,189
+51770,"Roanoke city, Virginia",,2025,1254,3603
+20097,"Kiowa County, Kansas",,2025,723,102
+17061,"Greene County, Illinois",,2025,839,254
+46117,"Stanley County, South Dakota",,2025,860,153
+05025,"Cleveland County, Arkansas",,2025,851,126
+35006,"Cibola County, New Mexico",,2025,930,461
+40081,"Lincoln County, Oklahoma",,2025,984,732
+38079,"Rolette County, North Dakota",,2025,991,284
+37033,"Caswell County, North Carolina",,2025,988,325
+37057,"Davidson County, North Carolina",,2025,1048,3610
+18107,"Montgomery County, Indiana",,2025,1155,936
+48395,"Robertson County, Texas",,2025,1234,396
+48289,"Leon County, Texas",,2025,1306,418
+46085,"Lyman County, South Dakota",,2025,772,140
+51011,"Appomattox County, Virginia",,2025,807,514
+48363,"Palo Pinto County, Texas",,2025,931,728
+29173,"Ralls County, Missouri",,2025,1023,279
+20169,"Saline County, Kansas",,2025,991,1611
+30101,"Toole County, Montana",,2025,1130,252
+48431,"Sterling County, Texas",,2025,1173,85
+45023,"Chester County, South Carolina",,2025,1179,691
+22057,"Lafourche Parish, Louisiana",,2025,1253,2225
+26085,"Lake County, Michigan",,2025,809,187
+18149,"Starke County, Indiana",,2025,855,343
+17075,"Iroquois County, Illinois",,2025,883,672
+18021,"Clay County, Indiana",,2025,892,536
+30041,"Hill County, Montana",,2025,936,610
+26041,"Delta County, Michigan",,2025,945,1061
+20061,"Geary County, Kansas",,2025,987,772
+38005,"Benson County, North Dakota",,2025,1030,148
+39053,"Gallia County, Ohio",,2025,1005,766
+18169,"Wabash County, Indiana",,2025,1009,785
+13275,"Thomas County, Georgia",,2025,1096,1542
+37127,"Nash County, North Carolina",,2025,1133,2438
+17099,"LaSalle County, Illinois",,2025,1209,2462
+54103,"Wetzel County, West Virginia",,2025,1168,444
+17115,"Macon County, Illinois",,2025,1442,1995
+29015,"Benton County, Missouri",,2025,753,569
+39015,"Brown County, Ohio",,2025,839,771
+26071,"Iron County, Michigan",,2025,893,392
+20187,"Stanton County, Kansas",,2025,863,94
+31067,"Gage County, Nebraska",,2025,941,747
+12029,"Dixie County, Florida",,2025,919,277
+45067,"Marion County, South Carolina",,2025,928,474
+20133,"Neosho County, Kansas",,2025,919,504
+29159,"Pettis County, Missouri",,2025,978,1347
+29031,"Cape Girardeau County, Missouri",,2025,1009,2893
+21047,"Christian County, Kentucky",,2025,1096,2196
+47179,"Washington County, Tennessee",,2025,1125,3701
+12119,"Sumter County, Florida",,2025,1153,2824
+48355,"Nueces County, Texas",,2025,1197,8403
+01129,"Washington County, Alabama",,2025,1886,332
+20019,"Chautauqua County, Kansas",,2025,716,108
+29017,"Bollinger County, Missouri",,2025,744,255
+20141,"Osborne County, Kansas",,2025,762,169
+46071,"Jackson County, South Dakota",,2025,822,83
+40033,"Cotton County, Oklahoma",,2025,849,128
+40099,"Murray County, Oklahoma",,2025,898,385
+20205,"Wilson County, Kansas",,2025,905,238
+13171,"Lamar County, Georgia",,2025,963,365
+55078,"Menominee County, Wisconsin",,2025,943,113
+55085,"Oneida County, Wisconsin",,2025,1005,1531
+46027,"Clay County, South Dakota",,2025,974,477
+20057,"Ford County, Kansas",,2025,1001,873
+26057,"Gratiot County, Michigan",,2025,1059,809
+38085,"Sioux County, North Dakota",,2025,1096,79
+13227,"Pickens County, Georgia",,2025,1136,959
+17045,"Edgar County, Illinois",,2025,1096,353
+54091,"Taylor County, West Virginia",,2025,1113,341
+48443,"Terrell County, Texas",,2025,1210,47
+13129,"Gordon County, Georgia",,2025,1242,1267
+48261,"Kenedy County, Texas",,2025,1437,28
+16065,"Madison County, Idaho",,2025,800,1727
+26129,"Ogemaw County, Michigan",,2025,824,617
+48333,"Mills County, Texas",,2025,805,155
+39079,"Jackson County, Ohio",,2025,895,759
+17165,"Saline County, Illinois",,2025,916,515
+22061,"Lincoln Parish, Louisiana",,2025,943,1521
+20067,"Grant County, Kansas",,2025,1007,234
+40119,"Payne County, Oklahoma",,2025,1037,2337
+18083,"Knox County, Indiana",,2025,1001,947
+17017,"Cass County, Illinois",,2025,1063,267
+39101,"Marion County, Ohio",,2025,1052,1245
+12043,"Glades County, Florida",,2025,1090,209
+46051,"Grant County, South Dakota",,2025,1096,379
+54011,"Cabell County, West Virginia",,2025,1124,3350
+22019,"Calcasieu Parish, Louisiana",,2025,1225,6153
+01131,"Wilcox County, Alabama",,2025,1191,331
+51139,"Page County, Virginia",,2025,854,619
+17149,"Pike County, Illinois",,2025,893,416
+22053,"Jefferson Davis Parish, Louisiana",,2025,863,804
+29101,"Johnson County, Missouri",,2025,894,1319
+20095,"Kingman County, Kansas",,2025,912,254
+46045,"Edmunds County, South Dakota",,2025,941,187
+45021,"Cherokee County, South Carolina",,2025,930,1024
+01079,"Lawrence County, Alabama",,2025,972,579
+51103,"Lancaster County, Virginia",,2025,1007,547
+56001,"Albany County, Wyoming",,2025,1027,1689
+21213,"Simpson County, Kentucky",,2025,992,721
+48481,"Wharton County, Texas",,2025,1022,1144
+17137,"Morgan County, Illinois",,2025,1041,708
+38031,"Foster County, North Dakota",,2025,1082,170
+48195,"Hansford County, Texas",,2025,1069,229
+51530,"Buena Vista city, Virginia",,2025,1096,158
+48341,"Moore County, Texas",,2025,1155,539
+13215,"Muscogee County, Georgia",,2025,1157,5405
+48103,"Crane County, Texas",,2025,1456,112
+20127,"Morris County, Kansas",,2025,786,167
+51193,"Westmoreland County, Virginia",,2025,839,497
+46049,"Faulk County, South Dakota",,2025,835,128
+24047,"Worcester County, Maryland",,2025,902,2500
+13011,"Banks County, Georgia",,2025,879,391
+17085,"Jo Daviess County, Illinois",,2025,909,753
+48083,"Coleman County, Texas",,2025,888,249
+18049,"Fulton County, Indiana",,2025,925,471
+26097,"Mackinac County, Michigan",,2025,1022,504
+18113,"Noble County, Indiana",,2025,1004,996
+39023,"Clark County, Ohio",,2025,1024,2569
+42111,"Somerset County, Pennsylvania",,2025,1023,1881
+13147,"Hart County, Georgia",,2025,995,618
+17049,"Effingham County, Illinois",,2025,1039,1245
+21059,"Daviess County, Kentucky",,2025,1059,3576
+38077,"Richland County, North Dakota",,2025,1065,707
+48123,"DeWitt County, Texas",,2025,1092,568
+46057,"Hamlin County, South Dakota",,2025,1108,283
+40037,"Creek County, Oklahoma",,2025,1115,1737
+29077,"Greene County, Missouri",,2025,1114,11423
+17105,"Livingston County, Illinois",,2025,1160,865
+22055,"Lafayette Parish, Louisiana",,2025,1146,12154
+47163,"Sullivan County, Tennessee",,2025,1325,4084
+48095,"Concho County, Texas",,2025,1517,91
+26053,"Gogebic County, Michigan",,2025,864,415
+46061,"Hanson County, South Dakota",,2025,880,106
+37061,"Duplin County, North Carolina",,2025,903,1153
+46077,"Kingsbury County, South Dakota",,2025,977,269
+35013,"Doña Ana County, New Mexico",,2025,986,5774
+37199,"Yancey County, North Carolina",,2025,985,497
+56041,"Uinta County, Wyoming",,2025,978,891
+18143,"Scott County, Indiana",,2025,991,441
+37103,"Jones County, North Carolina",,2025,995,191
+21187,"Owen County, Kentucky",,2025,1021,186
+54073,"Pleasants County, West Virginia",,2025,1139,188
+08023,"Costilla County, Colorado",,2025,751,115
+02164,"Lake and Peninsula Borough, Alaska",,2025,815,111
+20109,"Logan County, Kansas",,2025,805,136
+30005,"Blaine County, Montana",,2025,874,203
+20147,"Phillips County, Kansas",,2025,902,232
+26011,"Arenac County, Michigan",,2025,902,355
+20003,"Anderson County, Kansas",,2025,906,261
+46023,"Charles Mix County, South Dakota",,2025,929,377
+01077,"Lauderdale County, Alabama",,2025,940,2623
+37099,"Jackson County, North Carolina",,2025,920,1287
+17021,"Christian County, Illinois",,2025,1009,712
+18139,"Rush County, Indiana",,2025,1009,432
+48471,"Walker County, Texas",,2025,1044,1151
+20175,"Seward County, Kansas",,2025,1015,593
+54029,"Hancock County, West Virginia",,2025,1016,934
+18077,"Jefferson County, Indiana",,2025,1022,748
+54081,"Raleigh County, West Virginia",,2025,1033,2616
+28089,"Madison County, Mississippi",,2025,1078,4097
+37195,"Wilson County, North Carolina",,2025,1065,2088
+05143,"Washington County, Arkansas",,2025,1136,7279
+48185,"Grimes County, Texas",,2025,1198,607
+22103,"St. Tammany Parish, Louisiana",,2025,1204,11198
+20101,"Lane County, Kansas",,2025,910,89
+13145,"Harris County, Georgia",,2025,939,597
+20081,"Haskell County, Kansas",,2025,948,169
+47039,"Decatur County, Tennessee",,2025,933,298
+01123,"Tallapoosa County, Alabama",,2025,938,1080
+12077,"Liberty County, Florida",,2025,962,138
+01113,"Russell County, Alabama",,2025,953,1224
+51820,"Waynesboro city, Virginia",,2025,986,781
+20171,"Scott County, Kansas",,2025,983,257
+30035,"Glacier County, Montana",,2025,1003,344
+20013,"Brown County, Kansas",,2025,1012,352
+13277,"Tift County, Georgia",,2025,1017,1219
+18135,"Randolph County, Indiana",,2025,1035,569
+48041,"Brazos County, Texas",,2025,1067,5244
+48111,"Dallam County, Texas",,2025,1075,399
+35017,"Grant County, New Mexico",,2025,1104,744
+48361,"Orange County, Texas",,2025,1311,1436
+48297,"Live Oak County, Texas",,2025,1451,306
+48109,"Culberson County, Texas",,2025,2006,108
+48235,"Irion County, Texas",,2025,2213,76
+26143,"Roscommon County, Michigan",,2025,795,590
+48379,"Rains County, Texas",,2025,792,262
+51091,"Highland County, Virginia",,2025,894,124
+48025,"Bee County, Texas",,2025,898,558
+38103,"Wells County, North Dakota",,2025,922,208
+13185,"Lowndes County, Georgia",,2025,931,3299
+21065,"Estill County, Kentucky",,2025,896,264
+37191,"Wayne County, North Carolina",,2025,923,2519
+17025,"Clay County, Illinois",,2025,963,317
+48285,"Lavaca County, Texas",,2025,962,493
+38099,"Walsh County, North Dakota",,2025,1065,526
+21167,"Mercer County, Kentucky",,2025,1241,592
+21007,"Ballard County, Kentucky",,2025,1255,218
+48065,"Carson County, Texas",,2025,1979,188
+46111,"Sanborn County, South Dakota",,2025,795,89
+12065,"Jefferson County, Florida",,2025,892,397
+08105,"Rio Grande County, Colorado",,2025,933,488
+01011,"Bullock County, Alabama",,2025,928,211
+22011,"Beauregard Parish, Louisiana",,2025,1015,871
+29201,"Scott County, Missouri",,2025,976,1327
+17101,"Lawrence County, Illinois",,2025,994,260
+37193,"Wilkes County, North Carolina",,2025,1006,1388
+17183,"Vermilion County, Illinois",,2025,1125,1309
+48401,"Rusk County, Texas",,2025,1116,870
+48163,"Frio County, Texas",,2025,1244,383
+48461,"Upton County, Texas",,2025,1979,127
+17153,"Pulaski County, Illinois",,2025,826,108
+42023,"Cameron County, Pennsylvania",,2025,897,158
+39071,"Highland County, Ohio",,2025,886,862
+05087,"Madison County, Arkansas",,2025,872,296
+35005,"Chaves County, New Mexico",,2025,922,1789
+12129,"Wakulla County, Florida",,2025,926,643
+17055,"Franklin County, Illinois",,2025,915,709
+20037,"Crawford County, Kansas",,2025,906,1128
+22059,"LaSalle Parish, Louisiana",,2025,925,467
+46037,"Day County, South Dakota",,2025,924,275
+39127,"Perry County, Ohio",,2025,1001,597
+39031,"Coshocton County, Ohio",,2025,1045,740
+22043,"Grant Parish, Louisiana",,2025,1117,297
+22087,"St. Bernard Parish, Louisiana",,2025,1160,1046
+26069,"Iosco County, Michigan",,2025,1189,624
+13149,"Heard County, Georgia",,2025,1296,180
+18129,"Posey County, Indiana",,2025,1439,578
+55051,"Iron County, Wisconsin",,2025,734,229
+20063,"Gove County, Kansas",,2025,901,166
+38037,"Grant County, North Dakota",,2025,944,108
+01059,"Franklin County, Alabama",,2025,919,696
+20151,"Pratt County, Kansas",,2025,938,403
+12053,"Hernando County, Florida",,2025,973,4698
+21083,"Graves County, Kentucky",,2025,949,1027
+18027,"Daviess County, Indiana",,2025,979,984
+17121,"Marion County, Illinois",,2025,961,797
+48359,"Oldham County, Texas",,2025,991,93
+27087,"Mahnomen County, Minnesota",,2025,1000,121
+20009,"Barton County, Kansas",,2025,965,896
+38019,"Cavalier County, North Dakota",,2025,1015,176
+18035,"Delaware County, Indiana",,2025,1005,2372
+31053,"Dodge County, Nebraska",,2025,1039,1119
+39157,"Tuscarawas County, Ohio",,2025,1004,2425
+24019,"Dorchester County, Maryland",,2025,1049,806
+40073,"Kingfisher County, Oklahoma",,2025,1074,610
+17177,"Stephenson County, Illinois",,2025,1062,1046
+48147,"Fannin County, Texas",,2025,1051,640
+48265,"Kerr County, Texas",,2025,1079,1535
+18033,"DeKalb County, Indiana",,2025,1338,1108
+17191,"Wayne County, Illinois",,2025,827,382
+46015,"Brule County, South Dakota",,2025,806,254
+20165,"Rush County, Kansas",,2025,836,112
+17051,"Fayette County, Illinois",,2025,862,465
+18175,"Washington County, Indiana",,2025,863,493
+20025,"Clark County, Kansas",,2025,878,87
+08089,"Otero County, Colorado",,2025,900,500
+21081,"Grant County, Kentucky",,2025,889,631
+55083,"Oconto County, Wisconsin",,2025,892,951
+46067,"Hutchinson County, South Dakota",,2025,925,299
+20159,"Rice County, Kansas",,2025,923,363
+26151,"Sanilac County, Michigan",,2025,953,883
+17193,"White County, Illinois",,2025,946,341
+13187,"Lumpkin County, Georgia",,2025,965,738
+20107,"Linn County, Kansas",,2025,1002,273
+46069,"Hyde County, South Dakota",,2025,1028,76
+20053,"Ellsworth County, Kansas",,2025,1058,190
+35023,"Hidalgo County, New Mexico",,2025,1082,158
+39039,"Defiance County, Ohio",,2025,1100,942
+46097,"Miner County, South Dakota",,2025,856,105
+46019,"Butte County, South Dakota",,2025,894,476
+20085,"Jackson County, Kansas",,2025,880,345
+39147,"Seneca County, Ohio",,2025,986,1247
+39075,"Holmes County, Ohio",,2025,1007,1538
+46041,"Dewey County, South Dakota",,2025,979,157
+21151,"Madison County, Kentucky",,2025,1030,3186
+40113,"Osage County, Oklahoma",,2025,1026,570
+13269,"Taylor County, Georgia",,2025,1052,187
+40043,"Dewey County, Oklahoma",,2025,1516,194
+51063,"Floyd County, Virginia",,2025,784,517
+37073,"Gates County, North Carolina",,2025,814,197
+37149,"Polk County, North Carolina",,2025,870,717
+29029,"Camden County, Missouri",,2025,883,1773
+46059,"Hand County, South Dakota",,2025,880,164
+12133,"Washington County, Florida",,2025,895,560
+12093,"Okeechobee County, Florida",,2025,929,1107
+22003,"Allen Parish, Louisiana",,2025,967,437
+38071,"Ramsey County, North Dakota",,2025,986,533
+18017,"Cass County, Indiana",,2025,971,738
+48313,"Madison County, Texas",,2025,1015,297
+05091,"Miller County, Arkansas",,2025,975,929
+48269,"King County, Texas",,2025,1015,27
+46029,"Codington County, South Dakota",,2025,1032,1428
+39051,"Fulton County, Ohio",,2025,1090,1126
+54109,"Wyoming County, West Virginia",,2025,1149,435
+18051,"Gibson County, Indiana",,2025,1316,807
+46095,"Mellette County, South Dakota",,2025,703,42
+17013,"Calhoun County, Illinois",,2025,710,93
+48393,"Roberts County, Texas",,2025,797,43
+20033,"Comanche County, Kansas",,2025,794,93
+51131,"Northampton County, Virginia",,2025,813,601
+46089,"McPherson County, South Dakota",,2025,839,94
+26007,"Alpena County, Michigan",,2025,989,903
+21009,"Barren County, Kentucky",,2025,991,1319
+39065,"Hardin County, Ohio",,2025,998,567
+48413,"Schleicher County, Texas",,2025,1013,84
+01025,"Clarke County, Alabama",,2025,1007,731
+48421,"Sherman County, Texas",,2025,1062,134
+17041,"Douglas County, Illinois",,2025,1082,605
+48239,"Jackson County, Texas",,2025,1111,409
+01087,"Macon County, Alabama",,2025,1143,318
+29186,"Ste. Genevieve County, Missouri",,2025,1244,504
+20023,"Cheyenne County, Kansas",,2025,776,144
+46003,"Aurora County, South Dakota",,2025,803,102
+29033,"Carroll County, Missouri",,2025,813,327
+37015,"Bertie County, North Carolina",,2025,851,348
+48499,"Wood County, Texas",,2025,933,948
+47167,"Tipton County, Tennessee",,2025,956,937
+38003,"Barnes County, North Dakota",,2025,984,453
+18065,"Henry County, Indiana",,2025,954,920
+51171,"Shenandoah County, Virginia",,2025,1001,1174
+54049,"Marion County, West Virginia",,2025,1091,1738
+01033,"Colbert County, Alabama",,2025,1113,1674
+21163,"Meade County, Kentucky",,2025,1208,546
+21157,"Marshall County, Kentucky",,2025,1211,1054
+48371,"Pecos County, Texas",,2025,1336,442
+21077,"Gallatin County, Kentucky",,2025,1472,162
+37169,"Stokes County, North Carolina",,2025,800,858
+29123,"Madison County, Missouri",,2025,795,349
+56017,"Hot Springs County, Wyoming",,2025,900,261
+20077,"Harper County, Kansas",,2025,928,228
+46102,"Oglala Lakota County, South Dakota",,2025,936,134
+54031,"Hardy County, West Virginia",,2025,971,459
+18001,"Adams County, Indiana",,2025,968,795
+13053,"Chattahoochee County, Georgia",,2025,980,137
+17107,"Logan County, Illinois",,2025,1027,562
+48199,"Hardin County, Texas",,2025,1042,952
+19187,"Webster County, Iowa",,2025,1118,1185
+54077,"Preston County, West Virginia",,2025,1082,881
+18165,"Vermillion County, Indiana",,2025,1190,290
+48435,"Sutton County, Texas",,2025,1466,160
+32033,"White Pine County, Nevada",,2025,1634,262
+05085,"Lonoke County, Arkansas",,2025,827,1454
+31147,"Richardson County, Nebraska",,2025,846,300
+12067,"Lafayette County, Florida",,2025,870,153
+20041,"Dickinson County, Kansas",,2025,873,570
+08011,"Bent County, Colorado",,2025,907,94
+32021,"Mineral County, Nevada",,2025,1010,87
+47141,"Putnam County, Tennessee",,2025,988,2468
+21021,"Boyle County, Kentucky",,2025,1031,1076
+17127,"Massac County, Illinois",,2025,1044,199
+29145,"Newton County, Missouri",,2025,1041,1534
+13143,"Haralson County, Georgia",,2025,1066,621
+54069,"Ohio County, West Virginia",,2025,1087,1786
+20045,"Douglas County, Kansas",,2025,1078,3824
+29021,"Buchanan County, Missouri",,2025,1191,2702
+22051,"Jefferson Parish, Louisiana",,2025,1258,16078
+51680,"Lynchburg city, Virginia",,2025,1225,2692
+46099,"Minnehaha County, South Dakota",,2025,1307,10035
+29209,"Stone County, Missouri",,2025,769,898
+22111,"Union Parish, Louisiana",,2025,809,465
+17035,"Cumberland County, Illinois",,2025,859,195
+48069,"Castro County, Texas",,2025,884,294
+05125,"Saline County, Arkansas",,2025,909,2561
+18117,"Orange County, Indiana",,2025,896,401
+56015,"Goshen County, Wyoming",,2025,909,509
+38029,"Emmons County, North Dakota",,2025,950,168
+05045,"Faulkner County, Arkansas",,2025,969,3360
+01043,"Cullman County, Alabama",,2025,1009,2360
+12055,"Highlands County, Florida",,2025,956,2628
+40103,"Noble County, Oklahoma",,2025,1011,271
+20119,"Meade County, Kansas",,2025,1083,170
+21191,"Pendleton County, Kentucky",,2025,1095,290
+17077,"Jackson County, Illinois",,2025,1084,1156
+40009,"Beckham County, Oklahoma",,2025,1113,782
+46093,"Meade County, South Dakota",,2025,1170,1070
+01085,"Lowndes County, Alabama",,2025,1141,210
+21145,"McCracken County, Kentucky",,2025,1141,2896
+17029,"Coles County, Illinois",,2025,1136,1038
+29061,"Daviess County, Missouri",,2025,749,296
+28073,"Lamar County, Mississippi",,2025,859,1605
+46043,"Douglas County, South Dakota",,2025,870,133
+40129,"Roger Mills County, Oklahoma",,2025,865,111
+55041,"Forest County, Wisconsin",,2025,873,313
+48155,"Foard County, Texas",,2025,862,59
+55013,"Burnett County, Wisconsin",,2025,899,477
+39163,"Vinton County, Ohio",,2025,875,214
+38039,"Griggs County, North Dakota",,2025,907,113
+13195,"Madison County, Georgia",,2025,900,518
+38043,"Kidder County, North Dakota",,2025,952,130
+21003,"Allen County, Kentucky",,2025,926,432
+48017,"Bailey County, Texas",,2025,982,236
+48117,"Deaf Smith County, Texas",,2025,1043,483
+20145,"Pawnee County, Kansas",,2025,1032,215
+20113,"McPherson County, Kansas",,2025,1271,979
+38065,"Oliver County, North Dakota",,2025,1928,72
+20139,"Osage County, Kansas",,2025,736,377
+20071,"Greeley County, Kansas",,2025,828,75
+01013,"Butler County, Alabama",,2025,911,519
+20137,"Norton County, Kansas",,2025,946,201
+37175,"Transylvania County, North Carolina",,2025,976,1254
+40047,"Garfield County, Oklahoma",,2025,983,1759
+42021,"Cambria County, Pennsylvania",,2025,981,3294
+16047,"Gooding County, Idaho",,2025,993,631
+17015,"Carroll County, Illinois",,2025,1015,402
+18181,"White County, Indiana",,2025,1067,712
+22079,"Rapides Parish, Louisiana",,2025,1029,4108
+18167,"Vigo County, Indiana",,2025,1071,2543
+40013,"Bryan County, Oklahoma",,2025,1042,1251
+13095,"Dougherty County, Georgia",,2025,1116,2620
+48203,"Harrison County, Texas",,2025,1335,1440
+20153,"Rawlins County, Kansas",,2025,856,121
+48007,"Aransas County, Texas",,2025,867,696
+55129,"Washburn County, Wisconsin",,2025,887,607
+20167,"Russell County, Kansas",,2025,874,310
+20007,"Barber County, Kansas",,2025,895,215
+18131,"Pulaski County, Indiana",,2025,909,348
+16005,"Bannock County, Idaho",,2025,949,3239
+20047,"Edwards County, Kansas",,2025,926,134
+48349,"Navarro County, Texas",,2025,966,1020
+20051,"Ellis County, Kansas",,2025,941,1121
+29071,"Franklin County, Missouri",,2025,1020,3090
+38069,"Pierce County, North Dakota",,2025,1019,198
+18177,"Wayne County, Indiana",,2025,1039,1508
+22071,"Orleans Parish, Louisiana",,2025,1399,17448
+20049,"Elk County, Kansas",,2025,686,87
+18121,"Parke County, Indiana",,2025,821,332
+13079,"Crawford County, Georgia",,2025,831,159
+46073,"Jerauld County, South Dakota",,2025,916,106
+01065,"Hale County, Alabama",,2025,932,338
+17145,"Perry County, Illinois",,2025,944,335
+46087,"McCook County, South Dakota",,2025,954,241
+48307,"McCulloch County, Texas",,2025,934,272
+40031,"Comanche County, Oklahoma",,2025,964,2712
+12051,"Hendry County, Florida",,2025,992,1092
+46017,"Buffalo County, South Dakota",,2025,1025,27
+01107,"Pickens County, Alabama",,2025,1007,399
+48433,"Stonewall County, Texas",,2025,1011,68
+17001,"Adams County, Illinois",,2025,1069,1764
+31119,"Madison County, Nebraska",,2025,1076,1348
+45003,"Aiken County, South Carolina",,2025,1258,3996
+18119,"Owen County, Indiana",,2025,1306,338
+20207,"Woodson County, Kansas",,2025,738,96
+20073,"Greenwood County, Kansas",,2025,741,210
+20157,"Republic County, Kansas",,2025,796,217
+48263,"Kent County, Texas",,2025,842,29
+13009,"Baldwin County, Georgia",,2025,868,1010
+21079,"Garrard County, Kentucky",,2025,889,442
+20123,"Mitchell County, Kansas",,2025,906,276
+17095,"Knox County, Illinois",,2025,913,976
+22115,"Vernon Parish, Louisiana",,2025,928,1053
+13031,"Bulloch County, Georgia",,2025,923,1972
+22091,"St. Helena Parish, Louisiana",,2025,943,142
+46129,"Walworth County, South Dakota",,2025,951,254
+37013,"Beaufort County, North Carolina",,2025,982,1318
+55075,"Marinette County, Wisconsin",,2025,1025,1272
+21239,"Woodford County, Kentucky",,2025,1030,1105
+48205,"Hartley County, Texas",,2025,1005,153
+51750,"Radford city, Virginia",,2025,1008,374
+13285,"Troup County, Georgia",,2025,1097,1848
+51023,"Botetourt County, Virginia",,2025,1135,994
+54095,"Tyler County, West Virginia",,2025,1139,173
+51081,"Greensville County, Virginia",,2025,1331,238
+48417,"Shackelford County, Texas",,2025,1404,137
+48229,"Hudspeth County, Texas",,2025,1535,77
+29213,"Taney County, Missouri",,2025,836,2205
+20117,"Marshall County, Kansas",,2025,924,412
+20203,"Wichita County, Kansas",,2025,949,116
+46047,"Fall River County, South Dakota",,2025,1015,364
+40019,"Carter County, Oklahoma",,2025,1012,1758
+37151,"Randolph County, North Carolina",,2025,1026,3128
+13021,"Bibb County, Georgia",,2025,1120,4790
+21101,"Henderson County, Kentucky",,2025,1125,1457
+13059,"Clarke County, Georgia",,2025,1153,4018
+48233,"Hutchinson County, Texas",,2025,1677,446
+22123,"West Carroll Parish, Louisiana",,2025,751,233
+40057,"Harmon County, Oklahoma",,2025,862,77
+55135,"Waupaca County, Wisconsin",,2025,936,1434
+40151,"Woods County, Oklahoma",,2025,955,303
+21199,"Pulaski County, Kentucky",,2025,942,2197
+47043,"Dickson County, Tennessee",,2025,992,1378
+20035,"Cowley County, Kansas",,2025,989,797
+17199,"Williamson County, Illinois",,2025,1061,1460
+21017,"Bourbon County, Kentucky",,2025,1060,633
+48273,"Kleberg County, Texas",,2025,1065,622
+40123,"Pontotoc County, Oklahoma",,2025,1098,1207
+01125,"Tuscaloosa County, Alabama",,2025,1176,5520
+46065,"Hughes County, South Dakota",,2025,1238,936
+18067,"Howard County, Indiana",,2025,1266,1952
+45039,"Fairfield County, South Carolina",,2025,1222,443
+48227,"Howard County, Texas",,2025,1314,899
+48317,"Martin County, Texas",,2025,1452,242
+26119,"Montmorency County, Michigan",,2025,808,231
+20195,"Trego County, Kansas",,2025,850,131
+35041,"Roosevelt County, New Mexico",,2025,889,472
+45011,"Barnwell County, South Carolina",,2025,878,437
+40117,"Pawnee County, Oklahoma",,2025,892,357
+29135,"Moniteau County, Missouri",,2025,934,364
+45055,"Kershaw County, South Carolina",,2025,955,1610
+39107,"Mercer County, Ohio",,2025,981,1220
+17065,"Hamilton County, Illinois",,2025,1030,213
+54107,"Wood County, West Virginia",,2025,1087,2662
+13313,"Whitfield County, Georgia",,2025,1106,2744
+54033,"Harrison County, West Virginia",,2025,1276,2484
+05119,"Pulaski County, Arkansas",,2025,1289,14572
+17039,"De Witt County, Illinois",,2025,1635,344
+20197,"Wabaunsee County, Kansas",,2025,805,189
+29013,"Bates County, Missouri",,2025,809,476
+08099,"Prowers County, Colorado",,2025,892,391
+38063,"Nelson County, North Dakota",,2025,933,174
+46039,"Deuel County, South Dakota",,2025,987,198
+46101,"Moody County, South Dakota",,2025,1007,214
+18093,"Lawrence County, Indiana",,2025,1009,915
+39139,"Richland County, Ohio",,2025,991,2880
+26133,"Osceola County, Michigan",,2025,1087,481
+20087,"Jefferson County, Kansas",,2025,1167,442
+21073,"Franklin County, Kentucky",,2025,1188,2769
+51670,"Hopewell city, Virginia",,2025,1310,550
+48495,"Winkler County, Texas",,2025,1842,234
+46075,"Jones County, South Dakota",,2025,678,58
+37137,"Pamlico County, North Carolina",,2025,714,343
+18155,"Switzerland County, Indiana",,2025,815,145
+47153,"Sequatchie County, Tennessee",,2025,809,312
+12079,"Madison County, Florida",,2025,850,444
+17151,"Pope County, Illinois",,2025,896,47
+17173,"Shelby County, Illinois",,2025,912,479
+39087,"Lawrence County, Ohio",,2025,925,1033
+46025,"Clark County, South Dakota",,2025,913,187
+17109,"McDonough County, Illinois",,2025,949,554
+18075,"Jay County, Indiana",,2025,956,427
+39037,"Darke County, Ohio",,2025,1017,1327
+18147,"Spencer County, Indiana",,2025,1048,504
+35057,"Torrance County, New Mexico",,2025,1058,360
+48369,"Parmer County, Texas",,2025,1089,341
+01103,"Morgan County, Alabama",,2025,1195,3441
+01101,"Montgomery County, Alabama",,2025,1177,7384
+39073,"Hocking County, Ohio",,2025,772,584
+35011,"De Baca County, New Mexico",,2025,795,77
+48131,"Duval County, Texas",,2025,789,192
+20185,"Stafford County, Kansas",,2025,838,174
+17187,"Warren County, Illinois",,2025,876,372
+21217,"Taylor County, Kentucky",,2025,875,914
+13049,"Charlton County, Georgia",,2025,875,196
+20079,"Harvey County, Kansas",,2025,893,869
+45009,"Bamberg County, South Carolina",,2025,896,319
+20131,"Nemaha County, Kansas",,2025,977,437
+37111,"McDowell County, North Carolina",,2025,957,953
+48459,"Upshur County, Texas",,2025,954,579
+17003,"Alexander County, Illinois",,2025,979,96
+05053,"Grant County, Arkansas",,2025,984,363
+18023,"Clinton County, Indiana",,2025,1010,643
+48299,"Llano County, Texas",,2025,1022,623
+13115,"Floyd County, Georgia",,2025,1019,2433
+39021,"Champaign County, Ohio",,2025,1034,733
+47105,"Loudon County, Tennessee",,2025,1066,1441
+48175,"Goliad County, Texas",,2025,1148,161
+30077,"Powell County, Montana",,2025,1208,260
+39027,"Clinton County, Ohio",,2025,1259,952
+48389,"Reeves County, Texas",,2025,1699,504
+26001,"Alcona County, Michigan",,2025,766,213
+20027,"Clay County, Kansas",,2025,751,285
+29025,"Caldwell County, Missouri",,2025,765,245
+39105,"Meigs County, Ohio",,2025,800,353
+40041,"Delaware County, Oklahoma",,2025,831,958
+22063,"Livingston Parish, Louisiana",,2025,879,3217
+20129,"Morton County, Kansas",,2025,871,96
+37041,"Chowan County, North Carolina",,2025,901,433
+31001,"Adams County, Nebraska",,2025,980,1045
+47059,"Greene County, Tennessee",,2025,993,1510
+35053,"Socorro County, New Mexico",,2025,1019,379
+56031,"Platte County, Wyoming",,2025,1058,429
+18037,"Dubois County, Indiana",,2025,1072,1404
+30093,"Silver Bow County, Montana",,2025,1098,1553
+18007,"Benton County, Indiana",,2025,1101,217
+26017,"Bay County, Michigan",,2025,1103,2154
+17103,"Lee County, Illinois",,2025,1176,697
+20039,"Decatur County, Kansas",,2025,770,134
+12003,"Baker County, Florida",,2025,896,533
+40093,"Major County, Oklahoma",,2025,932,250
+17059,"Gallatin County, Illinois",,2025,960,126
+48045,"Briscoe County, Texas",,2025,944,73
+01017,"Chambers County, Alabama",,2025,973,802
+21093,"Hardin County, Kentucky",,2025,1068,3761
+04023,"Santa Cruz County, Arizona",,2025,1118,1227
+24039,"Somerset County, Maryland",,2025,1147,451
+29027,"Callaway County, Missouri",,2025,1180,968
+21223,"Trimble County, Kentucky",,2025,1260,163
+45057,"Lancaster County, South Carolina",,2025,1356,2360
+22093,"St. James Parish, Louisiana",,2025,1587,464
+20183,"Smith County, Kansas",,2025,833,165
+08115,"Sedgwick County, Colorado",,2025,844,93
+48193,"Hamilton County, Texas",,2025,877,279
+51019,"Bedford County, Virginia",,2025,951,2335
+18137,"Ripley County, Indiana",,2025,1043,806
+46013,"Brown County, South Dakota",,2025,1062,1520
+21179,"Nelson County, Kentucky",,2025,1082,1532
+29051,"Cole County, Missouri",,2025,1101,2768
+20011,"Bourbon County, Kansas",,2025,843,416
+17067,"Hancock County, Illinois",,2025,894,415
+35007,"Colfax County, New Mexico",,2025,852,541
+46137,"Ziebach County, South Dakota",,2025,940,28
+21023,"Bracken County, Kentucky",,2025,913,226
+20055,"Finney County, Kansas",,2025,973,1152
+29055,"Crawford County, Missouri",,2025,970,703
+39151,"Stark County, Ohio",,2025,1092,9429
+39171,"Williams County, Ohio",,2025,1051,928
+45069,"Marlboro County, South Carolina",,2025,1078,337
+20021,"Cherokee County, Kansas",,2025,1158,439
+48305,"Lynn County, Texas",,2025,1298,184
+40147,"Washington County, Oklahoma",,2025,1380,1432
+29089,"Howard County, Missouri",,2025,765,237
+20115,"Marion County, Kansas",,2025,775,354
+54075,"Pocahontas County, West Virginia",,2025,813,339
+48467,"Van Zandt County, Texas",,2025,869,1124
+17181,"Union County, Illinois",,2025,906,331
+18045,"Fountain County, Indiana",,2025,910,364
+51790,"Staunton city, Virginia",,2025,925,930
+40125,"Pottawatomie County, Oklahoma",,2025,893,1485
+46009,"Bon Homme County, South Dakota",,2025,920,241
+26109,"Menominee County, Michigan",,2025,967,499
+17135,"Montgomery County, Illinois",,2025,930,697
+40039,"Custer County, Oklahoma",,2025,958,1025
+37139,"Pasquotank County, North Carolina",,2025,975,1155
+51147,"Prince Edward County, Virginia",,2025,963,712
+01133,"Winston County, Alabama",,2025,994,558
+39137,"Putnam County, Ohio",,2025,1038,859
+12083,"Marion County, Florida",,2025,1032,10444
+48051,"Burleson County, Texas",,2025,1116,432
+21227,"Warren County, Kentucky",,2025,1131,5413
+40097,"Mayes County, Oklahoma",,2025,1125,1048
+54039,"Kanawha County, West Virginia",,2025,1250,6773
+05081,"Little River County, Arkansas",,2025,1258,244
+21091,"Hancock County, Kentucky",,2025,1750,238
+46021,"Campbell County, South Dakota",,2025,808,75
+08055,"Huerfano County, Colorado",,2025,881,195
+51057,"Essex County, Virginia",,2025,900,396
+20179,"Sheridan County, Kansas",,2025,919,125
+46115,"Spink County, South Dakota",,2025,947,270
+56003,"Big Horn County, Wyoming",,2025,974,524
+48391,"Refugio County, Texas",,2025,970,205
+56043,"Washakie County, Wyoming",,2025,972,441
+22073,"Ouachita Parish, Louisiana",,2025,989,5448
+48011,"Armstrong County, Texas",,2025,1023,87
+48381,"Randall County, Texas",,2025,1106,2719
+17033,"Crawford County, Illinois",,2025,1188,425
+37105,"Lee County, North Carolina",,2025,1268,1762
+37117,"Martin County, North Carolina",,2025,747,488
+40149,"Washita County, Oklahoma",,2025,847,284
+13213,"Murray County, Georgia",,2025,856,542
+20181,"Sherman County, Kansas",,2025,847,288
+18079,"Jennings County, Indiana",,2025,904,476
+46109,"Roberts County, South Dakota",,2025,903,305
+18055,"Greene County, Indiana",,2025,899,611
+48411,"San Saba County, Texas",,2025,906,204
+24023,"Garrett County, Maryland",,2025,944,1188
+18103,"Miami County, Indiana",,2025,973,640
+46035,"Davison County, South Dakota",,2025,1045,840
+48423,"Smith County, Texas",,2025,1127,6825
+51017,"Bath County, Virginia",,2025,1149,233
+17081,"Jefferson County, Illinois",,2025,1150,873
+20209,"Wyandotte County, Kansas",,2025,1328,4235
+22021,"Caldwell Parish, Louisiana",,2025,769,228
+13191,"McIntosh County, Georgia",,2025,801,251
+31095,"Jefferson County, Nebraska",,2025,915,279
+47079,"Henry County, Tennessee",,2025,899,803
+46107,"Potter County, South Dakota",,2025,915,143
+37093,"Hoke County, North Carolina",,2025,936,712
+26155,"Shiawassee County, Michigan",,2025,1060,1203
+01097,"Mobile County, Alabama",,2025,1197,12392
+54099,"Wayne County, West Virginia",,2025,1177,705
+47001,"Anderson County, Tennessee",,2025,1590,1993
+46105,"Perkins County, South Dakota",,2025,809,140
+17047,"Edwards County, Illinois",,2025,843,145
+29053,"Cooper County, Missouri",,2025,832,493
+48153,"Floyd County, Texas",,2025,892,244
+20193,"Thomas County, Kansas",,2025,921,424
+40051,"Grady County, Oklahoma",,2025,960,1301
+45041,"Florence County, South Carolina",,2025,1067,3800
+29211,"Sullivan County, Missouri",,2025,1036,150
+39069,"Henry County, Ohio",,2025,1068,679
+12127,"Volusia County, Florida",,2025,1101,16873
+39141,"Ross County, Ohio",,2025,1134,1561
+13245,"Richmond County, Georgia",,2025,1135,5145
+20173,"Sedgwick County, Kansas",,2025,1239,14809
+56009,"Converse County, Wyoming",,2025,1307,668
+20031,"Coffey County, Kansas",,2025,1336,264
+55037,"Florence County, Wisconsin",,2025,700,138
+16007,"Bear Lake County, Idaho",,2025,761,294
+19147,"Palo Alto County, Iowa",,2025,917,334
+55005,"Barron County, Wisconsin",,2025,935,1603
+13219,"Oconee County, Georgia",,2025,1014,1682
+19095,"Iowa County, Iowa",,2025,995,704
+46063,"Harding County, South Dakota",,2025,966,68
+42105,"Potter County, Pennsylvania",,2025,1021,470
+51015,"Augusta County, Virginia",,2025,1182,2038
+12081,"Manatee County, Florida",,2025,1235,14864
+38061,"Mountrail County, North Dakota",,2025,1552,523
+30051,"Liberty County, Montana",,2025,824,95
+49041,"Sevier County, Utah",,2025,923,814
+08125,"Yuma County, Colorado",,2025,950,423
+26105,"Mason County, Michigan",,2025,963,729
+26079,"Kalkaska County, Michigan",,2025,1136,397
+17087,"Johnson County, Illinois",,2025,1123,200
+56025,"Natrona County, Wyoming",,2025,1175,4058
+19139,"Muscatine County, Iowa",,2025,1286,1226
+51710,"Norfolk city, Virginia",,2025,1459,6535
+48425,"Somervell County, Texas",,2025,1827,264
+48501,"Yoakum County, Texas",,2025,1830,276
+31069,"Garden County, Nebraska",,2025,957,73
+12035,"Flagler County, Florida",,2025,985,3419
+31057,"Dundy County, Nebraska",,2025,966,83
+42033,"Clearfield County, Pennsylvania",,2025,1000,2055
+27133,"Rock County, Minnesota",,2025,1081,329
+42079,"Luzerne County, Pennsylvania",,2025,1121,7570
+45077,"Pickens County, South Carolina",,2025,1062,3042
+17171,"Scott County, Illinois",,2025,1090,100
+47113,"Madison County, Tennessee",,2025,1128,2899
+04003,"Cochise County, Arizona",,2025,1201,2549
+30065,"Musselshell County, Montana",,2025,1357,206
+42093,"Montour County, Pennsylvania",,2025,1735,493
+31167,"Stanton County, Nebraska",,2025,1734,97
+18115,"Ohio County, Indiana",,2025,765,91
+31165,"Sioux County, Nebraska",,2025,791,27
+16087,"Washington County, Idaho",,2025,815,367
+18161,"Union County, Indiana",,2025,860,159
+31083,"Harlan County, Nebraska",,2025,933,126
+31099,"Kearney County, Nebraska",,2025,951,214
+27033,"Cottonwood County, Minnesota",,2025,932,437
+31121,"Merrick County, Nebraska",,2025,940,278
+17083,"Jersey County, Illinois",,2025,931,383
+39019,"Carroll County, Ohio",,2025,970,554
+18029,"Dearborn County, Indiana",,2025,1020,1214
+53065,"Stevens County, Washington",,2025,1052,1018
+20069,"Gray County, Kansas",,2025,1010,302
+37109,"Lincoln County, North Carolina",,2025,1099,2747
+26121,"Muskegon County, Michigan",,2025,1081,3207
+31137,"Phelps County, Nebraska",,2025,1104,424
+19157,"Poweshiek County, Iowa",,2025,1181,694
+38021,"Dickey County, North Dakota",,2025,1213,278
+51109,"Louisa County, Virginia",,2025,1252,1124
+48329,"Midland County, Texas",,2025,1998,6364
+31063,"Frontier County, Nebraska",,2025,782,97
+26135,"Oscoda County, Michigan",,2025,780,204
+30091,"Sheridan County, Montana",,2025,947,229
+42039,"Crawford County, Pennsylvania",,2025,984,2134
+31037,"Colfax County, Nebraska",,2025,1008,314
+19109,"Kossuth County, Iowa",,2025,1028,634
+39155,"Trumbull County, Ohio",,2025,1058,4387
+42081,"Lycoming County, Pennsylvania",,2025,1081,3019
+19145,"Page County, Iowa",,2025,1025,471
+37125,"Moore County, North Carolina",,2025,1061,3460
+27167,"Wilkin County, Minnesota",,2025,1091,205
+19127,"Marshall County, Iowa",,2025,1105,1014
+01081,"Lee County, Alabama",,2025,1073,4498
+38091,"Steele County, North Dakota",,2025,1182,86
+22109,"Terrebonne Parish, Louisiana",,2025,1199,3375
+47093,"Knox County, Tennessee",,2025,1278,16667
+17129,"Menard County, Illinois",,2025,801,235
+31031,"Cherry County, Nebraska",,2025,818,290
+27125,"Red Lake County, Minnesota",,2025,843,123
+01009,"Blount County, Alabama",,2025,882,985
+37007,"Anson County, North Carolina",,2025,909,496
+55115,"Shawano County, Wisconsin",,2025,919,1091
+18151,"Steuben County, Indiana",,2025,950,1032
+27129,"Renville County, Minnesota",,2025,1062,588
+12015,"Charlotte County, Florida",,2025,1072,6027
+48291,"Liberty County, Texas",,2025,1079,1303
+19197,"Wright County, Iowa",,2025,1172,466
+45079,"Richland County, South Carolina",,2025,1284,13115
+47047,"Fayette County, Tennessee",,2025,1275,802
+42059,"Greene County, Pennsylvania",,2025,1397,799
+01073,"Jefferson County, Alabama",,2025,1511,23426
+31183,"Wheeler County, Nebraska",,2025,847,40
+29177,"Ray County, Missouri",,2025,890,472
+26117,"Montcalm County, Michigan",,2025,927,1124
+42009,"Bedford County, Pennsylvania",,2025,955,1234
+42065,"Jefferson County, Pennsylvania",,2025,970,1199
+55021,"Columbia County, Wisconsin",,2025,1021,1812
+17073,"Henry County, Illinois",,2025,997,1030
+26003,"Alger County, Michigan",,2025,1055,266
+42061,"Huntingdon County, Pennsylvania",,2025,991,1033
+17195,"Whiteside County, Illinois",,2025,1057,1184
+24029,"Kent County, Maryland",,2025,1062,762
+21029,"Bullitt County, Kentucky",,2025,1045,1833
+48039,"Brazoria County, Texas",,2025,1362,6789
+49031,"Piute County, Utah",,2025,741,60
+08061,"Kiowa County, Colorado",,2025,800,51
+31093,"Howard County, Nebraska",,2025,830,224
+19019,"Buchanan County, Iowa",,2025,989,640
+55113,"Sawyer County, Wisconsin",,2025,958,731
+38045,"LaMoure County, North Dakota",,2025,933,237
+19011,"Benton County, Iowa",,2025,1022,707
+12111,"St. Lucie County, Florida",,2025,1043,8976
+19123,"Mahaska County, Iowa",,2025,1228,615
+47157,"Shelby County, Tennessee",,2025,1410,23087
+48201,"Harris County, Texas",,2025,1967,122168
+31013,"Box Butte County, Nebraska",,2025,906,362
+18095,"Madison County, Indiana",,2025,958,2562
+18109,"Morgan County, Indiana",,2025,989,1413
+30017,"Custer County, Montana",,2025,968,579
+38073,"Ransom County, North Dakota",,2025,961,263
+13199,"Meriwether County, Georgia",,2025,968,426
+42087,"Mifflin County, Pennsylvania",,2025,1024,1110
+26061,"Houghton County, Michigan",,2025,1066,970
+18043,"Floyd County, Indiana",,2025,1092,2115
+45085,"Sumter County, South Carolina",,2025,1034,2362
+55141,"Wood County, Wisconsin",,2025,1100,2173
+39169,"Wayne County, Ohio",,2025,1093,2993
+56011,"Crook County, Wyoming",,2025,1114,380
+48497,"Wise County, Texas",,2025,1142,1667
+19149,"Plymouth County, Iowa",,2025,1204,870
+37077,"Granville County, North Carolina",,2025,1240,1183
+47009,"Blount County, Tennessee",,2025,1206,3331
+22121,"West Baton Rouge Parish, Louisiana",,2025,1294,871
+16045,"Gem County, Idaho",,2025,867,711
+27155,"Traverse County, Minnesota",,2025,909,154
+19141,"O'Brien County, Iowa",,2025,938,611
+27127,"Redwood County, Minnesota",,2025,973,584
+27065,"Kanabec County, Minnesota",,2025,995,356
+39013,"Belmont County, Ohio",,2025,1015,1646
+19057,"Des Moines County, Iowa",,2025,1020,1406
+53001,"Adams County, Washington",,2025,1049,693
+16053,"Jerome County, Idaho",,2025,997,939
+19015,"Boone County, Iowa",,2025,1044,739
+19055,"Delaware County, Iowa",,2025,1051,594
+28121,"Rankin County, Mississippi",,2025,1038,4707
+17139,"Moultrie County, Illinois",,2025,1051,353
+51053,"Dinwiddie County, Virginia",,2025,1343,563
+36017,"Chenango County, New York",,2025,1380,1041
+51700,"Newport News city, Virginia",,2025,1370,4587
+22005,"Ascension Parish, Louisiana",,2025,1448,4022
+31115,"Loup County, Nebraska",,2025,702,22
+08027,"Custer County, Colorado",,2025,908,203
+31143,"Polk County, Nebraska",,2025,916,167
+23021,"Piscataquis County, Maine",,2025,903,592
+13177,"Lee County, Georgia",,2025,915,634
+55001,"Adams County, Wisconsin",,2025,949,487
+36043,"Herkimer County, New York",,2025,1005,1297
+26051,"Gladwin County, Michigan",,2025,953,469
+12045,"Gulf County, Florida",,2025,980,544
+53003,"Asotin County, Washington",,2025,1088,546
+19033,"Cerro Gordo County, Iowa",,2025,1069,1683
+38049,"McHenry County, North Dakota",,2025,1064,243
+19081,"Hancock County, Iowa",,2025,1189,372
+30087,"Rosebud County, Montana",,2025,1240,275
+26131,"Ontonagon County, Michigan",,2025,714,196
+55007,"Bayfield County, Wisconsin",,2025,854,602
+26127,"Oceana County, Michigan",,2025,909,575
+31149,"Rock County, Nebraska",,2025,952,61
+31135,"Perkins County, Nebraska",,2025,1026,147
+38011,"Bowman County, North Dakota",,2025,1034,197
+27161,"Waseca County, Minnesota",,2025,1093,530
+48053,"Burnet County, Texas",,2025,1093,1700
+26091,"Lenawee County, Michigan",,2025,1109,1970
+45063,"Lexington County, South Carolina",,2025,1106,9142
+46079,"Lake County, South Dakota",,2025,1103,503
+45083,"Spartanburg County, South Carolina",,2025,1187,8650
+48321,"Matagorda County, Texas",,2025,1287,802
+12031,"Duval County, Florida",,2025,1549,34926
+30045,"Judith Basin County, Montana",,2025,799,115
+13231,"Pike County, Georgia",,2025,920,409
+19117,"Lucas County, Iowa",,2025,1005,246
+19175,"Union County, Iowa",,2025,983,462
+48171,"Gillespie County, Texas",,2025,989,1243
+30047,"Lake County, Montana",,2025,1059,1371
+51183,"Sussex County, Virginia",,2025,1031,283
+08017,"Cheyenne County, Colorado",,2025,1077,93
+26137,"Otsego County, Michigan",,2025,1108,820
+27119,"Polk County, Minnesota",,2025,1049,1023
+19047,"Crawford County, Iowa",,2025,1084,517
+39135,"Preble County, Ohio",,2025,1123,802
+13045,"Carroll County, Georgia",,2025,1151,2766
+48409,"San Patricio County, Texas",,2025,1273,1206
+22095,"St. John the Baptist Parish, Louisiana",,2025,1393,1028
+22075,"Plaquemines Parish, Louisiana",,2025,1885,886
+27081,"Lincoln County, Minnesota",,2025,847,226
+51133,"Northumberland County, Virginia",,2025,897,386
+30073,"Pondera County, Montana",,2025,899,239
+19099,"Jasper County, Iowa",,2025,948,979
+13035,"Butts County, Georgia",,2025,949,558
+08073,"Lincoln County, Colorado",,2025,1024,167
+13157,"Jackson County, Georgia",,2025,1007,2205
+31105,"Kimball County, Nebraska",,2025,1032,144
+45007,"Anderson County, South Carolina",,2025,1032,4705
+20161,"Riley County, Kansas",,2025,1045,2072
+51650,"Hampton city, Virginia",,2025,1279,3156
+27077,"Lake of the Woods County, Minnesota",,2025,1336,181
+17161,"Rock Island County, Illinois",,2025,1349,2897
+49017,"Garfield County, Utah",,2025,1613,284
+31129,"Nuckolls County, Nebraska",,2025,802,189
+31181,"Webster County, Nebraska",,2025,829,128
+31179,"Wayne County, Nebraska",,2025,851,284
+55123,"Vernon County, Wisconsin",,2025,909,847
+17123,"Marshall County, Illinois",,2025,877,262
+37189,"Watauga County, North Carolina",,2025,957,1985
+08095,"Phillips County, Colorado",,2025,959,186
+42123,"Warren County, Pennsylvania",,2025,996,913
+26101,"Manistee County, Michigan",,2025,1058,597
+51161,"Roanoke County, Virginia",,2025,1077,2724
+17175,"Stark County, Illinois",,2025,1087,150
+30013,"Cascade County, Montana",,2025,1088,3348
+31173,"Thurston County, Nebraska",,2025,1136,162
+53025,"Grant County, Washington",,2025,1253,2728
+18071,"Jackson County, Indiana",,2025,1171,1041
+22023,"Cameron Parish, Louisiana",,2025,3148,157
+31015,"Boyd County, Nebraska",,2025,680,95
+20083,"Hodgeman County, Kansas",,2025,828,81
+39111,"Monroe County, Ohio",,2025,920,356
+08071,"Las Animas County, Colorado",,2025,888,559
+37031,"Carteret County, North Carolina",,2025,905,2779
+30021,"Dawson County, Montana",,2025,960,425
+18133,"Putnam County, Indiana",,2025,1008,774
+20149,"Pottawatomie County, Kansas",,2025,986,774
+19069,"Franklin County, Iowa",,2025,1022,361
+19115,"Louisa County, Iowa",,2025,1035,283
+01001,"Autauga County, Alabama",,2025,1006,1173
+27083,"Lyon County, Minnesota",,2025,1025,848
+19161,"Sac County, Iowa",,2025,1047,384
+16003,"Adams County, Idaho",,2025,1039,211
+33007,"Coos County, New Hampshire",,2025,1070,1030
+27071,"Koochiching County, Minnesota",,2025,1099,424
+47011,"Bradley County, Tennessee",,2025,1084,2434
+12001,"Alachua County, Florida",,2025,1302,8280
+26025,"Calhoun County, Michigan",,2025,1378,2682
+30011,"Carter County, Montana",,2025,868,58
+35027,"Lincoln County, New Mexico",,2025,856,872
+26067,"Ionia County, Michigan",,2025,925,1124
+31065,"Furnas County, Nebraska",,2025,927,208
+20093,"Kearny County, Kansas",,2025,955,150
+31101,"Keith County, Nebraska",,2025,937,389
+08003,"Alamosa County, Colorado",,2025,958,613
+56019,"Johnson County, Wyoming",,2025,985,537
+16017,"Bonner County, Idaho",,2025,997,2481
+31019,"Buffalo County, Nebraska",,2025,1024,1906
+42013,"Blair County, Pennsylvania",,2025,1055,3466
+42057,"Fulton County, Pennsylvania",,2025,1121,318
+40131,"Rogers County, Oklahoma",,2025,1116,2259
+51775,"Salem city, Virginia",,2025,1289,1126
+12009,"Brevard County, Florida",,2025,1404,18969
+29003,"Andrew County, Missouri",,2025,738,491
+13047,"Catoosa County, Georgia",,2025,863,1270
+51007,"Amelia County, Virginia",,2025,908,413
+19195,"Worth County, Iowa",,2025,909,228
+45051,"Horry County, South Carolina",,2025,942,12990
+16019,"Bonneville County, Idaho",,2025,962,5660
+36057,"Montgomery County, New York",,2025,1038,1232
+27091,"Martin County, Minnesota",,2025,1005,701
+49001,"Beaver County, Utah",,2025,1038,271
+48089,"Colorado County, Texas",,2025,1021,636
+26149,"St. Joseph County, Michigan",,2025,1046,2298
+40153,"Woodward County, Oklahoma",,2025,1083,829
+16009,"Benewah County, Idaho",,2025,1170,426
+31141,"Platte County, Nebraska",,2025,1147,1167
+18141,"St. Joseph County, Indiana",,2025,1188,6672
+37081,"Guilford County, North Carolina",,2025,1260,17059
+29095,"Jackson County, Missouri",,2025,1450,26014
+16051,"Jefferson County, Idaho",,2025,861,1216
+47155,"Sevier County, Tennessee",,2025,829,3459
+26095,"Luce County, Michigan",,2025,898,183
+49021,"Iron County, Utah",,2025,925,2217
+40059,"Harper County, Oklahoma",,2025,914,145
+31051,"Dixon County, Nebraska",,2025,928,150
+19039,"Clarke County, Iowa",,2025,979,244
+32017,"Lincoln County, Nevada",,2025,950,126
+26035,"Clare County, Michigan",,2025,947,629
+12121,"Suwannee County, Florida",,2025,941,940
+18061,"Harrison County, Indiana",,2025,988,766
+19029,"Cass County, Iowa",,2025,1009,530
+30075,"Powder River County, Montana",,2025,1054,112
+06015,"Del Norte County, California",,2025,1076,903
+31081,"Hamilton County, Nebraska",,2025,1076,383
+24045,"Wicomico County, Maryland",,2025,1085,2700
+56007,"Carbon County, Wyoming",,2025,1119,690
+19067,"Floyd County, Iowa",,2025,1157,479
+18085,"Kosciusko County, Indiana",,2025,1281,2202
+22033,"East Baton Rouge Parish, Louisiana",,2025,1342,19274
+30069,"Petroleum County, Montana",,2025,685,27
+31085,"Hayes County, Nebraska",,2025,769,38
+31175,"Valley County, Nebraska",,2025,841,232
+35009,"Curry County, New Mexico",,2025,900,1320
+48221,"Hood County, Texas",,2025,1003,1713
+38001,"Adams County, North Dakota",,2025,964,120
+23003,"Aroostook County, Maine",,2025,1014,2355
+37049,"Craven County, North Carolina",,2025,1069,2734
+27107,"Norman County, Minnesota",,2025,1090,261
+22037,"East Feliciana Parish, Louisiana",,2025,1092,401
+19111,"Lee County, Iowa",,2025,1130,1043
+38035,"Grand Forks County, North Dakota",,2025,1187,2776
+13051,"Chatham County, Georgia",,2025,1234,11012
+17155,"Putnam County, Illinois",,2025,1223,166
+30033,"Garfield County, Montana",,2025,644,72
+31075,"Grant County, Nebraska",,2025,710,53
+31163,"Sherman County, Nebraska",,2025,750,108
+37143,"Perquimans County, North Carolina",,2025,870,272
+53047,"Okanogan County, Washington",,2025,939,1648
+19003,"Adams County, Iowa",,2025,957,142
+01127,"Walker County, Alabama",,2025,959,1551
+19017,"Bremer County, Iowa",,2025,1065,756
+31131,"Otoe County, Nebraska",,2025,1036,515
+46119,"Sully County, South Dakota",,2025,1011,96
+55081,"Monroe County, Wisconsin",,2025,1074,1373
+31185,"York County, Nebraska",,2025,1044,653
+26033,"Chippewa County, Michigan",,2025,1033,857
+02290,"Yukon-Koyukuk Census Area, Alaska",,2025,1027,241
+42107,"Schuylkill County, Pennsylvania",,2025,1065,2966
+26023,"Branch County, Michigan",,2025,1093,875
+26043,"Dickinson County, Michigan",,2025,1154,854
+51165,"Rockingham County, Virginia",,2025,1184,2077
+29019,"Boone County, Missouri",,2025,1186,5266
+13153,"Houston County, Georgia",,2025,1198,3500
+29043,"Christian County, Missouri",,2025,831,2465
+17125,"Mason County, Illinois",,2025,830,290
+19097,"Jackson County, Iowa",,2025,875,663
+40027,"Cleveland County, Oklahoma",,2025,991,7491
+42049,"Erie County, Pennsylvania",,2025,1095,6772
+37071,"Gaston County, North Carolina",,2025,1067,5589
+18091,"LaPorte County, Indiana",,2025,1048,2514
+38057,"Mercer County, North Dakota",,2025,1576,332
+40083,"Logan County, Oklahoma",,2025,886,969
+27001,"Aitkin County, Minnesota",,2025,966,474
+19001,"Adair County, Iowa",,2025,1029,333
+27153,"Todd County, Minnesota",,2025,1039,624
+19041,"Clay County, Iowa",,2025,1017,726
+19045,"Clinton County, Iowa",,2025,1060,1485
+23001,"Androscoggin County, Maine",,2025,1152,3528
+18031,"Decatur County, Indiana",,2025,1100,722
+27105,"Nobles County, Minnesota",,2025,1163,640
+48473,"Waller County, Texas",,2025,1210,1154
+39003,"Allen County, Ohio",,2025,1166,2581
+21209,"Scott County, Kentucky",,2025,1376,1844
+16033,"Clark County, Idaho",,2025,1447,45
+48003,"Andrews County, Texas",,2025,1534,537
+29510,"St. Louis city, Missouri",,2025,1703,15700
+40087,"McClain County, Oklahoma",,2025,921,1339
+37141,"Pender County, North Carolina",,2025,973,2088
+19079,"Hamilton County, Iowa",,2025,979,483
+53043,"Lincoln County, Washington",,2025,1034,451
+19009,"Audubon County, Iowa",,2025,996,236
+26073,"Isabella County, Michigan",,2025,1005,1421
+55057,"Juneau County, Wisconsin",,2025,1009,750
+39143,"Sandusky County, Ohio",,2025,1028,1458
+16077,"Power County, Idaho",,2025,1070,279
+42119,"Union County, Pennsylvania",,2025,1141,1020
+35045,"San Juan County, New Mexico",,2025,1117,3033
+39097,"Madison County, Ohio",,2025,1106,1052
+23025,"Somerset County, Maine",,2025,1139,1549
+48097,"Cooke County, Texas",,2025,1297,1122
+51181,"Surry County, Virginia",,2025,2074,144
+48301,"Loving County, Texas",,2025,2114,18
+31091,"Hooker County, Nebraska",,2025,710,33
+31161,"Sheridan County, Nebraska",,2025,800,225
+08109,"Saguache County, Colorado",,2025,790,229
+17057,"Fulton County, Illinois",,2025,881,656
+54065,"Morgan County, West Virginia",,2025,906,404
+40045,"Ellis County, Oklahoma",,2025,917,135
+48325,"Medina County, Texas",,2025,948,909
+39009,"Athens County, Ohio",,2025,957,1362
+19143,"Osceola County, Iowa",,2025,991,268
+12113,"Santa Rosa County, Florida",,2025,1021,4734
+17169,"Schuyler County, Illinois",,2025,1013,166
+37019,"Brunswick County, North Carolina",,2025,1045,4583
+31073,"Gosper County, Nebraska",,2025,1094,78
+19083,"Hardin County, Iowa",,2025,1079,642
+13211,"Morgan County, Georgia",,2025,1107,727
+53023,"Garfield County, Washington",,2025,1185,72
+17189,"Washington County, Illinois",,2025,1167,399
+18039,"Elkhart County, Indiana",,2025,1306,5362
+32013,"Humboldt County, Nevada",,2025,1516,479
+32015,"Lander County, Nevada",,2025,2290,122
+30099,"Teton County, Montana",,2025,839,342
+51115,"Mathews County, Virginia",,2025,819,260
+42109,"Snyder County, Pennsylvania",,2025,882,1017
+27021,"Cass County, Minnesota",,2025,864,951
+27011,"Big Stone County, Minnesota",,2025,925,221
+55019,"Clark County, Wisconsin",,2025,974,970
+16083,"Twin Falls County, Idaho",,2025,960,3943
+51187,"Warren County, Virginia",,2025,1049,1189
+30003,"Big Horn County, Montana",,2025,1076,282
+27015,"Brown County, Minnesota",,2025,1077,896
+08043,"Fremont County, Colorado",,2025,1106,1086
+12131,"Walton County, Florida",,2025,1091,4243
+19013,"Black Hawk County, Iowa",,2025,1135,3954
+38067,"Pembina County, North Dakota",,2025,1123,401
+38015,"Burleigh County, North Dakota",,2025,1289,4365
+48013,"Atascosa County, Texas",,2025,1285,936
+04011,"Greenlee County, Arizona",,2025,2111,104
+49055,"Wayne County, Utah",,2025,824,156
+51620,"Franklin city, Virginia",,2025,846,320
+31133,"Pawnee County, Nebraska",,2025,864,87
+19043,"Clayton County, Iowa",,2025,952,615
+48149,"Fayette County, Texas",,2025,1032,850
+55071,"Manitowoc County, Wisconsin",,2025,1070,2035
+51660,"Harrisonburg city, Virginia",,2025,1009,1779
+55027,"Dodge County, Wisconsin",,2025,1195,2043
+22047,"Iberville Parish, Louisiana",,2025,1792,824
+55067,"Langlade County, Wisconsin",,2025,840,667
+35021,"Harding County, New Mexico",,2025,844,31
+26113,"Missaukee County, Michigan",,2025,856,388
+30027,"Fergus County, Montana",,2025,912,605
+37167,"Stanly County, North Carolina",,2025,896,1712
+19171,"Tama County, Iowa",,2025,966,439
+04012,"La Paz County, Arizona",,2025,972,392
+19173,"Taylor County, Iowa",,2025,972,193
+26013,"Baraga County, Michigan",,2025,1067,213
+38059,"Morton County, North Dakota",,2025,1113,1227
+19075,"Grundy County, Iowa",,2025,1120,388
+19151,"Pocahontas County, Iowa",,2025,1071,260
+42053,"Forest County, Pennsylvania",,2025,1186,148
+48311,"McMullen County, Texas",,2025,1353,86
+01089,"Madison County, Alabama",,2025,1514,14325
+51093,"Isle of Wight County, Virginia",,2025,1664,941
+22089,"St. Charles Parish, Louisiana",,2025,1897,1470
+29049,"Clinton County, Missouri",,2025,889,500
+17117,"Macoupin County, Illinois",,2025,901,903
+51125,"Nelson County, Virginia",,2025,944,541
+55003,"Ashland County, Wisconsin",,2025,966,636
+37085,"Harnett County, North Carolina",,2025,946,2575
+21103,"Henry County, Kentucky",,2025,977,411
+48055,"Caldwell County, Texas",,2025,1062,878
+19023,"Butler County, Iowa",,2025,1041,436
+19185,"Wayne County, Iowa",,2025,999,181
+13225,"Peach County, Georgia",,2025,1038,659
+19165,"Shelby County, Iowa",,2025,1063,443
+17005,"Bond County, Illinois",,2025,1039,332
+26165,"Wexford County, Michigan",,2025,1071,896
+38097,"Traill County, North Dakota",,2025,1182,403
+54079,"Putnam County, West Virginia",,2025,1240,1913
+35055,"Taos County, New Mexico",,2025,850,1390
+42025,"Carbon County, Pennsylvania",,2025,855,1327
+31089,"Holt County, Nebraska",,2025,926,531
+16039,"Elmore County, Idaho",,2025,905,751
+17079,"Jasper County, Illinois",,2025,955,245
+40053,"Grant County, Oklahoma",,2025,1158,150
+30097,"Sweet Grass County, Montana",,2025,1219,286
+56021,"Laramie County, Wyoming",,2025,1212,4840
+31127,"Nemaha County, Nebraska",,2025,1429,223
+30015,"Chouteau County, Montana",,2025,871,231
+20015,"Butler County, Kansas",,2025,956,1737
+16027,"Canyon County, Idaho",,2025,1013,9008
+01003,"Baldwin County, Alabama",,2025,996,9152
+46081,"Lawrence County, South Dakota",,2025,964,1665
+31039,"Cuming County, Nebraska",,2025,1002,406
+56045,"Weston County, Wyoming",,2025,1061,279
+19021,"Buena Vista County, Iowa",,2025,1058,598
+26159,"Van Buren County, Michigan",,2025,1072,1683
+42097,"Northumberland County, Pennsylvania",,2025,1080,1826
+24043,"Washington County, Maryland",,2025,1145,3759
+39095,"Lucas County, Ohio",,2025,1287,10937
+47065,"Hamilton County, Tennessee",,2025,1329,13074
+48033,"Borden County, Texas",,2025,1431,73
+46127,"Union County, South Dakota",,2025,1435,893
+26163,"Wayne County, Michigan",,2025,1597,37357
+18097,"Marion County, Indiana",,2025,1779,28869
+20199,"Wallace County, Kansas",,2025,658,94
+48019,"Bandera County, Texas",,2025,848,506
+55099,"Price County, Wisconsin",,2025,920,435
+08063,"Kit Carson County, Colorado",,2025,969,318
+38075,"Renville County, North Dakota",,2025,975,143
+31011,"Boone County, Nebraska",,2025,993,254
+26123,"Newaygo County, Michigan",,2025,1002,873
+55077,"Marquette County, Wisconsin",,2025,1059,407
+19073,"Greene County, Iowa",,2025,1031,302
+12101,"Pasco County, Florida",,2025,1099,15321
+37001,"Alamance County, North Carolina",,2025,1065,4340
+48187,"Guadalupe County, Texas",,2025,1174,2749
+37147,"Pitt County, North Carolina",,2025,1165,4447
+49013,"Duchesne County, Utah",,2025,1211,863
+31023,"Butler County, Nebraska",,2025,1197,279
+48135,"Ector County, Texas",,2025,1481,4285
+26083,"Keweenaw County, Michigan",,2025,702,86
+30061,"Mineral County, Montana",,2025,802,215
+29107,"Lafayette County, Missouri",,2025,852,966
+20075,"Hamilton County, Kansas",,2025,938,109
+04027,"Yuma County, Arizona",,2025,1057,3937
+27111,"Otter Tail County, Minnesota",,2025,1051,1870
+40145,"Wagoner County, Oklahoma",,2025,1055,1258
+51097,"King and Queen County, Virginia",,2025,1111,207
+47021,"Cheatham County, Tennessee",,2025,1172,949
+39113,"Montgomery County, Ohio",,2025,1255,13219
+47119,"Maury County, Tennessee",,2025,1363,3060
+05007,"Benton County, Arkansas",,2025,2296,8882
+20143,"Ottawa County, Kansas",,2025,748,159
+13159,"Jasper County, Georgia",,2025,784,279
+55125,"Vilas County, Wisconsin",,2025,887,1046
+55043,"Grant County, Wisconsin",,2025,908,1558
+31145,"Red Willow County, Nebraska",,2025,926,441
+16059,"Lemhi County, Idaho",,2025,992,443
+16021,"Boundary County, Idaho",,2025,979,603
+04015,"Mohave County, Arizona",,2025,999,5022
+31041,"Custer County, Nebraska",,2025,975,479
+38009,"Bottineau County, North Dakota",,2025,992,340
+18099,"Marshall County, Indiana",,2025,1029,1182
+17011,"Bureau County, Illinois",,2025,1114,772
+39149,"Shelby County, Ohio",,2025,1146,1154
+21211,"Shelby County, Kentucky",,2025,1129,1609
+17019,"Champaign County, Illinois",,2025,1263,4238
+22125,"West Feliciana Parish, Louisiana",,2025,1699,314
+30107,"Wheatland County, Montana",,2025,848,105
+29169,"Pulaski County, Missouri",,2025,912,907
+30053,"Lincoln County, Montana",,2025,919,1008
+31087,"Hitchcock County, Nebraska",,2025,946,96
+29219,"Warren County, Missouri",,2025,962,793
+31159,"Seward County, Nebraska",,2025,963,526
+51175,"Southampton County, Virginia",,2025,958,348
+55053,"Jackson County, Wisconsin",,2025,972,499
+19025,"Calhoun County, Iowa",,2025,938,322
+35061,"Valencia County, New Mexico",,2025,961,1533
+31169,"Thayer County, Nebraska",,2025,965,267
+42083,"McKean County, Pennsylvania",,2025,980,1062
+37029,"Camden County, North Carolina",,2025,1018,201
+24011,"Caroline County, Maryland",,2025,1029,733
+27061,"Itasca County, Minnesota",,2025,1068,1342
+37145,"Person County, North Carolina",,2025,1016,812
+19037,"Chickasaw County, Iowa",,2025,1071,416
+13103,"Effingham County, Georgia",,2025,1075,1232
+19101,"Jefferson County, Iowa",,2025,1106,772
+08101,"Pueblo County, Colorado",,2025,1094,3766
+37069,"Franklin County, North Carolina",,2025,1138,1714
+39089,"Licking County, Ohio",,2025,1187,4020
+51740,"Portsmouth city, Virginia",,2025,1367,1893
+08021,"Conejos County, Colorado",,2025,799,195
+30089,"Sanders County, Montana",,2025,876,605
+27073,"Lac qui Parle County, Minnesota",,2025,888,241
+30001,"Beaverhead County, Montana",,2025,918,617
+16035,"Clearwater County, Idaho",,2025,976,353
+19105,"Jones County, Iowa",,2025,954,664
+39081,"Jefferson County, Ohio",,2025,970,1420
+51159,"Richmond County, Virginia",,2025,939,294
+42005,"Armstrong County, Pennsylvania",,2025,1002,1459
+29113,"Lincoln County, Missouri",,2025,1004,1241
+27159,"Wadena County, Minnesota",,2025,989,433
+27089,"Marshall County, Minnesota",,2025,1041,348
+18159,"Tipton County, Indiana",,2025,1059,355
+42035,"Clinton County, Pennsylvania",,2025,1081,921
+39091,"Logan County, Ohio",,2025,1054,1031
+39109,"Miami County, Ohio",,2025,1089,2614
+21037,"Campbell County, Kentucky",,2025,1106,3522
+18145,"Shelby County, Indiana",,2025,1151,1040
+56033,"Sheridan County, Wyoming",,2025,1147,1802
+18105,"Monroe County, Indiana",,2025,1254,3521
+48165,"Gaines County, Texas",,2025,1234,672
+49039,"Sanpete County, Utah",,2025,849,746
+31045,"Dawes County, Nebraska",,2025,805,300
+31017,"Brown County, Nebraska",,2025,872,165
+38041,"Hettinger County, North Dakota",,2025,898,146
+19065,"Fayette County, Iowa",,2025,919,684
+37087,"Haywood County, North Carolina",,2025,944,1993
+28071,"Lafayette County, Mississippi",,2025,987,1577
+56029,"Park County, Wyoming",,2025,1033,1902
+27151,"Swift County, Minnesota",,2025,1072,364
+20103,"Leavenworth County, Kansas",,2025,1153,1820
+31077,"Greeley County, Nebraska",,2025,792,121
+16043,"Fremont County, Idaho",,2025,859,583
+48143,"Erath County, Texas",,2025,924,1284
+26027,"Cass County, Michigan",,2025,998,948
+27117,"Pipestone County, Minnesota",,2025,985,387
+19183,"Washington County, Iowa",,2025,1068,855
+47147,"Robertson County, Tennessee",,2025,1052,1620
+56005,"Campbell County, Wyoming",,2025,1326,2061
+16071,"Oneida County, Idaho",,2025,785,181
+19053,"Decatur County, Iowa",,2025,826,221
+39117,"Morrow County, Ohio",,2025,888,559
+55107,"Rusk County, Wisconsin",,2025,859,408
+27097,"Morrison County, Minnesota",,2025,909,1110
+27143,"Sibley County, Minnesota",,2025,981,402
+16075,"Payette County, Idaho",,2025,1004,867
+12005,"Bay County, Florida",,2025,1050,6938
+27007,"Beltrami County, Minnesota",,2025,1067,1317
+48287,"Lee County, Texas",,2025,1078,462
+39077,"Huron County, Ohio",,2025,1025,1413
+31111,"Lincoln County, Nebraska",,2025,1043,1141
+16079,"Shoshone County, Idaho",,2025,1058,494
+51036,"Charles City County, Virginia",,2025,1082,239
+21113,"Jessamine County, Kentucky",,2025,1069,2025
+26021,"Berrien County, Michigan",,2025,1194,4186
+48231,"Hunt County, Texas",,2025,1256,1805
+38081,"Sargent County, North Dakota",,2025,1276,181
+16029,"Caribou County, Idaho",,2025,1339,315
+39063,"Hancock County, Ohio",,2025,1372,1949
+21111,"Jefferson County, Kentucky",,2025,1485,33969
+31007,"Banner County, Nebraska",,2025,890,15
+37095,"Hyde County, North Carolina",,2025,883,204
+28033,"DeSoto County, Mississippi",,2025,903,3880
+19107,"Keokuk County, Iowa",,2025,946,316
+27165,"Watonwan County, Minnesota",,2025,943,336
+55103,"Richland County, Wisconsin",,2025,933,545
+16031,"Cassia County, Idaho",,2025,967,1131
+39007,"Ashtabula County, Ohio",,2025,946,2239
+20121,"Miami County, Kansas",,2025,1032,992
+26059,"Hillsdale County, Michigan",,2025,1029,893
+39067,"Harrison County, Ohio",,2025,1157,347
+31097,"Johnson County, Nebraska",,2025,1083,128
+18183,"Whitley County, Indiana",,2025,1239,772
+46083,"Lincoln County, South Dakota",,2025,1317,2637
+31027,"Cedar County, Nebraska",,2025,843,348
+31107,"Knox County, Nebraska",,2025,839,335
+46007,"Bennett County, South Dakota",,2025,814,97
+37011,"Avery County, North Carolina",,2025,863,682
+29099,"Jefferson County, Missouri",,2025,967,4745
+17147,"Piatt County, Illinois",,2025,975,387
+18015,"Carroll County, Indiana",,2025,975,439
+42073,"Lawrence County, Pennsylvania",,2025,1046,2017
+48295,"Lipscomb County, Texas",,2025,1012,92
+45053,"Jasper County, South Carolina",,2025,1041,989
+55031,"Douglas County, Wisconsin",,2025,1057,1245
+26147,"St. Clair County, Michigan",,2025,1109,3331
+16055,"Kootenai County, Idaho",,2025,1134,8706
+13127,"Glynn County, Georgia",,2025,1072,3345
+04009,"Graham County, Arizona",,2025,1134,625
+13015,"Bartow County, Georgia",,2025,1162,3038
+19125,"Marion County, Iowa",,2025,1323,1065
+54061,"Monongalia County, West Virginia",,2025,1300,4274
+26039,"Crawford County, Michigan",,2025,1290,280
+31071,"Garfield County, Nebraska",,2025,757,108
+16049,"Idaho County, Idaho",,2025,872,708
+55137,"Waushara County, Wisconsin",,2025,871,581
+31003,"Antelope County, Nebraska",,2025,880,289
+19051,"Davis County, Iowa",,2025,949,251
+19189,"Winnebago County, Iowa",,2025,906,384
+13073,"Columbia County, Georgia",,2025,962,3618
+49005,"Cache County, Utah",,2025,1026,4487
+49007,"Carbon County, Utah",,2025,999,641
+31047,"Dawson County, Nebraska",,2025,984,762
+40003,"Alfalfa County, Oklahoma",,2025,991,146
+42051,"Fayette County, Pennsylvania",,2025,1019,2742
+19131,"Mitchell County, Iowa",,2025,1010,366
+55069,"Lincoln County, Wisconsin",,2025,1011,819
+42015,"Bradford County, Pennsylvania",,2025,1204,1525
+48167,"Galveston County, Texas",,2025,1249,6848
+12073,"Leon County, Florida",,2025,1228,11090
+56037,"Sweetwater County, Wyoming",,2025,1342,1766
+31049,"Deuel County, Nebraska",,2025,790,79
+16041,"Franklin County, Idaho",,2025,842,557
+02158,"Kusilvak Census Area, Alaska",,2025,818,122
+30055,"McCone County, Montana",,2025,912,81
+26107,"Mecosta County, Michigan",,2025,861,708
+37133,"Onslow County, North Carolina",,2025,906,4329
+21215,"Spencer County, Kentucky",,2025,895,456
+51033,"Caroline County, Virginia",,2025,922,753
+30105,"Valley County, Montana",,2025,919,364
+31123,"Morrill County, Nebraska",,2025,940,183
+42031,"Clarion County, Pennsylvania",,2025,928,1063
+17069,"Hardin County, Illinois",,2025,956,55
+19137,"Montgomery County, Iowa",,2025,1012,368
+46055,"Haakon County, South Dakota",,2025,983,111
+53019,"Ferry County, Washington",,2025,1030,279
+27027,"Clay County, Minnesota",,2025,1158,1484
+26049,"Genesee County, Michigan",,2025,1105,7403
+53013,"Columbia County, Washington",,2025,1158,182
+37159,"Rowan County, North Carolina",,2025,1180,3370
+45045,"Greenville County, South Carolina",,2025,1294,20942
+19135,"Monroe County, Iowa",,2025,1420,249
+48071,"Chambers County, Texas",,2025,1532,933
+37067,"Forsyth County, North Carolina",,2025,1469,11134
+31005,"Arthur County, Nebraska",,2025,619,15
+17071,"Henderson County, Illinois",,2025,672,146
+16073,"Owyhee County, Idaho",,2025,889,393
+19133,"Monona County, Iowa",,2025,887,302
+19159,"Ringgold County, Iowa",,2025,914,180
+19177,"Van Buren County, Iowa",,2025,919,228
+26087,"Lapeer County, Michigan",,2025,984,1741
+31035,"Clay County, Nebraska",,2025,965,272
+26157,"Tuscola County, Michigan",,2025,975,930
+19091,"Humboldt County, Iowa",,2025,1022,362
+18171,"Warren County, Indiana",,2025,1017,176
+27149,"Stevens County, Minnesota",,2025,1135,390
+18173,"Warrick County, Indiana",,2025,1177,1431
+26045,"Eaton County, Michigan",,2025,1211,2150
+51840,"Winchester city, Virginia",,2025,1226,1489
+53075,"Whitman County, Washington",,2025,1305,1243
+21067,"Fayette County, Kentucky",,2025,1300,15256
+48173,"Glasscock County, Texas",,2025,1913,138
+19005,"Allamakee County, Iowa",,2025,901,470
+18047,"Franklin County, Indiana",,2025,927,374
+31029,"Chase County, Nebraska",,2025,991,226
+46033,"Custer County, South Dakota",,2025,980,419
+08075,"Logan County, Colorado",,2025,998,636
+19027,"Carroll County, Iowa",,2025,1000,944
+42117,"Tioga County, Pennsylvania",,2025,1021,1009
+48493,"Wilson County, Texas",,2025,1029,910
+19179,"Wapello County, Iowa",,2025,1028,884
+19087,"Henry County, Iowa",,2025,1065,635
+18163,"Vanderburgh County, Indiana",,2025,1165,5201
+40143,"Tulsa County, Oklahoma",,2025,1332,27031
+08121,"Washington County, Colorado",,2025,836,151
+42113,"Sullivan County, Pennsylvania",,2025,868,177
+30103,"Treasure County, Montana",,2025,862,31
+19089,"Howard County, Iowa",,2025,916,347
+19063,"Emmet County, Iowa",,2025,929,330
+31125,"Nance County, Nebraska",,2025,915,108
+42037,"Columbia County, Pennsylvania",,2025,983,1566
+26153,"Schoolcraft County, Michigan",,2025,955,234
+37059,"Davie County, North Carolina",,2025,1015,1151
+47125,"Montgomery County, Tennessee",,2025,1055,4650
+31151,"Saline County, Nebraska",,2025,1098,385
+01083,"Limestone County, Alabama",,2025,1165,2184
+26075,"Jackson County, Michigan",,2025,1266,3124
+21117,"Kenton County, Kentucky",,2025,1415,6091
+31155,"Saunders County, Nebraska",,2025,950,680
+27063,"Jackson County, Minnesota",,2025,957,364
+39005,"Ashland County, Ohio",,2025,945,1217
+26031,"Cheboygan County, Michigan",,2025,972,829
+13255,"Spalding County, Georgia",,2025,983,1506
+42063,"Indiana County, Pennsylvania",,2025,1105,1921
+26145,"Saginaw County, Michigan",,2025,1170,4007
+30039,"Granite County, Montana",,2025,777,200
+38047,"Logan County, North Dakota",,2025,820,114
+16011,"Bingham County, Idaho",,2025,903,1510
+41037,"Lake County, Oregon",,2025,978,359
+38033,"Golden Valley County, North Dakota",,2025,952,90
+27029,"Clearwater County, Minnesota",,2025,991,230
+56013,"Fremont County, Wyoming",,2025,968,1873
+17027,"Clinton County, Illinois",,2025,1004,934
+27113,"Pennington County, Minnesota",,2025,1046,417
+42047,"Elk County, Pennsylvania",,2025,1025,955
+19193,"Woodbury County, Iowa",,2025,1084,3264
+30025,"Fallon County, Montana",,2025,1086,189
+02066,"Copper River Census Area, Alaska",,2025,1111,147
+31079,"Hall County, Nebraska",,2025,1040,1986
+18087,"LaGrange County, Indiana",,2025,1069,1058
+53051,"Pend Oreille County, Washington",,2025,1218,348
+48031,"Blanco County, Texas",,2025,1274,501
+17009,"Brown County, Illinois",,2025,1469,130
+48113,"Dallas County, Texas",,2025,1934,82438
+35003,"Catron County, New Mexico",,2025,760,133
+31009,"Blaine County, Nebraska",,2025,813,25
+31061,"Franklin County, Nebraska",,2025,778,130
+16061,"Lewis County, Idaho",,2025,816,236
+31139,"Pierce County, Nebraska",,2025,870,243
+51119,"Middlesex County, Virginia",,2025,907,401
+18111,"Newton County, Indiana",,2025,961,298
+42121,"Venango County, Pennsylvania",,2025,975,1208
+19191,"Winneshiek County, Iowa",,2025,985,762
+16063,"Lincoln County, Idaho",,2025,958,203
+39099,"Mahoning County, Ohio",,2025,1037,6208
+27043,"Faribault County, Minnesota",,2025,1032,485
+42085,"Mercer County, Pennsylvania",,2025,1081,2867
+31059,"Fillmore County, Nebraska",,2025,1070,278
+49015,"Emery County, Utah",,2025,1090,273
+37051,"Cumberland County, North Carolina",,2025,1111,7187
+21185,"Oldham County, Kentucky",,2025,1237,2537
+35001,"Bernalillo County, New Mexico",,2025,1273,22457
+40109,"Oklahoma County, Oklahoma",,2025,1352,34041
+32023,"Nye County, Nevada",,2025,1428,953
+48029,"Bexar County, Texas",,2025,1354,44984
+48015,"Austin County, Texas",,2025,1395,1488
+48255,"Karnes County, Texas",,2025,1613,401
+18013,"Brown County, Indiana",,2025,740,366
+17131,"Mercer County, Illinois",,2025,797,311
+31021,"Burt County, Nebraska",,2025,856,247
+31033,"Cheyenne County, Nebraska",,2025,927,354
+30085,"Roosevelt County, Montana",,2025,971,287
+22077,"Pointe Coupee Parish, Louisiana",,2025,1027,538
+27023,"Chippewa County, Minnesota",,2025,1041,419
+39043,"Erie County, Ohio",,2025,1043,2064
+39129,"Pickaway County, Ohio",,2025,1123,1091
+22007,"Assumption Parish, Louisiana",,2025,1105,333
+31177,"Washington County, Nebraska",,2025,1194,704
+46103,"Pennington County, South Dakota",,2025,1160,5803
+18157,"Tippecanoe County, Indiana",,2025,1202,4299
+19093,"Ida County, Iowa",,2025,1170,302
+18003,"Allen County, Indiana",,2025,1267,10700
+38017,"Cass County, North Dakota",,2025,1332,9451
+05101,"Newton County, Arkansas",,2025,698,117
+29067,"Douglas County, Missouri",,2025,722,289
+21189,"Owsley County, Kentucky",,2025,766,90
+21033,"Caldwell County, Kentucky",,2025,840,370
+28039,"George County, Mississippi",,2025,839,411
+21095,"Harlan County, Kentucky",,2025,821,527
+13141,"Hancock County, Georgia",,2025,873,99
+29083,"Henry County, Missouri",,2025,915,719
+45029,"Colleton County, South Carolina",,2025,924,948
+05019,"Clark County, Arkansas",,2025,878,660
+28061,"Jasper County, Mississippi",,2025,914,241
+13065,"Clinch County, Georgia",,2025,897,181
+13005,"Bacon County, Georgia",,2025,917,289
+28075,"Lauderdale County, Mississippi",,2025,916,1900
+22099,"St. Martin Parish, Louisiana",,2025,1064,1147
+47117,"Marshall County, Tennessee",,2025,1078,734
+51580,"Covington city, Virginia",,2025,1222,295
+48191,"Hall County, Texas",,2025,704,132
+51141,"Patrick County, Virginia",,2025,756,480
+05089,"Marion County, Arkansas",,2025,792,315
+13315,"Wilcox County, Georgia",,2025,804,120
+05149,"Yell County, Arkansas",,2025,803,405
+13155,"Irwin County, Georgia",,2025,842,166
+21069,"Fleming County, Kentucky",,2025,882,442
+13017,"Ben Hill County, Georgia",,2025,869,367
+01031,"Coffee County, Alabama",,2025,908,1404
+05033,"Crawford County, Arkansas",,2025,918,1314
+51005,"Alleghany County, Virginia",,2025,927,475
+54097,"Upshur County, West Virginia",,2025,948,845
+13003,"Atkinson County, Georgia",,2025,949,126
+22117,"Washington Parish, Louisiana",,2025,916,903
+12125,"Union County, Florida",,2025,988,214
+47095,"Lake County, Tennessee",,2025,1004,116
+51021,"Bland County, Virginia",,2025,1113,142
+13193,"Macon County, Georgia",,2025,1161,236
+45073,"Oconee County, South Carolina",,2025,1189,2084
+48309,"McLennan County, Texas",,2025,1202,5948
+12047,"Hamilton County, Florida",,2025,1194,253
+21181,"Nicholas County, Kentucky",,2025,699,127
+29205,"Shelby County, Missouri",,2025,861,207
+48107,"Crosby County, Texas",,2025,862,173
+13283,"Treutlen County, Georgia",,2025,899,100
+29195,"Saline County, Missouri",,2025,911,666
+12063,"Jackson County, Florida",,2025,931,1064
+51169,"Scott County, Virginia",,2025,888,414
+12049,"Hardee County, Florida",,2025,911,601
+20125,"Montgomery County, Kansas",,2025,956,2310
+45089,"Williamsburg County, South Carolina",,2025,954,665
+12027,"DeSoto County, Florida",,2025,952,777
+21193,"Perry County, Kentucky",,2025,999,940
+48331,"Milam County, Texas",,2025,1067,525
+12107,"Putnam County, Florida",,2025,1039,1611
+48343,"Morris County, Texas",,2025,1078,226
+47073,"Hawkins County, Tennessee",,2025,1091,830
+22101,"St. Mary Parish, Louisiana",,2025,1206,1440
+48293,"Limestone County, Texas",,2025,1285,397
+29181,"Ripley County, Missouri",,2025,608,682
+29223,"Wayne County, Missouri",,2025,760,399
+28053,"Humphreys County, Mississippi",,2025,725,179
+29171,"Putnam County, Missouri",,2025,864,141
+28029,"Copiah County, Mississippi",,2025,827,491
+21045,"Casey County, Kentucky",,2025,869,371
+13027,"Brooks County, Georgia",,2025,886,313
+28161,"Yalobusha County, Mississippi",,2025,828,207
+13295,"Walker County, Georgia",,2025,902,929
+48429,"Stephens County, Texas",,2025,892,310
+29023,"Butler County, Missouri",,2025,925,1578
+47107,"McMinn County, Tennessee",,2025,1022,1065
+51155,"Pulaski County, Virginia",,2025,1073,882
+40049,"Garvin County, Oklahoma",,2025,1111,848
+28095,"Monroe County, Mississippi",,2025,1058,665
+28087,"Lowndes County, Mississippi",,2025,1129,1569
+13239,"Quitman County, Georgia",,2025,689,46
+28119,"Quitman County, Mississippi",,2025,646,146
+28127,"Simpson County, Mississippi",,2025,732,514
+29141,"Morgan County, Missouri",,2025,755,647
+29079,"Grundy County, Missouri",,2025,798,285
+21131,"Leslie County, Kentucky",,2025,794,171
+13109,"Evans County, Georgia",,2025,815,288
+05011,"Bradley County, Arkansas",,2025,838,339
+47013,"Campbell County, Tennessee",,2025,842,723
+12041,"Gilchrist County, Florida",,2025,922,386
+48169,"Garza County, Texas",,2025,939,175
+22029,"Concordia Parish, Louisiana",,2025,908,478
+48207,"Haskell County, Texas",,2025,945,190
+05055,"Greene County, Arkansas",,2025,908,960
+47129,"Morgan County, Tennessee",,2025,951,238
+48073,"Cherokee County, Texas",,2025,990,881
+28159,"Winston County, Mississippi",,2025,927,367
+51730,"Petersburg city, Virginia",,2025,1046,1018
+48441,"Taylor County, Texas",,2025,1114,3828
+54045,"Logan County, West Virginia",,2025,1118,1038
+48001,"Anderson County, Texas",,2025,1185,1607
+28065,"Jefferson Davis County, Mississippi",,2025,1192,156
+29185,"St. Clair County, Missouri",,2025,738,252
+21053,"Clinton County, Kentucky",,2025,784,296
+29197,"Schuyler County, Missouri",,2025,782,101
+28015,"Carroll County, Mississippi",,2025,773,136
+48387,"Red River County, Texas",,2025,841,245
+40069,"Johnston County, Oklahoma",,2025,935,275
+45075,"Orangeburg County, South Carolina",,2025,943,1897
+45061,"Lee County, South Carolina",,2025,958,313
+37017,"Bladen County, North Carolina",,2025,1009,684
+37165,"Scotland County, North Carolina",,2025,1014,688
+21233,"Webster County, Kentucky",,2025,1068,291
+05131,"Sebastian County, Arkansas",,2025,1076,3802
+21153,"Magoffin County, Kentucky",,2025,744,300
+29155,"Pemiscot County, Missouri",,2025,760,928
+05049,"Fulton County, Arkansas",,2025,770,217
+21149,"McLean County, Kentucky",,2025,819,248
+47023,"Chester County, Tennessee",,2025,822,308
+48215,"Hidalgo County, Texas",,2025,820,14062
+28117,"Prentiss County, Mississippi",,2025,824,560
+21137,"Lincoln County, Kentucky",,2025,895,523
+54007,"Braxton County, West Virginia",,2025,914,380
+21205,"Rowan County, Kentucky",,2025,922,815
+13257,"Stephens County, Georgia",,2025,957,645
+28123,"Scott County, Mississippi",,2025,926,527
+29161,"Phelps County, Missouri",,2025,982,1338
+39059,"Guernsey County, Ohio",,2025,1030,973
+47033,"Crockett County, Tennessee",,2025,1029,301
+21155,"Marion County, Kentucky",,2025,993,542
+21107,"Hopkins County, Kentucky",,2025,1090,1224
+48183,"Gregg County, Texas",,2025,1164,4248
+29103,"Knox County, Missouri",,2025,772,111
+48455,"Trinity County, Texas",,2025,783,226
+28101,"Newton County, Mississippi",,2025,803,386
+13025,"Brantley County, Georgia",,2025,861,256
+29187,"St. Francois County, Missouri",,2025,853,1909
+21027,"Breckinridge County, Kentucky",,2025,871,438
+28153,"Wayne County, Mississippi",,2025,825,394
+13023,"Bleckley County, Georgia",,2025,870,225
+21057,"Cumberland County, Kentucky",,2025,907,191
+21133,"Letcher County, Kentucky",,2025,884,499
+51195,"Wise County, Virginia",,2025,923,793
+12039,"Gadsden County, Florida",,2025,934,899
+13071,"Colquitt County, Georgia",,2025,924,1159
+13267,"Tattnall County, Georgia",,2025,885,439
+13165,"Jenkins County, Georgia",,2025,904,135
+48141,"El Paso County, Texas",,2025,996,16563
+22081,"Red River Parish, Louisiana",,2025,991,198
+54059,"Mingo County, West Virginia",,2025,984,533
+48133,"Eastland County, Texas",,2025,979,540
+51025,"Brunswick County, Virginia",,2025,1010,491
+05123,"St. Francis County, Arkansas",,2025,942,586
+05001,"Arkansas County, Arkansas",,2025,1016,623
+48179,"Gray County, Texas",,2025,1187,546
+01045,"Dale County, Alabama",,2025,1216,1166
+40055,"Greer County, Oklahoma",,2025,740,104
+13201,"Miller County, Georgia",,2025,765,169
+28013,"Calhoun County, Mississippi",,2025,752,273
+13167,"Johnson County, Georgia",,2025,812,148
+21135,"Lewis County, Kentucky",,2025,801,267
+45033,"Dillon County, South Carolina",,2025,838,529
+54063,"Monroe County, West Virginia",,2025,878,323
+05077,"Lee County, Arkansas",,2025,809,212
+47109,"McNairy County, Tennessee",,2025,882,543
+01027,"Clay County, Alabama",,2025,897,265
+51690,"Martinsville city, Virginia",,2025,869,972
+39115,"Morgan County, Ohio",,2025,996,239
+48405,"San Augustine County, Texas",,2025,1015,152
+48145,"Falls County, Texas",,2025,1042,304
+54009,"Brooke County, West Virginia",,2025,1096,620
+54051,"Marshall County, West Virginia",,2025,1258,682
+28021,"Claiborne County, Mississippi",,2025,1607,135
+29125,"Maries County, Missouri",,2025,733,188
+29215,"Texas County, Missouri",,2025,805,635
+29117,"Livingston County, Missouri",,2025,876,486
+13205,"Mitchell County, Georgia",,2025,878,470
+12075,"Levy County, Florida",,2025,898,1140
+21175,"Morgan County, Kentucky",,2025,888,294
+37113,"Macon County, North Carolina",,2025,935,1464
+48351,"Newton County, Texas",,2025,938,135
+29007,"Audrain County, Missouri",,2025,947,641
+37005,"Alleghany County, North Carolina",,2025,959,340
+48241,"Jasper County, Texas",,2025,1043,652
+47143,"Rhea County, Tennessee",,2025,1019,617
+29045,"Clark County, Missouri",,2025,669,179
+29035,"Carter County, Missouri",,2025,660,245
+21123,"Larue County, Kentucky",,2025,828,333
+22039,"Evangeline Parish, Louisiana",,2025,842,652
+13123,"Gilmer County, Georgia",,2025,873,849
+48403,"Sabine County, Texas",,2025,868,223
+05035,"Crittenden County, Arkansas",,2025,929,1116
+13081,"Crisp County, Georgia",,2025,913,606
+37083,"Halifax County, North Carolina",,2025,917,1054
+12017,"Citrus County, Florida",,2025,933,3701
+54067,"Nicholas County, West Virginia",,2025,941,815
+40133,"Seminole County, Oklahoma",,2025,926,503
+28047,"Harrison County, Mississippi",,2025,990,5222
+01075,"Lamar County, Alabama",,2025,990,298
+47051,"Franklin County, Tennessee",,2025,1013,967
+51083,"Halifax County, Virginia",,2025,1006,1018
+48415,"Scurry County, Texas",,2025,1526,467
+51031,"Campbell County, Virginia",,2025,1557,1772
+48427,"Starr County, Texas",,2025,773,663
+28079,"Leake County, Mississippi",,2025,787,352
+40025,"Cimarron County, Oklahoma",,2025,843,100
+28023,"Clarke County, Mississippi",,2025,810,253
+48267,"Kimble County, Texas",,2025,839,160
+35019,"Guadalupe County, New Mexico",,2025,783,178
+13253,"Seminole County, Georgia",,2025,841,225
+05147,"Woodruff County, Arkansas",,2025,861,186
+48323,"Maverick County, Texas",,2025,847,948
+51678,"Lexington city, Virginia",,2025,929,315
+47029,"Cocke County, Tennessee",,2025,890,559
+21171,"Monroe County, Kentucky",,2025,920,309
+45071,"Newberry County, South Carolina",,2025,981,959
+48213,"Henderson County, Texas",,2025,1014,1656
+28063,"Jefferson County, Mississippi",,2025,901,77
+48279,"Lamb County, Texas",,2025,1086,411
+28049,"Hinds County, Mississippi",,2025,1200,5765
+29069,"Dunklin County, Missouri",,2025,682,1727
+54043,"Lincoln County, West Virginia",,2025,757,340
+13311,"White County, Georgia",,2025,800,863
+47049,"Fentress County, Tennessee",,2025,825,390
+48137,"Edwards County, Texas",,2025,820,70
+13173,"Lanier County, Georgia",,2025,874,133
+48077,"Clay County, Texas",,2025,906,201
+21039,"Carlisle County, Kentucky",,2025,902,141
+28107,"Panola County, Mississippi",,2025,888,672
+29129,"Mercer County, Missouri",,2025,885,119
+54087,"Roane County, West Virginia",,2025,939,360
+22127,"Winn Parish, Louisiana",,2025,961,344
+47053,"Gibson County, Tennessee",,2025,939,1095
+47159,"Smith County, Tennessee",,2025,999,395
+20005,"Atchison County, Kansas",,2025,1035,435
+40011,"Blaine County, Oklahoma",,2025,1008,288
+54053,"Mason County, West Virginia",,2025,1227,496
+18125,"Pike County, Indiana",,2025,1288,214
+13061,"Clay County, Georgia",,2025,655,78
+47137,"Pickett County, Tennessee",,2025,746,112
+21231,"Wayne County, Kentucky",,2025,782,460
+47083,"Houston County, Tennessee",,2025,811,142
+13055,"Chattooga County, Georgia",,2025,836,401
+51197,"Wythe County, Virginia",,2025,917,934
+45001,"Abbeville County, South Carolina",,2025,953,451
+54013,"Calhoun County, West Virginia",,2025,957,148
+01109,"Pike County, Alabama",,2025,1017,807
+05059,"Hot Spring County, Arkansas",,2025,947,635
+46005,"Beadle County, South Dakota",,2025,1018,676
+48189,"Hale County, Texas",,2025,1006,843
+48449,"Titus County, Texas",,2025,1027,844
+48043,"Brewster County, Texas",,2025,1018,447
+40077,"Latimer County, Oklahoma",,2025,1150,209
+54005,"Boone County, West Virginia",,2025,1178,423
+48027,"Bell County, Texas",,2025,1265,6489
+29059,"Dallas County, Missouri",,2025,705,450
+18025,"Crawford County, Indiana",,2025,853,172
+28143,"Tunica County, Mississippi",,2025,848,268
+05071,"Johnson County, Arkansas",,2025,825,510
+01005,"Barbour County, Alabama",,2025,897,595
+37075,"Graham County, North Carolina",,2025,949,218
+05003,"Ashley County, Arkansas",,2025,964,503
+28093,"Marshall County, Mississippi",,2025,961,586
+13307,"Webster County, Georgia",,2025,1001,45
+05069,"Jefferson County, Arkansas",,2025,1046,1672
+05027,"Columbia County, Arkansas",,2025,1004,628
+54015,"Clay County, West Virginia",,2025,744,193
+21165,"Menifee County, Kentucky",,2025,817,134
+13287,"Turner County, Georgia",,2025,830,186
+13273,"Terrell County, Georgia",,2025,858,225
+47099,"Lawrence County, Tennessee",,2025,883,914
+13105,"Elbert County, Georgia",,2025,900,555
+05111,"Poinsett County, Arkansas",,2025,942,463
+51720,"Norton city, Virginia",,2025,939,233
+48485,"Wichita County, Texas",,2025,1016,3283
+48115,"Dawson County, Texas",,2025,1097,475
+47061,"Grundy County, Tennessee",,2025,710,236
+40141,"Tillman County, Oklahoma",,2025,800,179
+29081,"Harrison County, Missouri",,2025,797,286
+22083,"Richland Parish, Louisiana",,2025,817,575
+48437,"Swisher County, Texas",,2025,876,181
+28113,"Pike County, Mississippi",,2025,837,1044
+35059,"Union County, New Mexico",,2025,910,176
+37153,"Richmond County, North Carolina",,2025,886,885
+13107,"Emanuel County, Georgia",,2025,894,478
+48463,"Uvalde County, Texas",,2025,911,709
+48009,"Archer County, Texas",,2025,972,246
+05009,"Boone County, Arkansas",,2025,926,1016
+47131,"Obion County, Tennessee",,2025,927,710
+54023,"Grant County, West Virginia",,2025,982,367
+47089,"Jefferson County, Tennessee",,2025,1035,1011
+47091,"Johnson County, Tennessee",,2025,1020,351
+40101,"Muskogee County, Oklahoma",,2025,1053,1593
+22049,"Jackson Parish, Louisiana",,2025,1074,323
+13019,"Berrien County, Georgia",,2025,1137,326
+48375,"Potter County, Texas",,2025,1155,3979
+47175,"Van Buren County, Tennessee",,2025,745,85
+21061,"Edmonson County, Kentucky",,2025,824,194
+54105,"Wirt County, West Virginia",,2025,793,109
+47151,"Scott County, Tennessee",,2025,796,463
+29091,"Howell County, Missouri",,2025,879,1442
+13007,"Baker County, Georgia",,2025,908,69
+45081,"Saluda County, South Carolina",,2025,975,306
+21229,"Washington County, Kentucky",,2025,986,370
+48253,"Jones County, Texas",,2025,984,343
+39121,"Noble County, Ohio",,2025,991,270
+12123,"Taylor County, Florida",,2025,910,488
+48075,"Childress County, Texas",,2025,987,229
+48465,"Val Verde County, Texas",,2025,953,924
+51051,"Dickenson County, Virginia",,2025,1009,324
+13319,"Wilkinson County, Georgia",,2025,1110,178
+47127,"Moore County, Tennessee",,2025,1126,91
+22045,"Iberia Parish, Louisiana",,2025,1144,1920
+13207,"Monroe County, Georgia",,2025,1159,707
+48047,"Brooks County, Texas",,2025,1169,151
+48219,"Hockley County, Texas",,2025,1467,610
+28055,"Issaquena County, Mississippi",,2025,601,38
+05043,"Drew County, Arkansas",,2025,840,529
+29105,"Laclede County, Missouri",,2025,884,899
+21115,"Johnson County, Kentucky",,2025,860,643
+29217,"Vernon County, Missouri",,2025,906,745
+05005,"Baxter County, Arkansas",,2025,869,1360
+28011,"Bolivar County, Mississippi",,2025,861,841
+18009,"Blackford County, Indiana",,2025,952,254
+51143,"Pittsylvania County, Virginia",,2025,946,1441
+29151,"Osage County, Missouri",,2025,963,278
+47019,"Carter County, Tennessee",,2025,962,834
+48177,"Gonzales County, Texas",,2025,1077,545
+01023,"Choctaw County, Alabama",,2025,1197,362
+05139,"Union County, Arkansas",,2025,1320,1171
+28017,"Chickasaw County, Mississippi",,2025,743,378
+13261,"Sumter County, Georgia",,2025,853,720
+29119,"McDonald County, Missouri",,2025,872,481
+28041,"Greene County, Mississippi",,2025,861,153
+13281,"Towns County, Georgia",,2025,890,367
+48445,"Terry County, Texas",,2025,923,352
+28007,"Attala County, Mississippi",,2025,856,420
+05039,"Dallas County, Arkansas",,2025,899,217
+13233,"Polk County, Georgia",,2025,965,786
+37187,"Washington County, North Carolina",,2025,993,270
+21019,"Boyd County, Kentucky",,2025,1105,1782
+48377,"Presidio County, Texas",,2025,1092,198
+28099,"Neshoba County, Mississippi",,2025,1119,592
+48035,"Bosque County, Texas",,2025,1180,386
+28149,"Warren County, Mississippi",,2025,1186,1087
+05129,"Searcy County, Arkansas",,2025,695,169
+22009,"Avoyelles Parish, Louisiana",,2025,782,959
+05137,"Stone County, Arkansas",,2025,757,300
+45065,"McCormick County, South Carolina",,2025,821,303
+22035,"East Carroll Parish, Louisiana",,2025,790,174
+05133,"Sevier County, Arkansas",,2025,870,328
+48489,"Willacy County, Texas",,2025,869,309
+28137,"Tate County, Mississippi",,2025,868,460
+29005,"Atchison County, Missouri",,2025,832,227
+12007,"Bradford County, Florida",,2025,928,556
+51520,"Bristol city, Virginia",,2025,913,618
+37171,"Surry County, North Carolina",,2025,1006,1999
+47123,"Monroe County, Tennessee",,2025,973,918
+18053,"Grant County, Indiana",,2025,1032,1283
+21097,"Harrison County, Kentucky",,2025,1028,434
+48217,"Hill County, Texas",,2025,1077,833
+29039,"Cedar County, Missouri",,2025,765,406
+13249,"Schley County, Georgia",,2025,846,79
+51009,"Amherst County, Virginia",,2025,901,790
+21147,"McCreary County, Kentucky",,2025,886,298
+01111,"Randolph County, Alabama",,2025,898,485
+48315,"Marion County, Texas",,2025,890,167
+47025,"Claiborne County, Tennessee",,2025,908,575
+05031,"Craighead County, Arkansas",,2025,988,3051
+47003,"Bedford County, Tennessee",,2025,1024,1044
+54035,"Jackson County, West Virginia",,2025,1031,723
+51135,"Nottoway County, Virginia",,2025,1034,475
+13175,"Laurens County, Georgia",,2025,1033,1244
+48081,"Coke County, Texas",,2025,1303,107
+22031,"De Soto Parish, Louisiana",,2025,1409,649
+29227,"Worth County, Missouri",,2025,635,68
+48327,"Menard County, Texas",,2025,664,78
+40135,"Sequoyah County, Oklahoma",,2025,733,789
+21221,"Trigg County, Kentucky",,2025,771,358
+40063,"Hughes County, Oklahoma",,2025,760,289
+21105,"Hickman County, Kentucky",,2025,774,113
+28147,"Walthall County, Mississippi",,2025,732,222
+13183,"Long County, Georgia",,2025,803,153
+35047,"San Miguel County, New Mexico",,2025,842,778
+22085,"Sabine Parish, Louisiana",,2025,854,589
+13075,"Cook County, Georgia",,2025,863,413
+28157,"Wilkinson County, Mississippi",,2025,766,121
+29011,"Barton County, Missouri",,2025,849,346
+01019,"Cherokee County, Alabama",,2025,879,510
+48479,"Webb County, Texas",,2025,907,5949
+21071,"Floyd County, Kentucky",,2025,892,1178
+37009,"Ashe County, North Carolina",,2025,917,746
+13043,"Candler County, Georgia",,2025,881,279
+13291,"Union County, Georgia",,2025,927,789
+28141,"Tishomingo County, Mississippi",,2025,915,484
+01049,"DeKalb County, Alabama",,2025,967,1526
+21177,"Muhlenberg County, Kentucky",,2025,1022,743
+48099,"Coryell County, Texas",,2025,1067,998
+21225,"Union County, Kentucky",,2025,1148,390
+47031,"Coffee County, Tennessee",,2025,1154,1550
+48057,"Calhoun County, Texas",,2025,1619,650
+48283,"La Salle County, Texas",,2025,1627,193
+13209,"Montgomery County, Georgia",,2025,771,146
+40001,"Adair County, Oklahoma",,2025,814,366
+21169,"Metcalfe County, Kentucky",,2025,840,258
+01061,"Geneva County, Alabama",,2025,825,616
+28139,"Tippah County, Mississippi",,2025,813,394
+13229,"Pierce County, Georgia",,2025,896,451
+13087,"Decatur County, Georgia",,2025,908,794
+48457,"Tyler County, Texas",,2025,950,339
+28129,"Smith County, Mississippi",,2025,915,198
+01057,"Fayette County, Alabama",,2025,991,363
+37027,"Caldwell County, North Carolina",,2025,1018,1603
+37045,"Cleveland County, North Carolina",,2025,1057,2232
+45005,"Allendale County, South Carolina",,2025,1078,181
+20177,"Shawnee County, Kansas",,2025,1248,6764
+48225,"Houston County, Texas",,2025,1313,955
+22025,"Catahoula Parish, Louisiana",,2025,744,276
+47067,"Hancock County, Tennessee",,2025,703,106
+40005,"Atoka County, Oklahoma",,2025,760,341
+12059,"Holmes County, Florida",,2025,773,416
+51077,"Grayson County, Virginia",,2025,765,348
+29065,"Dent County, Missouri",,2025,819,561
+13251,"Screven County, Georgia",,2025,820,298
+28043,"Grenada County, Mississippi",,2025,843,604
+22027,"Claiborne Parish, Louisiana",,2025,913,272
+51185,"Tazewell County, Virginia",,2025,916,1006
+51173,"Smyth County, Virginia",,2025,955,791
+05047,"Franklin County, Arkansas",,2025,928,402
+24001,"Allegany County, Maryland",,2025,998,1588
+28081,"Lee County, Mississippi",,2025,993,2699
+05099,"Nevada County, Arkansas",,2025,991,187
+35029,"Luna County, New Mexico",,2025,1018,554
+22041,"Franklin Parish, Louisiana",,2025,749,487
+12013,"Calhoun County, Florida",,2025,799,256
+48447,"Throckmorton County, Texas",,2025,811,68
+35037,"Quay County, New Mexico",,2025,831,330
+37185,"Warren County, North Carolina",,2025,837,352
+29199,"Scotland County, Missouri",,2025,822,154
+28097,"Montgomery County, Mississippi",,2025,801,240
+12037,"Franklin County, Florida",,2025,833,422
+37155,"Robeson County, North Carolina",,2025,894,2080
+05145,"White County, Arkansas",,2025,905,1849
+48125,"Dickens County, Texas",,2025,972,65
+48005,"Angelina County, Texas",,2025,989,1920
+05141,"Van Buren County, Arkansas",,2025,925,352
+51167,"Russell County, Virginia",,2025,953,574
+13293,"Upson County, Georgia",,2025,959,532
+48037,"Bowie County, Texas",,2025,1029,2450
+29085,"Hickory County, Missouri",,2025,705,204
+21119,"Knott County, Kentucky",,2025,793,304
+47035,"Cumberland County, Tennessee",,2025,888,1530
+18123,"Perry County, Indiana",,2025,975,394
+01053,"Escambia County, Alabama",,2025,1010,946
+45037,"Edgefield County, South Carolina",,2025,1042,470
+01099,"Monroe County, Alabama",,2025,1069,486
+22017,"Caddo Parish, Louisiana",,2025,1131,8002
+48247,"Jim Hogg County, Texas",,2025,1167,128
+29203,"Shannon County, Missouri",,2025,660,242
+29073,"Gasconade County, Missouri",,2025,780,546
+21001,"Adair County, Kentucky",,2025,796,518
+40061,"Haskell County, Oklahoma",,2025,823,297
+40075,"Kiowa County, Oklahoma",,2025,832,236
+05075,"Lawrence County, Arkansas",,2025,811,415
+29133,"Mississippi County, Missouri",,2025,846,409
+05109,"Pike County, Arkansas",,2025,851,269
+40089,"McCurtain County, Oklahoma",,2025,903,910
+21031,"Butler County, Kentucky",,2025,909,311
+21089,"Greenup County, Kentucky",,2025,928,819
+37123,"Montgomery County, North Carolina",,2025,934,626
+51105,"Lee County, Virginia",,2025,899,536
+37173,"Swain County, North Carolina",,2025,945,492
+48419,"Shelby County, Texas",,2025,989,604
+47121,"Meigs County, Tennessee",,2025,1034,164
+47045,"Dyer County, Tennessee",,2025,1092,859
+13243,"Randolph County, Georgia",,2025,809,166
+05121,"Randolph County, Arkansas",,2025,773,405
+28103,"Noxubee County, Mississippi",,2025,819,238
+21203,"Rockcastle County, Kentucky",,2025,831,289
+21013,"Bell County, Kentucky",,2025,822,613
+13111,"Fannin County, Georgia",,2025,886,842
+28005,"Amite County, Mississippi",,2025,866,212
+21099,"Hart County, Kentucky",,2025,991,415
+12023,"Columbia County, Florida",,2025,1020,1827
+05029,"Conway County, Arkansas",,2025,973,496
+51001,"Accomack County, Virginia",,2025,1057,1210
+01121,"Talladega County, Alabama",,2025,1088,1615
+28019,"Choctaw County, Mississippi",,2025,1149,161
+28059,"Jackson County, Mississippi",,2025,1215,2824
+28045,"Hancock County, Mississippi",,2025,1266,1075
+48127,"Dimmit County, Texas",,2025,1447,315
+18101,"Martin County, Indiana",,2025,1724,288
+13125,"Glascock County, Georgia",,2025,706,48
+13265,"Taliaferro County, Georgia",,2025,746,27
+40107,"Okfuskee County, Oklahoma",,2025,783,220
+40105,"Nowata County, Oklahoma",,2025,824,207
+54101,"Webster County, West Virginia",,2025,793,217
+29147,"Nodaway County, Missouri",,2025,827,646
+48119,"Delta County, Texas",,2025,818,113
+54071,"Pendleton County, West Virginia",,2025,843,222
+29121,"Macon County, Missouri",,2025,843,443
+45027,"Clarendon County, South Carolina",,2025,829,660
+47135,"Perry County, Tennessee",,2025,869,165
+21075,"Fulton County, Kentucky",,2025,824,217
+05051,"Garland County, Arkansas",,2025,887,3356
+29207,"Stoddard County, Missouri",,2025,874,874
+48093,"Comanche County, Texas",,2025,919,390
+37181,"Vance County, North Carolina",,2025,930,963
+47077,"Henderson County, Tennessee",,2025,907,592
+21025,"Breathitt County, Kentucky",,2025,894,345
+21125,"Laurel County, Kentucky",,2025,944,1799
+45049,"Hampton County, South Carolina",,2025,986,427
+29139,"Montgomery County, Missouri",,2025,987,337
+48151,"Fisher County, Texas",,2025,1097,115
+54089,"Summers County, West Virginia",,2025,804,261
+13221,"Oglethorpe County, Georgia",,2025,840,261
+13271,"Telfair County, Georgia",,2025,815,227
+13309,"Wheeler County, Georgia",,2025,911,82
+48063,"Camp County, Texas",,2025,927,283
+48275,"Knox County, Texas",,2025,936,143
+05061,"Howard County, Arkansas",,2025,893,337
+40065,"Jackson County, Oklahoma",,2025,989,679
+54057,"Mineral County, West Virginia",,2025,1124,715
+48079,"Cochran County, Texas",,2025,1177,122
+39131,"Pike County, Ohio",,2025,1228,611
+48505,"Zapata County, Texas",,2025,757,170
+21127,"Lawrence County, Kentucky",,2025,851,356
+28025,"Clay County, Mississippi",,2025,881,400
+13161,"Jeff Davis County, Georgia",,2025,932,287
+48347,"Nacogdoches County, Texas",,2025,963,1403
+01067,"Henry County, Alabama",,2025,1021,422
+01029,"Cleburne County, Alabama",,2025,1031,290
+28111,"Perry County, Mississippi",,2025,1020,176
+47075,"Haywood County, Tennessee",,2025,1313,415
+05073,"Lafayette County, Arkansas",,2025,730,166
+47101,"Lewis County, Tennessee",,2025,840,277
+01041,"Crenshaw County, Alabama",,2025,897,306
+13083,"Dade County, Georgia",,2025,907,328
+37177,"Tyrrell County, North Carolina",,2025,904,100
+28001,"Adams County, Mississippi",,2025,834,786
+22097,"St. Landry Parish, Louisiana",,2025,903,2128
+28009,"Benton County, Mississippi",,2025,884,94
+01071,"Jackson County, Alabama",,2025,976,1221
+47097,"Lauderdale County, Tennessee",,2025,973,352
+13259,"Stewart County, Georgia",,2025,1078,91
+28077,"Lawrence County, Mississippi",,2025,1107,218
+48353,"Nolan County, Texas",,2025,1161,416
+21041,"Carroll County, Kentucky",,2025,1423,371
+29153,"Ozark County, Missouri",,2025,635,266
+05135,"Sharp County, Arkansas",,2025,763,415
+13237,"Putnam County, Georgia",,2025,892,640
+20099,"Labette County, Kansas",,2025,942,509
+47041,"DeKalb County, Tennessee",,2025,931,444
+05041,"Desha County, Arkansas",,2025,887,429
+13299,"Ware County, Georgia",,2025,919,1007
+28027,"Coahoma County, Mississippi",,2025,845,590
+01093,"Marion County, Alabama",,2025,948,737
+29127,"Marion County, Missouri",,2025,991,1026
+37121,"Mitchell County, North Carolina",,2025,980,431
+28035,"Forrest County, Mississippi",,2025,1002,2034
+54041,"Lewis County, West Virginia",,2025,1015,559
+48223,"Hopkins County, Texas",,2025,1066,966
+05115,"Pope County, Arkansas",,2025,1015,1765
+40067,"Jefferson County, Oklahoma",,2025,647,147
+21201,"Robertson County, Kentucky",,2025,754,59
+51640,"Galax city, Virginia",,2025,794,395
+13091,"Dodge County, Georgia",,2025,823,379
+05107,"Phillips County, Arkansas",,2025,786,578
+54083,"Randolph County, West Virginia",,2025,884,991
+13093,"Dooly County, Georgia",,2025,862,228
+28057,"Itawamba County, Mississippi",,2025,853,406
+51191,"Washington County, Virginia",,2025,952,1624
+28151,"Washington County, Mississippi",,2025,855,1196
+21085,"Grayson County, Kentucky",,2025,920,696
+01119,"Sumter County, Alabama",,2025,935,299
+21173,"Montgomery County, Kentucky",,2025,937,901
+37163,"Sampson County, North Carolina",,2025,971,1238
+40137,"Stephens County, Oklahoma",,2025,1034,1214
+13033,"Burke County, Georgia",,2025,2054,484
+05097,"Montgomery County, Arkansas",,2025,669,188
+51035,"Carroll County, Virginia",,2025,779,661
+05105,"Perry County, Arkansas",,2025,818,164
+05113,"Polk County, Arkansas",,2025,778,506
+54093,"Tucker County, West Virginia",,2025,828,284
+28115,"Pontotoc County, Mississippi",,2025,805,569
+51111,"Lunenburg County, Virginia",,2025,872,353
+21129,"Lee County, Kentucky",,2025,844,163
+28085,"Lincoln County, Mississippi",,2025,881,862
+05057,"Hempstead County, Arkansas",,2025,886,502
+29115,"Linn County, Missouri",,2025,915,400
+39033,"Crawford County, Ohio",,2025,954,936
+37023,"Burke County, North Carolina",,2025,963,1759
+45047,"Greenwood County, South Carolina",,2025,1083,1638
+05067,"Jackson County, Arkansas",,2025,998,421
+54047,"McDowell County, West Virginia",,2025,1055,373
+48335,"Mitchell County, Texas",,2025,1454,185
+48345,"Motley County, Texas",,2025,725,63
+08009,"Baca County, Colorado",,2025,753,119
+29221,"Washington County, Missouri",,2025,781,775
+51595,"Emporia city, Virginia",,2025,780,269
+29109,"Lawrence County, Missouri",,2025,888,981
+47173,"Union County, Tennessee",,2025,903,293
+48067,"Cass County, Texas",,2025,918,565
+37065,"Edgecombe County, North Carolina",,2025,946,897
+28105,"Oktibbeha County, Mississippi",,2025,948,1102
+48373,"Polk County, Texas",,2025,966,952
+40015,"Caddo County, Oklahoma",,2025,990,607
+39001,"Adams County, Ohio",,2025,1042,684
+13303,"Washington County, Georgia",,2025,1037,436
+54001,"Barbour County, West Virginia",,2025,1112,395
+45031,"Darlington County, South Carolina",,2025,1226,1281
+47145,"Roane County, Tennessee",,2025,1650,1014
+29149,"Oregon County, Missouri",,2025,690,270
+48385,"Real County, Texas",,2025,752,109
+21197,"Powell County, Kentucky",,2025,782,303
+21087,"Green County, Kentucky",,2025,792,249
+22107,"Tensas Parish, Louisiana",,2025,802,131
+40079,"Le Flore County, Oklahoma",,2025,815,1046
+28109,"Pearl River County, Mississippi",,2025,798,1035
+29167,"Polk County, Missouri",,2025,899,831
+01055,"Etowah County, Alabama",,2025,897,2515
+21143,"Lyon County, Kentucky",,2025,929,290
+48451,"Tom Green County, Texas",,2025,1098,3020
+13301,"Warren County, Georgia",,2025,1022,100
+13099,"Early County, Georgia",,2025,1087,273
+13001,"Appling County, Georgia",,2025,1462,511
+05093,"Mississippi County, Arkansas",,2025,1456,1053
+05023,"Cleburne County, Arkansas",,2025,798,648
+01105,"Perry County, Alabama",,2025,830,195
+40115,"Ottawa County, Oklahoma",,2025,889,780
+21183,"Ohio County, Kentucky",,2025,892,521
+22069,"Natchitoches Parish, Louisiana",,2025,883,1052
+21235,"Whitley County, Kentucky",,2025,918,1054
+54055,"Mercer County, West Virginia",,2025,958,1678
+01095,"Marshall County, Alabama",,2025,952,2650
+21195,"Pike County, Kentucky",,2025,1008,1639
+22013,"Bienville Parish, Louisiana",,2025,1036,320
+48101,"Cottle County, Texas",,2025,1535,165
+05127,"Scott County, Arkansas",,2025,754,186
+05095,"Monroe County, Arkansas",,2025,746,234
+05065,"Izard County, Arkansas",,2025,801,262
+29111,"Lewis County, Missouri",,2025,830,253
+21207,"Russell County, Kentucky",,2025,857,553
+29093,"Iron County, Missouri",,2025,926,592
+37043,"Clay County, North Carolina",,2025,950,360
+13263,"Talbot County, Georgia",,2025,968,103
+45087,"Union County, South Carolina",,2025,945,496
+47071,"Hardin County, Tennessee",,2025,1057,612
+21139,"Livingston County, Kentucky",,2025,1169,260
+51027,"Buchanan County, Virginia",,2025,1189,555
+47171,"Unicoi County, Tennessee",,2025,1207,324
+21043,"Carter County, Kentucky",,2025,806,656
+29041,"Chariton County, Missouri",,2025,799,269
+40091,"McIntosh County, Oklahoma",,2025,813,441
+28051,"Holmes County, Mississippi",,2025,801,289
+40029,"Coal County, Oklahoma",,2025,868,137
+13101,"Echols County, Georgia",,2025,922,60
+48319,"Mason County, Texas",,2025,929,177
+20111,"Lyon County, Kansas",,2025,947,888
+48487,"Wilbarger County, Texas",,2025,924,330
+39145,"Scioto County, Ohio",,2025,981,1503
+47115,"Marion County, Tennessee",,2025,1003,587
+01007,"Bibb County, Alabama",,2025,1021,456
+47133,"Overton County, Tennessee",,2025,999,443
+13317,"Wilkes County, Georgia",,2025,992,250
+28163,"Yazoo County, Mississippi",,2025,1082,459
+21141,"Logan County, Kentucky",,2025,1151,799
+48237,"Jack County, Texas",,2025,1151,249
+22065,"Madison Parish, Louisiana",,2025,726,268
+13241,"Rabun County, Georgia",,2025,800,619
+28131,"Stone County, Mississippi",,2025,813,340
+48407,"San Jacinto County, Texas",,2025,871,303
+05021,"Clay County, Arkansas",,2025,820,359
+13131,"Grady County, Georgia",,2025,878,539
+35033,"Mora County, New Mexico",,2025,898,141
+28069,"Kemper County, Mississippi",,2025,873,135
+28037,"Franklin County, Mississippi",,2025,914,139
+21161,"Mason County, Kentucky",,2025,987,723
+47063,"Hamblen County, Tennessee",,2025,989,1528
+47055,"Giles County, Tennessee",,2025,1007,701
+47081,"Hickman County, Tennessee",,2025,1028,400
+48277,"Lamar County, Texas",,2025,1047,1344
+01091,"Marengo County, Alabama",,2025,1078,580
+48503,"Young County, Texas",,2025,1092,600
+48245,"Jefferson County, Texas",,2025,1469,5747
+28125,"Sharkey County, Mississippi",,2025,703,142
+21109,"Jackson County, Kentucky",,2025,774,207
+29087,"Holt County, Missouri",,2025,874,182
+29163,"Pike County, Missouri",,2025,904,516
+47015,"Cannon County, Tennessee",,2025,917,294
+28083,"Leflore County, Mississippi",,2025,837,816
+29063,"DeKalb County, Missouri",,2025,869,281
+54085,"Ritchie County, West Virginia",,2025,959,252
+29175,"Randolph County, Missouri",,2025,955,684
+47177,"Warren County, Tennessee",,2025,972,966
+48507,"Zavala County, Texas",,2025,926,176
+05063,"Independence County, Arkansas",,2025,964,967
+13163,"Jefferson County, Georgia",,2025,1014,412
+48161,"Freestone County, Texas",,2025,1122,397
+13321,"Worth County, Georgia",,2025,806,373
+05015,"Carroll County, Arkansas",,2025,796,822
+48129,"Donley County, Texas",,2025,828,123
+22001,"Acadia Parish, Louisiana",,2025,842,1444
+48197,"Hardeman County, Texas",,2025,834,127
+21219,"Todd County, Kentucky",,2025,900,333
+48061,"Cameron County, Texas",,2025,887,7144
+37039,"Cherokee County, North Carolina",,2025,906,911
+48049,"Brown County, Texas",,2025,971,947
+28003,"Alcorn County, Mississippi",,2025,917,825
+01037,"Coosa County, Alabama",,2025,1055,169
+48365,"Panola County, Texas",,2025,1193,548
+21237,"Wolfe County, Kentucky",,2025,746,186
+05037,"Cross County, Arkansas",,2025,784,451
+29137,"Monroe County, Missouri",,2025,823,261
+20001,"Allen County, Kansas",,2025,889,414
+29001,"Adair County, Missouri",,2025,889,808
+48483,"Wheeler County, Texas",,2025,906,197
+05079,"Lincoln County, Arkansas",,2025,894,234
+22105,"Tangipahoa Parish, Louisiana",,2025,920,3847
+46121,"Todd County, South Dakota",,2025,930,103
+40095,"Marshall County, Oklahoma",,2025,964,371
+13069,"Coffee County, Georgia",,2025,949,1021
+51590,"Danville city, Virginia",,2025,977,1829
+51117,"Mecklenburg County, Virginia",,2025,1017,1050
+48303,"Lubbock County, Texas",,2025,1078,8198
+29057,"Dade County, Missouri",,2025,758,190
+35051,"Sierra County, New Mexico",,2025,863,378
+47185,"White County, Tennessee",,2025,861,562
+47005,"Benton County, Tennessee",,2025,870,364
+40111,"Okmulgee County, Oklahoma",,2025,946,837
+47007,"Bledsoe County, Tennessee",,2025,950,183
+21051,"Clay County, Kentucky",,2025,916,425
+54021,"Gilmer County, West Virginia",,2025,957,164
+45025,"Chesterfield County, South Carolina",,2025,967,800
+48023,"Baylor County, Texas",,2025,978,186
+28091,"Marion County, Mississippi",,2025,943,610
+40071,"Kay County, Oklahoma",,2025,1024,1225
+28145,"Union County, Mississippi",,2025,1020,590
+01069,"Houston County, Alabama",,2025,1080,3810
+48271,"Kinney County, Texas",,2025,1131,78
+47027,"Clay County, Tennessee",,2025,769,143
+28155,"Webster County, Mississippi",,2025,787,208
+51049,"Cumberland County, Virginia",,2025,856,257
+29225,"Webster County, Missouri",,2025,863,916
+22067,"Morehouse Parish, Louisiana",,2025,883,565
+29143,"New Madrid County, Missouri",,2025,863,944
+28031,"Covington County, Mississippi",,2025,854,391
+47181,"Wayne County, Tennessee",,2025,871,286
+40023,"Choctaw County, Oklahoma",,2025,858,391
+13119,"Franklin County, Georgia",,2025,881,618
+29179,"Reynolds County, Missouri",,2025,933,272
+01039,"Covington County, Alabama",,2025,935,1159
+01047,"Dallas County, Alabama",,2025,975,993
+47069,"Hardeman County, Tennessee",,2025,1004,371
+47057,"Grainger County, Tennessee",,2025,1050,370
+48399,"Runnels County, Texas",,2025,1087,274
+47085,"Humphreys County, Tennessee",,2025,1152,398
+40127,"Pushmataha County, Oklahoma",,2025,765,302
+21121,"Knox County, Kentucky",,2025,832,613
+28133,"Sunflower County, Mississippi",,2025,809,539
+29009,"Barry County, Missouri",,2025,878,987
+54019,"Fayette County, West Virginia",,2025,920,1203
+37079,"Greene County, North Carolina",,2025,928,391
+22113,"Vermilion Parish, Louisiana",,2025,908,1366
+37157,"Rockingham County, North Carolina",,2025,919,1874
+48087,"Collingsworth County, Texas",,2025,932,115
+51037,"Charlotte County, Virginia",,2025,927,471
+28067,"Jones County, Mississippi",,2025,934,1444
+05103,"Ouachita County, Arkansas",,2025,953,573
+21159,"Martin County, Kentucky",,2025,1024,224
+48105,"Crockett County, Texas",,2025,1148,192
+13197,"Marion County, Georgia",,2025,739,123
+21055,"Crittenden County, Kentucky",,2025,788,210
+29229,"Wright County, Missouri",,2025,757,602
+13037,"Calhoun County, Georgia",,2025,821,129
+47139,"Polk County, Tennessee",,2025,831,335
+18041,"Fayette County, Indiana",,2025,865,431
+05083,"Logan County, Arkansas",,2025,810,458
+21011,"Bath County, Kentucky",,2025,866,303
+37197,"Yadkin County, North Carolina",,2025,853,781
+21063,"Elliott County, Kentucky",,2025,888,96
+48059,"Callahan County, Texas",,2025,912,339
+51089,"Henry County, Virginia",,2025,876,1746
+29075,"Gentry County, Missouri",,2025,872,241
+40121,"Pittsburg County, Oklahoma",,2025,936,1056
+13279,"Toombs County, Georgia",,2025,919,786
+47103,"Lincoln County, Tennessee",,2025,964,764
+01015,"Calhoun County, Alabama",,2025,995,2898
+22119,"Webster Parish, Louisiana",,2025,952,1004
+13133,"Greene County, Georgia",,2025,996,654
+45059,"Laurens County, South Carolina",,2025,1043,1080
+28135,"Tallahatchie County, Mississippi",,2025,945,217
+13305,"Wayne County, Georgia",,2025,1034,695
+05013,"Calhoun County, Arkansas",,2025,1518,104
+13181,"Lincoln County, Georgia",,2025,807,194
+56027,"Niobrara County, Wyoming",,2025,861,123
+05017,"Chicot County, Arkansas",,2025,805,355
+13189,"McDuffie County, Georgia",,2025,871,501
+13289,"Twiggs County, Georgia",,2025,887,118
+47183,"Weakley County, Tennessee",,2025,858,657
+47087,"Jackson County, Tennessee",,2025,906,212
+05117,"Prairie County, Arkansas",,2025,871,218
+37047,"Columbus County, North Carolina",,2025,966,1186
+37161,"Rutherford County, North Carolina",,2025,963,1494
+13137,"Habersham County, Georgia",,2025,1017,1160
+39119,"Muskingum County, Ohio",,2025,1040,1980
+47111,"Macon County, Tennessee",,2025,1060,403
+47017,"Carroll County, Tennessee",,2025,1024,536
+41033,"Josephine County, Oregon",,2025,967,2744
+29037,"Cass County, Missouri",,2025,923,2678
+23007,"Franklin County, Maine",,2025,923,1120
+44001,"Bristol County, Rhode Island",,2025,1180,2358
+06017,"El Dorado County, California",,2025,1294,6875
+49045,"Tooele County, Utah",,2025,1035,1535
+13097,"Douglas County, Georgia",,2025,1131,3521
+17163,"St. Clair County, Illinois",,2025,1115,4939
+49047,"Uintah County, Utah",,2025,1127,1360
+06099,"Stanislaus County, California",,2025,1253,18877
+32003,"Clark County, Nevada",,2025,1322,64550
+12085,"Martin County, Florida",,2025,1169,7674
+36055,"Monroe County, New York",,2025,1349,19685
+42011,"Berks County, Pennsylvania",,2025,1279,9003
+32001,"Churchill County, Nevada",,2025,1232,623
+30111,"Yellowstone County, Montana",,2025,1234,8204
+44007,"Providence County, Rhode Island",,2025,1456,24489
+48339,"Montgomery County, Texas",,2025,1500,15308
+25001,"Barnstable County, Massachusetts",,2025,1318,9892
+42075,"Lebanon County, Pennsylvania",,2025,1101,2989
+26055,"Grand Traverse County, Michigan",,2025,1144,3815
+27075,"Lake County, Minnesota",,2025,1127,377
+06061,"Placer County, California",,2025,1464,16439
+21015,"Boone County, Kentucky",,2025,1156,6361
+49003,"Box Elder County, Utah",,2025,1192,1620
+30095,"Stillwater County, Montana",,2025,1375,417
+11001,"District of Columbia, District of Columbia",,2025,2605,51456
+30007,"Broadwater County, Montana",,2025,859,293
+50019,"Orleans County, Vermont",,2025,964,1120
+19167,"Sioux County, Iowa",,2025,1046,1554
+13013,"Barrow County, Georgia",,2025,1045,1794
+41005,"Clackamas County, Oregon",,2025,1399,17339
+36031,"Essex County, New York",,2025,1165,1336
+26029,"Charlevoix County, Michigan",,2025,1146,912
+55079,"Milwaukee County, Wisconsin",,2025,1486,30155
+12103,"Pinellas County, Florida",,2025,1377,41629
+26065,"Ingham County, Michigan",,2025,1402,6996
+30109,"Wibaux County, Montana",,2025,769,47
+16085,"Valley County, Idaho",,2025,1028,901
+17203,"Woodford County, Illinois",,2025,1035,804
+33001,"Belknap County, New Hampshire",,2025,1077,2229
+19077,"Guthrie County, Iowa",,2025,1060,391
+36049,"Lewis County, New York",,2025,1081,602
+06077,"San Joaquin County, California",,2025,1210,23418
+02275,"Wrangell City and Borough, Alaska",,2025,1106,100
+37021,"Buncombe County, North Carolina",,2025,1196,13076
+06013,"Contra Costa County, California",,2025,1791,41662
+55105,"Rock County, Wisconsin",,2025,1266,4080
+51149,"Prince George County, Virginia",,2025,1281,689
+53011,"Clark County, Washington",,2025,1451,15771
+37119,"Mecklenburg County, North Carolina",,2025,2099,51715
+55023,"Crawford County, Wisconsin",,2025,895,514
+39045,"Fairfield County, Ohio",,2025,1028,3520
+08025,"Crowley County, Colorado",,2025,1118,72
+06031,"Kings County, California",,2025,1077,5789
+51047,"Culpeper County, Virginia",,2025,1113,1593
+27013,"Blue Earth County, Minnesota",,2025,1117,2142
+25005,"Bristol County, Massachusetts",,2025,1346,18058
+39173,"Wood County, Ohio",,2025,1152,3484
+08041,"El Paso County, Colorado",,2025,1369,24598
+53053,"Pierce County, Washington",,2025,1394,21186
+34007,"Camden County, New Jersey",,2025,1372,14701
+51101,"King William County, Virginia",,2025,1207,492
+18089,"Lake County, Indiana",,2025,1221,12115
+29183,"St. Charles County, Missouri",,2025,1316,11276
+36083,"Rensselaer County, New York",,2025,1447,3493
+39165,"Warren County, Ohio",,2025,1368,6582
+55139,"Winnebago County, Wisconsin",,2025,1359,4533
+17043,"DuPage County, Illinois",,2025,1669,34431
+26111,"Midland County, Michigan",,2025,1402,4014
+42029,"Chester County, Pennsylvania",,2025,1891,16821
+39041,"Delaware County, Ohio",,2025,1641,7394
+08117,"Summit County, Colorado",,2025,1090,2449
+17093,"Kendall County, Illinois",,2025,976,2517
+51079,"Greene County, Virginia",,2025,837,548
+30079,"Prairie County, Montana",,2025,891,62
+55091,"Pepin County, Wisconsin",,2025,975,274
+23029,"Washington County, Maine",,2025,1009,1172
+51153,"Prince William County, Virginia",,2025,1263,10754
+55045,"Green County, Wisconsin",,2025,1016,1185
+41059,"Umatilla County, Oregon",,2025,1108,2496
+53031,"Jefferson County, Washington",,2025,1171,1073
+34003,"Bergen County, New Jersey",,2025,1661,37147
+02180,"Nome Census Area, Alaska",,2025,1443,298
+12099,"Palm Beach County, Florida",,2025,1664,71046
+15009,"Maui County, Hawaii",,2025,1215,7795
+51127,"New Kent County, Virginia",,2025,963,586
+49053,"Washington County, Utah",,2025,976,8239
+36111,"Ulster County, New York",,2025,1214,5905
+06023,"Humboldt County, California",,2025,1079,8049
+55127,"Walworth County, Wisconsin",,2025,1022,3520
+36051,"Livingston County, New York",,2025,1094,1501
+50005,"Caledonia County, Vermont",,2025,1076,1236
+02110,"Juneau City and Borough, Alaska",,2025,1372,1173
+50011,"Franklin County, Vermont",,2025,1234,1618
+27039,"Dodge County, Minnesota",,2025,1170,503
+27099,"Mower County, Minnesota",,2025,1148,891
+48091,"Comal County, Texas",,2025,1183,5191
+51061,"Fauquier County, Virginia",,2025,1293,2596
+49049,"Utah County, Utah",,2025,1268,22522
+55025,"Dane County, Wisconsin",,2025,1519,18873
+06037,"Los Angeles County, California",,2025,1681,599731
+26099,"Macomb County, Michigan",,2025,1426,19968
+26077,"Kalamazoo County, Michigan",,2025,1385,6096
+02240,"Southeast Fairbanks Census Area, Alaska",,2025,1896,257
+37063,"Durham County, North Carolina",,2025,2084,11553
+27115,"Pine County, Minnesota",,2025,861,725
+27051,"Grant County, Minnesota",,2025,932,259
+06049,"Modoc County, California",,2025,965,437
+18019,"Clark County, Indiana",,2025,1056,3239
+53041,"Lewis County, Washington",,2025,1147,2256
+18059,"Hancock County, Indiana",,2025,1169,2101
+25009,"Essex County, Massachusetts",,2025,1563,28976
+39025,"Clermont County, Ohio",,2025,1175,5077
+35015,"Eddy County, New Mexico",,2025,1520,1960
+10003,"New Castle County, Delaware",,2025,1740,27420
+08079,"Mineral County, Colorado",,2025,906,83
+02195,"Petersburg Borough, Alaska",,2025,940,175
+55061,"Kewaunee County, Wisconsin",,2025,968,586
+06055,"Napa County, California",,2025,1406,6835
+49043,"Summit County, Utah",,2025,1323,3548
+34041,"Warren County, New Jersey",,2025,1330,2971
+36109,"Tompkins County, New York",,2025,1392,2763
+17201,"Winnebago County, Illinois",,2025,1172,5897
+17179,"Tazewell County, Illinois",,2025,1169,2584
+51610,"Falls Church city, Virginia",,2025,1617,1064
+36073,"Orleans County, New York",,2025,1216,833
+01115,"St. Clair County, Alabama",,2025,1312,2062
+51510,"Alexandria city, Virginia",,2025,1816,6370
+24027,"Howard County, Maryland",,2025,1753,11546
+39159,"Union County, Ohio",,2025,1351,1619
+02070,"Dillingham Census Area, Alaska",,2025,1365,151
+51760,"Richmond city, Virginia",,2025,1783,9389
+53055,"San Juan County, Washington",,2025,1028,1056
+49023,"Juab County, Utah",,2025,904,408
+41015,"Curry County, Oregon",,2025,947,923
+41041,"Lincoln County, Oregon",,2025,1004,2094
+34037,"Sussex County, New Jersey",,2025,1168,3735
+36103,"Suffolk County, New York",,2025,1563,56544
+36115,"Washington County, New York",,2025,1131,1307
+13029,"Bryan County, Georgia",,2025,1067,1130
+42027,"Centre County, Pennsylvania",,2025,1249,3640
+37101,"Johnston County, North Carolina",,2025,1137,5603
+12115,"Sarasota County, Florida",,2025,1287,21292
+08049,"Grand County, Colorado",,2025,1020,977
+27095,"Mille Lacs County, Minnesota",,2025,919,790
+41001,"Baker County, Oregon",,2025,1006,724
+24017,"Charles County, Maryland",,2025,1191,3329
+06109,"Tuolumne County, California",,2025,1131,1950
+27017,"Carlton County, Minnesota",,2025,1095,793
+06111,"Ventura County, California",,2025,1425,32850
+55073,"Marathon County, Wisconsin",,2025,1128,4099
+06113,"Yolo County, California",,2025,1531,8371
+19169,"Story County, Iowa",,2025,1276,3039
+36025,"Delaware County, New York",,2025,1271,1286
+36107,"Tioga County, New York",,2025,1394,904
+34027,"Morris County, New Jersey",,2025,2318,18509
+31103,"Keya Paha County, Nebraska",,2025,622,32
+51177,"Spotsylvania County, Virginia",,2025,1018,3634
+06083,"Santa Barbara County, California",,2025,1402,18225
+36021,"Columbia County, New York",,2025,1121,2228
+27067,"Kandiyohi County, Minnesota",,2025,1013,1443
+48021,"Bastrop County, Texas",,2025,1053,1841
+39083,"Knox County, Ohio",,2025,1058,1356
+06025,"Imperial County, California",,2025,1074,10433
+36035,"Fulton County, New York",,2025,1068,1172
+50003,"Bennington County, Vermont",,2025,1226,2007
+06103,"Tehama County, California",,2025,1113,2419
+33017,"Strafford County, New Hampshire",,2025,1354,3220
+47165,"Sumner County, Tennessee",,2025,1157,5379
+12071,"Lee County, Florida",,2025,1217,29283
+53015,"Cowlitz County, Washington",,2025,1324,2729
+45091,"York County, South Carolina",,2025,1268,9437
+56035,"Sublette County, Wyoming",,2025,1340,610
+45019,"Charleston County, South Carolina",,2025,1412,23329
+51099,"King George County, Virginia",,2025,1940,684
+41007,"Clatsop County, Oregon",,2025,1011,1909
+51085,"Hanover County, Virginia",,2025,1097,4354
+53077,"Yakima County, Washington",,2025,1004,6393
+06007,"Butte County, California",,2025,1119,9448
+36113,"Warren County, New York",,2025,1209,2415
+25019,"Nantucket County, Massachusetts",,2025,1597,1338
+35043,"Sandoval County, New Mexico",,2025,1177,3239
+23031,"York County, Maine",,2025,1258,8593
+25013,"Hampden County, Massachusetts",,2025,1259,18872
+39123,"Ottawa County, Ohio",,2025,1151,1213
+39133,"Portage County, Ohio",,2025,1173,3741
+49057,"Weber County, Utah",,2025,1178,7384
+36067,"Onondaga County, New York",,2025,1410,12914
+53033,"King County, Washington",,2025,2675,83145
+27093,"Meeker County, Minnesota",,2025,1018,693
+08047,"Gilpin County, Colorado",,2025,1226,227
+25021,"Norfolk County, Massachusetts",,2025,1775,26790
+36105,"Sullivan County, New York",,2025,1155,2364
+06019,"Fresno County, California",,2025,1149,46981
+39085,"Lake County, Ohio",,2025,1186,6785
+49011,"Davis County, Utah",,2025,1193,10377
+42041,"Cumberland County, Pennsylvania",,2025,1298,7077
+19103,"Johnson County, Iowa",,2025,1265,5108
+37129,"New Hanover County, North Carolina",,2025,1292,11238
+53063,"Spokane County, Washington",,2025,1333,15883
+42045,"Delaware County, Pennsylvania",,2025,1536,14609
+49009,"Daggett County, Utah",,2025,840,58
+02050,"Bethel Census Area, Alaska",,2025,1011,300
+06033,"Lake County, California",,2025,1079,3968
+51830,"Williamsburg city, Virginia",,2025,1037,579
+48257,"Kaufman County, Texas",,2025,1062,2673
+23019,"Penobscot County, Maine",,2025,1075,5163
+10005,"Sussex County, Delaware",,2025,1097,11118
+50023,"Washington County, Vermont",,2025,1336,3259
+49027,"Millard County, Utah",,2025,1093,469
+42095,"Northampton County, Pennsylvania",,2025,1224,7161
+53073,"Whatcom County, Washington",,2025,1322,7469
+12087,"Monroe County, Florida",,2025,1215,5029
+36089,"St. Lawrence County, New York",,2025,1211,2065
+25003,"Berkshire County, Massachusetts",,2025,1362,5529
+51800,"Suffolk city, Virginia",,2025,1293,2280
+24510,"Baltimore city, Maryland",,2025,1734,15198
+38105,"Williams County, North Dakota",,2025,1793,2188
+30059,"Meagher County, Montana",,2025,742,142
+13151,"Henry County, Georgia",,2025,1018,5511
+55109,"St. Croix County, Wisconsin",,2025,1086,3005
+06101,"Sutter County, California",,2025,1066,4425
+06047,"Merced County, California",,2025,1080,9139
+27101,"Murray County, Minnesota",,2025,1024,327
+25007,"Dukes County, Massachusetts",,2025,1461,1453
+55035,"Eau Claire County, Wisconsin",,2025,1146,3356
+33005,"Cheshire County, New Hampshire",,2025,1169,2260
+19155,"Pottawattamie County, Iowa",,2025,1109,2724
+02130,"Ketchikan Gateway Borough, Alaska",,2025,1263,631
+42133,"York County, Pennsylvania",,2025,1272,9473
+13139,"Hall County, Georgia",,2025,1263,6049
+30031,"Gallatin County, Montana",,2025,1352,10420
+34005,"Burlington County, New Jersey",,2025,1470,12992
+24021,"Frederick County, Maryland",,2025,1418,7126
+39153,"Summit County, Ohio",,2025,1306,15650
+37135,"Orange County, North Carolina",,2025,1518,5231
+45015,"Berkeley County, South Carolina",,2025,1403,5488
+36001,"Albany County, New York",,2025,1599,11261
+42003,"Allegheny County, Pennsylvania",,2025,1657,36763
+02188,"Northwest Arctic Borough, Alaska",,2025,1776,149
+25025,"Suffolk County, Massachusetts",,2025,3085,33616
+48397,"Rockwall County, Texas",,2025,1115,3373
+08065,"Lake County, Colorado",,2025,1277,287
+37037,"Chatham County, North Carolina",,2025,1092,2526
+08087,"Morgan County, Colorado",,2025,1100,872
+19129,"Mills County, Iowa",,2025,1106,468
+24041,"Talbot County, Maryland",,2025,1103,1622
+51550,"Chesapeake city, Virginia",,2025,1165,7048
+36007,"Broome County, New York",,2025,1217,4401
+55087,"Outagamie County, Wisconsin",,2025,1251,6202
+48259,"Kendall County, Texas",,2025,1220,1965
+51540,"Charlottesville city, Virginia",,2025,1397,2588
+24033,"Prince George's County, Maryland",,2025,1478,19119
+38013,"Burke County, North Dakota",,2025,1406,126
+27019,"Carver County, Minnesota",,2025,1883,2842
+08053,"Hinsdale County, Colorado",,2025,672,75
+06069,"San Benito County, California",,2025,1097,2057
+36087,"Rockland County, New York",,2025,1300,12743
+18081,"Johnson County, Indiana",,2025,988,4283
+53049,"Pacific County, Washington",,2025,966,695
+55131,"Washington County, Wisconsin",,2025,1205,4030
+24025,"Harford County, Maryland",,2025,1353,6212
+27147,"Steele County, Minnesota",,2025,1290,1131
+48121,"Denton County, Texas",,2025,1364,20715
+12011,"Broward County, Florida",,2025,1480,81704
+32027,"Pershing County, Nevada",,2025,1804,107
+27045,"Fillmore County, Minnesota",,2025,870,792
+06079,"San Luis Obispo County, California",,2025,1204,12112
+53037,"Kittitas County, Washington",,2025,1041,1434
+04021,"Pinal County, Arizona",,2025,1164,5140
+48367,"Parker County, Texas",,2025,1122,3783
+55039,"Fond du Lac County, Wisconsin",,2025,1168,2581
+27049,"Goodhue County, Minnesota",,2025,1223,1365
+02013,"Aleutians East Borough, Alaska",,2025,1240,94
+24015,"Cecil County, Maryland",,2025,1238,1953
+36121,"Wyoming County, New York",,2025,1201,936
+08059,"Jefferson County, Colorado",,2025,1628,24432
+51683,"Manassas city, Virginia",,2025,1733,1589
+38025,"Dunn County, North Dakota",,2025,1812,216
+49025,"Kane County, Utah",,2025,853,440
+08015,"Chaffee County, Colorado",,2025,1017,1228
+51073,"Gloucester County, Virginia",,2025,933,1106
+41053,"Polk County, Oregon",,2025,1009,2308
+34015,"Gloucester County, New Jersey",,2025,1152,7655
+27005,"Becker County, Minnesota",,2025,1041,1119
+42115,"Susquehanna County, Pennsylvania",,2025,1049,975
+36027,"Dutchess County, New York",,2025,1403,9046
+08019,"Clear Creek County, Colorado",,2025,1274,387
+51179,"Stafford County, Virginia",,2025,1337,3360
+41013,"Crook County, Oregon",,2025,1269,878
+32007,"Elko County, Nevada",,2025,1281,1399
+56039,"Teton County, Wyoming",,2025,1727,2957
+36099,"Seneca County, New York",,2025,1269,764
+08037,"Eagle County, Colorado",,2025,1256,3828
+19119,"Lyon County, Iowa",,2025,891,549
+02100,"Haines Borough, Alaska",,2025,1100,163
+50015,"Lamoille County, Vermont",,2025,1133,1604
+19121,"Madison County, Iowa",,2025,982,564
+04007,"Gila County, Arizona",,2025,1145,1117
+50007,"Chittenden County, Vermont",,2025,1462,9702
+37183,"Wake County, North Carolina",,2025,1639,50576
+51087,"Henrico County, Virginia",,2025,1540,12833
+27053,"Hennepin County, Minnesota",,2025,1983,43940
+36047,"Kings County, New York",,2025,1126,75689
+31117,"McPherson County, Nebraska",,2025,857,10
+50009,"Essex County, Vermont",,2025,959,186
+41009,"Columbia County, Oregon",,2025,1068,1449
+36123,"Yates County, New York",,2025,976,700
+08039,"Elbert County, Colorado",,2025,1200,864
+06107,"Tulare County, California",,2025,1035,15467
+53009,"Clallam County, Washington",,2025,1062,2309
+41011,"Coos County, Oregon",,2025,1027,2060
+27047,"Freeborn County, Minnesota",,2025,1036,826
+08045,"Garfield County, Colorado",,2025,1273,2971
+26139,"Ottawa County, Michigan",,2025,1155,7025
+17119,"Madison County, Illinois",,2025,1158,5534
+30063,"Missoula County, Montana",,2025,1175,7242
+23005,"Cumberland County, Maine",,2025,1460,17594
+51630,"Fredericksburg city, Virginia",,2025,1260,1751
+42043,"Dauphin County, Pennsylvania",,2025,1386,7566
+01117,"Shelby County, Alabama",,2025,1389,7509
+29189,"St. Louis County, Missouri",,2025,1588,46890
+34039,"Union County, New Jersey",,2025,1768,17187
+34013,"Essex County, New Jersey",,2025,1902,24671
+06087,"Santa Cruz County, California",,2025,1354,10524
+55093,"Pierce County, Wisconsin",,2025,921,1049
+36085,"Richmond County, New York",,2025,1327,10734
+27173,"Yellow Medicine County, Minnesota",,2025,978,380
+06097,"Sonoma County, California",,2025,1381,22562
+23027,"Waldo County, Maine",,2025,1129,1417
+27121,"Pope County, Minnesota",,2025,1088,376
+42055,"Franklin County, Pennsylvania",,2025,1079,3529
+33019,"Sullivan County, New Hampshire",,2025,1127,1204
+39103,"Medina County, Ohio",,2025,1163,5235
+08097,"Pitkin County, Colorado",,2025,1537,2008
+06029,"Kern County, California",,2025,1182,30032
+16001,"Ada County, Idaho",,2025,1386,26832
+42091,"Montgomery County, Pennsylvania",,2025,2003,29269
+48491,"Williamson County, Texas",,2025,1779,15731
+41069,"Wheeler County, Oregon",,2025,844,76
+27031,"Cook County, Minnesota",,2025,874,325
+06053,"Monterey County, California",,2025,1235,16548
+15001,"Hawaii County, Hawaii",,2025,1183,7329
+40017,"Canadian County, Oklahoma",,2025,971,4191
+44005,"Newport County, Rhode Island",,2025,1440,4438
+06021,"Glenn County, California",,2025,1020,1393
+38007,"Billings County, North Dakota",,2025,1101,62
+51041,"Chesterfield County, Virginia",,2025,1214,10504
+53021,"Franklin County, Washington",,2025,1116,2416
+12089,"Nassau County, Florida",,2025,1126,3005
+48139,"Ellis County, Texas",,2025,1149,3977
+06095,"Solano County, California",,2025,1437,14555
+55063,"La Crosse County, Wisconsin",,2025,1162,3649
+55049,"Iowa County, Wisconsin",,2025,1158,749
+47149,"Rutherford County, Tennessee",,2025,1262,8458
+12091,"Okaloosa County, Florida",,2025,1257,7605
+17141,"Ogle County, Illinois",,2025,1307,1044
+06001,"Alameda County, California",,2025,2036,76889
+39049,"Franklin County, Ohio",,2025,1517,39856
+12086,"Miami-Dade County, Florida",,2025,1708,123931
+27059,"Isanti County, Minnesota",,2025,996,968
+55029,"Door County, Wisconsin",,2025,936,1454
+41023,"Grant County, Oregon",,2025,1014,334
+06089,"Shasta County, California",,2025,1139,9215
+48251,"Johnson County, Texas",,2025,1130,4080
+29165,"Platte County, Missouri",,2025,1207,3221
+36015,"Chemung County, New York",,2025,1221,1887
+41051,"Multnomah County, Oregon",,2025,1645,40530
+41021,"Gilliam County, Oregon",,2025,1328,151
+49035,"Salt Lake County, Utah",,2025,1601,65968
+25011,"Franklin County, Massachusetts",,2025,1060,2592
+27057,"Hubbard County, Minnesota",,2025,926,667
+55033,"Dunn County, Wisconsin",,2025,1046,1187
+06039,"Madera County, California",,2025,1080,6006
+44009,"Washington County, Rhode Island",,2025,1267,5862
+17197,"Will County, Illinois",,2025,1180,16221
+51043,"Clarke County, Virginia",,2025,1088,484
+42071,"Lancaster County, Pennsylvania",,2025,1206,14788
+53045,"Mason County, Washington",,2025,1143,1242
+02122,"Kenai Peninsula Borough, Alaska",,2025,1252,2414
+51121,"Montgomery County, Virginia",,2025,1174,2598
+42019,"Butler County, Pennsylvania",,2025,1305,5537
+42101,"Philadelphia County, Pennsylvania",,2025,1702,33856
+12057,"Hillsborough County, Florida",,2025,1569,58004
+32011,"Eureka County, Nevada",,2025,2769,51
+08033,"Dolores County, Colorado",,2025,723,96
+08111,"San Juan County, Colorado",,2025,794,94
+08083,"Montezuma County, Colorado",,2025,888,997
+55065,"Lafayette County, Wisconsin",,2025,949,531
+41057,"Tillamook County, Oregon",,2025,1057,1073
+30019,"Daniels County, Montana",,2025,1011,101
+23009,"Hancock County, Maine",,2025,1106,2895
+25023,"Plymouth County, Massachusetts",,2025,1446,17049
+36023,"Cortland County, New York",,2025,1083,1124
+50021,"Rutland County, Vermont",,2025,1184,2743
+12109,"St. Johns County, Florida",,2025,1231,11220
+36037,"Genesee County, New York",,2025,1129,1512
+06063,"Plumas County, California",,2025,1189,1028
+27085,"McLeod County, Minnesota",,2025,1176,1045
+51107,"Loudoun County, Virginia",,2025,1724,15048
+26115,"Monroe County, Michigan",,2025,1221,2559
+41049,"Morrow County, Oregon",,2025,1356,408
+16081,"Teton County, Idaho",,2025,991,898
+53069,"Wahkiakum County, Washington",,2025,903,130
+08051,"Gunnison County, Colorado",,2025,1019,1309
+27163,"Washington County, Minnesota",,2025,1248,6992
+51095,"James City County, Virginia",,2025,1045,2286
+41045,"Malheur County, Oregon",,2025,959,1124
+51199,"York County, Virginia",,2025,1092,1735
+13297,"Walton County, Georgia",,2025,1046,2399
+41055,"Sherman County, Oregon",,2025,1267,121
+36011,"Cayuga County, New York",,2025,1255,1732
+41067,"Washington County, Oregon",,2025,1723,22661
+17143,"Peoria County, Illinois",,2025,1688,3972
+02105,"Hoonah-Angoon Census Area, Alaska",,2025,961,143
+19059,"Dickinson County, Iowa",,2025,924,952
+42089,"Monroe County, Pennsylvania",,2025,1091,3720
+06071,"San Bernardino County, California",,2025,1215,82242
+51810,"Virginia Beach city, Virginia",,2025,1180,14067
+08077,"Mesa County, Colorado",,2025,1119,5580
+19061,"Dubuque County, Iowa",,2025,1152,3736
+26081,"Kent County, Michigan",,2025,1256,18102
+51003,"Albemarle County, Virginia",,2025,1388,4211
+13135,"Gwinnett County, Georgia",,2025,1345,34466
+36029,"Erie County, New York",,2025,1367,25038
+39017,"Butler County, Ohio",,2025,1376,9202
+24005,"Baltimore County, Maryland",,2025,1475,23702
+13063,"Clayton County, Georgia",,2025,1792,5205
+34035,"Somerset County, New Jersey",,2025,2701,11320
+50025,"Windham County, Vermont",,2025,1088,2557
+17037,"DeKalb County, Illinois",,2025,1104,2008
+42001,"Adams County, Pennsylvania",,2025,1085,2255
+27141,"Sherburne County, Minnesota",,2025,1126,2469
+02230,"Skagway Municipality, Alaska",,2025,1185,108
+53007,"Chelan County, Washington",,2025,1118,3270
+55101,"Racine County, Wisconsin",,2025,1182,5339
+27041,"Douglas County, Minnesota",,2025,1187,1474
+24037,"St. Mary's County, Maryland",,2025,1731,2147
+47037,"Davidson County, Tennessee",,2025,1702,33059
+16023,"Butte County, Idaho",,2025,2275,146
+36079,"Putnam County, New York",,2025,1307,3331
+15007,"Kauai County, Hawaii",,2025,1226,3443
+51685,"Manassas Park city, Virginia",,2025,1273,339
+51113,"Madison County, Virginia",,2025,969,466
+53017,"Douglas County, Washington",,2025,1001,1150
+27025,"Chisago County, Minnesota",,2025,1101,1381
+12097,"Osceola County, Florida",,2025,1049,10648
+36005,"Bronx County, New York",,2025,1349,20396
+53057,"Skagit County, Washington",,2025,1305,3886
+55009,"Brown County, Wisconsin",,2025,1282,7794
+33015,"Rockingham County, New Hampshire",,2025,1538,11870
+06067,"Sacramento County, California",,2025,1594,77404
+36119,"Westchester County, New York",,2025,1996,37937
+48439,"Tarrant County, Texas",,2025,1501,49791
+08029,"Delta County, Colorado",,2025,934,1018
+19181,"Warren County, Iowa",,2025,983,1406
+16057,"Latah County, Idaho",,2025,985,1412
+27171,"Wright County, Minnesota",,2025,1087,3970
+13113,"Fayette County, Georgia",,2025,1166,4873
+36059,"Nassau County, New York",,2025,1540,56678
+41029,"Jackson County, Oregon",,2025,1147,8276
+36053,"Madison County, New York",,2025,1106,1629
+45035,"Dorchester County, South Carolina",,2025,1068,3745
+41035,"Klamath County, Oregon",,2025,1065,2350
+36069,"Ontario County, New York",,2025,1282,3321
+13217,"Newton County, Georgia",,2025,1109,2159
+02090,"Fairbanks North Star Borough, Alaska",,2025,1371,2460
+31109,"Lancaster County, Nebraska",,2025,1174,9993
+41047,"Marion County, Oregon",,2025,1243,12631
+13039,"Camden County, Georgia",,2025,1156,1241
+06041,"Marin County, California",,2025,1975,13382
+34031,"Passaic County, New Jersey",,2025,1266,16021
+04019,"Pima County, Arizona",,2025,1226,23302
+29047,"Clay County, Missouri",,2025,1277,6901
+32005,"Douglas County, Nevada",,2025,1482,2012
+19113,"Linn County, Iowa",,2025,1421,7765
+13089,"DeKalb County, Georgia",,2025,1588,23547
+02063,"Chugach Census Area, Alaska",,2025,1625,397
+42125,"Washington County, Pennsylvania",,2025,1630,5785
+24031,"Montgomery County, Maryland",,2025,2051,36105
+08031,"Denver County, Colorado",,2025,2244,41742
+17097,"Lake County, Illinois",,2025,2157,20314
+51075,"Goochland County, Virginia",,2025,3164,1050
+06003,"Alpine County, California",,2025,837,89
+16037,"Custer County, Idaho",,2025,953,279
+04005,"Coconino County, Arizona",,2025,1028,4086
+02220,"Sitka City and Borough, Alaska",,2025,1128,415
+02170,"Matanuska-Susitna Borough, Alaska",,2025,1113,2851
+27003,"Anoka County, Minnesota",,2025,1285,8750
+26037,"Clinton County, Michigan",,2025,1031,1495
+27131,"Rice County, Minnesota",,2025,1138,1766
+08081,"Moffat County, Colorado",,2025,1157,460
+36063,"Niagara County, New York",,2025,1118,4930
+34019,"Hunterdon County, New Jersey",,2025,1621,4166
+33013,"Merrimack County, New Hampshire",,2025,1319,5508
+48157,"Fort Bend County, Texas",,2025,1261,18354
+02020,"Anchorage Municipality, Alaska",,2025,1502,8837
+32510,"Carson City, Nevada",,2025,1355,2074
+08057,"Jackson County, Colorado",,2025,901,91
+24035,"Queen Anne's County, Maryland",,2025,1111,1664
+15003,"Honolulu County, Hawaii",,2025,1412,31663
+25015,"Hampshire County, Massachusetts",,2025,1208,4968
+27079,"Le Sueur County, Minnesota",,2025,1096,774
+36117,"Wayne County, New York",,2025,1160,2113
+32019,"Lyon County, Nevada",,2025,1099,1090
+53027,"Grays Harbor County, Washington",,2025,1118,1848
+06059,"Orange County, California",,2025,1692,155722
+53067,"Thurston County, Washington",,2025,1464,8598
+17167,"Sangamon County, Illinois",,2025,1410,5052
+26019,"Benzie County, Michigan",,2025,880,499
+17111,"McHenry County, Illinois",,2025,1076,8050
+06043,"Mariposa County, California",,2025,982,677
+06065,"Riverside County, California",,2025,1181,92749
+19085,"Harrison County, Iowa",,2025,1001,484
+55055,"Jefferson County, Wisconsin",,2025,1072,2392
+39093,"Lorain County, Ohio",,2025,1103,6890
+34033,"Salem County, New Jersey",,2025,1392,1565
+02016,"Aleutians West Census Area, Alaska",,2025,1547,159
+33009,"Grafton County, New Hampshire",,2025,1512,3383
+33011,"Hillsborough County, New Hampshire",,2025,1652,12710
+38089,"Stark County, North Dakota",,2025,1405,1549
+47187,"Williamson County, Tennessee",,2025,1868,13990
+06081,"San Mateo County, California",,2025,4379,32621
+06085,"Santa Clara County, California",,2025,4105,87398
+13085,"Dawson County, Georgia",,2025,841,1065
+08007,"Archuleta County, Colorado",,2025,968,671
+27157,"Wabasha County, Minnesota",,2025,942,603
+36081,"Queens County, New York",,2025,1360,58423
+51600,"Fairfax city, Virginia",,2025,1331,1823
+53059,"Skamania County, Washington",,2025,1095,279
+02198,"Prince of Wales-Hyder Census Area, Alaska",,2025,1022,233
+41065,"Wasco County, Oregon",,2025,1155,1119
+26103,"Marquette County, Michigan",,2025,1068,1800
+31153,"Sarpy County, Nebraska",,2025,1199,4789
+06035,"Lassen County, California",,2025,1169,771
+42077,"Lehigh County, Pennsylvania",,2025,1386,9065
+36101,"Steuben County, New York",,2025,1772,2177
+34009,"Cape May County, New Jersey",,2025,995,4130
+36095,"Schoharie County, New York",,2025,1052,709
+55097,"Portage County, Wisconsin",,2025,1203,1988
+08069,"Larimer County, Colorado",,2025,1458,14960
+32029,"Storey County, Nevada",,2025,1589,258
+16015,"Boise County, Idaho",,2025,652,278
+26089,"Leelanau County, Michigan",,2025,950,852
+42099,"Perry County, Pennsylvania",,2025,819,914
+51570,"Colonial Heights city, Virginia",,2025,852,747
+17133,"Monroe County, Illinois",,2025,937,832
+55095,"Polk County, Wisconsin",,2025,933,1351
+13057,"Cherokee County, Georgia",,2025,1067,8287
+19031,"Cedar County, Iowa",,2025,951,588
+27139,"Scott County, Minnesota",,2025,1233,3942
+41039,"Lane County, Oregon",,2025,1163,13418
+53029,"Island County, Washington",,2025,1189,2160
+36097,"Schuyler County, New York",,2025,1038,479
+42069,"Lackawanna County, Pennsylvania",,2025,1063,5603
+36003,"Allegany County, New York",,2025,1048,914
+51065,"Fluvanna County, Virginia",,2025,1114,677
+49051,"Wasatch County, Utah",,2025,1185,1643
+08123,"Weld County, Colorado",,2025,1373,9487
+26005,"Allegan County, Michigan",,2025,1231,2741
+17063,"Grundy County, Illinois",,2025,1530,1213
+39035,"Cuyahoga County, Ohio",,2025,1561,38758
+34017,"Hudson County, New Jersey",,2025,2184,20196
+33003,"Carroll County, New Hampshire",,2025,959,2131
+49033,"Rich County, Utah",,2025,946,159
+18073,"Jasper County, Indiana",,2025,1006,880
+36009,"Cattaraugus County, New York",,2025,1034,1781
+10001,"Kent County, Delaware",,2025,1126,5759
+55133,"Waukesha County, Wisconsin",,2025,1438,15102
+42007,"Beaver County, Pennsylvania",,2025,1241,3615
+24009,"Calvert County, Maryland",,2025,1440,2034
+31055,"Douglas County, Nebraska",,2025,1390,19173
+36093,"Schenectady County, New York",,2025,1515,3552
+26125,"Oakland County, Michigan",,2025,1573,43751
+20091,"Johnson County, Kansas",,2025,1599,31352
+25017,"Middlesex County, Massachusetts",,2025,2464,59189
+51059,"Fairfax County, Virginia",,2025,2379,39397
+31113,"Logan County, Nebraska",,2025,760,36
+08091,"Ouray County, Colorado",,2025,971,376
+55011,"Buffalo County, Wisconsin",,2025,952,413
+36071,"Orange County, New York",,2025,1228,12005
+04025,"Yavapai County, Arizona",,2025,1061,7334
+51145,"Powhatan County, Virginia",,2025,1039,904
+18011,"Boone County, Indiana",,2025,1122,2667
+41043,"Linn County, Oregon",,2025,1133,3899
+42017,"Bucks County, Pennsylvania",,2025,1286,21590
+42127,"Wayne County, Pennsylvania",,2025,1060,1463
+49029,"Morgan County, Utah",,2025,1143,459
+41003,"Benton County, Oregon",,2025,1319,3112
+37089,"Henderson County, North Carolina",,2025,1063,4122
+19163,"Scott County, Iowa",,2025,1193,6265
+30049,"Lewis and Clark County, Montana",,2025,1229,3950
+30083,"Richland County, Montana",,2025,1241,678
+12021,"Collier County, Florida",,2025,1366,18604
+12117,"Seminole County, Florida",,2025,1338,18204
+27135,"Roseau County, Minnesota",,2025,1367,465
+17113,"McLean County, Illinois",,2025,1411,3411
+12095,"Orange County, Florida",,2025,1392,55830
+02068,"Denali Borough, Alaska",,2025,1801,148
+19153,"Polk County, Iowa",,2025,1556,20514
+51013,"Arlington County, Virginia",,2025,2627,9631
+08093,"Park County, Colorado",,2025,1072,673
+30009,"Carbon County, Montana",,2025,891,691
+08119,"Teller County, Colorado",,2025,1070,1037
+41071,"Yamhill County, Oregon",,2025,1076,3738
+42067,"Juniata County, Pennsylvania",,2025,900,581
+30037,"Golden Valley County, Montana",,2025,954,50
+04017,"Navajo County, Arizona",,2025,949,1967
+08113,"San Miguel County, Colorado",,2025,1149,781
+26015,"Barry County, Michigan",,2025,986,1077
+27169,"Winona County, Minnesota",,2025,1023,1247
+19071,"Fremont County, Iowa",,2025,988,288
+48209,"Hays County, Texas",,2025,1057,6362
+30081,"Ravalli County, Montana",,2025,1052,2551
+06057,"Nevada County, California",,2025,1240,4652
+18127,"Porter County, Indiana",,2025,1174,4290
+36075,"Oswego County, New York",,2025,1289,2332
+06073,"San Diego County, California",,2025,1697,139028
+12019,"Clay County, Florida",,2025,1277,5473
+19049,"Dallas County, Iowa",,2025,1784,3660
+08014,"Broomfield County, Colorado",,2025,2308,3471
+39061,"Hamilton County, Ohio",,2025,1644,26995
+34021,"Mercer County, New Jersey",,2025,2133,12062
+48453,"Travis County, Texas",,2025,1991,51073
+26009,"Antrim County, Michigan",,2025,830,611
+31025,"Cass County, Nebraska",,2025,989,717
+36045,"Jefferson County, New York",,2025,1078,2890
+50001,"Addison County, Vermont",,2025,1170,1871
+26047,"Emmet County, Michigan",,2025,1071,1585
+38023,"Divide County, North Dakota",,2025,1130,125
+16069,"Nez Perce County, Idaho",,2025,1042,1499
+50027,"Windsor County, Vermont",,2025,1225,3141
+36013,"Chautauqua County, New York",,2025,1048,3198
+34001,"Atlantic County, New Jersey",,2025,1199,7559
+37025,"Cabarrus County, North Carolina",,2025,1170,6904
+13247,"Rockdale County, Georgia",,2025,1248,2572
+38087,"Slope County, North Dakota",,2025,1165,15
+37097,"Iredell County, North Carolina",,2025,1243,7182
+53039,"Klickitat County, Washington",,2025,1320,839
+08103,"Rio Blanco County, Colorado",,2025,1264,263
+35028,"Los Alamos County, New Mexico",,2025,2232,589
+36061,"New York County, New York",,2025,4514,130328
+50013,"Grand Isle County, Vermont",,2025,1025,306
+51157,"Rappahannock County, Virginia",,2025,995,288
+55015,"Calumet County, Wisconsin",,2025,1019,1057
+16013,"Blaine County, Idaho",,2025,1170,2226
+39055,"Geauga County, Ohio",,2025,1127,3195
+17091,"Kankakee County, Illinois",,2025,1097,2177
+06005,"Amador County, California",,2025,1184,1395
+06027,"Inyo County, California",,2025,1166,893
+42129,"Westmoreland County, Pennsylvania",,2025,1121,9162
+36091,"Saratoga County, New York",,2025,1356,6513
+30057,"Madison County, Montana",,2025,1173,652
+39011,"Auglaize County, Ohio",,2025,1172,1109
+36039,"Greene County, New York",,2025,1241,1385
+36077,"Otsego County, New York",,2025,1203,1536
+24003,"Anne Arundel County, Maryland",,2025,1590,15880
+36033,"Franklin County, New York",,2025,1369,1115
+08013,"Boulder County, Colorado",,2025,2035,18194
+38053,"McKenzie County, North Dakota",,2025,1805,839
+49019,"Grand County, Utah",,2025,913,684
+06045,"Mendocino County, California",,2025,1041,4772
+41061,"Union County, Oregon",,2025,984,1031
+06009,"Calaveras County, California",,2025,1113,1556
+55111,"Sauk County, Wisconsin",,2025,1008,2287
+30043,"Jefferson County, Montana",,2025,1057,542
+26093,"Livingston County, Michigan",,2025,1155,4869
+04001,"Apache County, Arizona",,2025,1062,618
+17007,"Boone County, Illinois",,2025,1070,891
+13117,"Forsyth County, Georgia",,2025,1273,9246
+31043,"Dakota County, Nebraska",,2025,1118,512
+36065,"Oneida County, New York",,2025,1230,5358
+25027,"Worcester County, Massachusetts",,2025,1489,28061
+38101,"Ward County, North Dakota",,2025,1196,2701
+32031,"Washoe County, Nevada",,2025,1382,16754
+51069,"Frederick County, Virginia",,2025,1265,2224
+48085,"Collin County, Texas",,2025,1945,34821
+06051,"Mono County, California",,2025,1026,738
+02150,"Kodiak Island Borough, Alaska",,2025,1172,473
+08085,"Montrose County, Colorado",,2025,1013,1717
+51137,"Orange County, Virginia",,2025,993,1027
+23017,"Oxford County, Maine",,2025,1013,1793
+23015,"Lincoln County, Maine",,2025,1091,1745
+45013,"Beaufort County, South Carolina",,2025,1097,8050
+34011,"Cumberland County, New Jersey",,2025,1106,3925
+27103,"Nicollet County, Minnesota",,2025,1085,842
+53071,"Walla Walla County, Washington",,2025,1118,1810
+36019,"Clinton County, New York",,2025,1167,1934
+27145,"Stearns County, Minnesota",,2025,1256,4666
+27109,"Olmsted County, Minnesota",,2025,1534,4011
+06115,"Yuba County, California",,2025,1335,2267
+35025,"Lea County, New Mexico",,2025,1348,2145
+34023,"Middlesex County, New Jersey",,2025,1764,26362
+36041,"Hamilton County, New York",,2025,1001,234
+27055,"Houston County, Minnesota",,2025,922,473
+08067,"La Plata County, Colorado",,2025,1173,3038
+34029,"Ocean County, New Jersey",,2025,1111,16576
+18063,"Hendricks County, Indiana",,2025,1083,4426
+55047,"Green Lake County, Wisconsin",,2025,972,542
+41031,"Jefferson County, Oregon",,2025,1080,675
+27009,"Benton County, Minnesota",,2025,1106,1049
+44003,"Kent County, Rhode Island",,2025,1284,7034
+41017,"Deschutes County, Oregon",,2025,1307,11622
+54003,"Berkeley County, West Virginia",,2025,1162,3800
+53035,"Kitsap County, Washington",,2025,1425,6849
+37179,"Union County, North Carolina",,2025,1293,8196
+56023,"Lincoln County, Wyoming",,2025,1219,1234
+06075,"San Francisco County, California",,2025,3806,69299
+02185,"North Slope Borough, Alaska",,2025,2868,228
+42103,"Pike County, Pennsylvania",,2025,897,1154
+51735,"Poquoson city, Virginia",,2025,874,255
+37055,"Dare County, North Carolina",,2025,941,2302
+55017,"Chippewa County, Wisconsin",,2025,1029,2045
+23013,"Knox County, Maine",,2025,1082,2221
+27035,"Crow Wing County, Minnesota",,2025,1040,2338
+55089,"Ozaukee County, Wisconsin",,2025,1196,3277
+13077,"Coweta County, Georgia",,2025,1084,3762
+54037,"Jefferson County, West Virginia",,2025,1219,2383
+23023,"Sagadahoc County, Maine",,2025,1294,1301
+42131,"Wyoming County, Pennsylvania",,2025,1236,727
+32009,"Esmeralda County, Nevada",,2025,1335,21
+39057,"Greene County, Ohio",,2025,1391,4176
+27123,"Ramsey County, Minnesota",,2025,1681,15201
+08005,"Arapahoe County, Colorado",,2025,1846,25619
+13067,"Cobb County, Georgia",,2025,1609,28496
+13121,"Fulton County, Georgia",,2025,2284,78890
+31171,"Thomas County, Nebraska",,2025,855,40
+06091,"Sierra County, California",,2025,957,142
+27069,"Kittson County, Minnesota",,2025,939,199
+55119,"Taylor County, Wisconsin",,2025,953,542
+37053,"Currituck County, North Carolina",,2025,955,1015
+17089,"Kane County, Illinois",,2025,1228,13166
+16025,"Camas County, Idaho",,2025,1077,74
+55059,"Kenosha County, Wisconsin",,2025,1157,4519
+02282,"Yakutat City and Borough, Alaska",,2025,1332,43
+06105,"Trinity County, California",,2025,1110,451
+27137,"St. Louis County, Minnesota",,2025,1221,5544
+53061,"Snohomish County, Washington",,2025,1643,20961
+18057,"Hamilton County, Indiana",,2025,1476,13347
+04013,"Maricopa County, Arizona",,2025,1510,140332
+18005,"Bartholomew County, Indiana",,2025,1752,2144
+49037,"San Juan County, Utah",,2025,973,370
+24013,"Carroll County, Maryland",,2025,1098,4537
+35049,"Santa Fe County, New Mexico",,2025,1162,6545
+30029,"Flathead County, Montana",,2025,1148,7504
+47189,"Wilson County, Tennessee",,2025,1148,4593
+34025,"Monmouth County, New Jersey",,2025,1526,22618
+26161,"Washtenaw County, Michigan",,2025,1467,9793
+02060,"Bristol Bay Borough, Alaska",,2025,1431,114
+41027,"Hood River County, Oregon",,2025,1024,1478
+13223,"Paulding County, Georgia",,2025,956,3039
+08107,"Routt County, Colorado",,2025,1202,2064
+41025,"Harney County, Oregon",,2025,966,335
+50017,"Orange County, Vermont",,2025,1086,1043
+30067,"Park County, Montana",,2025,1008,1393
+41063,"Wallowa County, Oregon",,2025,1034,453
+06093,"Siskiyou County, California",,2025,1012,1871
+41019,"Douglas County, Oregon",,2025,1045,3501
+06011,"Colusa County, California",,2025,1117,1102
+08001,"Adams County, Colorado",,2025,1427,13855
+23011,"Kennebec County, Maine",,2025,1183,4326
+27037,"Dakota County, Minnesota",,2025,1484,11839
+08035,"Douglas County, Colorado",,2025,1826,15762
+55117,"Sheboygan County, Wisconsin",,2025,1324,3157
+53005,"Benton County, Washington",,2025,1422,5465
+17031,"Cook County, Illinois",,2025,1930,140287

@@ -11,8 +11,22 @@ export const DATA_PATHS = {
   COUNTIES: '/datasets/geographic/counties.geojson',
   CONTAMINATION_COUNTS: '/datasets/epa-contamination/contamination_counts.json',
   COMBINED_SCORES: '/datasets/BLO-liveability-index/combined_scores.json',
+  COMBINED_SCORES_V2: '/datasets/precomputed/combined_scores_v2.json',
   DIVERSITY_DATA: '/datasets/demographics/county_pctBlack_diversity_index_with_stats.csv',
   LIFE_EXPECTANCY: '/datasets/demographics/lifeexpectancy-USA-county.csv',
+
+  // Economic data
+  AVG_WEEKLY_WAGES: '/datasets/economic/avg_weekly_wages.csv',
+  MEDIAN_INCOME_BY_RACE: '/datasets/economic/median_income_by_race.csv',
+
+  // Housing data
+  MEDIAN_HOME_VALUE: '/datasets/housing/median_home_value.csv',
+  MEDIAN_PROPERTY_TAX: '/datasets/housing/median_property_tax.csv',
+
+  // Equity data
+  HOMEOWNERSHIP_BY_RACE: '/datasets/equity/homeownership_by_race.csv',
+  POVERTY_BY_RACE: '/datasets/equity/poverty_by_race.csv',
+  BLACK_PROGRESS_INDEX: '/datasets/equity/black_progress_index.csv',
 } as const
 
 // Map configuration

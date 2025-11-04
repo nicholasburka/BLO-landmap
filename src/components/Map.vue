@@ -68,12 +68,21 @@
     <LayerControls
       :expanded="layerControlExpanded"
       :demographic-layers="demographicLayers"
+      :economic-layers="economicLayers"
+      :housing-layers="housingLayers"
+      :equity-layers="equityLayers"
       :selected-demographic-layers="selectedDemographicLayers"
+      :selected-economic-layers="selectedEconomicLayers"
+      :selected-housing-layers="selectedHousingLayers"
+      :selected-equity-layers="selectedEquityLayers"
       :show-contamination-layers="showContaminationLayers"
       :show-contamination-choropleth="showContaminationChoropleth"
       :dev-mode-only="DEV_MODE_DEMOGRAPHICS_ONLY"
       @toggle="toggleLayerControl"
       @toggle-demographic="toggleDemographicLayer"
+      @toggle-economic="toggleEconomicLayer"
+      @toggle-housing="toggleHousingLayer"
+      @toggle-equity="toggleEquityLayer"
       @toggle-contamination-layers="toggleContaminationLayers"
       @toggle-contamination-choropleth="toggleContaminationChoropleth"
     >
@@ -88,6 +97,10 @@
       :contamination-data="currentCounty?.id ? countyContaminationCounts[currentCounty.id] : undefined"
       :life-expectancy="currentCounty?.id ? lifeExpectancyData[currentCounty.id]?.lifeExpectancy : undefined"
       :combined-score="currentCounty?.id ? combinedScoresData[currentCounty.id] : undefined"
+      :combined-score-v2="currentCounty?.id ? combinedScoresV2Data[currentCounty.id] : undefined"
+      :economic-data="currentCounty?.id ? economicData[currentCounty.id] : undefined"
+      :housing-data="currentCounty?.id ? housingData[currentCounty.id] : undefined"
+      :equity-data="currentCounty?.id ? equityData[currentCounty.id] : undefined"
       @close="closeDetailedPopup"
     />
 
@@ -107,7 +120,13 @@ import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import { usePropertyListings } from "@/composables/usePropertyListings";
 import { useMapData } from "@/composables/useMapData";
 import { useColorCalculation } from "@/composables/useColorCalculation";
-import { DEMOGRAPHIC_LAYERS, CONTAMINATION_LAYERS } from "@/config/layerConfig";
+import {
+  DEMOGRAPHIC_LAYERS,
+  CONTAMINATION_LAYERS,
+  ECONOMIC_LAYERS,
+  HOUSING_LAYERS,
+  EQUITY_LAYERS,
+} from "@/config/layerConfig";
 import {
   DEV_MODE_DEMOGRAPHICS_ONLY,
   debugLog,
@@ -132,6 +151,10 @@ const {
   lifeExpectancyData,
   countyContaminationCounts,
   combinedScoresData,
+  combinedScoresV2Data,
+  economicData,
+  housingData,
+  equityData,
   loadAllCountyData,
 } = useMapData();
 
@@ -165,7 +188,7 @@ const {
 const layerControlExpanded = ref(true);
 const showContaminationLayers = ref(false);
 const showContaminationChoropleth = ref(false);
-const showDiversityChoropleth = ref(false);
+const showDiversityChoropleth = ref(true); // Start with true since BLO layer is pre-selected
 const showDetailedPopup = ref(false);
 
 // County modal state
@@ -208,26 +231,29 @@ const toggleContaminationChoropleth = () => {
   updateChoroplethVisibility();
 };
 
-const selectedDemographicLayers = ref<string[]>([]);
+const selectedDemographicLayers = ref<string[]>(['combined_scores_v2']);
+const selectedEconomicLayers = ref<string[]>([]);
+const selectedHousingLayers = ref<string[]>([]);
+const selectedEquityLayers = ref<string[]>([]);
 
 const toggleDemographicLayer = (layerId: string) => {
   debugLog("TOGGLING " + layerId);
   const layer = demographicLayers.find((l) => l.id === layerId);
   if (!layer) return;
 
-  if (layerId === "combined_scores") {
+  if (layerId === "combined_scores" || layerId === "combined_scores_v2") {
     // Handle combined scores separately
-    if (selectedDemographicLayers.value[0] === "combined_scores") {
+    if (selectedDemographicLayers.value[0] === layerId) {
       selectedDemographicLayers.value = [];
       demographicLayers.forEach((l) => {
-        if (l.id === "combined_scores") {
+        if (l.id === layerId) {
           l.visible = false;
         }
       });
     } else {
-      selectedDemographicLayers.value = ["combined_scores"];
+      selectedDemographicLayers.value = [layerId];
       demographicLayers.forEach(
-        (l) => (l.visible = l.id === "combined_scores")
+        (l) => (l.visible = l.id === layerId)
       );
     }
   } else {
@@ -253,6 +279,66 @@ const toggleDemographicLayer = (layerId: string) => {
   updateChoroplethColors();
 };
 
+const toggleEconomicLayer = (layerId: string) => {
+  debugLog("TOGGLING ECONOMIC " + layerId);
+  const layer = economicLayers.find((l) => l.id === layerId);
+  if (!layer) return;
+
+  const currentIndex = selectedEconomicLayers.value.indexOf(layerId);
+
+  if (currentIndex === -1) {
+    selectedEconomicLayers.value = [layerId];
+    layer.visible = true;
+  } else {
+    selectedEconomicLayers.value.splice(currentIndex, 1);
+    layer.visible = false;
+  }
+
+  showDiversityChoropleth.value = selectedEconomicLayers.value.length > 0 || selectedDemographicLayers.value.length > 0;
+  updateChoroplethVisibility();
+  updateChoroplethColors();
+};
+
+const toggleHousingLayer = (layerId: string) => {
+  debugLog("TOGGLING HOUSING " + layerId);
+  const layer = housingLayers.find((l) => l.id === layerId);
+  if (!layer) return;
+
+  const currentIndex = selectedHousingLayers.value.indexOf(layerId);
+
+  if (currentIndex === -1) {
+    selectedHousingLayers.value = [layerId];
+    layer.visible = true;
+  } else {
+    selectedHousingLayers.value.splice(currentIndex, 1);
+    layer.visible = false;
+  }
+
+  showDiversityChoropleth.value = selectedHousingLayers.value.length > 0 || selectedDemographicLayers.value.length > 0;
+  updateChoroplethVisibility();
+  updateChoroplethColors();
+};
+
+const toggleEquityLayer = (layerId: string) => {
+  debugLog("TOGGLING EQUITY " + layerId);
+  const layer = equityLayers.find((l) => l.id === layerId);
+  if (!layer) return;
+
+  const currentIndex = selectedEquityLayers.value.indexOf(layerId);
+
+  if (currentIndex === -1) {
+    selectedEquityLayers.value = [layerId];
+    layer.visible = true;
+  } else {
+    selectedEquityLayers.value.splice(currentIndex, 1);
+    layer.visible = false;
+  }
+
+  showDiversityChoropleth.value = selectedEquityLayers.value.length > 0 || selectedDemographicLayers.value.length > 0;
+  updateChoroplethVisibility();
+  updateChoroplethColors();
+};
+
 const updateChoroplethVisibility = () => {
   if (!map.value) return;
 
@@ -264,7 +350,11 @@ const updateChoroplethVisibility = () => {
   const visibility =
     showContaminationChoropleth.value ||
     showDiversityChoropleth.value ||
-    selectedDemographicLayers.value.includes("combined_scores")
+    selectedDemographicLayers.value.includes("combined_scores") ||
+    selectedDemographicLayers.value.includes("combined_scores_v2") ||
+    selectedEconomicLayers.value.length > 0 ||
+    selectedHousingLayers.value.length > 0 ||
+    selectedEquityLayers.value.length > 0
       ? "visible"
       : "none";
 
@@ -280,6 +370,9 @@ const contaminationLayers = DEV_MODE_DEMOGRAPHICS_ONLY
   : reactive(CONTAMINATION_LAYERS);
 
 const demographicLayers = reactive(DEMOGRAPHIC_LAYERS);
+const economicLayers = reactive(ECONOMIC_LAYERS);
+const housingLayers = reactive(HOUSING_LAYERS);
+const equityLayers = reactive(EQUITY_LAYERS);
 
 const showLifeExpectancyChoropleth = ref(false);
 
@@ -507,7 +600,12 @@ const updateChoroplethColors = () => {
       ),
       ["rgba", 0, 0, 0, 0], // default color
     ];
-  } else if (selectedDemographicLayers.value.length > 0) {
+  } else if (
+    selectedDemographicLayers.value.length > 0 ||
+    selectedEconomicLayers.value.length > 0 ||
+    selectedHousingLayers.value.length > 0 ||
+    selectedEquityLayers.value.length > 0
+  ) {
     expression = [
       "match",
       ["get", "GEOID"],
@@ -515,8 +613,9 @@ const updateChoroplethColors = () => {
         ([geoID, colors]) => {
           let finalColor: [number, number, number, number];
 
+          // Check if we have any selected layers
           if (selectedDemographicLayers.value.length === 1) {
-            // Single layer selected
+            // Single demographic layer selected
             const layer = selectedDemographicLayers.value[0];
             switch (layer) {
               case "diversity_index":
@@ -531,10 +630,20 @@ const updateChoroplethColors = () => {
               case "combined_scores":
                 finalColor = colors.combinedScoreColor;
                 break;
+              case "combined_scores_v2":
+                // Get BLO v2.0 score and convert to color
+                finalColor = getColorForBLOV2(geoID);
+                break;
               default:
                 finalColor = [0, 0, 0, 0];
             }
-          } else {
+          } else if (selectedEconomicLayers.value.length > 0) {
+            finalColor = getColorForEconomicLayer(geoID, selectedEconomicLayers.value[0]);
+          } else if (selectedHousingLayers.value.length > 0) {
+            finalColor = getColorForHousingLayer(geoID, selectedHousingLayers.value[0]);
+          } else if (selectedEquityLayers.value.length > 0) {
+            finalColor = getColorForEquityLayer(geoID, selectedEquityLayers.value[0]);
+          } else if (selectedDemographicLayers.value.length === 2) {
             // Two layers selected - blend colors
             const [layer1, layer2] = selectedDemographicLayers.value;
             const color1 = getLayerColor(colors, layer1);
@@ -546,6 +655,8 @@ const updateChoroplethColors = () => {
               Math.round((color1[2] + color2[2]) / 2),
               Math.max(color1[3], color2[3]),
             ];
+          } else {
+            finalColor = [0, 0, 0, 0];
           }
 
           return [geoID, ["rgba", ...finalColor]];
@@ -575,6 +686,175 @@ const getLayerColor = (
     default:
       return [0, 0, 0, 0];
   }
+};
+
+// Color calculation for BLO Liveability Index
+const getColorForBLOV2 = (geoID: string): [number, number, number, number] => {
+  const score = combinedScoresV2Data.value[geoID];
+  if (!score || score.blo_score_v2 == null) return [0, 0, 0, 0];
+
+  // Actual data range: 1.15 - 3.28 (out of 5)
+  // Normalize to actual min/max for better visual contrast
+  const MIN_SCORE = 1.15;
+  const MAX_SCORE = 3.28;
+
+  const normalized = Math.max(0, Math.min(1, (score.blo_score_v2 - MIN_SCORE) / (MAX_SCORE - MIN_SCORE)));
+
+  // Apply slight curve to emphasize extremes
+  const curved = Math.pow(normalized, 0.9);
+
+  // Dramatic color gradient: Bright yellow -> Deep emerald green
+  // Low scores: Bright yellow (255, 245, 100)
+  // High scores: Deep emerald green (0, 100, 0)
+  const r = Math.round(255 - (255 - 0) * curved);
+  const g = Math.round(245 - (245 - 100) * curved);
+  const b = Math.round(100 - (100 - 0) * curved);
+
+  return [r, g, b, 0.9];
+};
+
+// Color calculation for economic layers
+const getColorForEconomicLayer = (
+  geoID: string,
+  layerId: string
+): [number, number, number, number] => {
+  const data = economicData.value[geoID];
+  if (!data) return [0, 0, 0, 0];
+
+  let value: number | null = null;
+  let min = 0;
+  let max = 1;
+
+  if (layerId === "avg_weekly_wage") {
+    value = data.avg_weekly_wage;
+    if (value == null) return [0, 0, 0, 0];
+    min = 601;
+    max = 4514;
+    // Red (low/bad) to Green (high/good) - similar to contamination but inverted
+    const normalized = (value - min) / (max - min);
+    const curved = Math.pow(normalized, 0.8);
+    const r = Math.round((1 - curved) * 220);
+    const g = Math.round(curved * 200);
+    return [r, g, 0, 0.85];
+  } else if (layerId === "median_income_by_race") {
+    value = data.median_income_black;
+    // Treat 0 as missing data
+    if (value == null || value === 0) return [0, 0, 0, 0];
+    min = 0;
+    max = 250001;
+
+    // Dramatic gradient with varying opacity
+    const normalized = Math.max(0, Math.min(1, (value - min) / (max - min)));
+
+    // Apply power curve to emphasize differences
+    const curved = Math.pow(normalized, 0.8);
+
+    // Color gradient: Light cyan (low) -> Deep royal blue (high)
+    // Low income: Light cyan (100, 200, 255)
+    // High income: Deep royal blue (0, 50, 150)
+    const r = Math.round(100 - (100 - 0) * curved);
+    const g = Math.round(200 - (200 - 50) * curved);
+    const b = Math.round(255 - (255 - 150) * curved);
+
+    // Opacity increases with income (0.3 to 0.95)
+    const alpha = 0.3 + (curved * 0.65);
+
+    return [r, g, b, alpha];
+  }
+
+  return [0, 0, 0, 0];
+};
+
+// Color calculation for housing layers
+const getColorForHousingLayer = (
+  geoID: string,
+  layerId: string
+): [number, number, number, number] => {
+  const data = housingData.value[geoID];
+  if (!data) return [0, 0, 0, 0];
+
+  let value: number | null = null;
+  let min = 0;
+  let max = 1;
+
+  if (layerId === "median_home_value") {
+    value = data.median_home_value;
+    // Treat 0 as missing data
+    if (value == null || value === 0) return [0, 0, 0, 0];
+    min = 0;
+    max = 1535200;
+    // Green (low/affordable) to Red (high/expensive)
+    const normalized = (value - min) / (max - min);
+    const curved = Math.pow(normalized, 0.8);
+    const r = Math.round(curved * 220);
+    const g = Math.round((1 - curved) * 200);
+    return [r, g, 0, 0.85];
+  } else if (layerId === "median_property_tax") {
+    value = data.median_property_tax;
+    if (value == null) return [0, 0, 0, 0];
+    min = 0;
+    max = 10001;
+    // Green (low/affordable) to Red (high/expensive)
+    const normalized = (value - min) / (max - min);
+    const curved = Math.pow(normalized, 0.8);
+    const r = Math.round(curved * 220);
+    const g = Math.round((1 - curved) * 200);
+    return [r, g, 0, 0.85];
+  } else if (layerId === "homeownership_by_race") {
+    value = data.homeownership_rate_black;
+    // Treat 0 and null as missing data
+    if (value == null || value === 0) return [0, 0, 0, 0];
+    min = 0;
+    max = 100;
+    // Green (high/good) to Red (low/bad) - higher homeownership is better
+    const normalized = (value - min) / (max - min);
+    const curved = Math.pow(normalized, 0.8);
+    const r = Math.round((1 - curved) * 220);
+    const g = Math.round(curved * 200);
+    return [r, g, 0, 0.85];
+  }
+
+  return [0, 0, 0, 0];
+};
+
+// Color calculation for equity layers
+const getColorForEquityLayer = (
+  geoID: string,
+  layerId: string
+): [number, number, number, number] => {
+  const data = equityData.value[geoID];
+  if (!data) return [0, 0, 0, 0];
+
+  let value: number | null = null;
+  let min = 0;
+  let max = 1;
+
+  if (layerId === "poverty_by_race") {
+    value = data.poverty_rate_black;
+    // Treat 0 as missing data
+    if (value == null || value === 0) return [0, 0, 0, 0];
+    min = 0;
+    max = 100;
+    // Green (low/good) to Red (high/bad)
+    const normalized = (value - min) / (max - min);
+    const curved = Math.pow(normalized, 0.8);
+    const r = Math.round(curved * 220);
+    const g = Math.round((1 - curved) * 200);
+    return [r, g, 0, 0.85];
+  } else if (layerId === "black_progress_index") {
+    value = data.black_progress_index;
+    if (value == null) return [0, 0, 0, 0];
+    min = 0;
+    max = 100;
+    // Green (high/good) to Red (low/bad) - inverted from poverty
+    const normalized = (value - min) / (max - min);
+    const curved = Math.pow(normalized, 0.8);
+    const r = Math.round((1 - curved) * 220);
+    const g = Math.round(curved * 200);
+    return [r, g, 0, 0.85];
+  }
+
+  return [0, 0, 0, 0];
 };
 
 const updateDiversityColors = () => {
@@ -748,14 +1028,89 @@ const addTooltip = () => {
       const pctBlackValue = countyDiversityData?.pct_Black;
       const diversityValue = countyDiversityData?.diversityIndex;
 
+      // Build active layers section
+      let activeLayersHTML = '';
+
+      // Helper to get layer name from config
+      const getLayerName = (layerId: string) => {
+        const allLayers = [
+          ...demographicLayers,
+          ...economicLayers,
+          ...housingLayers,
+          ...equityLayers,
+        ];
+        return allLayers.find(l => l.id === layerId)?.name || layerId;
+      };
+
+      // Helper to get formatted value for a layer
+      const getLayerValue = (layerId: string) => {
+        switch (layerId) {
+          case 'combined_scores_v2':
+            return combinedScoresV2Data.value[countyId]?.blo_score_v2
+              ? `${combinedScoresV2Data.value[countyId].blo_score_v2.toFixed(2)} of 5.0`
+              : '?';
+          case 'diversity_index':
+            return diversityValue != null ? diversityValue.toFixed(4) : '?';
+          case 'pct_Black':
+            return pctBlackValue != null ? `${pctBlackValue.toFixed(2)}%` : '?';
+          case 'life_expectancy':
+            return lifeExpValue ? `${lifeExpValue.toFixed(1)} years` : '?';
+          case 'avg_weekly_wage':
+            return economicData.value[countyId]?.avg_weekly_wage
+              ? `$${economicData.value[countyId].avg_weekly_wage.toLocaleString()}`
+              : '?';
+          case 'median_income_by_race':
+            return economicData.value[countyId]?.median_income_black
+              ? `$${economicData.value[countyId].median_income_black.toLocaleString()}`
+              : '?';
+          case 'median_home_value':
+            return housingData.value[countyId]?.median_home_value
+              ? `$${housingData.value[countyId].median_home_value.toLocaleString()}`
+              : '?';
+          case 'median_property_tax':
+            return housingData.value[countyId]?.median_property_tax
+              ? `$${housingData.value[countyId].median_property_tax.toLocaleString()}`
+              : '?';
+          case 'homeownership_by_race':
+            return housingData.value[countyId]?.homeownership_rate_black != null
+              ? `${housingData.value[countyId].homeownership_rate_black.toFixed(1)}%`
+              : '?';
+          case 'poverty_by_race':
+            return equityData.value[countyId]?.poverty_rate_black != null
+              ? `${equityData.value[countyId].poverty_rate_black.toFixed(1)}%`
+              : '?';
+          case 'black_progress_index':
+            return equityData.value[countyId]?.black_progress_index != null
+              ? equityData.value[countyId].black_progress_index.toFixed(2)
+              : '?';
+          default:
+            return '?';
+        }
+      };
+
+      // Collect all active layers
+      const activeLayers = [
+        ...selectedDemographicLayers.value,
+        ...selectedEconomicLayers.value,
+        ...selectedHousingLayers.value,
+        ...selectedEquityLayers.value,
+      ];
+
+      if (activeLayers.length > 0) {
+        activeLayersHTML = '<div style="border-bottom: 2px solid #ddd; padding-bottom: 8px; margin-bottom: 8px;">';
+        activeLayers.forEach(layerId => {
+          const name = getLayerName(layerId);
+          const value = getLayerValue(layerId);
+          activeLayersHTML += `<p style="margin: 4px 0;"><strong>${name}:</strong> ${value}</p>`;
+        });
+        activeLayersHTML += '</div>';
+      }
+
       const tooltipContent = `
         <h3>${countyName}, ${stateName}</h3>
-        <p>BLO Combined Score: ${combinedScoresData.value[countyId]?.combinedScore ? getColoredValue(combinedScoresData.value[countyId].combinedScore, 2.84) : "?"}</p>
+        ${activeLayersHTML}
         <p>Total Population: ${countyDiversityData?.totalPopulation ? countyDiversityData.totalPopulation.toLocaleString() : "?"}</p>
-        <p>Life Expectancy: ${lifeExpValue ? getColoredValue(lifeExpValue, averages.lifeExpectancy) + " years" : "?"}</p>
-        <p>Percent Black: ${pctBlackValue != null ? getColoredValue(pctBlackValue, averages.blackPct) + "%" : "?"}</p>
-        <p>Diversity Index: ${diversityValue != null ? getColoredValue(diversityValue, averages.diversityIndex) : "?"}</p>
-        <p>EPA Sites of Land Toxicity: ${totalContamination != null ? getColoredValueContam(totalContamination, averages.contamination) : "?"}</p>
+        <p>Percent Black: ${pctBlackValue != null ? pctBlackValue.toFixed(2) + "%" : "?"}</p>
       `;
 
       tooltip.setLngLat(e.lngLat).setHTML(tooltipContent).addTo(map.value);
@@ -945,9 +1300,15 @@ onMounted(async () => {
       });
     }
 
-    // Ensure choropleth layer is not visible by default
+    // Set initial choropleth visibility based on pre-selected layers
     if (map.value && map.value.getLayer("county-choropleth")) {
-      map.value.setLayoutProperty("county-choropleth", "visibility", "none");
+      const initialVisibility = showDiversityChoropleth.value ? "visible" : "none";
+      map.value.setLayoutProperty("county-choropleth", "visibility", initialVisibility);
+
+      // Update colors if layer is visible
+      if (showDiversityChoropleth.value) {
+        updateChoroplethColors();
+      }
     }
   });
 
