@@ -148,9 +148,8 @@
               />
               County-Level Polluted Site Comparison
             </label>
-            <span class="tooltip-icon">
+            <span class="tooltip-icon" title="Total EPA contamination sites per county (lower is better).">
               ⓘ
-              <span class="tooltip-text">Total EPA contamination sites per county (lower is better).</span>
             </span>
           </div>
         </div>
@@ -245,8 +244,7 @@ const toggleCategory = (category: keyof typeof expandedCategories.value) => {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   max-height: 70vh;
   overflow-y: auto;
-  overflow-x: visible;
-  position: relative;
+  overflow-x: hidden;
 }
 
 .layer-control-collapsed #layer-control {
@@ -374,7 +372,6 @@ const toggleCategory = (category: keyof typeof expandedCategories.value) => {
   margin: 10px 0;
   color: black;
   position: relative;
-  overflow: visible;
 }
 
 .layer-item label {
@@ -388,48 +385,7 @@ const toggleCategory = (category: keyof typeof expandedCategories.value) => {
   margin-left: 5px;
   font-size: 14px;
   color: #666;
-  position: relative;
   display: inline-block;
   vertical-align: middle;
-}
-
-.tooltip-icon:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
-}
-
-.tooltip-text {
-  visibility: hidden;
-  opacity: 0;
-  width: 200px;
-  background-color: #333;
-  color: #fff;
-  text-align: left;
-  border-radius: 6px;
-  padding: 8px 10px;
-  position: absolute;
-  z-index: 10000;
-  transition: opacity 0.2s;
-  font-size: 11px;
-  line-height: 1.4;
-  white-space: normal;
-  word-wrap: break-word;
-  pointer-events: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  /* Position to the left of the icon */
-  right: calc(100% + 10px);
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.tooltip-text::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 100%;
-  margin-top: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: transparent transparent transparent #333;
 }
 </style>
