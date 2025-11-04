@@ -175,25 +175,38 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import Papa from "papaparse";
-
-const DEV_MODE_DEMOGRAPHICS_ONLY = false;
-
-const DEBUG = true; // Set to false to disable console logs
-
-// Function to handle logging based on the debug flag
-const debugLog = (...args) => {
-  if (DEBUG) {
-    console.log(...args);
-  }
-};
+import { usePropertyListings } from "@/composables/usePropertyListings";
+import { DEMOGRAPHIC_LAYERS, CONTAMINATION_LAYERS } from "@/config/layerConfig";
+import {
+  DEV_MODE_DEMOGRAPHICS_ONLY,
+  debugLog,
+  MAPBOX_ACCESS_TOKEN,
+  DATA_PATHS,
+  MAP_CONFIG,
+  LAYER_COLORS
+} from "@/config/constants";
 
 const mapContainer = ref<HTMLElement | null>(null);
 const map = ref<mapboxgl.Map | null>(null);
 const countiesData = ref<GeoJSON.FeatureCollection | null>(null);
 let geocoder: MapboxGeocoder;
-const currentGeocoderResult = ref<any>(null);
+const geocoderRef = { value: undefined as MapboxGeocoder | undefined };
 const countyContaminationCounts = reactive<{ [key: string]: number }>({});
 const detailedPopup = ref<HTMLElement | null>(null);
+
+// Initialize property listings composable
+const {
+  listings,
+  listingMarkers,
+  listingsPanelExpanded,
+  isSearchResultsLoading,
+  currentGeocoderResult,
+  toggleListings,
+  highlightMarker,
+  downloadCSV,
+  searchListings,
+  clearSearch,
+} = usePropertyListings(map, geocoderRef);
 
 const layerControlExpanded = ref(true);
 const showContaminationLayers = ref(false);
@@ -201,221 +214,6 @@ const showContaminationChoropleth = ref(false);
 const showDiversityChoropleth = ref(false);
 const showDetailedPopup = ref(false);
 const detailedPopupContent = ref("");
-
-const listings = ref<any[]>([]);
-const listingMarkers = ref<mapboxgl.Marker[]>([]);
-
-const listingsPanelExpanded = ref(true);
-
-const isSearchResultsLoading = ref(false);
-
-const toggleListings = () => {
-  listingsPanelExpanded.value = !listingsPanelExpanded.value;
-};
-
-const highlightMarker = (listing) => {
-  // Remove highlight from all markers
-  listingMarkers.value.forEach((marker) => {
-    marker.getElement().style.zIndex = "0";
-    marker.getElement().style.filter = "none";
-  });
-
-  // Find and highlight the corresponding marker
-  const markerIndex = listings.value.findIndex((l) => l.id === listing.id);
-  if (markerIndex !== -1) {
-    const marker = listingMarkers.value[markerIndex];
-    marker.getElement().style.zIndex = "1";
-    marker.getElement().style.filter = "brightness(1.5)";
-
-    // Center map on the marker
-    map.value?.flyTo({
-      center: [listing.longitude, listing.latitude],
-      zoom: 10,
-    });
-  }
-};
-
-const downloadCSV = () => {
-  // Convert listings data to CSV format
-  const csvData = Papa.unparse(
-    listings.value.map((listing) => ({
-      // Basic Property Info
-      address: listing.formattedAddress,
-      addressLine1: listing.addressLine1,
-      addressLine2: listing.addressLine2,
-      city: listing.city,
-      state: listing.state,
-      zipCode: listing.zipCode,
-      county: listing.county,
-      latitude: listing.latitude,
-      longitude: listing.longitude,
-
-      // Property Details
-      propertyType: listing.propertyType,
-      bedrooms: listing.bedrooms,
-      bathrooms: listing.bathrooms,
-      squareFootage: listing.squareFootage,
-      lotSize: listing.lotSize,
-      yearBuilt: listing.yearBuilt,
-      hoaFee: listing.hoa?.fee,
-
-      // Listing Info
-      status: listing.status,
-      price: listing.price,
-      listingType: listing.listingType,
-      listedDate: listing.listedDate,
-      removedDate: listing.removedDate,
-      createdDate: listing.createdDate,
-      lastSeenDate: listing.lastSeenDate,
-      daysOnMarket: listing.daysOnMarket,
-      mlsName: listing.mlsName,
-      mlsNumber: listing.mlsNumber,
-
-      // Listing Agent Info
-      agentName: listing.listingAgent?.name,
-      agentPhone: listing.listingAgent?.phone,
-      agentEmail: listing.listingAgent?.email,
-      agentWebsite: listing.listingAgent?.website,
-
-      // Listing Office Info
-      officeName: listing.listingOffice?.name,
-      officePhone: listing.listingOffice?.phone,
-      officeEmail: listing.listingOffice?.email,
-      officeWebsite: listing.listingOffice?.website,
-
-      // History (most recent event)
-      mostRecentHistoryEvent: listing.history
-        ? Object.entries(listing.history)[0]?.[1]?.event
-        : null,
-      mostRecentHistoryPrice: listing.history
-        ? Object.entries(listing.history)[0]?.[1]?.price
-        : null,
-      mostRecentHistoryDate: listing.history
-        ? Object.entries(listing.history)[0]?.[0]
-        : null,
-    }))
-  );
-
-  // Create and trigger download
-  const blob = new Blob([csvData], { type: "text/csv" });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.setAttribute("href", url);
-  const getDateTime = (date = new Date()) => {
-    return date
-      .toLocaleString("en", {
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      })
-      .replace(",", "");
-  };
-  a.setAttribute(
-    "download",
-    listings.value[0].county +
-      listings.value[0].state +
-      "-LandForSale-" +
-      getDateTime() +
-      ".csv"
-  );
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  window.URL.revokeObjectURL(url);
-};
-
-const searchListings = async () => {
-  isSearchResultsLoading.value = true; // Set loading to true when search starts
-  // Clear existing markers
-  listingMarkers.value.forEach((marker) => marker.remove());
-  listingMarkers.value = [];
-
-  const center = map.value?.getCenter();
-  if (!center) return;
-
-  let searchUrl = "https://api.rentcast.io/v1/listings/sale?";
-
-  if (currentGeocoderResult.value) {
-    if (currentGeocoderResult.value.place_type?.includes("place")) {
-      // If it's a city search
-      const state = currentGeocoderResult.value.context
-        ?.find((c) => c.id.startsWith("region"))
-        ?.short_code?.split("-")[1];
-      searchUrl += `city=${currentGeocoderResult.value.text}&state=${state}`;
-    } else {
-      // If it's an address search
-      searchUrl += `latitude=${center.lat}&longitude=${center.lng}&radius=100`;
-    }
-  } else {
-    // No geocoder result, use map center
-    searchUrl += `latitude=${center.lat}&longitude=${center.lng}&radius=100`;
-  }
-
-  // Add common parameters
-  searchUrl += "&propertyType=Land&status=Active&limit=60";
-
-  try {
-    const response = await fetch(searchUrl, {
-      headers: {
-        accept: "application/json",
-        "X-Api-Key": "72f7ed2c628a40169dfa4bdaf2655fd8",
-      },
-    });
-
-    const data = await response.json();
-    debugLog("got rentcast data");
-    debugLog(data);
-    listings.value = data;
-    if (data.length === 0) {
-      alert(
-        "No lots found within 100 miles of this point, try somewhere else."
-      );
-    }
-
-    // Add markers for each listing
-    data.forEach((listing: any) => {
-      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-        <div class="listing-popup">
-          <h4>${listing.formattedAddress}</h4>
-          <p>Price: $${listing.price.toLocaleString()}</p>
-          <p>Lot Size: ${listing.lotSize} sq ft</p>
-          <p>Days on Market: ${listing.daysOnMarket}</p>
-          <a href="${listing.listingOffice?.website}" target="_blank">View Website</a>
-        </div>
-      `);
-
-      const marker = new mapboxgl.Marker()
-        .setLngLat([listing.longitude, listing.latitude])
-        .setPopup(popup)
-        .addTo(map.value!);
-
-      listingMarkers.value.push(marker);
-    });
-  } catch (error) {
-    console.error("Error fetching listings:", error);
-  } finally {
-    isSearchResultsLoading.value = false;
-  }
-};
-
-const clearSearch = () => {
-  // Remove all listing markers from map
-  listingMarkers.value.forEach((marker) => marker.remove());
-  listingMarkers.value = [];
-
-  // Clear listings array (this will hide the panel)
-  listings.value = [];
-
-  // Clear geocoder input
-  if (geocoder) {
-    geocoder.clear();
-  }
-
-  // Reset geocoder result
-  currentGeocoderResult.value = null;
-};
 
 const isDesktopView = computed(() => {
   return window.innerWidth > 768;
@@ -522,73 +320,9 @@ const updateChoroplethVisibility = () => {
 
 const contaminationLayers = DEV_MODE_DEMOGRAPHICS_ONLY
   ? []
-  : reactive([
-      {
-        id: "acres_brownfields",
-        name: "Brownfields",
-        file: "/datasets/epa-contamination/acres_brownfields.geojson",
-        color: "#FF0000",
-        visible: false,
-      },
-      {
-        id: "air_pollution_sources",
-        name: "Air Pollution Sources",
-        file: "/datasets/epa-contamination/air_pollution_sources.geojson",
-        color: "#00FF00",
-        visible: false,
-      },
-      {
-        id: "hazardous_waste_sites",
-        name: "Hazardous Waste Sites",
-        file: "/datasets/epa-contamination/hazardous_waste_sites.geojson",
-        color: "#0000FF",
-        visible: false,
-      },
-      {
-        id: "superfund_sites",
-        name: "Superfund Sites",
-        file: "/datasets/epa-contamination/superfund_sites.geojson",
-        color: "#FFFF00",
-        visible: false,
-      },
-      {
-        id: "toxic_release_inventory",
-        name: "Toxic Release Inventory",
-        file: "/datasets/epa-contamination/toxic_release_inventory.geojson",
-        color: "#FF00FF",
-        visible: false,
-      },
-    ]);
+  : reactive(CONTAMINATION_LAYERS);
 
-const demographicLayers = reactive([
-  {
-    id: "diversity_index",
-    name: "Diversity Index",
-    file: "/datasets/demographics/county_diversity_index_with_stats.csv",
-    color: "#800080", // Purple color for diversity
-    visible: false,
-    tooltip: "2023 Census => Simpson's Diversity Index",
-  },
-  {
-    id: "pct_Black",
-    name: "Percent Black",
-    file: "/datasets/demographics/county_diversity_index_with_stats.csv",
-    color: "#8B4513", // Brown color
-    visible: false,
-    tooltip: "2023 Census",
-  },
-  {
-    id: "life_expectancy",
-    name: "Life Expectancy",
-    visible: false,
-    tooltip: "2014, Center for Disease Control",
-  },
-  {
-    id: "combined_scores",
-    name: "BLO Combined Score",
-    visible: false,
-  },
-]);
+const demographicLayers = reactive(DEMOGRAPHIC_LAYERS);
 
 interface ColorBlend {
   geoID: string;
@@ -627,7 +361,7 @@ const loadingProgress = computed(() => {
 
 const loadCountiesData = async () => {
   try {
-    const countiesResponse = await fetch("/datasets/geographic/counties.geojson");
+    const countiesResponse = await fetch(DATA_PATHS.COUNTIES);
     countiesData.value = await countiesResponse.json();
 
     // Add debug logging
@@ -636,18 +370,14 @@ const loadCountiesData = async () => {
       sampleFeature: countiesData.value?.features?.[0],
     });
 
-    const contaminationResponse = await fetch(
-      "/datasets/epa-contamination/contamination_counts.json"
-    );
+    const contaminationResponse = await fetch(DATA_PATHS.CONTAMINATION_COUNTS);
     const contaminationData = await contaminationResponse.json();
     Object.assign(countyContaminationCounts, contaminationData);
 
     await loadDiversityData();
     await loadLifeExpectancyData();
 
-    const combinedScoresResponse = await fetch(
-      "/datasets/BLO-liveability-index/combined_scores.json"
-    );
+    const combinedScoresResponse = await fetch(DATA_PATHS.COMBINED_SCORES);
     combinedScoresData.value = await combinedScoresResponse.json();
 
     // Pre-calculate colors after all data is loaded
@@ -1278,9 +1008,7 @@ const combinedScoresData = ref<{ [key: string]: CombinedScoreData }>({});
 
 const loadDiversityData = async () => {
   try {
-    const response = await fetch(
-      "/datasets/demographics/county_pctBlack_diversity_index_with_stats.csv"
-    );
+    const response = await fetch(DATA_PATHS.DIVERSITY_DATA);
     const csvText = await response.text();
 
     const results = Papa.parse(csvText, { header: true, dynamicTyping: true });
@@ -1329,7 +1057,7 @@ const loadDiversityData = async () => {
 
 const loadLifeExpectancyData = async () => {
   try {
-    const response = await fetch("/datasets/demographics/lifeexpectancy-USA-county.csv");
+    const response = await fetch(DATA_PATHS.LIFE_EXPECTANCY);
     const csvText = await response.text();
 
     const results = Papa.parse(csvText, { header: true, dynamicTyping: true });
@@ -1435,7 +1163,7 @@ const handleGeocoderResult = (result: any) => {
 };
 
 onMounted(async () => {
-  mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+  mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
   debugLog("Component mounted");
   try {
     await loadCountiesData();
@@ -1450,17 +1178,20 @@ onMounted(async () => {
   map.value = new mapboxgl.Map({
     container: mapContainer.value!,
     style: "mapbox://styles/mapbox/light-v10",
-    center: [-98.5795, 39.8283], // Center of the US
-    zoom: 2,
+    center: MAP_CONFIG.DEFAULT_CENTER,
+    zoom: MAP_CONFIG.DEFAULT_ZOOM,
   });
 
   geocoder = new MapboxGeocoder({
     accessToken: mapboxgl.accessToken,
     mapboxgl: mapboxgl,
-    countries: "us",
+    countries: MAP_CONFIG.GEOCODER_COUNTRIES,
     types: "country,region,postcode,district,place",
     placeholder: "Search for a location",
   });
+
+  // Set geocoder ref for composables
+  geocoderRef.value = geocoder;
 
   const geocoderContainer = document.getElementById("geocoder");
   if (geocoderContainer) {
@@ -1631,10 +1362,10 @@ onMounted(async () => {
 const preCalculateColors = () => {
   debugLog("Pre-calculating color blends...");
   const colors = {
-    diversity_index: [128, 0, 128], // Purple
-    pct_Black: [139, 69, 19], // Brown (saddle brown)
-    contamination: [255, 0, 0], // Red
-    life_expectancy: [0, 128, 0], // Green
+    diversity_index: LAYER_COLORS.DIVERSITY_INDEX,
+    pct_Black: LAYER_COLORS.PCT_BLACK,
+    contamination: LAYER_COLORS.CONTAMINATION,
+    life_expectancy: LAYER_COLORS.LIFE_EXPECTANCY,
     combined_scores: {
       min: [255, 255, 0], // Yellow
       max: [0, 255, 0], // Vivid green
