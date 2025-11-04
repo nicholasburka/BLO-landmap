@@ -3,10 +3,10 @@ import numpy as np
 
 def calculate_diversity_index(group):
     total_pop = group['TOT_POP'].sum()
-    
+
     if total_pop == 0:
         return pd.Series({'diversity_index': 0, 'total_population': 0})
-    
+
     races = {
         'NH_White': group['NHWA_MALE'].sum() + group['NHWA_FEMALE'].sum(),
         'NH_Black': group['NHBA_MALE'].sum() + group['NHBA_FEMALE'].sum(),
@@ -16,23 +16,29 @@ def calculate_diversity_index(group):
         'NH_TwoOrMore': group['NHTOM_MALE'].sum() + group['NHTOM_FEMALE'].sum(),
         'Hispanic': group['H_MALE'].sum() + group['H_FEMALE'].sum()
     }
-    
+
+    # Calculate total Black population (Hispanic + Non-Hispanic)
+    total_black = group['BA_MALE'].sum() + group['BA_FEMALE'].sum()
+
     sum_squares = sum((n / total_pop) ** 2 for n in races.values() if n > 0)
     diversity_index = 1 - sum_squares
     pct_nhBlack = (races['NH_Black'] / total_pop) * 100 if total_pop > 0 else 0
+    pct_Black = (total_black / total_pop) * 100 if total_pop > 0 else 0
 
-    
+
     result = {
         'diversity_index': diversity_index,
         'total_population': total_pop,
-        'pct_nhBlack': pct_nhBlack
+        'pct_nhBlack': pct_nhBlack,
+        'pct_Black': pct_Black,
+        'total_Black': total_black
     }
     result.update(races)
     return pd.Series(result)
 
 
 # Read the CSV file
-df = pd.read_csv('/Users/mac/Desktop/BLO/map/BLO-landmap/public/datasets/countyCensus-est2023-alldata.csv', encoding='latin-1')
+df = pd.read_csv('../source-data/census/countyCensus-est2023-alldata.csv', encoding='latin-1')
 
 # Group by county and calculate diversity index and aggregate statistics
 county_diversity = df.groupby(['STATE', 'COUNTY', 'STNAME', 'CTYNAME']).apply(calculate_diversity_index).reset_index()
@@ -48,7 +54,7 @@ county_diversity = county_diversity.sort_values('diversity_index', ascending=Fal
 print(county_diversity)
 
 # Save to a new CSV file
-county_diversity.to_csv('county_diversity_index_with_stats.csv', index=False)
+county_diversity.to_csv('../public/datasets/demographics/county_pctBlack_diversity_index_with_stats.csv', index=False)
 
 # Add after line 38 in precompute_census_race.py
 # Print state coverage statistics

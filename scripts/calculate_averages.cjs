@@ -28,9 +28,9 @@ const loadJSONData = (filePath) => {
 
 // Load the necessary data files
 const loadData = async () => {
-  const diversityData = await loadCSVData(path.join(__dirname, '../public/datasets/county_pctBlack_diversity_index_with_stats.csv'));
-  const lifeExpectancyData = await loadCSVData(path.join(__dirname, '../public/datasets/lifeexpectancy-USA-county.csv'));
-  const contaminationCounts = await loadJSONData(path.join(__dirname, '../public/datasets/new_contamination_counts.json'));
+  const diversityData = await loadCSVData(path.join(__dirname, '../public/datasets/demographics/county_pctBlack_diversity_index_with_stats.csv'));
+  const lifeExpectancyData = await loadCSVData(path.join(__dirname, '../public/datasets/demographics/lifeexpectancy-USA-county.csv'));
+  const contaminationCounts = await loadJSONData(path.join(__dirname, '../source-data/computed/new_contamination_counts.json'));
 
   return { diversityData, lifeExpectancyData, contaminationCounts };
 };
@@ -184,7 +184,7 @@ const main = async () => {
   };
 
   // Save to a new output file
-  fs.writeFileSync(path.join(__dirname, '../public/datasets/averages.json'), JSON.stringify(results, null, 2));
+  fs.writeFileSync(path.join(__dirname, '../source-data/computed/averages.json'), JSON.stringify(results, null, 2));
   console.log('Averages calculated and saved to averages.json');
 };
 

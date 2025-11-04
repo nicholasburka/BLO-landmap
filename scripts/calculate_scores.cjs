@@ -30,16 +30,17 @@ const calculateScores = (averages, countyData) => {
 
   for (const countyId in countyData) {
     const data = countyData[countyId];
-    
-    // Skip if essential data is missing
-    if (!data.pct_nhBlack || !data.diversity_index || !data.lifeExpectancy) {
+
+    // Skip only if NO demographic data is available
+    if (!data.pct_nhBlack && !data.diversity_index) {
       continue;
     }
 
-    const contaminationValue = parseFloat(data.total) || 0;
-    const pctBlackValue = parseFloat(data.pct_nhBlack);
-    const diversityIndexValue = parseFloat(data.diversity_index);
-    const lifeExpectancyValue = parseFloat(data.lifeExpectancy);
+    // Parse values, using null for missing data
+    const contaminationValue = data.total != null ? parseFloat(data.total) : null;
+    const pctBlackValue = data.pct_nhBlack != null ? parseFloat(data.pct_nhBlack) : null;
+    const diversityIndexValue = data.diversity_index != null ? parseFloat(data.diversity_index) : null;
+    const lifeExpectancyValue = data.lifeExpectancy != null ? parseFloat(data.lifeExpectancy) : null;
 
     scores[countyId] = {
       rawValues: {
@@ -49,10 +50,11 @@ const calculateScores = (averages, countyData) => {
         lifeExpectancy: lifeExpectancyValue
       },
       scores: {
-        contaminationScore: getScore(contaminationValue, averages.contaminationStats.avgContamination, averages.contaminationStats.stdDevContamination),
-        pctBlackScore: getScore(pctBlackValue, averages.demographicAverages.avgBlackPct, averages.demographicAverages.stdDevBlackPct),
-        diversityIndexScore: getScore(diversityIndexValue, averages.demographicAverages.avgDiversityIndex, averages.demographicAverages.stdDevDiversityIndex),
-        lifeExpectancyScore: getScore(lifeExpectancyValue, averages.demographicAverages.avgLifeExpectancy, 2.5) // Using approximate std dev for life expectancy
+        // Use 0 for missing data - this signals to skip it in combined score calculation
+        contaminationScore: contaminationValue != null ? getScore(contaminationValue, averages.contaminationStats.avgContamination, averages.contaminationStats.stdDevContamination) : 0,
+        pctBlackScore: pctBlackValue != null ? getScore(pctBlackValue, averages.demographicAverages.avgBlackPct, averages.demographicAverages.stdDevBlackPct) : 0,
+        diversityIndexScore: diversityIndexValue != null ? getScore(diversityIndexValue, averages.demographicAverages.avgDiversityIndex, averages.demographicAverages.stdDevDiversityIndex) : 0,
+        lifeExpectancyScore: lifeExpectancyValue != null ? getScore(lifeExpectancyValue, averages.demographicAverages.avgLifeExpectancy, 2.5) : 0
       }
     };
   }
@@ -84,12 +86,12 @@ const getScore = (value, avg, stdDev) => {
 // Main function to execute the script
 const main = async () => {
   try {
-    const averages = await loadJSONData(path.join(__dirname, '../public/datasets/averages.json'));
-    
+    const averages = await loadJSONData(path.join(__dirname, '../source-data/computed/averages.json'));
+
     // Load all data sources
-    const diversityData = await loadCSVData(path.join(__dirname, '../public/datasets/county_pctBlack_diversity_index_with_stats.csv'));
-    const lifeExpectancyData = await loadCSVData(path.join(__dirname, '../public/datasets/lifeexpectancy-USA-county.csv'));
-    const contaminationData = await loadJSONData(path.join(__dirname, '../public/datasets/new_contamination_counts.json'));
+    const diversityData = await loadCSVData(path.join(__dirname, '../public/datasets/demographics/county_pctBlack_diversity_index_with_stats.csv'));
+    const lifeExpectancyData = await loadCSVData(path.join(__dirname, '../public/datasets/demographics/lifeexpectancy-USA-county.csv'));
+    const contaminationData = await loadJSONData(path.join(__dirname, '../source-data/computed/new_contamination_counts.json'));
 
     // Combine county data
     const countyData = {};
@@ -98,7 +100,7 @@ const main = async () => {
     diversityData.forEach(item => {
       const countyId = item.GEOID;
       countyData[countyId] = {
-        pct_nhBlack: parseFloat(item.pct_nhBlack),
+        pct_nhBlack: parseFloat(item.pct_Black) || parseFloat(item.pct_nhBlack), // Use pct_Black (total) instead of pct_nhBlack
         diversity_index: parseFloat(item.diversity_index)
       };
     });
@@ -122,7 +124,7 @@ const main = async () => {
 
     // Save results
     fs.writeFileSync(
-      path.join(__dirname, '../public/datasets/county_scores.json'), 
+      path.join(__dirname, '../source-data/computed/county_scores.json'),
       JSON.stringify(scores, null, 2)
     );
     

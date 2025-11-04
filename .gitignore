@@ -30,8 +30,9 @@ coverage
 *.tsbuildinfo
 
 # Project specific
-public/datasets/State-zip-code-GeoJSON/
-public/datasets/large/
+archive/
+source-data/zip-codes/
+source-data/census/
 
 # Python virtual environment
 .env

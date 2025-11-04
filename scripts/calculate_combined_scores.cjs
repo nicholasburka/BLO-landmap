@@ -13,13 +13,15 @@ function processCountyData(data) {
         let combinedScore = 0;
         
         // Count valid scores and sum them with appropriate weights
+        // Invert contamination score so higher is better (6 - score maps 1->5, 5->1)
         if (scores.contaminationScore !== 0) {
-            combinedScore += -1 * scores.contaminationScore;
+            combinedScore += (6 - scores.contaminationScore);
             validScores++;
         }
+        // Triple-weight percent Black (count it 3 times)
         if (scores.pctBlackScore !== 0) {
-            combinedScore += scores.pctBlackScore;
-            validScores++;
+            combinedScore += scores.pctBlackScore * 3;
+            validScores += 3;
         }
         if (scores.diversityIndexScore !== 0) {
             combinedScore += scores.diversityIndexScore;
@@ -74,8 +76,8 @@ function processCountyData(data) {
 }
 
 // Read and process the data
-const inputData = JSON.parse(fs.readFileSync(path.join(__dirname, '../public/datasets/county_scores.json')));
+const inputData = JSON.parse(fs.readFileSync(path.join(__dirname, '../source-data/computed/county_scores.json')));
 const processedData = processCountyData(inputData);
 
 // Write the results
-fs.writeFileSync(path.join(__dirname, '../public/datasets/combined_scores.json'), JSON.stringify(processedData, null, 2));
+fs.writeFileSync(path.join(__dirname, '../public/datasets/BLO-liveability-index/combined_scores.json'), JSON.stringify(processedData, null, 2));

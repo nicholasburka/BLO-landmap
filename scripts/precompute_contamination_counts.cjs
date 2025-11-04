@@ -12,7 +12,7 @@ const contaminationLayers = [
 ]
 
 const countiesData = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '../public/datasets/counties-10m.json'), 'utf-8')
+  fs.readFileSync(path.join(__dirname, '../source-data/geographic/counties-10m.json'), 'utf-8')
 )
 const countyContaminationCounts = {}
 
@@ -90,7 +90,7 @@ console.log('Sample Colorado counties from map:',
 
 contaminationLayers.forEach((layer) => {
   const data = JSON.parse(
-    fs.readFileSync(path.join(__dirname, `../public/datasets/${layer}.geojson`), 'utf-8')
+    fs.readFileSync(path.join(__dirname, `../public/datasets/epa-contamination/${layer}.geojson`), 'utf-8')
   )
   data.features.forEach((feature) => {
     const point = turf.point(feature.geometry.coordinates)
@@ -111,7 +111,7 @@ contaminationLayers.forEach((layer) => {
 })
 
 fs.writeFileSync(
-  path.join(__dirname, '../public/datasets/new_contamination_counts.json'),
+  path.join(__dirname, '../source-data/computed/new_contamination_counts.json'),
   JSON.stringify(countyContaminationCounts)
 )
 

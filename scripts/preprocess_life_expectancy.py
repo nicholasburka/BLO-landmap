@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 
-# Read the CSV file
-df = pd.read_csv('dist/datasets/lifeexpectancy-USA.csv')
+# Read the CSV file (assuming source file is in source-data)
+df = pd.read_csv('../source-data/census/lifeexpectancy-USA.csv')
 
 # Create GEOID by padding state and county codes with zeros
 df['GEOID'] = (df['STATE2KX'].astype(str).str.zfill(2) + 
@@ -26,7 +26,7 @@ county_data['CNTY2KX'] = county_data['GEOID'].str[2:].astype(int)
 county_data = county_data[['GEOID', 'STATE2KX', 'CNTY2KX', 'e(0)', 'se(e(0))']]
 
 # Save to CSV in the public folder
-county_data.to_csv('public/datasets/lifeexpectancy-USA-county.csv', index=False)
+county_data.to_csv('../public/datasets/demographics/lifeexpectancy-USA-county.csv', index=False)
 
 # After creating GEOIDs
 # Check Colorado data

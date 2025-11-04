@@ -3,11 +3,13 @@
     <div
       id="geocoder"
       class="geocoder"
+      v-show="!showDetailedPopup"
       style="position: absolute; top: 10px; left: 10px; z-index: 1"
     ></div>
     <div
       id="search-listings"
       class="search-listings"
+      v-show="!showDetailedPopup"
       style="position: absolute; top: 60px; left: 10px; z-index: 1"
     >
       <button
@@ -17,6 +19,13 @@
       >
         <span v-if="!isSearchResultsLoading">Find land for sale</span>
         <div v-else class="loader"></div>
+      </button>
+      <button
+        v-if="listings.length > 0"
+        @click="clearSearch"
+        class="clear-search-button"
+      >
+        Clear Search
       </button>
     </div>
     <div v-if="listings.length > 0" id="listings-panel" class="listings-panel">
@@ -94,33 +103,15 @@
           </span>
         </div>
         <template v-if="!DEV_MODE_DEMOGRAPHICS_ONLY">
-          <h3 style="color: black">EPA - Sites of Contamination</h3>
-          <div>
+          <h3 style="color: black">EPA - Sites of Land Toxicity</h3>
+          <div class="layer-item">
             <label style="color: black">
               <input
                 type="checkbox"
                 v-model="showContaminationLayers"
                 @change="toggleContaminationLayers"
               />
-              Show All
-            </label>
-          </div>
-          <div
-            v-for="layer in contaminationLayers"
-            :key="layer.id"
-            class="layer-item"
-          >
-            <label style="color: black">
-              <input
-                type="checkbox"
-                v-model="layer.visible"
-                @click="toggleLayer(layer.id)"
-              />
-              <span
-                class="color-dot"
-                :style="{ backgroundColor: layer.color }"
-              ></span>
-              {{ layer.name }}
+              Show All Sites
             </label>
           </div>
           <div class="layer-item">
@@ -130,7 +121,7 @@
                 v-model="showContaminationChoropleth"
                 @click="toggleContaminationChoropleth"
               />
-              Show Contamination Choropleth
+              County-Level Breakdown
             </label>
           </div>
         </template>
@@ -167,11 +158,11 @@
         {{ averagesPanelExpanded ? "▼" : "▲" }} National Averages (per county)
       </button>
       <div v-show="averagesPanelExpanded" class="averages-content">
-        <p>Contamination Sites: 8.77</p>
+        <p>Sites of Land Toxicity: 8.77</p>
         <p>Black Population: 9.05%</p>
         <p>Diversity Index: 0.33</p>
         <p>Life Expectancy: 77.74 years</p>
-        <p>BLO Combined Score: 1.4</p>
+        <p>BLO Combined Score: 2.84</p>
       </div>
     </div>
   </div>
@@ -409,6 +400,23 @@ const searchListings = async () => {
   }
 };
 
+const clearSearch = () => {
+  // Remove all listing markers from map
+  listingMarkers.value.forEach((marker) => marker.remove());
+  listingMarkers.value = [];
+
+  // Clear listings array (this will hide the panel)
+  listings.value = [];
+
+  // Clear geocoder input
+  if (geocoder) {
+    geocoder.clear();
+  }
+
+  // Reset geocoder result
+  currentGeocoderResult.value = null;
+};
+
 const isDesktopView = computed(() => {
   return window.innerWidth > 768;
 });
@@ -518,35 +526,35 @@ const contaminationLayers = DEV_MODE_DEMOGRAPHICS_ONLY
       {
         id: "acres_brownfields",
         name: "Brownfields",
-        file: "/datasets/acres_brownfields.geojson",
+        file: "/datasets/epa-contamination/acres_brownfields.geojson",
         color: "#FF0000",
         visible: false,
       },
       {
         id: "air_pollution_sources",
         name: "Air Pollution Sources",
-        file: "/datasets/air_pollution_sources.geojson",
+        file: "/datasets/epa-contamination/air_pollution_sources.geojson",
         color: "#00FF00",
         visible: false,
       },
       {
         id: "hazardous_waste_sites",
         name: "Hazardous Waste Sites",
-        file: "/datasets/hazardous_waste_sites.geojson",
+        file: "/datasets/epa-contamination/hazardous_waste_sites.geojson",
         color: "#0000FF",
         visible: false,
       },
       {
         id: "superfund_sites",
         name: "Superfund Sites",
-        file: "/datasets/superfund_sites.geojson",
+        file: "/datasets/epa-contamination/superfund_sites.geojson",
         color: "#FFFF00",
         visible: false,
       },
       {
         id: "toxic_release_inventory",
         name: "Toxic Release Inventory",
-        file: "/datasets/toxic_release_inventory.geojson",
+        file: "/datasets/epa-contamination/toxic_release_inventory.geojson",
         color: "#FF00FF",
         visible: false,
       },
@@ -556,16 +564,16 @@ const demographicLayers = reactive([
   {
     id: "diversity_index",
     name: "Diversity Index",
-    file: "/datasets/county_diversity_index_with_stats.csv",
+    file: "/datasets/demographics/county_diversity_index_with_stats.csv",
     color: "#800080", // Purple color for diversity
     visible: false,
     tooltip: "2023 Census => Simpson's Diversity Index",
   },
   {
-    id: "pct_nhBlack",
-    name: "Percent Black (Non-Hispanic)",
-    file: "/datasets/county_diversity_index_with_stats.csv",
-    color: "#000080", // Navy blue color
+    id: "pct_Black",
+    name: "Percent Black",
+    file: "/datasets/demographics/county_diversity_index_with_stats.csv",
+    color: "#8B4513", // Brown color
     visible: false,
     tooltip: "2023 Census",
   },
@@ -619,7 +627,7 @@ const loadingProgress = computed(() => {
 
 const loadCountiesData = async () => {
   try {
-    const countiesResponse = await fetch("/datasets/counties.geojson");
+    const countiesResponse = await fetch("/datasets/geographic/counties.geojson");
     countiesData.value = await countiesResponse.json();
 
     // Add debug logging
@@ -629,7 +637,7 @@ const loadCountiesData = async () => {
     });
 
     const contaminationResponse = await fetch(
-      "/datasets/contamination_counts.json"
+      "/datasets/epa-contamination/contamination_counts.json"
     );
     const contaminationData = await contaminationResponse.json();
     Object.assign(countyContaminationCounts, contaminationData);
@@ -638,7 +646,7 @@ const loadCountiesData = async () => {
     await loadLifeExpectancyData();
 
     const combinedScoresResponse = await fetch(
-      "/datasets/combined_scores.json"
+      "/datasets/BLO-liveability-index/combined_scores.json"
     );
     combinedScoresData.value = await combinedScoresResponse.json();
 
@@ -865,7 +873,7 @@ const updateChoroplethColors = () => {
               case "diversity_index":
                 finalColor = colors.diversityColor;
                 break;
-              case "pct_nhBlack":
+              case "pct_Black":
                 finalColor = colors.blackPctColor;
                 break;
               case "life_expectancy":
@@ -909,7 +917,7 @@ const getLayerColor = (
   switch (layerId) {
     case "diversity_index":
       return colors.diversityColor;
-    case "pct_nhBlack":
+    case "pct_Black":
       return colors.blackPctColor;
     case "life_expectancy":
       return colors.lifeExpectancyColor;
@@ -975,7 +983,7 @@ const popup = ref<mapboxgl.Popup | null>(null);
           `
           <div style="color: black;">
             <strong>${countyName}</strong><br>
-            EPA Sources of Contamination: ${contaminationCount}
+            EPA Sites of Land Toxicity: ${contaminationCount}
           </div>
         `
         )
@@ -1084,17 +1092,21 @@ const addTooltip = () => {
       };
       const getColoredValueContam = (value: number, average: number) => {
         const color = value > average ? "red" : "green";
-        return `<span style="color: ${color}">${value.toFixed(2)}</span>`;
+        return `<span style="color: ${color}">${Math.round(value)}</span>`;
       };
+
+      const lifeExpValue = lifeExpectancyData.value[countyId]?.lifeExpectancy;
+      const pctBlackValue = countyDiversityData?.pct_Black;
+      const diversityValue = countyDiversityData?.diversityIndex;
 
       const tooltipContent = `
         <h3>${countyName}, ${stateName}</h3>
-        <p>BLO Combined Score: ${getColoredValue(combinedScoresData.value[countyId]?.combinedScore || 0, 1.4)}</p>
-        <p>Total Population: ${countyDiversityData ? countyDiversityData.totalPopulation.toLocaleString() : "N/A"}</p>
-        <p>Life Expectancy: ${getColoredValue(lifeExpectancyData.value[countyId]?.lifeExpectancy || 0, averages.lifeExpectancy)} years</p>
-        <p>Percent Black (Non-Hispanic): ${getColoredValue(countyDiversityData?.pct_nhBlack || 0, averages.blackPct)}</p>
-        <p>Diversity Index: ${getColoredValue(countyDiversityData?.diversityIndex || 0, averages.diversityIndex)}</p>
-        <p>EPA Contaminated Sites: ${getColoredValueContam(totalContamination, averages.contamination)}</p>
+        <p>BLO Combined Score: ${combinedScoresData.value[countyId]?.combinedScore ? getColoredValue(combinedScoresData.value[countyId].combinedScore, 2.84) : "?"}</p>
+        <p>Total Population: ${countyDiversityData?.totalPopulation ? countyDiversityData.totalPopulation.toLocaleString() : "?"}</p>
+        <p>Life Expectancy: ${lifeExpValue ? getColoredValue(lifeExpValue, averages.lifeExpectancy) + " years" : "?"}</p>
+        <p>Percent Black: ${pctBlackValue != null ? getColoredValue(pctBlackValue, averages.blackPct) + "%" : "?"}</p>
+        <p>Diversity Index: ${diversityValue != null ? getColoredValue(diversityValue, averages.diversityIndex) : "?"}</p>
+        <p>EPA Sites of Land Toxicity: ${totalContamination != null ? getColoredValueContam(totalContamination, averages.contamination) : "?"}</p>
       `;
 
       tooltip.setLngLat(e.lngLat).setHTML(tooltipContent).addTo(map.value);
@@ -1191,37 +1203,44 @@ const showDetailedPopupForFeature = (
 
   let content = `
     <h2>${countyName}, ${stateName}</h2>
-    <h3>Demographic Data – Census</h3>
   `;
 
   if (countyDiversityData) {
     content += `
-      <p>BLO Combined Score: ${combinedScore.combinedScore.toFixed(2)}</p>
-      <p>Rank: ${combinedScore.rankScore} (${combinedScore.countiesWithSameRank} counties tied) of 3244</p>
-      <p>Total Population: ${countyDiversityData.totalPopulation.toLocaleString()}</p>
-      <p>Life Expectancy: ${lifeExpectancyValue ? lifeExpectancyValue.toFixed(1) : "N/A"} years</p>
-      <p>Diversity Index: ${countyDiversityData.diversityIndex.toFixed(4)}</p>
-      <p>Black (Non-Hispanic): ${countyDiversityData.nhBlack.toLocaleString()} (${countyDiversityData.pct_nhBlack.toFixed(2)}%)</p>
-      <p>White (Non-Hispanic): ${countyDiversityData.nhWhite.toLocaleString()} (${((countyDiversityData.nhWhite / countyDiversityData.totalPopulation) * 100).toFixed(2)}%)</p>
-      <p>American Indian: ${countyDiversityData.nhAmIndian.toLocaleString()} (${((countyDiversityData.nhAmIndian / countyDiversityData.totalPopulation) * 100).toFixed(2)}%)</p>
-      <p>Asian: ${countyDiversityData.nhAsian.toLocaleString()} (${((countyDiversityData.nhAsian / countyDiversityData.totalPopulation) * 100).toFixed(2)}%)</p>
-      <p>Pacific Islander: ${countyDiversityData.nhPacIslander.toLocaleString()} (${((countyDiversityData.nhPacIslander / countyDiversityData.totalPopulation) * 100).toFixed(2)}%)</p>
-      <p>Two or More Races: ${countyDiversityData.nhTwoOrMore.toLocaleString()} (${((countyDiversityData.nhTwoOrMore / countyDiversityData.totalPopulation) * 100).toFixed(2)}%)</p>
-      <p>Hispanic: ${countyDiversityData.hispanic.toLocaleString()} (${((countyDiversityData.hispanic / countyDiversityData.totalPopulation) * 100).toFixed(2)}%)</p>
+      <table class="county-stats-table">
+        <tr>
+          <td class="label">BLO Liveability Score:</td>
+          <td class="value">${combinedScore?.combinedScore != null ? combinedScore.combinedScore.toFixed(2) + " of 5.0" : "?"}</td>
+        </tr>
+        <tr>
+          <td class="label">Rank:</td>
+          <td class="value">${combinedScore?.rankScore != null ? combinedScore.rankScore + " of 3244" : "?"}</td>
+        </tr>
+        <tr>
+          <td class="label">Total Population:</td>
+          <td class="value">${countyDiversityData.totalPopulation != null ? countyDiversityData.totalPopulation.toLocaleString() : "?"}</td>
+        </tr>
+        <tr>
+          <td class="label">Percent Black:</td>
+          <td class="value">${countyDiversityData.pct_Black != null ? countyDiversityData.pct_Black.toFixed(2) + "%" : "?"}</td>
+        </tr>
+        <tr>
+          <td class="label">Life Expectancy:</td>
+          <td class="value">${lifeExpectancyValue != null ? lifeExpectancyValue.toFixed(1) + " years" : "?"}</td>
+        </tr>
+        <tr>
+          <td class="label">Diversity Index:</td>
+          <td class="value">${countyDiversityData.diversityIndex != null ? countyDiversityData.diversityIndex.toFixed(4) : "?"}</td>
+        </tr>
+        <tr>
+          <td class="label">EPA Sites of Land Toxicity:</td>
+          <td class="value">${contaminationData?.total != null ? contaminationData.total : "?"}</td>
+        </tr>
+      </table>
     `;
   } else {
-    content += `<p>No demographic data available</p>`;
+    content += `<p>No data available</p>`;
   }
-
-  content += `
-    <h3>Contamination Data – EPA</h3>
-    <p>Brownfields: ${contaminationData.layers?.acres_brownfields || 0}</p>
-    <p>Air Pollution Sources: ${contaminationData.layers?.air_pollution_sources || 0}</p>
-    <p>Hazardous Waste Sites: ${contaminationData.layers?.hazardous_waste_sites || 0}</p>
-    <p>Superfund Sites: ${contaminationData.layers?.superfund_sites || 0}</p>
-    <p>Toxic Release Inventory: ${contaminationData.layers?.toxic_release_inventory || 0}</p>
-    <p>Total Contamination Count: ${contaminationData.total}</p>
-  `;
 
   detailedPopupContent.value = content;
   showDetailedPopup.value = true;
@@ -1234,6 +1253,8 @@ interface DiversityData {
     nhWhite: number;
     nhBlack: number;
     pct_nhBlack: number;
+    pct_Black: number;
+    total_Black: number;
     nhAmIndian: number;
     nhAsian: number;
     nhPacIslander: number;
@@ -1258,7 +1279,7 @@ const combinedScoresData = ref<{ [key: string]: CombinedScoreData }>({});
 const loadDiversityData = async () => {
   try {
     const response = await fetch(
-      "/datasets/county_pctBlack_diversity_index_with_stats.csv"
+      "/datasets/demographics/county_pctBlack_diversity_index_with_stats.csv"
     );
     const csvText = await response.text();
 
@@ -1282,6 +1303,8 @@ const loadDiversityData = async () => {
         diversityIndex: row.diversity_index,
         totalPopulation: row.total_population,
         pct_nhBlack: row.pct_nhBlack,
+        pct_Black: row.pct_Black,
+        total_Black: row.total_Black,
         nhWhite: row.NH_White,
         nhBlack: row.NH_Black,
         nhAmIndian: row.NH_AmIndian,
@@ -1306,7 +1329,7 @@ const loadDiversityData = async () => {
 
 const loadLifeExpectancyData = async () => {
   try {
-    const response = await fetch("/datasets/lifeexpectancy-USA-county.csv");
+    const response = await fetch("/datasets/demographics/lifeexpectancy-USA-county.csv");
     const csvText = await response.text();
 
     const results = Papa.parse(csvText, { header: true, dynamicTyping: true });
@@ -1609,7 +1632,7 @@ const preCalculateColors = () => {
   debugLog("Pre-calculating color blends...");
   const colors = {
     diversity_index: [128, 0, 128], // Purple
-    pct_nhBlack: [0, 0, 128], // Navy blue
+    pct_Black: [139, 69, 19], // Brown (saddle brown)
     contamination: [255, 0, 0], // Red
     life_expectancy: [0, 128, 0], // Green
     combined_scores: {
@@ -1660,7 +1683,7 @@ const preCalculateColors = () => {
       maxDiversityIndex > 0
         ? (data.diversityIndex || 0) / maxDiversityIndex
         : 0;
-    const blackPctValue = (data.pct_nhBlack || 0) / 100;
+    const blackPctValue = (data.pct_Black || 0) / 100;
     const contaminationValue = countyContaminationCounts[geoID]?.total || 0;
     const contaminationNormalized =
       maxContamination > 0 ? contaminationValue / maxContamination : 0;
@@ -1680,7 +1703,7 @@ const preCalculateColors = () => {
         number,
         number,
       ],
-      blackPctColor: [...colors.pct_nhBlack, blackPctValue] as [
+      blackPctColor: [...colors.pct_Black, blackPctValue] as [
         number,
         number,
         number,
@@ -1716,17 +1739,17 @@ const preCalculateColors = () => {
         blackPctAndContamination: [
           Math.min(
             255,
-            colors.pct_nhBlack[0] * blackPctValue +
+            colors.pct_Black[0] * blackPctValue +
               colors.contamination[0] * contaminationNormalized
           ),
           Math.min(
             255,
-            colors.pct_nhBlack[1] * blackPctValue +
+            colors.pct_Black[1] * blackPctValue +
               colors.contamination[1] * contaminationNormalized
           ),
           Math.min(
             255,
-            colors.pct_nhBlack[2] * blackPctValue +
+            colors.pct_Black[2] * blackPctValue +
               colors.contamination[2] * contaminationNormalized
           ),
           Math.max(blackPctValue, contaminationNormalized),
@@ -1838,6 +1861,12 @@ const preCalculateColors = () => {
   }
 }
 
+.search-listings {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
 .listings-button {
   background-color: #4caf50;
   color: white;
@@ -1861,6 +1890,26 @@ const preCalculateColors = () => {
 
 .listings-button:hover {
   background-color: #45a049;
+}
+
+.clear-search-button {
+  background-color: #f44336;
+  color: white;
+  padding: 10px 20px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 150px;
+  min-height: 40px;
+}
+
+.clear-search-button:hover {
+  background-color: #da190b;
 }
 
 .listings-panel {
@@ -2202,6 +2251,38 @@ const preCalculateColors = () => {
 .detailed-popup-content {
   padding-right: 20px;
   pointer-events: auto;
+}
+
+.county-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+}
+
+.county-stats-table tr {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.county-stats-table tr:last-child {
+  border-bottom: none;
+}
+
+.county-stats-table td {
+  padding: 8px 10px;
+  line-height: 1.4;
+}
+
+.county-stats-table td.label {
+  font-weight: 600;
+  color: #555;
+  width: 50%;
+  text-align: left;
+}
+
+.county-stats-table td.value {
+  color: #333;
+  text-align: right;
+  width: 50%;
 }
 
 .detailed-popup-close {
