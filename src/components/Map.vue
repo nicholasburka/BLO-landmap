@@ -113,7 +113,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, reactive, watch, computed } from "vue";
-import mapboxgl, { Expression, Map } from "mapbox-gl";
+import mapboxgl, { type Expression, type Map } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
@@ -133,6 +133,7 @@ import {
   MAPBOX_ACCESS_TOKEN,
   MAP_CONFIG,
 } from "@/config/constants";
+import type { ColorBlend } from "@/types/mapTypes";
 import CountyModal from "@/components/CountyModal.vue";
 import LayerControls from "@/components/LayerControls.vue";
 import LoadingIndicator from "@/components/LoadingIndicator.vue";
@@ -236,6 +237,66 @@ const selectedEconomicLayers = ref<string[]>([]);
 const selectedHousingLayers = ref<string[]>([]);
 const selectedEquityLayers = ref<string[]>([]);
 
+// Computed property to track ALL selected layers across categories
+const allSelectedLayers = computed(() => {
+  const layers = [
+    ...selectedDemographicLayers.value,
+    ...selectedEconomicLayers.value,
+    ...selectedHousingLayers.value,
+    ...selectedEquityLayers.value,
+  ].filter(layerId =>
+    // Exclude BLO combined scores from multi-layer computation
+    layerId !== 'combined_scores' && layerId !== 'combined_scores_v2'
+  );
+
+  // Add contamination if the choropleth is showing
+  if (showContaminationChoropleth.value) {
+    layers.push('contamination');
+  }
+
+  return layers;
+});
+
+// Layer ID to component name mapping for combined_scores_v2.json
+const layerToComponent: Record<string, string> = {
+  'diversity_index': 'diversity',
+  'pct_Black': 'pct_black',
+  'life_expectancy': 'life_expectancy',
+  'contamination': 'contamination',  // For EPA contamination choropleth
+  'avg_weekly_wage': 'avg_weekly_wage',
+  'median_income_by_race': 'median_income_black',
+  'median_home_value': 'median_home_value',
+  'median_property_tax': 'median_property_tax',
+  'homeownership_by_race': 'homeownership_black',
+  'poverty_by_race': 'poverty_rate_black',
+  'black_progress_index': 'black_progress_index',
+};
+
+// Compute combined score for multiple selected layers
+const computeCombinedScore = (countyId: string, selectedLayerIds: string[]): number => {
+  if (selectedLayerIds.length === 0) return 0;
+
+  const countyData = combinedScoresV2Data.value[countyId];
+  if (!countyData || !countyData.components) return 0;
+
+  // Map layer IDs to component names and get their normalized values
+  const componentValues: number[] = [];
+
+  selectedLayerIds.forEach(layerId => {
+    const componentName = layerToComponent[layerId];
+    if (componentName && countyData.components[componentName as keyof typeof countyData.components] != null) {
+      componentValues.push(countyData.components[componentName as keyof typeof countyData.components]);
+    }
+  });
+
+  // Return 0 if no valid components found
+  if (componentValues.length === 0) return 0;
+
+  // Average the normalized component values (0-1) and scale to 0-5
+  const average = componentValues.reduce((sum, val) => sum + val, 0) / componentValues.length;
+  return average * 5;
+};
+
 const toggleDemographicLayer = (layerId: string) => {
   debugLog("TOGGLING " + layerId);
   const layer = demographicLayers.find((l) => l.id === layerId);
@@ -260,11 +321,16 @@ const toggleDemographicLayer = (layerId: string) => {
     const currentIndex = selectedDemographicLayers.value.indexOf(layerId);
 
     if (currentIndex === -1) {
-      // Adding a new layer
-      if (selectedDemographicLayers.value.length >= 2) {
-        // If we already have 2 layers, remove the first one
-        selectedDemographicLayers.value.shift();
+      // Adding a new layer - clear BLO index if present
+      const bloIndex = selectedDemographicLayers.value.findIndex(
+        id => id === 'combined_scores' || id === 'combined_scores_v2'
+      );
+      if (bloIndex !== -1) {
+        selectedDemographicLayers.value.splice(bloIndex, 1);
+        const bloLayer = demographicLayers.find(l => l.id === 'combined_scores' || l.id === 'combined_scores_v2');
+        if (bloLayer) bloLayer.visible = false;
       }
+
       selectedDemographicLayers.value.push(layerId);
       layer.visible = true;
     } else {
@@ -287,7 +353,18 @@ const toggleEconomicLayer = (layerId: string) => {
   const currentIndex = selectedEconomicLayers.value.indexOf(layerId);
 
   if (currentIndex === -1) {
-    selectedEconomicLayers.value = [layerId];
+    // Clear BLO index if present
+    const bloIndex = selectedDemographicLayers.value.findIndex(
+      id => id === 'combined_scores' || id === 'combined_scores_v2'
+    );
+    if (bloIndex !== -1) {
+      selectedDemographicLayers.value.splice(bloIndex, 1);
+      const bloLayer = demographicLayers.find(l => l.id === 'combined_scores' || l.id === 'combined_scores_v2');
+      if (bloLayer) bloLayer.visible = false;
+    }
+
+    // Allow multiple economic layers to be selected
+    selectedEconomicLayers.value.push(layerId);
     layer.visible = true;
   } else {
     selectedEconomicLayers.value.splice(currentIndex, 1);
@@ -307,7 +384,18 @@ const toggleHousingLayer = (layerId: string) => {
   const currentIndex = selectedHousingLayers.value.indexOf(layerId);
 
   if (currentIndex === -1) {
-    selectedHousingLayers.value = [layerId];
+    // Clear BLO index if present
+    const bloIndex = selectedDemographicLayers.value.findIndex(
+      id => id === 'combined_scores' || id === 'combined_scores_v2'
+    );
+    if (bloIndex !== -1) {
+      selectedDemographicLayers.value.splice(bloIndex, 1);
+      const bloLayer = demographicLayers.find(l => l.id === 'combined_scores' || l.id === 'combined_scores_v2');
+      if (bloLayer) bloLayer.visible = false;
+    }
+
+    // Allow multiple housing layers to be selected
+    selectedHousingLayers.value.push(layerId);
     layer.visible = true;
   } else {
     selectedHousingLayers.value.splice(currentIndex, 1);
@@ -327,7 +415,18 @@ const toggleEquityLayer = (layerId: string) => {
   const currentIndex = selectedEquityLayers.value.indexOf(layerId);
 
   if (currentIndex === -1) {
-    selectedEquityLayers.value = [layerId];
+    // Clear BLO index if present
+    const bloIndex = selectedDemographicLayers.value.findIndex(
+      id => id === 'combined_scores' || id === 'combined_scores_v2'
+    );
+    if (bloIndex !== -1) {
+      selectedDemographicLayers.value.splice(bloIndex, 1);
+      const bloLayer = demographicLayers.find(l => l.id === 'combined_scores' || l.id === 'combined_scores_v2');
+      if (bloLayer) bloLayer.visible = false;
+    }
+
+    // Allow multiple equity layers to be selected
+    selectedEquityLayers.value.push(layerId);
     layer.visible = true;
   } else {
     selectedEquityLayers.value.splice(currentIndex, 1);
@@ -606,6 +705,9 @@ const updateChoroplethColors = () => {
     selectedHousingLayers.value.length > 0 ||
     selectedEquityLayers.value.length > 0
   ) {
+    // Check if we should use multi-layer combined scoring
+    const useMultiLayerScoring = allSelectedLayers.value.length >= 2;
+
     expression = [
       "match",
       ["get", "GEOID"],
@@ -613,8 +715,11 @@ const updateChoroplethColors = () => {
         ([geoID, colors]) => {
           let finalColor: [number, number, number, number];
 
-          // Check if we have any selected layers
-          if (selectedDemographicLayers.value.length === 1) {
+          if (useMultiLayerScoring) {
+            // Multi-layer selection: compute combined score and use BLO gradient
+            const combinedScore = computeCombinedScore(geoID, allSelectedLayers.value);
+            finalColor = getColorForCombinedScore(combinedScore);
+          } else if (selectedDemographicLayers.value.length === 1) {
             // Single demographic layer selected
             const layer = selectedDemographicLayers.value[0];
             switch (layer) {
@@ -637,24 +742,12 @@ const updateChoroplethColors = () => {
               default:
                 finalColor = [0, 0, 0, 0];
             }
-          } else if (selectedEconomicLayers.value.length > 0) {
+          } else if (selectedEconomicLayers.value.length === 1) {
             finalColor = getColorForEconomicLayer(geoID, selectedEconomicLayers.value[0]);
-          } else if (selectedHousingLayers.value.length > 0) {
+          } else if (selectedHousingLayers.value.length === 1) {
             finalColor = getColorForHousingLayer(geoID, selectedHousingLayers.value[0]);
-          } else if (selectedEquityLayers.value.length > 0) {
+          } else if (selectedEquityLayers.value.length === 1) {
             finalColor = getColorForEquityLayer(geoID, selectedEquityLayers.value[0]);
-          } else if (selectedDemographicLayers.value.length === 2) {
-            // Two layers selected - blend colors
-            const [layer1, layer2] = selectedDemographicLayers.value;
-            const color1 = getLayerColor(colors, layer1);
-            const color2 = getLayerColor(colors, layer2);
-
-            finalColor = [
-              Math.round((color1[0] + color2[0]) / 2),
-              Math.round((color1[1] + color2[1]) / 2),
-              Math.round((color1[2] + color2[2]) / 2),
-              Math.max(color1[3], color2[3]),
-            ];
           } else {
             finalColor = [0, 0, 0, 0];
           }
@@ -713,6 +806,27 @@ const getColorForBLOV2 = (geoID: string): [number, number, number, number] => {
   return [r, g, b, 0.9];
 };
 
+// Color calculation for combined multi-layer scores (uses same BLO gradient)
+const getColorForCombinedScore = (score: number): [number, number, number, number] => {
+  if (score === 0) return [0, 0, 0, 0];
+
+  // Score is already 0-5 range, normalize using same bounds as BLO v2
+  const MIN_SCORE = 1.15;
+  const MAX_SCORE = 3.28;
+
+  const normalized = Math.max(0, Math.min(1, (score - MIN_SCORE) / (MAX_SCORE - MIN_SCORE)));
+
+  // Apply slight curve to emphasize extremes
+  const curved = Math.pow(normalized, 0.9);
+
+  // Use same BLO gradient: Bright yellow -> Deep emerald green
+  const r = Math.round(255 - (255 - 0) * curved);
+  const g = Math.round(245 - (245 - 100) * curved);
+  const b = Math.round(100 - (100 - 0) * curved);
+
+  return [r, g, b, 0.9];
+};
+
 // Color calculation for economic layers
 const getColorForEconomicLayer = (
   geoID: string,
@@ -727,15 +841,21 @@ const getColorForEconomicLayer = (
 
   if (layerId === "avg_weekly_wage") {
     value = data.avg_weekly_wage;
-    if (value == null) return [0, 0, 0, 0];
+    if (value == null) {
+      return [0, 0, 0, 0];
+    }
     min = 601;
     max = 4514;
-    // Red (low/bad) to Green (high/good) - similar to contamination but inverted
-    const normalized = (value - min) / (max - min);
-    const curved = Math.pow(normalized, 0.8);
-    const r = Math.round((1 - curved) * 220);
-    const g = Math.round(curved * 200);
-    return [r, g, 0, 0.85];
+    // Light yellow/green (low) to Deep emerald green (high) - similar to BLO gradient
+    const normalized = Math.max(0, Math.min(1, (value - min) / (max - min)));
+    const curved = Math.pow(normalized, 0.9);
+
+    // Gradient: Light yellow-green (200, 220, 100) -> Deep emerald green (0, 100, 0)
+    const r = Math.round(200 - (200 - 0) * curved);
+    const g = Math.round(220 - (220 - 100) * curved);
+    const b = Math.round(100 - (100 - 0) * curved);
+
+    return [r, g, b, 0.85];
   } else if (layerId === "median_income_by_race") {
     value = data.median_income_black;
     // Treat 0 as missing data
@@ -1096,6 +1216,22 @@ const addTooltip = () => {
         ...selectedEquityLayers.value,
       ];
 
+      // Show combined score if multiple layers are selected (excluding BLO indices)
+      let combinedScoreHTML = '';
+      if (allSelectedLayers.value.length >= 2) {
+        const combinedScore = computeCombinedScore(countyId, allSelectedLayers.value);
+        combinedScoreHTML = `
+          <div style="background-color: #f0f8ff; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
+            <p style="margin: 0; font-size: 14px; font-weight: bold; color: #2c5f2d;">
+              Combined Score: ${combinedScore.toFixed(2)} of 5.0
+            </p>
+            <p style="margin: 4px 0 0 0; font-size: 11px; color: #555;">
+              (Average of ${allSelectedLayers.value.length} selected layers)
+            </p>
+          </div>
+        `;
+      }
+
       if (activeLayers.length > 0) {
         activeLayersHTML = '<div style="border-bottom: 2px solid #ddd; padding-bottom: 8px; margin-bottom: 8px;">';
         activeLayers.forEach(layerId => {
@@ -1108,6 +1244,7 @@ const addTooltip = () => {
 
       const tooltipContent = `
         <h3>${countyName}, ${stateName}</h3>
+        ${combinedScoreHTML}
         ${activeLayersHTML}
         <p>Total Population: ${countyDiversityData?.totalPopulation ? countyDiversityData.totalPopulation.toLocaleString() : "?"}</p>
         <p>Percent Black: ${pctBlackValue != null ? pctBlackValue.toFixed(2) + "%" : "?"}</p>
