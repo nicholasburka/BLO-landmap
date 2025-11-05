@@ -50,8 +50,9 @@
               @change="$emit('toggle-demographic', layer.id)"
             />
             <label :for="layer.id">{{ layer.name }}</label>
-            <span class="tooltip-icon" v-if="layer.tooltip" :title="layer.tooltip">
-              ⓘ
+            <span class="tooltip-wrapper" v-if="layer.tooltip">
+              <span class="tooltip-icon">ⓘ</span>
+              <span class="tooltip-popup">{{ layer.tooltip }}</span>
             </span>
           </div>
         </div>
@@ -71,8 +72,9 @@
               @change="$emit('toggle-economic', layer.id)"
             />
             <label :for="layer.id">{{ layer.name }}</label>
-            <span class="tooltip-icon" v-if="layer.tooltip" :title="layer.tooltip">
-              ⓘ
+            <span class="tooltip-wrapper" v-if="layer.tooltip">
+              <span class="tooltip-icon">ⓘ</span>
+              <span class="tooltip-popup">{{ layer.tooltip }}</span>
             </span>
           </div>
         </div>
@@ -92,8 +94,9 @@
               @change="$emit('toggle-housing', layer.id)"
             />
             <label :for="layer.id">{{ layer.name }}</label>
-            <span class="tooltip-icon" v-if="layer.tooltip" :title="layer.tooltip">
-              ⓘ
+            <span class="tooltip-wrapper" v-if="layer.tooltip">
+              <span class="tooltip-icon">ⓘ</span>
+              <span class="tooltip-popup">{{ layer.tooltip }}</span>
             </span>
           </div>
         </div>
@@ -113,8 +116,9 @@
               @change="$emit('toggle-equity', layer.id)"
             />
             <label :for="layer.id">{{ layer.name }}</label>
-            <span class="tooltip-icon" v-if="layer.tooltip" :title="layer.tooltip">
-              ⓘ
+            <span class="tooltip-wrapper" v-if="layer.tooltip">
+              <span class="tooltip-icon">ⓘ</span>
+              <span class="tooltip-popup">{{ layer.tooltip }}</span>
             </span>
           </div>
         </div>
@@ -135,8 +139,9 @@
               />
               Individual Sites of Pollution
             </label>
-            <span class="tooltip-icon" title="Individual EPA contamination sites (Superfund, hazardous waste, toxic release, brownfields, air pollution).">
-              ⓘ
+            <span class="tooltip-wrapper">
+              <span class="tooltip-icon">ⓘ</span>
+              <span class="tooltip-popup">Individual EPA contamination sites (Superfund, hazardous waste, toxic release, brownfields, air pollution).</span>
             </span>
           </div>
           <div class="layer-item">
@@ -148,8 +153,9 @@
               />
               County-Level Polluted Site Comparison
             </label>
-            <span class="tooltip-icon" title="Total EPA contamination sites per county (lower is better).">
-              ⓘ
+            <span class="tooltip-wrapper">
+              <span class="tooltip-icon">ⓘ</span>
+              <span class="tooltip-popup">Total EPA contamination sites per county (lower is better).</span>
             </span>
           </div>
         </div>
@@ -170,8 +176,9 @@
               @change="$emit('toggle-demographic', layer.id)"
             />
             <label :for="layer.id">{{ layer.name }}</label>
-            <span class="tooltip-icon" v-if="layer.tooltip" :title="layer.tooltip">
-              ⓘ
+            <span class="tooltip-wrapper" v-if="layer.tooltip">
+              <span class="tooltip-icon">ⓘ</span>
+              <span class="tooltip-popup">{{ layer.tooltip }}</span>
             </span>
           </div>
         </div>
@@ -182,7 +189,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import type {
   DemographicLayer,
   EconomicLayer,
@@ -230,6 +237,57 @@ const expandedCategories = ref({
 const toggleCategory = (category: keyof typeof expandedCategories.value) => {
   expandedCategories.value[category] = !expandedCategories.value[category]
 }
+
+// Position tooltips dynamically
+onMounted(() => {
+  const updateTooltipPosition = (e: MouseEvent) => {
+    const wrapper = (e.currentTarget as HTMLElement)
+    const tooltip = wrapper.querySelector('.tooltip-popup') as HTMLElement
+    if (!tooltip) return
+
+    const rect = wrapper.getBoundingClientRect()
+    const tooltipRect = tooltip.getBoundingClientRect()
+
+    // Check if mobile viewport
+    const isMobile = window.innerWidth <= 768
+
+    if (isMobile) {
+      // On mobile, position above the icon
+      tooltip.style.left = `${rect.left + rect.width / 2 - tooltipRect.width / 2}px`
+      tooltip.style.top = `${rect.top - tooltipRect.height - 8}px`
+
+      // Adjust if going off left edge
+      const leftEdge = parseFloat(tooltip.style.left)
+      if (leftEdge < 10) {
+        tooltip.style.left = '10px'
+      }
+
+      // Adjust if going off right edge
+      if (leftEdge + tooltipRect.width > window.innerWidth - 10) {
+        tooltip.style.left = `${window.innerWidth - tooltipRect.width - 10}px`
+      }
+    } else {
+      // On desktop, position to the left of the icon
+      const leftPos = rect.left - tooltipRect.width - 10
+
+      // If would go off-screen, position to the right instead
+      if (leftPos < 10) {
+        tooltip.style.left = `${rect.right + 10}px`
+      } else {
+        tooltip.style.left = `${leftPos}px`
+      }
+
+      tooltip.style.top = `${rect.top + rect.height / 2 - tooltipRect.height / 2}px`
+    }
+  }
+
+  // Add event listeners to all tooltip wrappers
+  setTimeout(() => {
+    document.querySelectorAll('.tooltip-wrapper').forEach(wrapper => {
+      wrapper.addEventListener('mouseenter', updateTooltipPosition as EventListener)
+    })
+  }, 100)
+})
 </script>
 
 <style scoped>
@@ -380,12 +438,51 @@ const toggleCategory = (category: keyof typeof expandedCategories.value) => {
   color: black;
 }
 
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
 .tooltip-icon {
   cursor: help;
-  margin-left: 5px;
   font-size: 14px;
   color: #666;
   display: inline-block;
-  vertical-align: middle;
+  transition: all 0.2s ease;
+  padding: 2px;
+  border-radius: 50%;
+}
+
+.tooltip-wrapper:hover .tooltip-icon {
+  color: #4a90e2;
+  background-color: #f0f7ff;
+  transform: scale(1.2);
+}
+
+.tooltip-popup {
+  visibility: hidden;
+  opacity: 0;
+  position: fixed;
+  background-color: #2c3e50;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  max-width: 250px;
+  width: max-content;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10001;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  white-space: normal;
+  text-align: left;
+}
+
+.tooltip-wrapper:hover .tooltip-popup {
+  visibility: visible;
+  opacity: 1;
 }
 </style>
