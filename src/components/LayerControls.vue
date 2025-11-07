@@ -137,13 +137,31 @@
                 :checked="showContaminationLayers"
                 @change="$emit('toggle-contamination-layers')"
               />
-              Individual Sites of Pollution
+              All Individual Sites
             </label>
             <span class="tooltip-wrapper">
               <span class="tooltip-icon">ⓘ</span>
-              <span class="tooltip-popup">Individual EPA contamination sites (Superfund, hazardous waste, toxic release, brownfields, air pollution).</span>
+              <span class="tooltip-popup">Toggle all individual EPA contamination sites on/off.</span>
             </span>
           </div>
+
+          <!-- Individual contamination layer checkboxes -->
+          <div v-if="contaminationLayers && contaminationLayers.length > 0" style="margin-left: 20px;">
+            <div v-for="layer in contaminationLayers" :key="layer.id" class="layer-item">
+              <input
+                type="checkbox"
+                :id="layer.id"
+                :checked="layer.visible"
+                @change="$emit('toggle-contamination', layer.id)"
+              />
+              <label :for="layer.id">{{ layer.name }}</label>
+              <span class="tooltip-wrapper" v-if="layer.tooltip">
+                <span class="tooltip-icon">ⓘ</span>
+                <span class="tooltip-popup">{{ layer.tooltip }}</span>
+              </span>
+            </div>
+          </div>
+
           <div class="layer-item">
             <label style="color: black">
               <input
@@ -195,6 +213,7 @@ import type {
   EconomicLayer,
   HousingLayer,
   EquityLayer,
+  ContaminationLayer,
 } from '@/config/layerConfig'
 
 interface Props {
@@ -203,6 +222,7 @@ interface Props {
   economicLayers?: EconomicLayer[]
   housingLayers?: HousingLayer[]
   equityLayers?: EquityLayer[]
+  contaminationLayers?: ContaminationLayer[]
   selectedDemographicLayers: string[]
   selectedEconomicLayers?: string[]
   selectedHousingLayers?: string[]
@@ -220,6 +240,7 @@ defineEmits<{
   'toggle-economic': [layerId: string]
   'toggle-housing': [layerId: string]
   'toggle-equity': [layerId: string]
+  'toggle-contamination': [layerId: string]
   'toggle-contamination-layers': []
   'toggle-contamination-choropleth': []
 }>()

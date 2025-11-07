@@ -71,6 +71,7 @@
       :economic-layers="economicLayers"
       :housing-layers="housingLayers"
       :equity-layers="equityLayers"
+      :contamination-layers="contaminationLayers"
       :selected-demographic-layers="selectedDemographicLayers"
       :selected-economic-layers="selectedEconomicLayers"
       :selected-housing-layers="selectedHousingLayers"
@@ -83,6 +84,7 @@
       @toggle-economic="toggleEconomicLayer"
       @toggle-housing="toggleHousingLayer"
       @toggle-equity="toggleEquityLayer"
+      @toggle-contamination="toggleContaminationLayer"
       @toggle-contamination-layers="toggleContaminationLayers"
       @toggle-contamination-choropleth="toggleContaminationChoropleth"
     >
@@ -107,6 +109,14 @@
     <AveragesPanel
       :expanded="averagesPanelExpanded"
       @toggle="toggleAveragesPanel"
+    />
+
+    <ColorLegend
+      :selected-demographic-layers="selectedDemographicLayers"
+      :selected-economic-layers="selectedEconomicLayers"
+      :selected-housing-layers="selectedHousingLayers"
+      :selected-equity-layers="selectedEquityLayers"
+      :show-contamination-choropleth="showContaminationChoropleth"
     />
   </div>
 </template>
@@ -138,6 +148,7 @@ import CountyModal from "@/components/CountyModal.vue";
 import LayerControls from "@/components/LayerControls.vue";
 import LoadingIndicator from "@/components/LoadingIndicator.vue";
 import AveragesPanel from "@/components/AveragesPanel.vue";
+import ColorLegend from "@/components/ColorLegend.vue";
 
 const mapContainer = ref<HTMLElement | null>(null);
 const map = ref<mapboxgl.Map | null>(null);
@@ -229,6 +240,19 @@ const toggleLayerControl = () => {
 
 const toggleContaminationChoropleth = () => {
   showContaminationChoropleth.value = !showContaminationChoropleth.value;
+
+  // Clear BLO index if present when turning on contamination choropleth
+  if (showContaminationChoropleth.value) {
+    const bloIndex = selectedDemographicLayers.value.findIndex(
+      id => id === 'combined_scores' || id === 'combined_scores_v2'
+    );
+    if (bloIndex !== -1) {
+      selectedDemographicLayers.value.splice(bloIndex, 1);
+      const bloLayer = demographicLayers.find(l => l.id === 'combined_scores' || l.id === 'combined_scores_v2');
+      if (bloLayer) bloLayer.visible = false;
+    }
+  }
+
   updateChoroplethVisibility();
 };
 
@@ -611,7 +635,7 @@ const addCountyChoroplethLayer = () => {
   );
 };
 
-const toggleLayer = (layerId: string) => {
+const toggleContaminationLayer = (layerId: string) => {
   if (!layersLoaded.value || !map.value) {
     debugLog(`Layers not loaded yet, skipping toggle for ${layerId}`);
     return;
@@ -690,20 +714,12 @@ const updateChoroplethColors = () => {
 
   let expression: Expression = ["rgba", 0, 0, 0, 0]; // Default transparent
 
-  if (showContaminationChoropleth.value) {
-    expression = [
-      "match",
-      ["get", "GEOID"],
-      ...Object.entries(preCalculatedColors.value).flatMap(
-        ([geoID, colors]) => [geoID, ["rgba", ...colors.contaminationColor]]
-      ),
-      ["rgba", 0, 0, 0, 0], // default color
-    ];
-  } else if (
+  if (
     selectedDemographicLayers.value.length > 0 ||
     selectedEconomicLayers.value.length > 0 ||
     selectedHousingLayers.value.length > 0 ||
-    selectedEquityLayers.value.length > 0
+    selectedEquityLayers.value.length > 0 ||
+    showContaminationChoropleth.value
   ) {
     // Check if we should use multi-layer combined scoring
     const useMultiLayerScoring = allSelectedLayers.value.length >= 2;
@@ -748,6 +764,9 @@ const updateChoroplethColors = () => {
             finalColor = getColorForHousingLayer(geoID, selectedHousingLayers.value[0]);
           } else if (selectedEquityLayers.value.length === 1) {
             finalColor = getColorForEquityLayer(geoID, selectedEquityLayers.value[0]);
+          } else if (showContaminationChoropleth.value && allSelectedLayers.value.length === 1) {
+            // Single contamination layer selected
+            finalColor = colors.contaminationColor;
           } else {
             finalColor = [0, 0, 0, 0];
           }
@@ -1153,6 +1172,9 @@ const addTooltip = () => {
 
       // Helper to get layer name from config
       const getLayerName = (layerId: string) => {
+        if (layerId === 'contamination') {
+          return 'EPA Contamination Sites';
+        }
         const allLayers = [
           ...demographicLayers,
           ...economicLayers,
@@ -1203,6 +1225,10 @@ const addTooltip = () => {
             return equityData.value[countyId]?.black_progress_index != null
               ? equityData.value[countyId].black_progress_index.toFixed(2)
               : '?';
+          case 'contamination':
+            return totalContamination > 0
+              ? `${totalContamination} sites`
+              : '0 sites';
           default:
             return '?';
         }
@@ -1215,6 +1241,11 @@ const addTooltip = () => {
         ...selectedHousingLayers.value,
         ...selectedEquityLayers.value,
       ];
+
+      // Add contamination if choropleth is showing
+      if (showContaminationChoropleth.value) {
+        activeLayers.push('contamination');
+      }
 
       // Show combined score if multiple layers are selected (excluding BLO indices)
       let combinedScoreHTML = '';
