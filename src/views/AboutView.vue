@@ -1,26 +1,26 @@
 <template>
   <div class="about">
     <div class="about-content">
-      <h1>About the BLO Liveability Index</h1>
+      <h1>About the BLO Livability Index</h1>
 
       <section class="intro-section">
         <p>
-          The <strong>BLO Liveability Index</strong> is an interactive mapping tool designed to help Black Americans
+          The <strong>BLO Livability Index</strong> is an interactive mapping tool designed to help Black Americans
           identify the most favorable counties for living, working, and building wealth across the United States.
         </p>
         <p>
           By combining data from diverse sources—including demographic information, health outcomes, economic indicators,
           housing affordability, environmental quality, and racial equity measures—this tool provides a comprehensive
-          view of county-level conditions that impact Black liveability.
+          view of county-level conditions that impact Black livability.
         </p>
       </section>
 
       <section class="methodology-section">
-        <h2>How the BLO Liveability Index is Calculated</h2>
+        <h2>How the BLO Livability Index is Calculated</h2>
 
         <p>
-          The BLO Liveability Index is a <strong>weighted composite score (0-5)</strong> that combines 11 normalized
-          metrics across 6 key dimensions. Each metric is normalized to a 0-1 scale and weighted according to a roughly estimated "relative importance" in determining overall liveability for Black Americans.
+          The BLO Livability Index is a <strong>weighted composite score (0-5)</strong> that combines 11 normalized
+          metrics across 6 key dimensions. Each metric is normalized to a 0-1 scale and weighted according to a roughly estimated "relative importance" in determining overall livability for Black Americans.
         </p>
 
         <table class="metrics-table">
@@ -83,7 +83,7 @@
         <h2>Data Sources</h2>
 
         <p>
-          The BLO Liveability Index draws from multiple authoritative sources to provide a comprehensive
+          The BLO Livability Index draws from multiple authoritative sources to provide a comprehensive
           and accurate picture of county-level conditions:
         </p>
 
@@ -200,7 +200,7 @@
       <section class="disclaimer-section">
         <h2>Disclaimer</h2>
         <p>
-          The BLO Liveability Index is intended as an informational tool to help inform decision-making.
+          The BLO Livability Index is intended as an informational tool to help inform decision-making.
           It should not be the sole factor in determining where to live, as individual circumstances, preferences,
           and priorities vary significantly. Data accuracy depends on source reliability and may not reflect
           the most current conditions. Users should conduct additional research and consider personal factors

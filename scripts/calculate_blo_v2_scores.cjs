@@ -2,7 +2,7 @@
 
 /**
  * BLO v2.0 Scoring Engine
- * Combines existing + new datasets into comprehensive liveability scores
+ * Combines existing + new datasets into comprehensive livability scores
  */
 
 const fs = require('fs');

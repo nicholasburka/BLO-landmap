@@ -121,7 +121,7 @@ async function main() {
   console.log('=========================================');
   console.log('National Averages');
   console.log('=========================================\n');
-  console.log(`BLO Liveability Index: ${avgBLOScore?.toFixed(2)} of 5.0`);
+  console.log(`BLO Livability Index: ${avgBLOScore?.toFixed(2)} of 5.0`);
   console.log(`Total Population: ${avgTotalPopulation?.toLocaleString()}`);
   console.log(`Percent Black: ${avgPctBlack?.toFixed(2)}%`);
   console.log(`Diversity Index: ${avgDiversityIndex?.toFixed(4)} of 1`);

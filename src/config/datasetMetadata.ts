@@ -1,6 +1,6 @@
 /**
  * Dataset Metadata
- * Comprehensive information about all datasets used in the BLO Liveability Index
+ * Comprehensive information about all datasets used in the BLO Livability Index
  */
 
 export interface DatasetMetadata {
@@ -19,14 +19,14 @@ export interface DatasetMetadata {
 
 export const datasetMetadata: Record<string, DatasetMetadata> = {
   // BLO Composite Score
-  blo_liveability_index: {
-    id: 'blo_liveability_index',
-    name: 'BLO Liveability Index',
-    description: 'Comprehensive county liveability score combining demographics, equity, economics, housing, environment, and health.',
+  blo_livability_index: {
+    id: 'blo_livability_index',
+    name: 'BLO Livability Index',
+    description: 'Comprehensive county livability score combining demographics, equity, economics, housing, environment, and health.',
     source: 'Black Land Ownership (BLO)',
     year: 2024,
     methodology: 'Weighted composite score (0-5) combining 11 normalized metrics: diversity index (10%), percent Black (10%), life expectancy (10%), EPA contamination sites (5%), average weekly wage (10%), median income Black (10%), median home value (10%), median property tax (5%), Black homeownership rate (5%), poverty rate Black (10%), and Black Progress Index (15%). Missing data is handled through dynamic weight redistribution.',
-    interpretation: 'Higher scores indicate more favorable conditions for Black liveability. Scores range from 1.15 to 3.28 across US counties, with a national average of 2.42.',
+    interpretation: 'Higher scores indicate more favorable conditions for Black livability. Scores range from 1.15 to 3.28 across US counties, with a national average of 2.42.',
     unit: 'score',
     range: { min: 1.15, max: 3.28 },
     colorScheme: 'Yellow (low) to Emerald Green (high)',
@@ -205,9 +205,9 @@ export const datasetMetadata: Record<string, DatasetMetadata> = {
 
 // BLO Calculation Methodology
 export const bloCalculationMethodology = `
-## BLO Liveability Index Calculation
+## BLO Livability Index Calculation
 
-The BLO Liveability Index is a comprehensive measure designed to evaluate county-level conditions for Black American liveability. It combines 11 normalized metrics across 6 key dimensions:
+The BLO Livability Index is a comprehensive measure designed to evaluate county-level conditions for Black American livability. It combines 11 normalized metrics across 6 key dimensions:
 
 ### Metric Weights
 

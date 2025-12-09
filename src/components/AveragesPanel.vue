@@ -17,7 +17,7 @@
     <div v-show="expanded" id="averages-content" class="averages-content">
       <div class="average-section">
         <p class="section-header">National Averages</p>
-        <p class="highlight-score">BLO Liveability Index: 2.42 of 5</p>
+        <p class="highlight-score">BLO Livability Index: 2.42 of 5</p>
       </div>
       <div class="average-section">
         <p>Black Population: 9.47%</p>

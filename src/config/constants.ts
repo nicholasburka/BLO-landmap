@@ -10,7 +10,7 @@ export const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
 export const DATA_PATHS = {
   COUNTIES: '/datasets/geographic/counties.geojson',
   CONTAMINATION_COUNTS: '/datasets/epa-contamination/contamination_counts.json',
-  COMBINED_SCORES: '/datasets/BLO-liveability-index/combined_scores.json',
+  COMBINED_SCORES: '/datasets/BLO-livability-index/combined_scores.json',
   COMBINED_SCORES_V2: '/datasets/precomputed/combined_scores_v2.json',
   DIVERSITY_DATA: '/datasets/demographics/county_pctBlack_diversity_index_with_stats.csv',
   LIFE_EXPECTANCY: '/datasets/demographics/lifeexpectancy-USA-county.csv',

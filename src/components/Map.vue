@@ -800,7 +800,7 @@ const getLayerColor = (
   }
 };
 
-// Color calculation for BLO Liveability Index
+// Color calculation for BLO Livability Index
 const getColorForBLOV2 = (geoID: string): [number, number, number, number] => {
   const score = combinedScoresV2Data.value[geoID];
   if (!score || score.blo_score_v2 == null) return [0, 0, 0, 0];

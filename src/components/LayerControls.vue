@@ -20,7 +20,7 @@
       @click.stop
       class="layer-control-content"
     >
-      <!-- BLO Liveability Index (no category) -->
+      <!-- BLO Livability Index (no category) -->
       <div v-for="layer in demographicLayers.filter(l => !l.category)" :key="layer.id" class="layer-item">
         <input
           type="checkbox"

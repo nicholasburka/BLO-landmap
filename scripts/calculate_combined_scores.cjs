@@ -80,4 +80,4 @@ const inputData = JSON.parse(fs.readFileSync(path.join(__dirname, '../source-dat
 const processedData = processCountyData(inputData);
 
 // Write the results
-fs.writeFileSync(path.join(__dirname, '../public/datasets/BLO-liveability-index/combined_scores.json'), JSON.stringify(processedData, null, 2));
+fs.writeFileSync(path.join(__dirname, '../public/datasets/BLO-livability-index/combined_scores.json'), JSON.stringify(processedData, null, 2));

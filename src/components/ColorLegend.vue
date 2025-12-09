@@ -37,7 +37,7 @@ const props = defineProps<Props>()
 const layerLegends: Record<string, LayerLegend> = {
   combined_scores_v2: {
     id: 'combined_scores_v2',
-    name: 'BLO Liveability Index',
+    name: 'BLO Livability Index',
     gradient: 'linear-gradient(to right, rgb(255, 245, 100), rgb(0, 100, 0))',
     lowLabel: 'Lower',
     highLabel: 'Higher',
@@ -138,7 +138,7 @@ const activeLayers = computed(() => {
   if (nonBLOLayers.length >= 2) {
     return [{
       ...layerLegends.combined_scores_v2,
-      name: 'BLO Liveability Sub-Index'
+      name: 'BLO Livability Sub-Index'
     }]
   }
 

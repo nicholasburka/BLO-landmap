@@ -19,10 +19,10 @@
     <div class="detailed-popup-content">
       <h2 :id="'modal-title-' + countyId">{{ countyName }}, {{ stateName }}</h2>
 
-      <!-- BLO Liveability Index Section -->
+      <!-- BLO Livability Index Section -->
       <div v-if="hasBLOV2Data" class="blo-v2-section">
         <div class="score-header">
-          <h3 class="section-title inline">BLO Liveability Index:</h3>
+          <h3 class="section-title inline">BLO Livability Index:</h3>
           <span class="score-value">{{ formatBLOScoreV2 }}</span>
           <span v-html="getBLOScoreDiff"></span>
         </div>
