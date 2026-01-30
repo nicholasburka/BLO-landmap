@@ -98,6 +98,22 @@
             <td class="value">{{ formatLifeExpectancy }}<span v-html="getLifeExpectancyDiff"></span></td>
           </tr>
         </table>
+
+        <h4 class="subsection-title">Transportation</h4>
+        <table class="county-stats-table compact">
+          <tr>
+            <td class="label">Most Common Commute:</td>
+            <td class="value">{{ formatCommuteTime }}</td>
+          </tr>
+          <tr>
+            <td class="label">% Drove Alone (Black):</td>
+            <td class="value">{{ formatDroveAlone }}</td>
+          </tr>
+          <tr>
+            <td class="label">% Public Transit (Black):</td>
+            <td class="value">{{ formatPublicTransit }}</td>
+          </tr>
+        </table>
       </div>
 
       <p v-else>No data available for this county</p>
@@ -116,6 +132,7 @@ import type {
   EconomicData,
   HousingData,
   EquityData,
+  TransportationData,
 } from '@/types/mapTypes'
 
 // National averages
@@ -133,6 +150,7 @@ interface Props {
   economicData?: EconomicData
   housingData?: HousingData
   equityData?: EquityData
+  transportationData?: TransportationData
 }
 
 const props = defineProps<Props>()
@@ -267,6 +285,28 @@ const formatBlackProgressIndex = computed(() => {
     return props.equityData.black_progress_index.toFixed(2)
   }
   return '?'
+})
+
+// Transportation computed properties
+const formatCommuteTime = computed(() => {
+  if (props.transportationData?.most_frequent_commute_time) {
+    return props.transportationData.most_frequent_commute_time
+  }
+  return 'N/A'
+})
+
+const formatDroveAlone = computed(() => {
+  if (props.transportationData?.pct_drove_alone != null) {
+    return `${props.transportationData.pct_drove_alone.toFixed(1)}%`
+  }
+  return 'N/A'
+})
+
+const formatPublicTransit = computed(() => {
+  if (props.transportationData?.pct_public_transit != null) {
+    return `${props.transportationData.pct_public_transit.toFixed(1)}%`
+  }
+  return 'N/A'
 })
 
 // Helper to calculate difference from national average

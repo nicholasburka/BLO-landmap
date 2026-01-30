@@ -46,6 +46,15 @@ export interface EquityLayer {
   tooltip?: string
 }
 
+export interface TransportationLayer {
+  id: string
+  name: string
+  file: string
+  color: string
+  visible: boolean
+  tooltip?: string
+}
+
 export const DEMOGRAPHIC_LAYERS: DemographicLayer[] = [
   {
     id: 'combined_scores_v2',
@@ -186,5 +195,32 @@ export const EQUITY_LAYERS: EquityLayer[] = [
     color: '#8A2BE2', // Blue violet
     visible: false,
     tooltip: datasetMetadata.black_progress_index?.description || 'Composite measure of Black wellbeing from NAACP & Brookings',
+  },
+]
+
+export const TRANSPORTATION_LAYERS: TransportationLayer[] = [
+  {
+    id: 'commute_time',
+    name: 'Most Common Commute Time',
+    file: '/datasets/transportation/commute_times.csv',
+    color: '#FF6B6B', // Coral red
+    visible: false,
+    tooltip: 'Most frequent commute time category for Black workers in the county (2023)',
+  },
+  {
+    id: 'drove_alone',
+    name: '% Drove Alone (Black Workers)',
+    file: '/datasets/transportation/commute_times.csv',
+    color: '#4ECDC4', // Teal
+    visible: false,
+    tooltip: 'Percentage of Black workers age 16+ who drove alone to work',
+  },
+  {
+    id: 'public_transit',
+    name: '% Public Transit (Black Workers)',
+    file: '/datasets/transportation/commute_times.csv',
+    color: '#9B59B6', // Purple
+    visible: false,
+    tooltip: 'Percentage of Black workers age 16+ who used public transportation',
   },
 ]

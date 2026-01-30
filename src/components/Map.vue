@@ -71,11 +71,13 @@
       :economic-layers="economicLayers"
       :housing-layers="housingLayers"
       :equity-layers="equityLayers"
+      :transportation-layers="transportationLayers"
       :contamination-layers="contaminationLayers"
       :selected-demographic-layers="selectedDemographicLayers"
       :selected-economic-layers="selectedEconomicLayers"
       :selected-housing-layers="selectedHousingLayers"
       :selected-equity-layers="selectedEquityLayers"
+      :selected-transportation-layers="selectedTransportationLayers"
       :show-contamination-layers="showContaminationLayers"
       :show-contamination-choropleth="showContaminationChoropleth"
       :dev-mode-only="DEV_MODE_DEMOGRAPHICS_ONLY"
@@ -84,6 +86,7 @@
       @toggle-economic="toggleEconomicLayer"
       @toggle-housing="toggleHousingLayer"
       @toggle-equity="toggleEquityLayer"
+      @toggle-transportation="toggleTransportationLayer"
       @toggle-contamination="toggleContaminationLayer"
       @toggle-contamination-layers="toggleContaminationLayers"
       @toggle-contamination-choropleth="toggleContaminationChoropleth"
@@ -103,6 +106,7 @@
       :economic-data="currentCounty?.id ? economicData[currentCounty.id] : undefined"
       :housing-data="currentCounty?.id ? housingData[currentCounty.id] : undefined"
       :equity-data="currentCounty?.id ? equityData[currentCounty.id] : undefined"
+      :transportation-data="currentCounty?.id ? transportationData[currentCounty.id] : undefined"
       @close="closeDetailedPopup"
     />
 
@@ -116,6 +120,7 @@
       :selected-economic-layers="selectedEconomicLayers"
       :selected-housing-layers="selectedHousingLayers"
       :selected-equity-layers="selectedEquityLayers"
+      :selected-transportation-layers="selectedTransportationLayers"
       :show-contamination-choropleth="showContaminationChoropleth"
     />
   </div>
@@ -136,6 +141,7 @@ import {
   ECONOMIC_LAYERS,
   HOUSING_LAYERS,
   EQUITY_LAYERS,
+  TRANSPORTATION_LAYERS,
 } from "@/config/layerConfig";
 import {
   DEV_MODE_DEMOGRAPHICS_ONLY,
@@ -167,6 +173,7 @@ const {
   economicData,
   housingData,
   equityData,
+  transportationData,
   loadAllCountyData,
 } = useMapData();
 
@@ -260,6 +267,7 @@ const selectedDemographicLayers = ref<string[]>(['combined_scores_v2']);
 const selectedEconomicLayers = ref<string[]>([]);
 const selectedHousingLayers = ref<string[]>([]);
 const selectedEquityLayers = ref<string[]>([]);
+const selectedTransportationLayers = ref<string[]>([]);
 
 // Computed property to track ALL selected layers across categories
 const allSelectedLayers = computed(() => {
@@ -268,6 +276,7 @@ const allSelectedLayers = computed(() => {
     ...selectedEconomicLayers.value,
     ...selectedHousingLayers.value,
     ...selectedEquityLayers.value,
+    ...selectedTransportationLayers.value,
   ].filter(layerId =>
     // Exclude BLO combined scores from multi-layer computation
     layerId !== 'combined_scores' && layerId !== 'combined_scores_v2'
@@ -462,6 +471,36 @@ const toggleEquityLayer = (layerId: string) => {
   updateChoroplethColors();
 };
 
+const toggleTransportationLayer = (layerId: string) => {
+  debugLog("TOGGLING TRANSPORTATION " + layerId);
+  const layer = transportationLayers.find((l) => l.id === layerId);
+  if (!layer) return;
+
+  const currentIndex = selectedTransportationLayers.value.indexOf(layerId);
+
+  if (currentIndex === -1) {
+    // Clear BLO index if present
+    const bloIndex = selectedDemographicLayers.value.findIndex(
+      id => id === 'combined_scores' || id === 'combined_scores_v2'
+    );
+    if (bloIndex !== -1) {
+      selectedDemographicLayers.value.splice(bloIndex, 1);
+      const bloLayer = demographicLayers.find(l => l.id === 'combined_scores' || l.id === 'combined_scores_v2');
+      if (bloLayer) bloLayer.visible = false;
+    }
+
+    selectedTransportationLayers.value.push(layerId);
+    layer.visible = true;
+  } else {
+    selectedTransportationLayers.value.splice(currentIndex, 1);
+    layer.visible = false;
+  }
+
+  showDiversityChoropleth.value = selectedTransportationLayers.value.length > 0 || selectedDemographicLayers.value.length > 0;
+  updateChoroplethVisibility();
+  updateChoroplethColors();
+};
+
 const updateChoroplethVisibility = () => {
   if (!map.value) return;
 
@@ -477,7 +516,8 @@ const updateChoroplethVisibility = () => {
     selectedDemographicLayers.value.includes("combined_scores_v2") ||
     selectedEconomicLayers.value.length > 0 ||
     selectedHousingLayers.value.length > 0 ||
-    selectedEquityLayers.value.length > 0
+    selectedEquityLayers.value.length > 0 ||
+    selectedTransportationLayers.value.length > 0
       ? "visible"
       : "none";
 
@@ -496,6 +536,7 @@ const demographicLayers = reactive(DEMOGRAPHIC_LAYERS);
 const economicLayers = reactive(ECONOMIC_LAYERS);
 const housingLayers = reactive(HOUSING_LAYERS);
 const equityLayers = reactive(EQUITY_LAYERS);
+const transportationLayers = reactive(TRANSPORTATION_LAYERS);
 
 const showLifeExpectancyChoropleth = ref(false);
 
@@ -719,6 +760,7 @@ const updateChoroplethColors = () => {
     selectedEconomicLayers.value.length > 0 ||
     selectedHousingLayers.value.length > 0 ||
     selectedEquityLayers.value.length > 0 ||
+    selectedTransportationLayers.value.length > 0 ||
     showContaminationChoropleth.value
   ) {
     // Check if we should use multi-layer combined scoring
@@ -764,6 +806,8 @@ const updateChoroplethColors = () => {
             finalColor = getColorForHousingLayer(geoID, selectedHousingLayers.value[0]);
           } else if (selectedEquityLayers.value.length === 1) {
             finalColor = getColorForEquityLayer(geoID, selectedEquityLayers.value[0]);
+          } else if (selectedTransportationLayers.value.length === 1) {
+            finalColor = getColorForTransportationLayer(geoID, selectedTransportationLayers.value[0]);
           } else if (showContaminationChoropleth.value && allSelectedLayers.value.length === 1) {
             // Single contamination layer selected
             finalColor = colors.contaminationColor;
@@ -996,6 +1040,74 @@ const getColorForEquityLayer = (
   return [0, 0, 0, 0];
 };
 
+// Color calculation for transportation layers
+const getColorForTransportationLayer = (
+  geoID: string,
+  layerId: string
+): [number, number, number, number] => {
+  const data = transportationData.value[geoID];
+  if (!data) return [0, 0, 0, 0];
+
+  if (layerId === "commute_time") {
+    const value = data.commute_time_ordinal;
+    if (value == null || value === 0) return [0, 0, 0, 0];
+
+    // Ordinal scale 1-12 (1 = shortest, 12 = longest)
+    const min = 1;
+    const max = 12;
+    const normalized = (value - min) / (max - min);
+    const curved = Math.pow(normalized, 0.8);
+
+    // Green (short commute) -> Yellow (medium) -> Red (long commute)
+    let r: number, g: number, b: number;
+    if (curved < 0.5) {
+      // Green to Yellow
+      const t = curved * 2;
+      r = Math.round(t * 255);
+      g = Math.round(180 + t * 75);
+      b = 0;
+    } else {
+      // Yellow to Red
+      const t = (curved - 0.5) * 2;
+      r = 255;
+      g = Math.round(255 - t * 255);
+      b = 0;
+    }
+
+    return [r, g, b, 0.85];
+  } else if (layerId === "drove_alone") {
+    const value = data.pct_drove_alone;
+    if (value == null) return [0, 0, 0, 0];
+
+    // Percentage 0-100
+    const normalized = Math.max(0, Math.min(1, value / 100));
+    const curved = Math.pow(normalized, 0.8);
+
+    // Light teal to dark teal
+    const r = Math.round(78 - curved * 50);
+    const g = Math.round(205 - curved * 80);
+    const b = Math.round(196 - curved * 50);
+
+    return [r, g, b, 0.85];
+  } else if (layerId === "public_transit") {
+    const value = data.pct_public_transit;
+    if (value == null) return [0, 0, 0, 0];
+
+    // Percentage 0-100 (often low values)
+    const normalized = Math.max(0, Math.min(1, value / 50)); // Cap at 50% for better contrast
+    const curved = Math.pow(normalized, 0.7);
+
+    // Light purple to dark purple
+    const r = Math.round(200 - curved * 45);
+    const g = Math.round(150 - curved * 61);
+    const b = Math.round(230 - curved * 48);
+
+    return [r, g, b, 0.85];
+  }
+
+  return [0, 0, 0, 0];
+};
+
 const updateDiversityColors = () => {
   if (!map.value || !map.value.getLayer("diversity-layer")) return;
 
@@ -1180,6 +1292,7 @@ const addTooltip = () => {
           ...economicLayers,
           ...housingLayers,
           ...equityLayers,
+          ...transportationLayers,
         ];
         return allLayers.find(l => l.id === layerId)?.name || layerId;
       };
@@ -1229,6 +1342,16 @@ const addTooltip = () => {
             return totalContamination > 0
               ? `${totalContamination} sites`
               : '0 sites';
+          case 'commute_time':
+            return transportationData.value[countyId]?.most_frequent_commute_time || '?';
+          case 'drove_alone':
+            return transportationData.value[countyId]?.pct_drove_alone != null
+              ? `${transportationData.value[countyId].pct_drove_alone.toFixed(1)}%`
+              : '?';
+          case 'public_transit':
+            return transportationData.value[countyId]?.pct_public_transit != null
+              ? `${transportationData.value[countyId].pct_public_transit.toFixed(1)}%`
+              : '?';
           default:
             return '?';
         }
@@ -1240,6 +1363,7 @@ const addTooltip = () => {
         ...selectedEconomicLayers.value,
         ...selectedHousingLayers.value,
         ...selectedEquityLayers.value,
+        ...selectedTransportationLayers.value,
       ];
 
       // Add contamination if choropleth is showing

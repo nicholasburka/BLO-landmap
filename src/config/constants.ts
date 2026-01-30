@@ -27,6 +27,9 @@ export const DATA_PATHS = {
   HOMEOWNERSHIP_BY_RACE: '/datasets/equity/homeownership_by_race.csv',
   POVERTY_BY_RACE: '/datasets/equity/poverty_by_race.csv',
   BLACK_PROGRESS_INDEX: '/datasets/equity/black_progress_index.csv',
+
+  // Transportation data
+  COMMUTE_TIMES: '/datasets/transportation/commute_times.csv',
 } as const
 
 // Map configuration

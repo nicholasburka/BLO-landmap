@@ -211,6 +211,29 @@ export interface EquityDataMap {
   [geoID: string]: EquityData
 }
 
+/**
+ * Transportation/commute data for a county
+ */
+export interface TransportationData {
+  GEOID: string
+  county_name: string
+  state_name: string
+  year: string
+  most_frequent_commute_time: string
+  commute_time_ordinal: number
+  pct_drove_alone?: number
+  pct_carpooled?: number
+  pct_public_transit?: number
+  pct_black?: number
+}
+
+/**
+ * Collection of transportation data indexed by GEOID
+ */
+export interface TransportationDataMap {
+  [geoID: string]: TransportationData
+}
+
 // ============= Computed Data Types =============
 
 /**
@@ -304,6 +327,11 @@ export type HousingLayerId =
  * Available equity layers
  */
 export type EquityLayerId = 'poverty_by_race' | 'black_progress_index'
+
+/**
+ * Available transportation layers
+ */
+export type TransportationLayerId = 'commute_time' | 'drove_alone' | 'public_transit'
 
 // ============= Utility Types =============
 

@@ -28,6 +28,7 @@ interface Props {
   selectedEconomicLayers: string[]
   selectedHousingLayers: string[]
   selectedEquityLayers: string[]
+  selectedTransportationLayers: string[]
   showContaminationChoropleth: boolean
 }
 
@@ -119,6 +120,27 @@ const layerLegends: Record<string, LayerLegend> = {
     lowLabel: 'Fewer Sites',
     highLabel: 'More Sites',
   },
+  commute_time: {
+    id: 'commute_time',
+    name: 'Most Common Commute Time',
+    gradient: 'linear-gradient(to right, rgb(0, 180, 0), rgb(255, 255, 0), rgb(255, 0, 0))',
+    lowLabel: 'Shorter',
+    highLabel: 'Longer',
+  },
+  drove_alone: {
+    id: 'drove_alone',
+    name: '% Drove Alone (Black Workers)',
+    gradient: 'linear-gradient(to right, rgb(78, 205, 196), rgb(28, 125, 146))',
+    lowLabel: 'Lower %',
+    highLabel: 'Higher %',
+  },
+  public_transit: {
+    id: 'public_transit',
+    name: '% Public Transit (Black Workers)',
+    gradient: 'linear-gradient(to right, rgb(200, 150, 230), rgb(155, 89, 182))',
+    lowLabel: 'Lower %',
+    highLabel: 'Higher %',
+  },
 }
 
 const activeLayers = computed(() => {
@@ -127,6 +149,7 @@ const activeLayers = computed(() => {
     ...props.selectedEconomicLayers,
     ...props.selectedHousingLayers,
     ...props.selectedEquityLayers,
+    ...props.selectedTransportationLayers,
   ]
 
   if (props.showContaminationChoropleth) {

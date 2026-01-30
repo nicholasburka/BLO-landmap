@@ -149,6 +149,33 @@
         </div>
       </template>
 
+      <template v-if="transportationLayers && transportationLayers.length > 0">
+        <h3 class="category-header" @click="toggleCategory('transportation')">
+          <span class="arrow" :class="{ expanded: expandedCategories.transportation }">▶</span>
+          Transportation
+        </h3>
+        <div v-show="expandedCategories.transportation">
+          <div v-for="layer in transportationLayers" :key="layer.id" class="layer-item">
+            <input
+              type="checkbox"
+              :id="layer.id"
+              :checked="selectedTransportationLayers?.includes(layer.id)"
+              @change="$emit('toggle-transportation', layer.id)"
+            />
+            <label :for="layer.id">{{ layer.name }}</label>
+            <span class="tooltip-wrapper" v-if="layer.tooltip">
+              <button
+                type="button"
+                class="tooltip-icon"
+                :aria-label="'Info about ' + layer.name"
+                :aria-describedby="'tooltip-' + layer.id"
+              >ⓘ</button>
+              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
+            </span>
+          </div>
+        </div>
+      </template>
+
       <template v-if="!devModeOnly">
         <h3 class="category-header" @click="toggleCategory('epa')">
           <span class="arrow" :class="{ expanded: expandedCategories.epa }">▶</span>
@@ -258,6 +285,7 @@ import type {
   EconomicLayer,
   HousingLayer,
   EquityLayer,
+  TransportationLayer,
   ContaminationLayer,
 } from '@/config/layerConfig'
 
@@ -267,11 +295,13 @@ interface Props {
   economicLayers?: EconomicLayer[]
   housingLayers?: HousingLayer[]
   equityLayers?: EquityLayer[]
+  transportationLayers?: TransportationLayer[]
   contaminationLayers?: ContaminationLayer[]
   selectedDemographicLayers: string[]
   selectedEconomicLayers?: string[]
   selectedHousingLayers?: string[]
   selectedEquityLayers?: string[]
+  selectedTransportationLayers?: string[]
   showContaminationLayers: boolean
   showContaminationChoropleth: boolean
   devModeOnly?: boolean
@@ -285,6 +315,7 @@ defineEmits<{
   'toggle-economic': [layerId: string]
   'toggle-housing': [layerId: string]
   'toggle-equity': [layerId: string]
+  'toggle-transportation': [layerId: string]
   'toggle-contamination': [layerId: string]
   'toggle-contamination-layers': []
   'toggle-contamination-choropleth': []
@@ -296,6 +327,7 @@ const expandedCategories = ref({
   economic: false,
   housing: false,
   equity: false,
+  transportation: false,
   epa: false,
   health: false,
 })

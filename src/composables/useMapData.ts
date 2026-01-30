@@ -10,6 +10,7 @@ import type {
   EconomicDataMap,
   HousingDataMap,
   EquityDataMap,
+  TransportationDataMap,
   CountiesGeoJSON,
 } from '@/types/mapTypes'
 
@@ -24,6 +25,7 @@ export function useMapData() {
   const economicData = ref<EconomicDataMap>({})
   const housingData = ref<HousingDataMap>({})
   const equityData = ref<EquityDataMap>({})
+  const transportationData = ref<TransportationDataMap>({})
 
   /**
    * Load counties GeoJSON data
@@ -413,6 +415,46 @@ export function useMapData() {
   }
 
   /**
+   * Load transportation/commute data from CSV
+   */
+  const loadTransportationData = async (): Promise<void> => {
+    try {
+      const response = await fetch(DATA_PATHS.COMMUTE_TIMES)
+      const csvText = await response.text()
+
+      const results = Papa.parse(csvText, {
+        header: true,
+        dynamicTyping: true,
+      })
+
+      results.data.forEach((row: any) => {
+        if (!row.GEOID) return
+        const geoID = row.GEOID.toString().padStart(5, '0')
+
+        transportationData.value[geoID] = {
+          GEOID: geoID,
+          county_name: row.county_name,
+          state_name: row.state_name,
+          year: row.year,
+          most_frequent_commute_time: row.most_frequent_commute_time,
+          commute_time_ordinal: row.commute_time_ordinal,
+          pct_drove_alone: row.pct_drove_alone,
+          pct_carpooled: row.pct_carpooled,
+          pct_public_transit: row.pct_public_transit,
+          pct_black: row.pct_black,
+        }
+      })
+
+      debugLog('Transportation data loaded:', {
+        totalCounties: Object.keys(transportationData.value).length,
+      })
+    } catch (error) {
+      console.error('Error loading transportation data:', error)
+      throw error
+    }
+  }
+
+  /**
    * Load all county data
    */
   const loadAllCountyData = async (): Promise<void> => {
@@ -426,6 +468,7 @@ export function useMapData() {
       await loadEconomicData()
       await loadHousingData()
       await loadEquityData()
+      await loadTransportationData()
 
       debugLog('All data loaded successfully')
     } catch (error) {
@@ -445,6 +488,7 @@ export function useMapData() {
     economicData,
     housingData,
     equityData,
+    transportationData,
 
     // Loading functions
     loadCountiesGeoJSON,
@@ -456,6 +500,7 @@ export function useMapData() {
     loadEconomicData,
     loadHousingData,
     loadEquityData,
+    loadTransportationData,
     loadAllCountyData,
   }
 }
