@@ -1,8 +1,8 @@
-# BLO Liveability Index v2.0 - Data Integration Strategy
+# BLO Livability Index v2.0 - Data Integration Strategy
 
 ## Overview
 
-This document outlines the strategy for integrating new economic, housing, and social vulnerability data into the BLO (Black Liveability Observatory) Liveability Index. The enhanced index will provide a more comprehensive assessment of county liveability for Black Americans.
+This document outlines the strategy for integrating new economic, housing, and social vulnerability data into the BLO (Black Livability Observatory) Livability Index. The enhanced index will provide a more comprehensive assessment of county livability for Black Americans.
 
 ---
 
@@ -111,7 +111,7 @@ This document outlines the strategy for integrating new economic, housing, and s
 
 ---
 
-## Enhanced BLO Liveability Index Formula
+## Enhanced BLO Livability Index Formula
 
 ### Current Index Components (50% weight)
 1. **Diversity Index** (10%) - Existing
@@ -173,7 +173,7 @@ BLO Score v2.0 = (
 ) * 5.0
 ```
 
-**Output**: Score from 0-5, where 5 is the highest liveability
+**Output**: Score from 0-5, where 5 is the highest livability
 
 ---
 
@@ -424,7 +424,7 @@ const housingValueData = loadCSV('./public/datasets/housing/median_home_value.cs
 const housingTaxData = loadCSV('./public/datasets/housing/median_property_tax.csv')
 const equityData = loadCSV('./public/datasets/equity/combined_equity_metrics.csv')
 const vulnerabilityData = loadCSV('./public/datasets/social-vulnerability/svi_2022_county.csv')
-const existingScores = loadJSON('./public/datasets/BLO-liveability-index/combined_scores.json')
+const existingScores = loadJSON('./public/datasets/BLO-livability-index/combined_scores.json')
 
 // Normalize function
 function normalize(value, min, max, invert = false) {
@@ -508,7 +508,7 @@ const ranked = Object.entries(scores)
 
 // Save
 fs.writeFileSync(
-  './public/datasets/BLO-liveability-index/combined_scores_v2.json',
+  './public/datasets/BLO-livability-index/combined_scores_v2.json',
   JSON.stringify(scores, null, 2)
 )
 ```
@@ -562,7 +562,7 @@ fs.writeFileSync(
 <!-- src/components/CountyModal.vue -->
 <table v-if="hasData" class="county-stats-table">
   <tr>
-    <td class="label">BLO Liveability Score v2.0:</td>
+    <td class="label">BLO Livability Score v2.0:</td>
     <td class="value">{{ formatCombinedScore }}</td>
   </tr>
   <tr>
@@ -674,7 +674,7 @@ public/datasets/
 │   └── black_progress_index.csv (NEW)
 ├── social-vulnerability/
 │   └── svi_2022_county.csv (NEW - converted from .gdb)
-└── BLO-liveability-index/
+└── BLO-livability-index/
     ├── combined_scores.json (existing v1.0)
     └── combined_scores_v2.json (NEW v2.0)
 

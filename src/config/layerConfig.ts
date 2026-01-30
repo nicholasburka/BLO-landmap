@@ -51,7 +51,7 @@ export const DEMOGRAPHIC_LAYERS: DemographicLayer[] = [
     id: 'combined_scores_v2',
     name: 'BLO Livability Index',
     visible: true,
-    tooltip: datasetMetadata.blo_livability_index?.description || 'Comprehensive livability score combining 11 metrics across demographics, equity, economics, housing, environment, and health',
+    tooltip: datasetMetadata.blo_livability_index?.description || 'Comprehensive county livability score combining demographics, equity, economics, housing, environment, and health.',
     category: '', // No category - appears at top
   },
   {

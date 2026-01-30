@@ -98,7 +98,7 @@ interface DemographicLayer {
 DATA_PATHS = {
   COUNTIES: '/datasets/geographic/counties.geojson',
   CONTAMINATION_COUNTS: '/datasets/epa-contamination/contamination_counts.json',
-  COMBINED_SCORES: '/datasets/BLO-liveability-index/combined_scores.json',
+  COMBINED_SCORES: '/datasets/BLO-livability-index/combined_scores.json',
   DIVERSITY_DATA: '/datasets/demographics/county_pctBlack_diversity_index_with_stats.csv',
   LIFE_EXPECTANCY: '/datasets/demographics/lifeexpectancy-USA-county.csv',
 }

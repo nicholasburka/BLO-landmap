@@ -29,9 +29,14 @@
           @change="$emit('toggle-demographic', layer.id)"
         />
         <label :for="layer.id">{{ layer.name }}</label>
-        <span class="tooltip-icon" v-if="layer.tooltip">
-          ⓘ
-          <span class="tooltip-text">{{ layer.tooltip }}</span>
+        <span class="tooltip-wrapper" v-if="layer.tooltip">
+          <button
+            type="button"
+            class="tooltip-icon"
+            :aria-label="'Info about ' + layer.name"
+            :aria-describedby="'tooltip-' + layer.id"
+          >ⓘ</button>
+          <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
         </span>
       </div>
 
@@ -51,8 +56,13 @@
             />
             <label :for="layer.id">{{ layer.name }}</label>
             <span class="tooltip-wrapper" v-if="layer.tooltip">
-              <span class="tooltip-icon">ⓘ</span>
-              <span class="tooltip-popup">{{ layer.tooltip }}</span>
+              <button
+                type="button"
+                class="tooltip-icon"
+                :aria-label="'Info about ' + layer.name"
+                :aria-describedby="'tooltip-' + layer.id"
+              >ⓘ</button>
+              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
             </span>
           </div>
         </div>
@@ -73,8 +83,13 @@
             />
             <label :for="layer.id">{{ layer.name }}</label>
             <span class="tooltip-wrapper" v-if="layer.tooltip">
-              <span class="tooltip-icon">ⓘ</span>
-              <span class="tooltip-popup">{{ layer.tooltip }}</span>
+              <button
+                type="button"
+                class="tooltip-icon"
+                :aria-label="'Info about ' + layer.name"
+                :aria-describedby="'tooltip-' + layer.id"
+              >ⓘ</button>
+              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
             </span>
           </div>
         </div>
@@ -95,8 +110,13 @@
             />
             <label :for="layer.id">{{ layer.name }}</label>
             <span class="tooltip-wrapper" v-if="layer.tooltip">
-              <span class="tooltip-icon">ⓘ</span>
-              <span class="tooltip-popup">{{ layer.tooltip }}</span>
+              <button
+                type="button"
+                class="tooltip-icon"
+                :aria-label="'Info about ' + layer.name"
+                :aria-describedby="'tooltip-' + layer.id"
+              >ⓘ</button>
+              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
             </span>
           </div>
         </div>
@@ -117,8 +137,13 @@
             />
             <label :for="layer.id">{{ layer.name }}</label>
             <span class="tooltip-wrapper" v-if="layer.tooltip">
-              <span class="tooltip-icon">ⓘ</span>
-              <span class="tooltip-popup">{{ layer.tooltip }}</span>
+              <button
+                type="button"
+                class="tooltip-icon"
+                :aria-label="'Info about ' + layer.name"
+                :aria-describedby="'tooltip-' + layer.id"
+              >ⓘ</button>
+              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
             </span>
           </div>
         </div>
@@ -140,8 +165,13 @@
               All Individual Sites
             </label>
             <span class="tooltip-wrapper">
-              <span class="tooltip-icon">ⓘ</span>
-              <span class="tooltip-popup">Toggle all individual EPA contamination sites on/off.</span>
+              <button
+                type="button"
+                class="tooltip-icon"
+                aria-label="Info about All Individual Sites"
+                aria-describedby="tooltip-all-sites"
+              >ⓘ</button>
+              <span class="tooltip-popup" id="tooltip-all-sites" role="tooltip">Toggle all individual EPA contamination sites on/off.</span>
             </span>
           </div>
 
@@ -156,8 +186,13 @@
               />
               <label :for="layer.id">{{ layer.name }}</label>
               <span class="tooltip-wrapper" v-if="layer.tooltip">
-                <span class="tooltip-icon">ⓘ</span>
-                <span class="tooltip-popup">{{ layer.tooltip }}</span>
+                <button
+                  type="button"
+                  class="tooltip-icon"
+                  :aria-label="'Info about ' + layer.name"
+                  :aria-describedby="'tooltip-' + layer.id"
+                >ⓘ</button>
+                <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
               </span>
             </div>
           </div>
@@ -172,8 +207,13 @@
               County-Level Polluted Site Comparison
             </label>
             <span class="tooltip-wrapper">
-              <span class="tooltip-icon">ⓘ</span>
-              <span class="tooltip-popup">Total EPA contamination sites per county (lower is better).</span>
+              <button
+                type="button"
+                class="tooltip-icon"
+                aria-label="Info about County-Level Polluted Site Comparison"
+                aria-describedby="tooltip-county-pollution"
+              >ⓘ</button>
+              <span class="tooltip-popup" id="tooltip-county-pollution" role="tooltip">Total EPA contamination sites per county (lower is better).</span>
             </span>
           </div>
         </div>
@@ -195,8 +235,13 @@
             />
             <label :for="layer.id">{{ layer.name }}</label>
             <span class="tooltip-wrapper" v-if="layer.tooltip">
-              <span class="tooltip-icon">ⓘ</span>
-              <span class="tooltip-popup">{{ layer.tooltip }}</span>
+              <button
+                type="button"
+                class="tooltip-icon"
+                :aria-label="'Info about ' + layer.name"
+                :aria-describedby="'tooltip-' + layer.id"
+              >ⓘ</button>
+              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
             </span>
           </div>
         </div>
@@ -466,7 +511,9 @@ onMounted(() => {
   vertical-align: middle;
 }
 
-.tooltip-icon {
+button.tooltip-icon {
+  background: none;
+  border: none;
   cursor: help;
   font-size: 14px;
   color: #666;
@@ -474,9 +521,16 @@ onMounted(() => {
   transition: all 0.2s ease;
   padding: 2px;
   border-radius: 50%;
+  line-height: 1;
 }
 
-.tooltip-wrapper:hover .tooltip-icon {
+button.tooltip-icon:focus {
+  outline: 2px solid #4a90e2;
+  outline-offset: 1px;
+}
+
+.tooltip-wrapper:hover button.tooltip-icon,
+.tooltip-wrapper button.tooltip-icon:focus {
   color: #4a90e2;
   background-color: #f0f7ff;
   transform: scale(1.2);
@@ -502,7 +556,8 @@ onMounted(() => {
   text-align: left;
 }
 
-.tooltip-wrapper:hover .tooltip-popup {
+.tooltip-wrapper:hover .tooltip-popup,
+.tooltip-wrapper:focus-within .tooltip-popup {
   visibility: visible;
   opacity: 1;
 }

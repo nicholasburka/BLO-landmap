@@ -10,6 +10,7 @@ import MapComponent from './components/Map.vue'
         <a href="https://blacklandownership.com" target="_blank" rel="noopener noreferrer" class="logo-link">
           <img src="/BLO-FAVICON.png" alt="BLO Logo" class="logo" />
         </a>
+        <h1 class="site-title">U.S. Livability Index</h1>
         <RouterLink to="/">Map</RouterLink>
         <RouterLink to="/about">About</RouterLink>
       </nav>
@@ -55,6 +56,13 @@ nav {
 
 .logo:hover {
   opacity: 0.8;
+}
+
+.site-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 main {
