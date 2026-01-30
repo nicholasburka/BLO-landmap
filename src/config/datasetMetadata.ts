@@ -201,6 +201,48 @@ export const datasetMetadata: Record<string, DatasetMetadata> = {
     range: { min: 0, max: 100 },
     colorScheme: 'Red (low/bad) to Green (high/good)',
   },
+
+  // Transportation
+  commute_time: {
+    id: 'commute_time',
+    name: 'Most Common Commute Time',
+    description: 'Most frequent commute time category for Black workers age 16+ in the county.',
+    source: 'Black Worker Data Center (BWDC)',
+    sourceUrl: 'https://blackworkers.org/',
+    year: 2023,
+    methodology: 'American Community Survey data processed by BWDC. Shows the most common commute time bracket among Black workers: <10 min, 10-14 min, 15-19 min, 20-24 min, 25-29 min, 30-34 min, 35-44 min, 45-59 min, or 60+ min.',
+    interpretation: 'Shorter commute times generally indicate better access to employment and quality of life. Categories are ordered from shortest to longest.',
+    unit: 'category',
+    colorScheme: 'Green (shorter) to Yellow to Red (longer)',
+  },
+
+  drove_alone: {
+    id: 'drove_alone',
+    name: 'Drove Alone (Black Workers)',
+    description: 'Percentage of Black workers age 16+ who drove alone to work.',
+    source: 'Black Worker Data Center (BWDC)',
+    sourceUrl: 'https://blackworkers.org/',
+    year: 2023,
+    methodology: 'American Community Survey data processed by BWDC. Calculated as percentage of Black workers who commute by driving alone.',
+    interpretation: 'Higher percentages may indicate car dependency and lack of public transit options. Lower percentages may indicate better transit access or walkability.',
+    unit: 'percent',
+    range: { min: 0, max: 100 },
+    colorScheme: 'Teal gradient based on percentage',
+  },
+
+  public_transit: {
+    id: 'public_transit',
+    name: 'Public Transit (Black Workers)',
+    description: 'Percentage of Black workers age 16+ who used public transportation to work.',
+    source: 'Black Worker Data Center (BWDC)',
+    sourceUrl: 'https://blackworkers.org/',
+    year: 2023,
+    methodology: 'American Community Survey data processed by BWDC. Calculated as percentage of Black workers who commute via public transit (bus, subway, rail, ferry, etc.).',
+    interpretation: 'Higher percentages indicate better public transit access and utilization. Urban areas typically show higher rates.',
+    unit: 'percent',
+    range: { min: 0, max: 100 },
+    colorScheme: 'Purple gradient based on percentage',
+  },
 }
 
 // BLO Calculation Methodology
