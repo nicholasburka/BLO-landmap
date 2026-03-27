@@ -81,6 +81,9 @@
       :show-contamination-layers="showContaminationLayers"
       :show-contamination-choropleth="showContaminationChoropleth"
       :dev-mode-only="DEV_MODE_DEMOGRAPHICS_ONLY"
+      :show-scoring-controls="showScoringControls"
+      :layer-weights="layerWeights"
+      :layer-directions="layerDirections"
       @toggle="toggleLayerControl"
       @toggle-demographic="toggleDemographicLayer"
       @toggle-economic="toggleEconomicLayer"
@@ -90,6 +93,8 @@
       @toggle-contamination="toggleContaminationLayer"
       @toggle-contamination-layers="toggleContaminationLayers"
       @toggle-contamination-choropleth="toggleContaminationChoropleth"
+      @update-weight="updateLayerWeight"
+      @update-direction="updateLayerDirection"
     >
       <LoadingIndicator :loaded="layersLoaded" :progress="loadingProgress" />
     </LayerControls>
@@ -234,6 +239,20 @@ const handleOutsideClick = (event: MouseEvent) => {
 };
 
 const averagesPanelExpanded = ref(false);
+
+// Dynamic scoring state
+const layerWeights = ref<Record<string, number>>({})
+const layerDirections = ref<Record<string, string>>({})
+
+const showScoringControls = computed(() => allSelectedLayers.value.length >= 2)
+
+const updateLayerWeight = (layerId: string, weight: number) => {
+  layerWeights.value = { ...layerWeights.value, [layerId]: weight }
+}
+
+const updateLayerDirection = (layerId: string, direction: string) => {
+  layerDirections.value = { ...layerDirections.value, [layerId]: direction }
+}
 
 const toggleAveragesPanel = () => {
   averagesPanelExpanded.value = !averagesPanelExpanded.value;
