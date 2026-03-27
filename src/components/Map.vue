@@ -158,6 +158,7 @@ import {
   MAP_CONFIG,
 } from "@/config/constants";
 import type { ColorBlend } from "@/types/mapTypes";
+import { LAYER_REGISTRY } from "@/config/layerRegistry";
 import CountyModal from "@/components/CountyModal.vue";
 import LayerControls from "@/components/LayerControls.vue";
 import LoadingIndicator from "@/components/LoadingIndicator.vue";
@@ -1304,79 +1305,52 @@ const addTooltip = () => {
       // Build active layers section
       let activeLayersHTML = '';
 
-      // Helper to get layer name from config
+      // Helper to get layer name from registry
       const getLayerName = (layerId: string) => {
-        if (layerId === 'contamination') {
-          return 'EPA Contamination Sites';
-        }
-        const allLayers = [
-          ...demographicLayers,
-          ...economicLayers,
-          ...housingLayers,
-          ...equityLayers,
-          ...transportationLayers,
-        ];
-        return allLayers.find(l => l.id === layerId)?.name || layerId;
+        return LAYER_REGISTRY[layerId]?.name || layerId;
       };
 
-      // Helper to get formatted value for a layer
-      const getLayerValue = (layerId: string) => {
+      // Helper to get raw value for a layer from the correct data map
+      const getRawLayerValue = (layerId: string): any => {
+        const reg = LAYER_REGISTRY[layerId];
+        if (!reg) return undefined;
+        const key = reg.dataKey;
         switch (layerId) {
           case 'combined_scores_v2':
-            return combinedScoresV2Data.value[countyId]?.blo_score_v2
-              ? `${combinedScoresV2Data.value[countyId].blo_score_v2.toFixed(2)} of 5.0`
-              : '?';
+            return combinedScoresV2Data.value[countyId]?.blo_score_v2;
           case 'diversity_index':
-            return diversityValue != null ? diversityValue.toFixed(4) : '?';
+            return diversityValue;
           case 'pct_Black':
-            return pctBlackValue != null ? `${pctBlackValue.toFixed(2)}%` : '?';
+            return pctBlackValue;
           case 'life_expectancy':
-            return lifeExpValue ? `${lifeExpValue.toFixed(1)} years` : '?';
-          case 'avg_weekly_wage':
-            return economicData.value[countyId]?.avg_weekly_wage
-              ? `$${economicData.value[countyId].avg_weekly_wage.toLocaleString()}`
-              : '?';
-          case 'median_income_by_race':
-            return economicData.value[countyId]?.median_income_black
-              ? `$${economicData.value[countyId].median_income_black.toLocaleString()}`
-              : '?';
-          case 'median_home_value':
-            return housingData.value[countyId]?.median_home_value
-              ? `$${housingData.value[countyId].median_home_value.toLocaleString()}`
-              : '?';
-          case 'median_property_tax':
-            return housingData.value[countyId]?.median_property_tax
-              ? `$${housingData.value[countyId].median_property_tax.toLocaleString()}`
-              : '?';
-          case 'homeownership_by_race':
-            return housingData.value[countyId]?.homeownership_rate_black != null
-              ? `${housingData.value[countyId].homeownership_rate_black.toFixed(1)}%`
-              : '?';
-          case 'poverty_by_race':
-            return equityData.value[countyId]?.poverty_rate_black != null
-              ? `${equityData.value[countyId].poverty_rate_black.toFixed(1)}%`
-              : '?';
-          case 'black_progress_index':
-            return equityData.value[countyId]?.black_progress_index != null
-              ? equityData.value[countyId].black_progress_index.toFixed(2)
-              : '?';
+            return lifeExpValue;
           case 'contamination':
-            return totalContamination > 0
-              ? `${totalContamination} sites`
-              : '0 sites';
+            return totalContamination;
+          case 'avg_weekly_wage':
+          case 'median_income_by_race':
+            return (economicData.value[countyId] as any)?.[key];
+          case 'median_home_value':
+          case 'median_property_tax':
+          case 'homeownership_by_race':
+            return (housingData.value[countyId] as any)?.[key];
+          case 'poverty_by_race':
+          case 'black_progress_index':
+            return (equityData.value[countyId] as any)?.[key];
           case 'commute_time':
-            return transportationData.value[countyId]?.most_frequent_commute_time || '?';
           case 'drove_alone':
-            return transportationData.value[countyId]?.pct_drove_alone != null
-              ? `${transportationData.value[countyId].pct_drove_alone.toFixed(1)}%`
-              : '?';
           case 'public_transit':
-            return transportationData.value[countyId]?.pct_public_transit != null
-              ? `${transportationData.value[countyId].pct_public_transit.toFixed(1)}%`
-              : '?';
+            return (transportationData.value[countyId] as any)?.[key];
           default:
-            return '?';
+            return undefined;
         }
+      };
+
+      // Helper to get formatted value for a layer using registry formatValue
+      const getLayerValue = (layerId: string) => {
+        const reg = LAYER_REGISTRY[layerId];
+        if (!reg) return '?';
+        const raw = getRawLayerValue(layerId);
+        return reg.formatValue(raw);
       };
 
       // Collect all active layers

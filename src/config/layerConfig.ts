@@ -1,4 +1,4 @@
-import { datasetMetadata } from './datasetMetadata'
+import { LAYER_REGISTRY, getLayer } from './layerRegistry'
 
 export interface DemographicLayer {
   id: string
@@ -55,41 +55,49 @@ export interface TransportationLayer {
   tooltip?: string
 }
 
+/** Helper: build tooltip from registry description + source */
+function tip(id: string): string {
+  const r = LAYER_REGISTRY[id]
+  if (!r) return ''
+  return `${r.description} (${r.source})`
+}
+
 export const DEMOGRAPHIC_LAYERS: DemographicLayer[] = [
   {
     id: 'combined_scores_v2',
-    name: 'BLO Livability Index',
+    name: getLayer('combined_scores_v2').name,
     visible: true,
-    tooltip: (datasetMetadata.blo_livability_index?.description || 'Comprehensive county livability score combining demographics, equity, economics, housing, environment, and health.') + ' (BLO)',
-    category: '', // No category - appears at top
+    tooltip: tip('combined_scores_v2'),
+    category: '',
   },
   {
     id: 'diversity_index',
-    name: 'Diversity Index',
-    file: '/datasets/demographics/county_diversity_index_with_stats.csv',
-    color: '#800080', // Purple color for diversity
+    name: getLayer('diversity_index').name,
+    file: getLayer('diversity_index').dataPath,
+    color: getLayer('diversity_index').color,
     visible: false,
-    tooltip: (datasetMetadata.diversity_index?.description || 'Probability that two randomly selected people are from different racial/ethnic groups') + ' (Census)',
+    tooltip: tip('diversity_index'),
     category: 'Demographics',
   },
   {
     id: 'pct_Black',
-    name: 'Percent Black',
-    file: '/datasets/demographics/county_diversity_index_with_stats.csv',
-    color: '#8B4513', // Brown color
+    name: getLayer('pct_Black').name,
+    file: getLayer('pct_Black').dataPath,
+    color: getLayer('pct_Black').color,
     visible: false,
-    tooltip: (datasetMetadata.pct_black?.description || 'Percentage of county residents who identify as Black or African American') + ' (Census)',
+    tooltip: tip('pct_Black'),
     category: 'Demographics',
   },
   {
     id: 'life_expectancy',
-    name: 'Life Expectancy',
+    name: getLayer('life_expectancy').name,
     visible: false,
-    tooltip: (datasetMetadata.life_expectancy?.description || 'Average years a person born in this county is expected to live') + ' (IHME)',
+    tooltip: tip('life_expectancy'),
     category: 'Health',
   },
 ]
 
+// Contamination layers are point/polygon overlays, not in the registry
 export const CONTAMINATION_LAYERS: ContaminationLayer[] = [
   {
     id: 'acres_brownfields',
@@ -136,91 +144,91 @@ export const CONTAMINATION_LAYERS: ContaminationLayer[] = [
 export const ECONOMIC_LAYERS: EconomicLayer[] = [
   {
     id: 'avg_weekly_wage',
-    name: 'Average Weekly Wage',
-    file: '/datasets/economic/avg_weekly_wages.csv',
-    color: '#2E8B57', // Sea green
+    name: getLayer('avg_weekly_wage').name,
+    file: getLayer('avg_weekly_wage').dataPath,
+    color: getLayer('avg_weekly_wage').color!,
     visible: false,
-    tooltip: (datasetMetadata.avg_weekly_wage?.description || 'Average weekly wages across all industries in the county') + ' (BLS)',
+    tooltip: tip('avg_weekly_wage'),
   },
   {
     id: 'median_income_by_race',
-    name: 'Median Income (Black)',
-    file: '/datasets/economic/median_income_by_race.csv',
-    color: '#20B2AA', // Light sea green
+    name: getLayer('median_income_by_race').name,
+    file: getLayer('median_income_by_race').dataPath,
+    color: getLayer('median_income_by_race').color!,
     visible: false,
-    tooltip: (datasetMetadata.median_income_black?.description || 'Median household income for Black households') + ' (Urban Institute)',
+    tooltip: tip('median_income_by_race'),
   },
 ]
 
 export const HOUSING_LAYERS: HousingLayer[] = [
   {
     id: 'median_home_value',
-    name: 'Median Home Value',
-    file: '/datasets/housing/median_home_value.csv',
-    color: '#FF6347', // Tomato
+    name: getLayer('median_home_value').name,
+    file: getLayer('median_home_value').dataPath,
+    color: getLayer('median_home_value').color!,
     visible: false,
-    tooltip: (datasetMetadata.median_home_value?.description || 'Median value of owner-occupied housing units with mortgages') + ' (Urban Institute)',
+    tooltip: tip('median_home_value'),
   },
   {
     id: 'median_property_tax',
-    name: 'Median Property Tax',
-    file: '/datasets/housing/median_property_tax.csv',
-    color: '#FF4500', // Orange red
+    name: getLayer('median_property_tax').name,
+    file: getLayer('median_property_tax').dataPath,
+    color: getLayer('median_property_tax').color!,
     visible: false,
-    tooltip: (datasetMetadata.median_property_tax?.description || 'Median annual property tax paid by homeowners') + ' (Urban Institute)',
+    tooltip: tip('median_property_tax'),
   },
   {
     id: 'homeownership_by_race',
-    name: 'Black Homeownership Rate',
-    file: '/datasets/equity/homeownership_by_race.csv',
-    color: '#FFA500', // Orange
+    name: getLayer('homeownership_by_race').name,
+    file: getLayer('homeownership_by_race').dataPath,
+    color: getLayer('homeownership_by_race').color!,
     visible: false,
-    tooltip: (datasetMetadata.homeownership_black?.description || 'Percentage of Black households that own their homes') + ' (Urban Institute)',
+    tooltip: tip('homeownership_by_race'),
   },
 ]
 
 export const EQUITY_LAYERS: EquityLayer[] = [
   {
     id: 'poverty_by_race',
-    name: 'Poverty Rate (Black)',
-    file: '/datasets/equity/poverty_by_race.csv',
-    color: '#9370DB', // Medium purple
+    name: getLayer('poverty_by_race').name,
+    file: getLayer('poverty_by_race').dataPath,
+    color: getLayer('poverty_by_race').color!,
     visible: false,
-    tooltip: (datasetMetadata.poverty_rate_black?.description || 'Percentage of Black individuals living below the federal poverty line') + ' (Urban Institute)',
+    tooltip: tip('poverty_by_race'),
   },
   {
     id: 'black_progress_index',
-    name: 'Black Progress Index',
-    file: '/datasets/equity/black_progress_index.csv',
-    color: '#8A2BE2', // Blue violet
+    name: getLayer('black_progress_index').name,
+    file: getLayer('black_progress_index').dataPath,
+    color: getLayer('black_progress_index').color!,
     visible: false,
-    tooltip: (datasetMetadata.black_progress_index?.description || 'Composite measure of Black wellbeing from NAACP & Brookings') + ' (Brookings)',
+    tooltip: tip('black_progress_index'),
   },
 ]
 
 export const TRANSPORTATION_LAYERS: TransportationLayer[] = [
   {
     id: 'commute_time',
-    name: 'Most Common Commute Time',
-    file: '/datasets/transportation/commute_times.csv',
-    color: '#FF6B6B', // Coral red
+    name: getLayer('commute_time').name,
+    file: getLayer('commute_time').dataPath,
+    color: getLayer('commute_time').color!,
     visible: false,
-    tooltip: 'Most frequent commute time category for Black workers in the county (2023). (BWDC)',
+    tooltip: tip('commute_time'),
   },
   {
     id: 'drove_alone',
-    name: '% Drove Alone (Black Workers)',
-    file: '/datasets/transportation/commute_times.csv',
-    color: '#4ECDC4', // Teal
+    name: getLayer('drove_alone').name,
+    file: getLayer('drove_alone').dataPath,
+    color: getLayer('drove_alone').color!,
     visible: false,
-    tooltip: 'Percentage of Black workers age 16+ who drove alone to work (2023). (BWDC)',
+    tooltip: tip('drove_alone'),
   },
   {
     id: 'public_transit',
-    name: '% Public Transit (Black Workers)',
-    file: '/datasets/transportation/commute_times.csv',
-    color: '#9B59B6', // Purple
+    name: getLayer('public_transit').name,
+    file: getLayer('public_transit').dataPath,
+    color: getLayer('public_transit').color!,
     visible: false,
-    tooltip: 'Percentage of Black workers age 16+ who used public transportation (2023). (BWDC)',
+    tooltip: tip('public_transit'),
   },
 ]

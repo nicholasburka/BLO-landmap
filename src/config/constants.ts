@@ -48,15 +48,6 @@ export const PROPERTY_SEARCH = {
   SEARCH_RADIUS: 100, // miles
 } as const
 
-// Color configuration
-export const LAYER_COLORS = {
-  DIVERSITY_INDEX: [128, 0, 128] as [number, number, number], // Purple
-  PCT_BLACK: [139, 69, 19] as [number, number, number],       // Brown
-  CONTAMINATION: [255, 0, 0] as [number, number, number],     // Red
-  LIFE_EXPECTANCY: [0, 128, 0] as [number, number, number],   // Green
-  COMBINED_SCORE: [0, 0, 255] as [number, number, number],    // Blue
-} as const
-
 // Debug logging helper
 export const debugLog = (...args: any[]) => {
   if (DEBUG) {

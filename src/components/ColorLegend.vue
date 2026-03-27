@@ -42,113 +42,17 @@ interface Props {
 
 const props = defineProps<Props>()
 
-// Define legend information for each layer
-const layerLegends: Record<string, LayerLegend> = {
-  combined_scores_v2: {
-    id: 'combined_scores_v2',
-    name: 'BLO Livability Index',
-    gradient: 'linear-gradient(to right, rgb(255, 245, 100), rgb(0, 100, 0))',
-    lowLabel: 'Lower',
-    highLabel: 'Higher',
-  },
-  diversity_index: {
-    id: 'diversity_index',
-    name: 'Diversity Index',
-    gradient: 'linear-gradient(to right, rgb(200, 0, 200), rgb(100, 0, 150))',
-    lowLabel: 'Less Diverse',
-    highLabel: 'More Diverse',
-  },
-  pct_Black: {
-    id: 'pct_Black',
-    name: 'Percent Black',
-    gradient: 'linear-gradient(to right, rgb(139, 69, 19, 0.3), rgb(69, 35, 10, 0.95))',
-    lowLabel: 'Lower %',
-    highLabel: 'Higher %',
-  },
-  life_expectancy: {
-    id: 'life_expectancy',
-    name: 'Life Expectancy',
-    gradient: 'linear-gradient(to right, rgb(255, 100, 100), rgb(100, 200, 100))',
-    lowLabel: 'Lower',
-    highLabel: 'Higher',
-  },
-  avg_weekly_wage: {
-    id: 'avg_weekly_wage',
-    name: 'Average Weekly Wage',
-    gradient: 'linear-gradient(to right, rgb(200, 220, 100), rgb(0, 100, 0))',
-    lowLabel: 'Lower',
-    highLabel: 'Higher',
-  },
-  median_income_by_race: {
-    id: 'median_income_by_race',
-    name: 'Median Income (Black)',
-    gradient: 'linear-gradient(to right, rgba(100, 200, 255, 0.3), rgba(0, 50, 150, 0.95))',
-    lowLabel: 'Lower',
-    highLabel: 'Higher',
-  },
-  median_home_value: {
-    id: 'median_home_value',
-    name: 'Median Home Value',
-    gradient: 'linear-gradient(to right, rgb(0, 180, 0), rgb(220, 0, 0))',
-    lowLabel: 'More Affordable',
-    highLabel: 'Less Affordable',
-  },
-  median_property_tax: {
-    id: 'median_property_tax',
-    name: 'Median Property Tax',
-    gradient: 'linear-gradient(to right, rgb(100, 200, 100), rgb(255, 100, 100))',
-    lowLabel: 'Lower',
-    highLabel: 'Higher',
-  },
-  homeownership_by_race: {
-    id: 'homeownership_by_race',
-    name: 'Black Homeownership Rate',
-    gradient: 'linear-gradient(to right, rgb(220, 100, 100), rgb(100, 200, 100))',
-    lowLabel: 'Lower',
-    highLabel: 'Higher',
-  },
-  poverty_by_race: {
-    id: 'poverty_by_race',
-    name: 'Poverty Rate (Black)',
-    gradient: 'linear-gradient(to right, rgb(100, 200, 100), rgb(200, 0, 0))',
-    lowLabel: 'Lower',
-    highLabel: 'Higher',
-  },
-  black_progress_index: {
-    id: 'black_progress_index',
-    name: 'Black Progress Index',
-    gradient: 'linear-gradient(to right, rgb(220, 100, 100), rgb(100, 200, 100))',
-    lowLabel: 'Lower',
-    highLabel: 'Higher',
-  },
-  contamination: {
-    id: 'contamination',
-    name: 'EPA Contamination Sites',
-    gradient: 'linear-gradient(to right, rgba(255, 0, 0, 0), rgba(255, 0, 0, 1))',
-    lowLabel: 'Fewer Sites',
-    highLabel: 'More Sites',
-  },
-  commute_time: {
-    id: 'commute_time',
-    name: 'Most Common Commute Time',
-    gradient: 'linear-gradient(to right, rgb(0, 180, 0), rgb(255, 255, 0), rgb(255, 0, 0))',
-    lowLabel: 'Shorter',
-    highLabel: 'Longer',
-  },
-  drove_alone: {
-    id: 'drove_alone',
-    name: '% Drove Alone (Black Workers)',
-    gradient: 'linear-gradient(to right, rgb(78, 205, 196), rgb(28, 125, 146))',
-    lowLabel: 'Lower %',
-    highLabel: 'Higher %',
-  },
-  public_transit: {
-    id: 'public_transit',
-    name: '% Public Transit (Black Workers)',
-    gradient: 'linear-gradient(to right, rgb(200, 150, 230), rgb(155, 89, 182))',
-    lowLabel: 'Lower %',
-    highLabel: 'Higher %',
-  },
+/** Derive legend info from the layer registry */
+function getLegend(id: string): LayerLegend | null {
+  const reg = LAYER_REGISTRY[id]
+  if (!reg) return null
+  return {
+    id: reg.id,
+    name: reg.name,
+    gradient: reg.gradient.css,
+    lowLabel: reg.gradient.lowLabel,
+    highLabel: reg.gradient.highLabel,
+  }
 }
 
 const activeLayers = computed(() => {
@@ -167,16 +71,14 @@ const activeLayers = computed(() => {
   // If multiple layers are selected (multi-layer mode), show BLO gradient
   const nonBLOLayers = allSelected.filter(id => id !== 'combined_scores' && id !== 'combined_scores_v2')
   if (nonBLOLayers.length >= 2) {
-    return [{
-      ...layerLegends.combined_scores_v2,
-      name: 'BLO Livability Sub-Index'
-    }]
+    const bloLegend = getLegend('combined_scores_v2')
+    return bloLegend ? [{ ...bloLegend, name: 'Custom Index' }] : []
   }
 
   // Otherwise show the specific layer legend
   return allSelected
-    .filter(id => layerLegends[id])
-    .map(id => layerLegends[id])
+    .map(id => getLegend(id))
+    .filter((l): l is LayerLegend => l !== null)
 })
 
 /** In multi-layer mode, show each layer with its direction indicator */

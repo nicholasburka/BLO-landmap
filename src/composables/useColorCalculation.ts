@@ -1,5 +1,5 @@
 import { ref, type Ref } from 'vue'
-import { LAYER_COLORS, debugLog } from '@/config/constants'
+import { debugLog } from '@/config/constants'
 import type {
   ColorBlend,
   DiversityData,
@@ -77,10 +77,10 @@ export function useColorCalculation(
     debugLog('Pre-calculating color blends...')
 
     const colors = {
-      diversity_index: LAYER_COLORS.DIVERSITY_INDEX,
-      pct_Black: LAYER_COLORS.PCT_BLACK,
-      contamination: LAYER_COLORS.CONTAMINATION,
-      life_expectancy: LAYER_COLORS.LIFE_EXPECTANCY,
+      diversity_index: [128, 0, 128] as RGBColor,     // Purple
+      pct_Black: [139, 69, 19] as RGBColor,            // Brown
+      contamination: [255, 0, 0] as RGBColor,           // Red
+      life_expectancy: [0, 128, 0] as RGBColor,         // Green
       combined_scores: {
         min: [255, 255, 0] as RGBColor, // Yellow
         max: [0, 255, 0] as RGBColor,   // Vivid green
