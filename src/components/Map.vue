@@ -169,6 +169,7 @@ import {
 import type { ColorBlend, ScoringQuery } from "@/types/mapTypes";
 import { LAYER_REGISTRY } from "@/config/layerRegistry";
 import { usePersonalizedScore, type DataMaps } from "@/composables/usePersonalizedScore";
+import { BLO_PRESET, BLO_PRESET_LAYER_IDS } from "@/config/presets";
 import CountyModal from "@/components/CountyModal.vue";
 import LayerControls from "@/components/LayerControls.vue";
 import LoadingIndicator from "@/components/LoadingIndicator.vue";
@@ -320,20 +321,10 @@ const toggleLayerControl = () => {
 };
 
 const toggleContaminationChoropleth = () => {
-  showContaminationChoropleth.value = !showContaminationChoropleth.value;
-
-  // Clear BLO index if present when turning on contamination choropleth
-  if (showContaminationChoropleth.value) {
-    const bloIndex = selectedDemographicLayers.value.findIndex(
-      id => id === 'combined_scores' || id === 'combined_scores_v2'
-    );
-    if (bloIndex !== -1) {
-      selectedDemographicLayers.value.splice(bloIndex, 1);
-      const bloLayer = demographicLayers.find(l => l.id === 'combined_scores' || l.id === 'combined_scores_v2');
-      if (bloLayer) bloLayer.visible = false;
-    }
+  if (!showContaminationChoropleth.value && isBLOPrecomputedMode()) {
+    expandBLOPreset();
   }
-
+  showContaminationChoropleth.value = !showContaminationChoropleth.value;
   updateChoroplethVisibility();
 };
 
@@ -389,44 +380,104 @@ const dataMaps: DataMaps = {
 
 const { scores: personalizedScores, rankedCounties } = usePersonalizedScore(scoringQuery, dataMaps);
 
+/**
+ * Expand BLO preset into component layers for dynamic scoring.
+ * Called when a user adds a layer while BLO is selected, or modifies weights.
+ * Removes the BLO composite layer and selects all 11 component layers
+ * with preset weights and directions.
+ */
+const expandBLOPreset = () => {
+  // Remove BLO composite from demographics
+  const bloIdx = selectedDemographicLayers.value.indexOf('combined_scores_v2');
+  if (bloIdx !== -1) selectedDemographicLayers.value.splice(bloIdx, 1);
+  const bloLayer = demographicLayers.find(l => l.id === 'combined_scores_v2');
+  if (bloLayer) bloLayer.visible = false;
+
+  // Add preset demographic layers
+  for (const id of ['diversity_index', 'pct_Black', 'life_expectancy']) {
+    if (!selectedDemographicLayers.value.includes(id)) {
+      selectedDemographicLayers.value.push(id);
+      const l = demographicLayers.find(l => l.id === id);
+      if (l) l.visible = true;
+    }
+  }
+
+  // Add preset economic layers
+  for (const id of ['avg_weekly_wage', 'median_income_by_race']) {
+    if (!selectedEconomicLayers.value.includes(id)) {
+      selectedEconomicLayers.value.push(id);
+      const l = economicLayers.find(l => l.id === id);
+      if (l) l.visible = true;
+    }
+  }
+
+  // Add preset housing layers
+  for (const id of ['median_home_value', 'median_property_tax', 'homeownership_by_race']) {
+    if (!selectedHousingLayers.value.includes(id)) {
+      selectedHousingLayers.value.push(id);
+      const l = housingLayers.find(l => l.id === id);
+      if (l) l.visible = true;
+    }
+  }
+
+  // Add preset equity layers
+  for (const id of ['poverty_by_race', 'black_progress_index']) {
+    if (!selectedEquityLayers.value.includes(id)) {
+      selectedEquityLayers.value.push(id);
+      const l = equityLayers.find(l => l.id === id);
+      if (l) l.visible = true;
+    }
+  }
+
+  // Add contamination choropleth
+  showContaminationChoropleth.value = true;
+
+  // Apply preset weights and directions (don't overwrite user-set values)
+  const newWeights = { ...layerWeights.value };
+  const newDirections = { ...layerDirections.value };
+  BLO_PRESET.forEach(q => {
+    if (newWeights[q.layerId] === undefined) newWeights[q.layerId] = q.weight;
+    if (newDirections[q.layerId] === undefined && q.direction) newDirections[q.layerId] = q.direction;
+  });
+  layerWeights.value = newWeights;
+  layerDirections.value = newDirections;
+};
+
+/** Check if BLO composite is the only selected layer (precomputed mode) */
+const isBLOPrecomputedMode = () => {
+  return selectedDemographicLayers.value.length === 1 &&
+    selectedDemographicLayers.value[0] === 'combined_scores_v2' &&
+    selectedEconomicLayers.value.length === 0 &&
+    selectedHousingLayers.value.length === 0 &&
+    selectedEquityLayers.value.length === 0 &&
+    selectedTransportationLayers.value.length === 0 &&
+    !showContaminationChoropleth.value;
+};
+
 const toggleDemographicLayer = (layerId: string) => {
   debugLog("TOGGLING " + layerId);
   const layer = demographicLayers.find((l) => l.id === layerId);
   if (!layer) return;
 
   if (layerId === "combined_scores" || layerId === "combined_scores_v2") {
-    // Handle combined scores separately
-    if (selectedDemographicLayers.value[0] === layerId) {
-      selectedDemographicLayers.value = [];
-      demographicLayers.forEach((l) => {
-        if (l.id === layerId) {
-          l.visible = false;
-        }
-      });
+    // BLO toggle: simple on/off for precomputed view
+    if (selectedDemographicLayers.value.includes(layerId)) {
+      selectedDemographicLayers.value = selectedDemographicLayers.value.filter(id => id !== layerId);
+      layer.visible = false;
     } else {
-      selectedDemographicLayers.value = [layerId];
-      demographicLayers.forEach(
-        (l) => (l.visible = l.id === layerId)
-      );
+      selectedDemographicLayers.value.push(layerId);
+      layer.visible = true;
     }
   } else {
     const currentIndex = selectedDemographicLayers.value.indexOf(layerId);
 
     if (currentIndex === -1) {
-      // Adding a new layer - clear BLO index if present
-      const bloIndex = selectedDemographicLayers.value.findIndex(
-        id => id === 'combined_scores' || id === 'combined_scores_v2'
-      );
-      if (bloIndex !== -1) {
-        selectedDemographicLayers.value.splice(bloIndex, 1);
-        const bloLayer = demographicLayers.find(l => l.id === 'combined_scores' || l.id === 'combined_scores_v2');
-        if (bloLayer) bloLayer.visible = false;
+      if (isBLOPrecomputedMode()) expandBLOPreset();
+      if (!selectedDemographicLayers.value.includes(layerId)) {
+        selectedDemographicLayers.value.push(layerId);
       }
-
-      selectedDemographicLayers.value.push(layerId);
       layer.visible = true;
     } else {
-      // Removing a layer
       selectedDemographicLayers.value.splice(currentIndex, 1);
       layer.visible = false;
     }
@@ -445,18 +496,10 @@ const toggleEconomicLayer = (layerId: string) => {
   const currentIndex = selectedEconomicLayers.value.indexOf(layerId);
 
   if (currentIndex === -1) {
-    // Clear BLO index if present
-    const bloIndex = selectedDemographicLayers.value.findIndex(
-      id => id === 'combined_scores' || id === 'combined_scores_v2'
-    );
-    if (bloIndex !== -1) {
-      selectedDemographicLayers.value.splice(bloIndex, 1);
-      const bloLayer = demographicLayers.find(l => l.id === 'combined_scores' || l.id === 'combined_scores_v2');
-      if (bloLayer) bloLayer.visible = false;
+    if (isBLOPrecomputedMode()) expandBLOPreset();
+    if (!selectedEconomicLayers.value.includes(layerId)) {
+      selectedEconomicLayers.value.push(layerId);
     }
-
-    // Allow multiple economic layers to be selected
-    selectedEconomicLayers.value.push(layerId);
     layer.visible = true;
   } else {
     selectedEconomicLayers.value.splice(currentIndex, 1);
@@ -476,18 +519,10 @@ const toggleHousingLayer = (layerId: string) => {
   const currentIndex = selectedHousingLayers.value.indexOf(layerId);
 
   if (currentIndex === -1) {
-    // Clear BLO index if present
-    const bloIndex = selectedDemographicLayers.value.findIndex(
-      id => id === 'combined_scores' || id === 'combined_scores_v2'
-    );
-    if (bloIndex !== -1) {
-      selectedDemographicLayers.value.splice(bloIndex, 1);
-      const bloLayer = demographicLayers.find(l => l.id === 'combined_scores' || l.id === 'combined_scores_v2');
-      if (bloLayer) bloLayer.visible = false;
+    if (isBLOPrecomputedMode()) expandBLOPreset();
+    if (!selectedHousingLayers.value.includes(layerId)) {
+      selectedHousingLayers.value.push(layerId);
     }
-
-    // Allow multiple housing layers to be selected
-    selectedHousingLayers.value.push(layerId);
     layer.visible = true;
   } else {
     selectedHousingLayers.value.splice(currentIndex, 1);
@@ -507,18 +542,10 @@ const toggleEquityLayer = (layerId: string) => {
   const currentIndex = selectedEquityLayers.value.indexOf(layerId);
 
   if (currentIndex === -1) {
-    // Clear BLO index if present
-    const bloIndex = selectedDemographicLayers.value.findIndex(
-      id => id === 'combined_scores' || id === 'combined_scores_v2'
-    );
-    if (bloIndex !== -1) {
-      selectedDemographicLayers.value.splice(bloIndex, 1);
-      const bloLayer = demographicLayers.find(l => l.id === 'combined_scores' || l.id === 'combined_scores_v2');
-      if (bloLayer) bloLayer.visible = false;
+    if (isBLOPrecomputedMode()) expandBLOPreset();
+    if (!selectedEquityLayers.value.includes(layerId)) {
+      selectedEquityLayers.value.push(layerId);
     }
-
-    // Allow multiple equity layers to be selected
-    selectedEquityLayers.value.push(layerId);
     layer.visible = true;
   } else {
     selectedEquityLayers.value.splice(currentIndex, 1);
@@ -538,17 +565,10 @@ const toggleTransportationLayer = (layerId: string) => {
   const currentIndex = selectedTransportationLayers.value.indexOf(layerId);
 
   if (currentIndex === -1) {
-    // Clear BLO index if present
-    const bloIndex = selectedDemographicLayers.value.findIndex(
-      id => id === 'combined_scores' || id === 'combined_scores_v2'
-    );
-    if (bloIndex !== -1) {
-      selectedDemographicLayers.value.splice(bloIndex, 1);
-      const bloLayer = demographicLayers.find(l => l.id === 'combined_scores' || l.id === 'combined_scores_v2');
-      if (bloLayer) bloLayer.visible = false;
+    if (isBLOPrecomputedMode()) expandBLOPreset();
+    if (!selectedTransportationLayers.value.includes(layerId)) {
+      selectedTransportationLayers.value.push(layerId);
     }
-
-    selectedTransportationLayers.value.push(layerId);
     layer.visible = true;
   } else {
     selectedTransportationLayers.value.splice(currentIndex, 1);
