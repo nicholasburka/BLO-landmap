@@ -131,6 +131,15 @@
         @toggle="toggleAveragesPanel"
       />
     </div>
+
+    <RankingPanel
+      :expanded="rankingPanelExpanded"
+      :visible="showRankingPanel"
+      :ranked-counties="rankedCounties"
+      :get-county-name="getCountyName"
+      @toggle="toggleRankingPanel"
+      @select-county="selectCountyFromRanking"
+    />
   </div>
 </template>
 
@@ -165,6 +174,7 @@ import LayerControls from "@/components/LayerControls.vue";
 import LoadingIndicator from "@/components/LoadingIndicator.vue";
 import AveragesPanel from "@/components/AveragesPanel.vue";
 import ColorLegend from "@/components/ColorLegend.vue";
+import RankingPanel from "@/components/RankingPanel.vue";
 
 const mapContainer = ref<HTMLElement | null>(null);
 const map = ref<mapboxgl.Map | null>(null);
@@ -242,6 +252,46 @@ const handleOutsideClick = (event: MouseEvent) => {
 };
 
 const averagesPanelExpanded = ref(false);
+const rankingPanelExpanded = ref(false);
+
+const toggleRankingPanel = () => {
+  rankingPanelExpanded.value = !rankingPanelExpanded.value;
+};
+
+const showRankingPanel = computed(() => allSelectedLayers.value.length >= 2);
+
+/** Resolve county name from GEOID using diversity data or other data maps */
+const getCountyName = (geoId: string): string => {
+  const div = diversityData.value[geoId];
+  if (div?.countyName) return div.countyName;
+  const econ = economicData.value[geoId];
+  if (econ?.county_name) return econ.county_name;
+  const housing = housingData.value[geoId];
+  if (housing?.county_name) return housing.county_name;
+  return geoId;
+};
+
+/** Handle county selection from ranking panel — zoom and open modal */
+const selectCountyFromRanking = (geoId: string) => {
+  const name = getCountyName(geoId);
+  currentCounty.value = { id: geoId, name };
+  showDetailedPopup.value = true;
+
+  // Zoom to county if we have GeoJSON data
+  if (countiesData.value?.features) {
+    const feature = countiesData.value.features.find(
+      (f: any) => f.properties?.GEOID === geoId
+    );
+    if (feature && map.value) {
+      const bounds = new mapboxgl.LngLatBounds();
+      const coords = feature.geometry.type === 'MultiPolygon'
+        ? feature.geometry.coordinates.flat(2)
+        : feature.geometry.coordinates.flat(1);
+      coords.forEach((coord: number[]) => bounds.extend(coord as [number, number]));
+      map.value.fitBounds(bounds, { padding: 50, maxZoom: 10 });
+    }
+  }
+};
 
 // Dynamic scoring state
 const layerWeights = ref<Record<string, number>>({})
