@@ -110,19 +110,21 @@
       @close="closeDetailedPopup"
     />
 
-    <AveragesPanel
-      :expanded="averagesPanelExpanded"
-      @toggle="toggleAveragesPanel"
-    />
+    <div class="bottom-left-panels">
+      <ColorLegend
+        :selected-demographic-layers="selectedDemographicLayers"
+        :selected-economic-layers="selectedEconomicLayers"
+        :selected-housing-layers="selectedHousingLayers"
+        :selected-equity-layers="selectedEquityLayers"
+        :selected-transportation-layers="selectedTransportationLayers"
+        :show-contamination-choropleth="showContaminationChoropleth"
+      />
 
-    <ColorLegend
-      :selected-demographic-layers="selectedDemographicLayers"
-      :selected-economic-layers="selectedEconomicLayers"
-      :selected-housing-layers="selectedHousingLayers"
-      :selected-equity-layers="selectedEquityLayers"
-      :selected-transportation-layers="selectedTransportationLayers"
-      :show-contamination-choropleth="showContaminationChoropleth"
-    />
+      <AveragesPanel
+        :expanded="averagesPanelExpanded"
+        @toggle="toggleAveragesPanel"
+      />
+    </div>
   </div>
 </template>
 
@@ -1671,6 +1673,26 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.bottom-left-panels {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 300px;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .bottom-left-panels {
+    bottom: 10px;
+    left: 10px;
+    max-width: 200px;
+  }
+}
+
 .download-csv-button {
   background-color: #4caf50;
   color: white;

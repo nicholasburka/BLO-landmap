@@ -174,14 +174,10 @@ const activeLayers = computed(() => {
 
 <style scoped>
 .color-legend {
-  position: absolute;
-  bottom: 30px;
-  left: 10px;
   background: white;
   padding: 12px;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 5;
   min-width: 200px;
   pointer-events: auto;
 }
@@ -229,9 +225,6 @@ const activeLayers = computed(() => {
 
 @media (max-width: 768px) {
   .color-legend {
-    bottom: 90px;
-    left: 10px;
-    top: auto;
     min-width: 160px;
     padding: 10px;
   }

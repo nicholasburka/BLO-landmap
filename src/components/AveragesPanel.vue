@@ -2,7 +2,7 @@
   <div
     id="averages-panel"
     :class="{ 'averages-panel-collapsed': !expanded }"
-    style="position: absolute; bottom: 10px; left: 10px; z-index: 10; pointer-events: auto"
+    style="pointer-events: auto"
     @click.stop
   >
     <button
