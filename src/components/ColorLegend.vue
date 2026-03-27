@@ -9,11 +9,18 @@
         <span class="legend-high">{{ layer.highLabel }}</span>
       </div>
     </div>
+    <div v-if="scoringLayers.length > 0" class="legend-scoring-layers">
+      <div v-for="sl in scoringLayers" :key="sl.id" class="legend-scoring-item">
+        <span class="legend-direction-arrow" :class="sl.directionClass">{{ sl.arrow }}</span>
+        <span class="legend-scoring-name">{{ sl.name }}</span>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { LAYER_REGISTRY } from '@/config/layerRegistry'
 
 interface LayerLegend {
   id: string
@@ -30,6 +37,7 @@ interface Props {
   selectedEquityLayers: string[]
   selectedTransportationLayers: string[]
   showContaminationChoropleth: boolean
+  layerDirections?: Record<string, string>
 }
 
 const props = defineProps<Props>()
@@ -170,6 +178,34 @@ const activeLayers = computed(() => {
     .filter(id => layerLegends[id])
     .map(id => layerLegends[id])
 })
+
+/** In multi-layer mode, show each layer with its direction indicator */
+const scoringLayers = computed(() => {
+  const allSelected = [
+    ...props.selectedDemographicLayers,
+    ...props.selectedEconomicLayers,
+    ...props.selectedHousingLayers,
+    ...props.selectedEquityLayers,
+    ...props.selectedTransportationLayers,
+  ].filter(id => id !== 'combined_scores' && id !== 'combined_scores_v2')
+
+  if (props.showContaminationChoropleth) {
+    allSelected.push('contamination')
+  }
+
+  if (allSelected.length < 2) return []
+
+  return allSelected.map(id => {
+    const reg = LAYER_REGISTRY[id]
+    const dir = props.layerDirections?.[id] ?? reg?.direction ?? 'higher_better'
+    return {
+      id,
+      name: reg?.name || id,
+      arrow: dir === 'lower_better' ? '↓' : '↑',
+      directionClass: dir === 'lower_better' ? 'dir-lower' : 'dir-higher',
+    }
+  })
+})
 </script>
 
 <style scoped>
@@ -221,6 +257,40 @@ const activeLayers = computed(() => {
 .legend-low,
 .legend-high {
   font-style: italic;
+}
+
+.legend-scoring-layers {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.legend-scoring-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #444;
+  margin: 3px 0;
+}
+
+.legend-direction-arrow {
+  font-weight: 700;
+  font-size: 12px;
+  width: 14px;
+  text-align: center;
+}
+
+.legend-direction-arrow.dir-higher {
+  color: #2d8a4e;
+}
+
+.legend-direction-arrow.dir-lower {
+  color: #c0392b;
+}
+
+.legend-scoring-name {
+  font-size: 11px;
 }
 
 @media (max-width: 768px) {

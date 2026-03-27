@@ -363,7 +363,7 @@ export interface ParseResult<T = any> {
 export interface ScoringQueryLayer {
   layerId: string
   weight: number
-  direction?: 'higher_better' | 'lower_better' | 'neutral'
+  direction?: 'higher_better' | 'lower_better'
 }
 
 /** A complete scoring query — an array of layer selections with weights. */
@@ -377,7 +377,7 @@ export interface ScoredComponent {
   rawValue: number
   normalizedValue: number
   weight: number
-  direction: 'higher_better' | 'lower_better' | 'neutral'
+  direction: 'higher_better' | 'lower_better'
 }
 
 /**

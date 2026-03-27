@@ -157,11 +157,10 @@ function computeScores(
       let normalizedValue = normalize(rawValue, def.range.min, def.range.max)
 
       // Apply direction: if lower_better, invert so lower raw = higher score
-      const direction = q.direction || 'neutral'
+      const direction = q.direction || def.direction || 'higher_better'
       if (direction === 'lower_better') {
         normalizedValue = 1 - normalizedValue
       }
-      // 'higher_better' and 'neutral': no inversion
 
       weightedSum += normalizedValue * q.weight
       availableWeight += q.weight

@@ -404,30 +404,19 @@ const getDirection = (layerId: string): string => {
 }
 
 const directionLabel = (dir: string): string => {
-  switch (dir) {
-    case 'higher_better': return '↑ More scores higher'
-    case 'lower_better': return '↓ Less scores higher'
-    default: return '— No preference'
-  }
+  return dir === 'lower_better' ? '↓ Less scores higher' : '↑ More scores higher'
 }
 
 const directionTooltip = (layerId: string, dir: string): string => {
   const layer = LAYER_REGISTRY[layerId]
   const name = layer?.name || layerId
-  switch (dir) {
-    case 'higher_better': return `Higher ${name} values score higher`
-    case 'lower_better': return `Lower ${name} values score higher`
-    default: return `${name} values are scored without preference for high or low`
-  }
+  return dir === 'lower_better'
+    ? `Lower ${name} values score higher`
+    : `Higher ${name} values score higher`
 }
 
 const nextDirection = (current: string): string => {
-  switch (current) {
-    case 'neutral': return 'higher_better'
-    case 'higher_better': return 'lower_better'
-    case 'lower_better': return 'neutral'
-    default: return 'neutral'
-  }
+  return current === 'higher_better' ? 'lower_better' : 'higher_better'
 }
 
 // Category expansion state

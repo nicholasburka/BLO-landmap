@@ -123,6 +123,7 @@
         :selected-equity-layers="selectedEquityLayers"
         :selected-transportation-layers="selectedTransportationLayers"
         :show-contamination-choropleth="showContaminationChoropleth"
+        :layer-directions="layerDirections"
       />
 
       <AveragesPanel

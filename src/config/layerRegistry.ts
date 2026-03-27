@@ -20,7 +20,7 @@ export type LayerCategory =
 
 export type DataType = 'percentage' | 'currency' | 'count' | 'index' | 'years' | 'ordinal'
 
-export type Direction = 'higher_better' | 'lower_better' | 'neutral'
+export type Direction = 'higher_better' | 'lower_better'
 
 export interface LayerGradient {
   /** CSS linear-gradient string for the legend */
@@ -388,7 +388,7 @@ export const LAYER_REGISTRY: Record<string, LayerDefinition> = {
     name: '% Drove Alone (Black Workers)',
     category: 'transportation',
     dataType: 'percentage',
-    direction: 'neutral',
+    direction: 'lower_better',
     unit: '%',
     range: { min: 0, max: 100 },
     description: 'Percentage of Black workers age 16+ who drove alone to work.',
