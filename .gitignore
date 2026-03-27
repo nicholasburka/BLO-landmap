@@ -29,17 +29,12 @@ coverage
 
 *.tsbuildinfo
 
-# Project specific
+# Archive data files (but keep archived docs)
 archive/
+!archive/docs/
 
-# Large source data files (processed versions in public/datasets/)
-source-data/zip-codes/
-source-data/census/
-source-data/AVG WEEKLY WAGES/
-source-data/MEDIAN REAL ESTATE TAXES OF OWNER - OCCUPIED MORTGAGES/
-source-data/MEDIAN VALUE of OWNER OCCUPIED MORTGAGES/
-source-data/RACIAL PROGRESS/
-source-data/SVI2022_US_county.gdb/
+# Raw source data (processed versions live in public/datasets/)
+source-data/
 
 # Python virtual environment
 .env

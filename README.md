@@ -1,61 +1,59 @@
-# blo-landmap
+# BLO Livability Index - National Map
 
-This template should help get you started developing with Vue 3 in Vite.
+An interactive choropleth mapping tool built for the [Black Livability Observatory](https://blacklandownership.org/) that helps Black Americans identify favorable counties for living, working, and building wealth across the United States.
 
-## Recommended IDE Setup
+## Tech Stack
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- **Vue 3** + TypeScript + Vite
+- **Mapbox GL JS** for interactive map rendering
+- **PapaParse** for CSV data loading
+- Deployed on **Netlify**
 
-## Type Support for `.vue` Imports in TS
+## Data Layers
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+The map visualizes county-level data across seven categories:
 
-## Customize configuration
+| Category | Source(s) | Examples |
+|----------|-----------|----------|
+| Demographics | US Census, IHME | Diversity index, % Black population, life expectancy |
+| Economic | Census, BLS | Median income by race, average weekly wages |
+| Housing | Census | Median home value, property taxes |
+| Equity | Census, Urban Institute, Brookings | Poverty by race, homeownership by race, Black Progress Index |
+| Environment | EPA | Superfund sites, toxic releases, brownfields, air pollution |
+| Transportation | BWDC | Commute times, transit mode share |
+| Computed | BLO | Composite livability score (v2) |
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+See [DATA_SOURCES.md](DATA_SOURCES.md) for full attribution, file mappings, and data pipeline details.
 
-## Project Setup
+## Development
 
 ```sh
 npm install
+npm run dev          # Start dev server
+npm run build        # Production build
+npm run type-check   # TypeScript validation
+npm run lint         # ESLint
 ```
 
-### Compile and Hot-Reload for Development
+### Data Pipeline
 
-```sh
-npm run dev
+Raw data lives in `source-data/` (gitignored). Preprocessing scripts in `scripts/` transform it into web-ready CSV/JSON in `public/datasets/`, keyed by 5-digit FIPS GEOID codes.
+
+```
+source-data/  -->  scripts/  -->  public/datasets/
 ```
 
-### Type-Check, Compile and Minify for Production
+### Project Structure
 
-```sh
-npm run build
+```
+src/
+  components/     Map.vue (main), LayerControls, ColorLegend, CountyModal
+  composables/    useMapData, useColorCalculation, usePropertyListings
+  config/         layerConfig, constants, datasetMetadata, stateFips
+  types/          mapTypes.ts
+  views/          HomeView, AboutView
 ```
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+## Deployment
 
-```sh
-npm run test:unit
-```
-
-### Run End-to-End Tests with [Cypress](https://www.cypress.io/)
-
-```sh
-npm run test:e2e:dev
-```
-
-This runs the end-to-end tests against the Vite development server.
-It is much faster than the production build.
-
-But it's still recommended to test the production build with `test:e2e` before deploying (e.g. in CI environments):
-
-```sh
-npm run build
-npm run test:e2e
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+Hosted on Netlify. Pushes to `main` trigger automatic builds via `npm run build` with `dist/` as the publish directory.
