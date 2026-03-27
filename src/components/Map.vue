@@ -157,8 +157,9 @@ import {
   MAPBOX_ACCESS_TOKEN,
   MAP_CONFIG,
 } from "@/config/constants";
-import type { ColorBlend } from "@/types/mapTypes";
+import type { ColorBlend, ScoringQuery } from "@/types/mapTypes";
 import { LAYER_REGISTRY } from "@/config/layerRegistry";
+import { usePersonalizedScore, type DataMaps } from "@/composables/usePersonalizedScore";
 import CountyModal from "@/components/CountyModal.vue";
 import LayerControls from "@/components/LayerControls.vue";
 import LoadingIndicator from "@/components/LoadingIndicator.vue";
@@ -313,45 +314,30 @@ const allSelectedLayers = computed(() => {
   return layers;
 });
 
-// Layer ID to component name mapping for combined_scores_v2.json
-const layerToComponent: Record<string, string> = {
-  'diversity_index': 'diversity',
-  'pct_Black': 'pct_black',
-  'life_expectancy': 'life_expectancy',
-  'contamination': 'contamination',  // For EPA contamination choropleth
-  'avg_weekly_wage': 'avg_weekly_wage',
-  'median_income_by_race': 'median_income_black',
-  'median_home_value': 'median_home_value',
-  'median_property_tax': 'median_property_tax',
-  'homeownership_by_race': 'homeownership_black',
-  'poverty_by_race': 'poverty_rate_black',
-  'black_progress_index': 'black_progress_index',
-};
-
-// Compute combined score for multiple selected layers
-const computeCombinedScore = (countyId: string, selectedLayerIds: string[]): number => {
-  if (selectedLayerIds.length === 0) return 0;
-
-  const countyData = combinedScoresV2Data.value[countyId];
-  if (!countyData || !countyData.components) return 0;
-
-  // Map layer IDs to component names and get their normalized values
-  const componentValues: number[] = [];
-
-  selectedLayerIds.forEach(layerId => {
-    const componentName = layerToComponent[layerId];
-    if (componentName && countyData.components[componentName as keyof typeof countyData.components] != null) {
-      componentValues.push(countyData.components[componentName as keyof typeof countyData.components]);
-    }
+// Build reactive scoring query from selected layers + weights + directions
+const scoringQuery = computed<ScoringQuery>(() => {
+  return allSelectedLayers.value.map(layerId => {
+    const reg = LAYER_REGISTRY[layerId];
+    return {
+      layerId,
+      weight: layerWeights.value[layerId] ?? 5,
+      direction: (layerDirections.value[layerId] as 'higher_better' | 'lower_better') ?? reg?.direction ?? 'higher_better',
+    };
   });
+});
 
-  // Return 0 if no valid components found
-  if (componentValues.length === 0) return 0;
-
-  // Average the normalized component values (0-1) and scale to 0-5
-  const average = componentValues.reduce((sum, val) => sum + val, 0) / componentValues.length;
-  return average * 5;
+// Initialize scoring engine
+const dataMaps: DataMaps = {
+  diversityData,
+  lifeExpectancyData,
+  countyContaminationCounts,
+  economicData,
+  housingData,
+  equityData,
+  transportationData,
 };
+
+const { scores: personalizedScores, rankedCounties } = usePersonalizedScore(scoringQuery, dataMaps);
 
 const toggleDemographicLayer = (layerId: string) => {
   debugLog("TOGGLING " + layerId);
@@ -797,9 +783,9 @@ const updateChoroplethColors = () => {
           let finalColor: [number, number, number, number];
 
           if (useMultiLayerScoring) {
-            // Multi-layer selection: compute combined score and use BLO gradient
-            const combinedScore = computeCombinedScore(geoID, allSelectedLayers.value);
-            finalColor = getColorForCombinedScore(combinedScore);
+            // Multi-layer: use dynamic scoring engine
+            const countyScore = personalizedScores.value.get(geoID);
+            finalColor = getColorForDynamicScore(countyScore?.score ?? null);
           } else if (selectedDemographicLayers.value.length === 1) {
             // Single demographic layer selected
             const layer = selectedDemographicLayers.value[0];
@@ -892,20 +878,15 @@ const getColorForBLOV2 = (geoID: string): [number, number, number, number] => {
   return [r, g, b, 0.9];
 };
 
-// Color calculation for combined multi-layer scores (uses same BLO gradient)
-const getColorForCombinedScore = (score: number): [number, number, number, number] => {
-  if (score === 0) return [0, 0, 0, 0];
+// Color calculation for dynamic personalized scores (0-100 range)
+const getColorForDynamicScore = (score: number | null): [number, number, number, number] => {
+  if (score === null || score === 0) return [0, 0, 0, 0];
 
-  // Score is already 0-5 range, normalize using same bounds as BLO v2
-  const MIN_SCORE = 1.15;
-  const MAX_SCORE = 3.28;
-
-  const normalized = Math.max(0, Math.min(1, (score - MIN_SCORE) / (MAX_SCORE - MIN_SCORE)));
-
-  // Apply slight curve to emphasize extremes
+  // Score is 0-100, normalize to 0-1
+  const normalized = Math.max(0, Math.min(1, score / 100));
   const curved = Math.pow(normalized, 0.9);
 
-  // Use same BLO gradient: Bright yellow -> Deep emerald green
+  // BLO gradient: Bright yellow (255, 245, 100) -> Deep emerald green (0, 100, 0)
   const r = Math.round(255 - (255 - 0) * curved);
   const g = Math.round(245 - (245 - 100) * curved);
   const b = Math.round(100 - (100 - 0) * curved);
@@ -1165,6 +1146,16 @@ watch(
   { deep: true }
 );
 
+// Recolor choropleth when scoring query changes (weights/directions adjusted)
+let recolorTimeout: ReturnType<typeof setTimeout> | null = null;
+watch(scoringQuery, () => {
+  // Debounce at 100ms to avoid jank during rapid slider movement
+  if (recolorTimeout) clearTimeout(recolorTimeout);
+  recolorTimeout = setTimeout(() => {
+    updateChoroplethColors();
+  }, 100);
+}, { deep: true });
+
 const popup = ref<mapboxgl.Popup | null>(null);
 
 /*const updatePopup = (
@@ -1367,17 +1358,20 @@ const addTooltip = () => {
         activeLayers.push('contamination');
       }
 
-      // Show combined score if multiple layers are selected (excluding BLO indices)
+      // Show custom score if multiple layers are selected
       let combinedScoreHTML = '';
       if (allSelectedLayers.value.length >= 2) {
-        const combinedScore = computeCombinedScore(countyId, allSelectedLayers.value);
+        const countyScore = personalizedScores.value.get(countyId);
+        const scoreDisplay = countyScore?.score != null ? countyScore.score.toFixed(1) : '?';
+        const missingCount = countyScore?.missingLayers?.length || 0;
+        const missingNote = missingCount > 0 ? ` (${missingCount} layer${missingCount > 1 ? 's' : ''} unavailable)` : '';
         combinedScoreHTML = `
           <div style="background-color: #f0f8ff; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
             <p style="margin: 0; font-size: 14px; font-weight: bold; color: #2c5f2d;">
-              Combined Score: ${combinedScore.toFixed(2)} of 5.0
+              Custom Score: ${scoreDisplay} / 100
             </p>
             <p style="margin: 4px 0 0 0; font-size: 11px; color: #555;">
-              (Average of ${allSelectedLayers.value.length} selected layers)
+              ${allSelectedLayers.value.length} layers weighted${missingNote}
             </p>
           </div>
         `;
