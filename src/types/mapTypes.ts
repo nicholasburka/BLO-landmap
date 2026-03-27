@@ -353,3 +353,40 @@ export interface ParseResult<T = any> {
     [key: string]: any
   }
 }
+
+// ============= Dynamic Scoring Types =============
+
+/**
+ * A single layer selection in a scoring query, with weight and optional direction override.
+ * Direction defaults to 'neutral' if not specified — raw normalized value, no inversion.
+ */
+export interface ScoringQueryLayer {
+  layerId: string
+  weight: number
+  direction?: 'higher_better' | 'lower_better' | 'neutral'
+}
+
+/** A complete scoring query — an array of layer selections with weights. */
+export type ScoringQuery = ScoringQueryLayer[]
+
+/**
+ * A scored component within a county's composite score.
+ */
+export interface ScoredComponent {
+  layerId: string
+  rawValue: number
+  normalizedValue: number
+  weight: number
+  direction: 'higher_better' | 'lower_better' | 'neutral'
+}
+
+/**
+ * The result of scoring a single county against a query.
+ */
+export interface CountyScore {
+  geoId: string
+  /** Composite score 0-100, or null if all layers missing */
+  score: number | null
+  components: ScoredComponent[]
+  missingLayers: string[]
+}
