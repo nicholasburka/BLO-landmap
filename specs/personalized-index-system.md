@@ -376,7 +376,7 @@ User: "What housing is available in Mecklenburg County?"
 - [x] LLM model choice → Claude Haiku
 - [x] Missing data strategy → weight redistribution
 - [x] Backend approach → decided later (Phase 2), likely Netlify Functions or Express
-- [x] Default direction for all layers → `neutral` in scoring. The registry's `direction` field is semantic metadata (for LLM context/UI labels), not a scoring default. Direction only applies when explicitly set per-query.
+- [x] Default direction for all layers → defaults to the registry's `direction` field (matching BLO index semantics). Users can override per-query. This means selecting multiple layers immediately produces sensible scoring without manual direction-setting.
 - [x] Geographic filtering → Phase 1. It's a data filtering problem regardless of whether a human or LLM is requesting it. Add state/region filter to ranking panel.
 - [x] CSV export from ranking → deferred, low lift but not Phase 1
 - [x] BLO composite score → remains as a "preset" that coexists with custom queries. Selecting BLO score is like loading a saved query with predefined layers/weights. Custom queries are independent.

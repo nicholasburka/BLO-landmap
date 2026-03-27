@@ -82,6 +82,7 @@
                 class="direction-toggle"
                 @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))"
                 :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))"
+                :title="directionTooltip(layer.id, getDirection(layer.id))"
               >{{ directionLabel(getDirection(layer.id)) }}</button>
             </div>
           </div>
@@ -116,7 +117,7 @@
                 <label :for="'weight-' + layer.id" class="weight-label">Weight: {{ getWeight(layer.id) }}</label>
                 <input type="range" :id="'weight-' + layer.id" min="1" max="10" :value="getWeight(layer.id)" @input="$emit('update-weight', layer.id, Number(($event.target as HTMLInputElement).value))" :aria-label="'Weight for ' + layer.name" class="weight-slider" />
               </div>
-              <button type="button" class="direction-toggle" @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))" :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))">{{ directionLabel(getDirection(layer.id)) }}</button>
+              <button type="button" class="direction-toggle" @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))" :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))" :title="directionTooltip(layer.id, getDirection(layer.id))">{{ directionLabel(getDirection(layer.id)) }}</button>
             </div>
           </div>
         </div>
@@ -150,7 +151,7 @@
                 <label :for="'weight-' + layer.id" class="weight-label">Weight: {{ getWeight(layer.id) }}</label>
                 <input type="range" :id="'weight-' + layer.id" min="1" max="10" :value="getWeight(layer.id)" @input="$emit('update-weight', layer.id, Number(($event.target as HTMLInputElement).value))" :aria-label="'Weight for ' + layer.name" class="weight-slider" />
               </div>
-              <button type="button" class="direction-toggle" @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))" :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))">{{ directionLabel(getDirection(layer.id)) }}</button>
+              <button type="button" class="direction-toggle" @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))" :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))" :title="directionTooltip(layer.id, getDirection(layer.id))">{{ directionLabel(getDirection(layer.id)) }}</button>
             </div>
           </div>
         </div>
@@ -184,7 +185,7 @@
                 <label :for="'weight-' + layer.id" class="weight-label">Weight: {{ getWeight(layer.id) }}</label>
                 <input type="range" :id="'weight-' + layer.id" min="1" max="10" :value="getWeight(layer.id)" @input="$emit('update-weight', layer.id, Number(($event.target as HTMLInputElement).value))" :aria-label="'Weight for ' + layer.name" class="weight-slider" />
               </div>
-              <button type="button" class="direction-toggle" @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))" :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))">{{ directionLabel(getDirection(layer.id)) }}</button>
+              <button type="button" class="direction-toggle" @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))" :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))" :title="directionTooltip(layer.id, getDirection(layer.id))">{{ directionLabel(getDirection(layer.id)) }}</button>
             </div>
           </div>
         </div>
@@ -218,7 +219,7 @@
                 <label :for="'weight-' + layer.id" class="weight-label">Weight: {{ getWeight(layer.id) }}</label>
                 <input type="range" :id="'weight-' + layer.id" min="1" max="10" :value="getWeight(layer.id)" @input="$emit('update-weight', layer.id, Number(($event.target as HTMLInputElement).value))" :aria-label="'Weight for ' + layer.name" class="weight-slider" />
               </div>
-              <button type="button" class="direction-toggle" @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))" :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))">{{ directionLabel(getDirection(layer.id)) }}</button>
+              <button type="button" class="direction-toggle" @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))" :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))" :title="directionTooltip(layer.id, getDirection(layer.id))">{{ directionLabel(getDirection(layer.id)) }}</button>
             </div>
           </div>
         </div>
@@ -323,7 +324,7 @@
                 <label :for="'weight-' + layer.id" class="weight-label">Weight: {{ getWeight(layer.id) }}</label>
                 <input type="range" :id="'weight-' + layer.id" min="1" max="10" :value="getWeight(layer.id)" @input="$emit('update-weight', layer.id, Number(($event.target as HTMLInputElement).value))" :aria-label="'Weight for ' + layer.name" class="weight-slider" />
               </div>
-              <button type="button" class="direction-toggle" @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))" :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))">{{ directionLabel(getDirection(layer.id)) }}</button>
+              <button type="button" class="direction-toggle" @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))" :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))" :title="directionTooltip(layer.id, getDirection(layer.id))">{{ directionLabel(getDirection(layer.id)) }}</button>
             </div>
           </div>
         </div>
@@ -335,6 +336,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { LAYER_REGISTRY } from '@/config/layerRegistry'
 import type {
   DemographicLayer,
   EconomicLayer,
@@ -398,14 +400,24 @@ const getWeight = (layerId: string): number => {
 }
 
 const getDirection = (layerId: string): string => {
-  return props.layerDirections?.[layerId] ?? 'neutral'
+  return props.layerDirections?.[layerId] ?? LAYER_REGISTRY[layerId]?.direction ?? 'neutral'
 }
 
 const directionLabel = (dir: string): string => {
   switch (dir) {
-    case 'higher_better': return '↑ Higher'
-    case 'lower_better': return '↓ Lower'
-    default: return '— Neutral'
+    case 'higher_better': return '↑ More scores higher'
+    case 'lower_better': return '↓ Less scores higher'
+    default: return '— No preference'
+  }
+}
+
+const directionTooltip = (layerId: string, dir: string): string => {
+  const layer = LAYER_REGISTRY[layerId]
+  const name = layer?.name || layerId
+  switch (dir) {
+    case 'higher_better': return `Higher ${name} values score higher`
+    case 'lower_better': return `Lower ${name} values score higher`
+    default: return `${name} values are scored without preference for high or low`
   }
 }
 

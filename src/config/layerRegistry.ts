@@ -154,7 +154,7 @@ export const LAYER_REGISTRY: Record<string, LayerDefinition> = {
     name: 'Percent Black',
     category: 'demographic',
     dataType: 'percentage',
-    direction: 'neutral',
+    direction: 'higher_better',
     unit: '%',
     range: { min: 0, max: 100 },
     description: 'Percentage of county residents who identify as Black or African American.',
