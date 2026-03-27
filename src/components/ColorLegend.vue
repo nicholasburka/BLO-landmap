@@ -208,7 +208,7 @@ const activeLayers = computed(() => {
   height: 12px;
   border-radius: 3px;
   margin-bottom: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: none;
 }
 
 .legend-values {
