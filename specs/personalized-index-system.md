@@ -243,6 +243,60 @@ User: "What housing is available in Mecklenburg County?"
 
 ---
 
+## Phase 4: Threshold Filtering + Combined Queries
+
+**Not yet scoped — noting for future planning.**
+
+Phases 1-3 support **scoring** (rank all counties by weighted factors) and **map controls** (zoom, search, toggle). What's missing is **filtering** — the ability to set hard thresholds that exclude counties from results entirely.
+
+### 4.1 Data-Level Filtering
+
+**What:** Users can specify threshold conditions per layer, applied as filters before scoring.
+
+**Examples:**
+- "Show me counties with percent Black higher than 50% and life expectancy above 74 years"
+- "Only counties where median home value is under $200,000"
+- "Counties with at least 60% Black homeownership rate"
+
+**Filter types:**
+- `greater_than(layerId, value)` — only include counties where this layer exceeds the threshold
+- `less_than(layerId, value)` — only include counties where this layer is below the threshold
+- `between(layerId, min, max)` — range filter
+
+### 4.2 Combined Scoring + Filtering
+
+**What:** Filters narrow the set, then scoring ranks within that set.
+
+**Example:**
+- Filter: `pct_Black > 50%` AND `life_expectancy > 74`
+- Score remaining counties by: `median_income_by_race` (weight 8, higher_better) + `median_home_value` (weight 6, lower_better)
+- Result: "Among counties with majority Black population and above-average life expectancy, here are the most affordable with best income"
+
+### 4.3 LLM Integration
+
+The system prompt would need to support a `filters` field in addition to `layers`:
+```json
+{
+  "filters": [
+    { "layerId": "pct_Black", "operator": "greater_than", "value": 50 },
+    { "layerId": "life_expectancy", "operator": "greater_than", "value": 74 }
+  ],
+  "layers": [
+    { "layerId": "median_income_by_race", "weight": 8, "direction": "higher_better" }
+  ],
+  "explanation": "..."
+}
+```
+
+### 4.4 Implementation Considerations
+- Scoring engine needs a pre-filter step: exclude counties that don't pass all filter conditions
+- Choropleth should visually distinguish filtered-out counties (transparent or greyed out)
+- Ranking panel only shows counties that pass all filters
+- Filter UI: could be threshold sliders per-layer, or purely prompt-driven via LLM
+- Filter counts: show "X of 3,144 counties match your filters" as feedback
+
+---
+
 ## System Context
 
 ### Current Architecture
