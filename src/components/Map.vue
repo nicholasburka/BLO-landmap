@@ -28,6 +28,8 @@
         Clear Search
       </button>
     </div>
+    <PromptInput @query-result="handleQueryResult" />
+
     <div v-if="listings.length > 0" id="listings-panel" class="listings-panel">
       <h3>
         Available Properties
@@ -176,6 +178,8 @@ import LoadingIndicator from "@/components/LoadingIndicator.vue";
 import AveragesPanel from "@/components/AveragesPanel.vue";
 import ColorLegend from "@/components/ColorLegend.vue";
 import RankingPanel from "@/components/RankingPanel.vue";
+import PromptInput from "@/components/PromptInput.vue";
+import type { QueryResponse } from "@/composables/usePromptQuery";
 
 const mapContainer = ref<HTMLElement | null>(null);
 const map = ref<mapboxgl.Map | null>(null);
@@ -379,6 +383,73 @@ const dataMaps: DataMaps = {
 };
 
 const { scores: personalizedScores, rankedCounties } = usePersonalizedScore(scoringQuery, dataMaps);
+
+/** Handle prompt query result: auto-select layers with weights and directions */
+const handleQueryResult = (result: QueryResponse) => {
+  if (!result.layers || result.layers.length === 0) return;
+
+  // Clear everything
+  selectedDemographicLayers.value = [];
+  selectedEconomicLayers.value = [];
+  selectedHousingLayers.value = [];
+  selectedEquityLayers.value = [];
+  selectedTransportationLayers.value = [];
+  showContaminationChoropleth.value = false;
+  demographicLayers.forEach(l => { l.visible = false; });
+  economicLayers.forEach(l => { l.visible = false; });
+  housingLayers.forEach(l => { l.visible = false; });
+  equityLayers.forEach(l => { l.visible = false; });
+  transportationLayers.forEach(l => { l.visible = false; });
+
+  const newWeights: Record<string, number> = {};
+  const newDirections: Record<string, string> = {};
+
+  for (const layer of result.layers) {
+    newWeights[layer.layerId] = layer.weight;
+    newDirections[layer.layerId] = layer.direction;
+
+    // Route to the correct category array
+    const demoLayer = demographicLayers.find(l => l.id === layer.layerId);
+    if (demoLayer) {
+      selectedDemographicLayers.value.push(layer.layerId);
+      demoLayer.visible = true;
+      continue;
+    }
+    const econLayer = economicLayers.find(l => l.id === layer.layerId);
+    if (econLayer) {
+      selectedEconomicLayers.value.push(layer.layerId);
+      econLayer.visible = true;
+      continue;
+    }
+    const housLayer = housingLayers.find(l => l.id === layer.layerId);
+    if (housLayer) {
+      selectedHousingLayers.value.push(layer.layerId);
+      housLayer.visible = true;
+      continue;
+    }
+    const eqLayer = equityLayers.find(l => l.id === layer.layerId);
+    if (eqLayer) {
+      selectedEquityLayers.value.push(layer.layerId);
+      eqLayer.visible = true;
+      continue;
+    }
+    const transLayer = transportationLayers.find(l => l.id === layer.layerId);
+    if (transLayer) {
+      selectedTransportationLayers.value.push(layer.layerId);
+      transLayer.visible = true;
+      continue;
+    }
+    if (layer.layerId === 'contamination') {
+      showContaminationChoropleth.value = true;
+    }
+  }
+
+  layerWeights.value = newWeights;
+  layerDirections.value = newDirections;
+  showDiversityChoropleth.value = true;
+  updateChoroplethVisibility();
+  updateChoroplethColors();
+};
 
 /** Clear BLO precomputed layer when user selects a different layer */
 const clearBLO = () => {
