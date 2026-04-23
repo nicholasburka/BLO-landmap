@@ -10,6 +10,7 @@ import { computed, type Ref, type ComputedRef } from 'vue'
 import { LAYER_REGISTRY, getLayer } from '@/config/layerRegistry'
 import type {
   ScoringQuery,
+  ScoringFilter,
   CountyScore,
   ScoredComponent,
   DiversityData,
@@ -101,6 +102,36 @@ function normalize(value: number, min: number, max: number): number {
 }
 
 /**
+ * Evaluate a single filter against a county.
+ * Returns false (filter failed) if the county's value doesn't match.
+ * Missing data is treated as filter-failed (conservative: we can't confirm it passes).
+ */
+function passesFilter(
+  geoId: string,
+  filter: ScoringFilter,
+  dataMaps: DataMaps
+): boolean {
+  const def = LAYER_REGISTRY[filter.layerId]
+  if (!def) return true // unknown filter layer → skip it
+
+  const value = getRawValue(geoId, filter.layerId, def.dataKey, dataMaps)
+  if (value === undefined) return false // missing data → fail filter
+
+  switch (filter.operator) {
+    case 'greater_than':
+      return value > filter.value
+    case 'less_than':
+      return value < filter.value
+    case 'between': {
+      const max = filter.max ?? Number.POSITIVE_INFINITY
+      return value >= filter.value && value <= max
+    }
+    default:
+      return true
+  }
+}
+
+/**
  * Collect all unique GEOIDs across all data maps.
  */
 function getAllGeoIds(dataMaps: DataMaps): Set<string> {
@@ -116,11 +147,13 @@ function getAllGeoIds(dataMaps: DataMaps): Set<string> {
 }
 
 /**
- * Score all counties against a scoring query.
+ * Score all counties against a scoring query, optionally applying filters.
+ * Filtered-out counties get score=null and filteredOut=true.
  */
 function computeScores(
   query: ScoringQuery,
-  dataMaps: DataMaps
+  dataMaps: DataMaps,
+  filters: ScoringFilter[] = []
 ): Map<string, CountyScore> {
   const results = new Map<string, CountyScore>()
 
@@ -141,6 +174,21 @@ function computeScores(
   const geoIds = getAllGeoIds(dataMaps)
 
   for (const geoId of geoIds) {
+    // Apply filters first — any failure excludes the county from scoring
+    if (filters.length > 0) {
+      const allPass = filters.every((f) => passesFilter(geoId, f, dataMaps))
+      if (!allPass) {
+        results.set(geoId, {
+          geoId,
+          score: null,
+          components: [],
+          missingLayers: [],
+          filteredOut: true,
+        })
+        continue
+      }
+    }
+
     const components: ScoredComponent[] = []
     const missingLayers: string[] = []
     let weightedSum = 0
@@ -199,26 +247,38 @@ function computeScores(
  *
  * @param query - Reactive scoring query (layers + weights + directions)
  * @param dataMaps - All loaded data maps from useMapData
+ * @param filters - Optional reactive filters applied before scoring
  */
 export function usePersonalizedScore(
   query: Ref<ScoringQuery>,
-  dataMaps: DataMaps
+  dataMaps: DataMaps,
+  filters?: Ref<ScoringFilter[]>
 ) {
   const scores: ComputedRef<Map<string, CountyScore>> = computed(() => {
-    return computeScores(query.value, dataMaps)
+    return computeScores(query.value, dataMaps, filters?.value || [])
   })
 
   const rankedCounties: ComputedRef<CountyScore[]> = computed(() => {
     const ranked: CountyScore[] = []
     for (const cs of scores.value.values()) {
-      if (cs.score !== null) ranked.push(cs)
+      if (cs.score !== null && !cs.filteredOut) ranked.push(cs)
     }
     ranked.sort((a, b) => (b.score as number) - (a.score as number))
     return ranked
   })
 
+  /** GEOIDs of counties excluded by filters (for choropleth styling) */
+  const filteredOutCountyIds: ComputedRef<Set<string>> = computed(() => {
+    const ids = new Set<string>()
+    for (const cs of scores.value.values()) {
+      if (cs.filteredOut) ids.add(cs.geoId)
+    }
+    return ids
+  })
+
   return {
     scores,
     rankedCounties,
+    filteredOutCountyIds,
   }
 }

@@ -369,6 +369,30 @@ export interface ScoringQueryLayer {
 /** A complete scoring query — an array of layer selections with weights. */
 export type ScoringQuery = ScoringQueryLayer[]
 
+/** Filter operator types for threshold-based county exclusion */
+export type FilterOperator = 'greater_than' | 'less_than' | 'between'
+
+/** A threshold filter applied before scoring. Counties that fail are excluded. */
+export interface ScoringFilter {
+  layerId: string
+  operator: FilterOperator
+  /** For greater_than/less_than: the threshold. For between: the minimum. */
+  value: number
+  /** For between: the maximum (inclusive). */
+  max?: number
+}
+
+/**
+ * Extended scoring query with optional filters and display limit.
+ * Phase 4a: filters are applied before scoring; limit is a display-only cap
+ * on the ranking panel (does not affect which counties are scored).
+ */
+export interface ExtendedScoringQuery {
+  layers: ScoringQuery
+  filters?: ScoringFilter[]
+  limit?: number
+}
+
 /**
  * A scored component within a county's composite score.
  */
@@ -385,8 +409,10 @@ export interface ScoredComponent {
  */
 export interface CountyScore {
   geoId: string
-  /** Composite score 0-100, or null if all layers missing */
+  /** Composite score 0-100, or null if all layers missing OR county filtered out */
   score: number | null
   components: ScoredComponent[]
   missingLayers: string[]
+  /** True if this county was excluded by a filter condition (distinct from missing data) */
+  filteredOut?: boolean
 }
