@@ -312,6 +312,28 @@ The system prompt would need to support `filters` and `limit` fields in addition
 - Filter UI: could be threshold sliders per-layer, or purely prompt-driven via LLM
 - Filter counts: show "X of 3,144 counties match your filters" as feedback
 
+### 4.6 Guided Walk-Through of Results
+
+**What:** Low-lift UI enhancement that lets users step through the top-N results one at a time, with the map zooming and the modal opening for each.
+
+**Rationale:** When someone asks "top 5 counties for X," they often want to explore each one individually, not just see a list. A guided walkthrough gives them a structured way to do this.
+
+**Design:**
+- Ranking panel already shows the top 20 (Phase 1)
+- Add a "Walk through results" button at the top of the ranking panel
+- On click: zoom to #1, open county modal, show "1 of 5" indicator with Next/Previous buttons
+- Next → zoom to #2, open its modal, etc.
+- Escape or close button exits the walkthrough
+- Keyboard shortcuts: arrow keys for next/previous, Esc to exit
+
+**Implementation:**
+- Reuse existing ranking data and `selectCountyFromRanking()` function from Phase 1 (T6)
+- Add walkthrough state: `{ isActive: boolean, currentIndex: number, limit: number }`
+- Advance/back buttons mutate `currentIndex`, which triggers the zoom+modal
+- Respects the `limit` from the LLM response (if "top 5" was requested, walk through 5)
+
+**Lift estimate:** Small — the zoom-to-county and modal-open logic already exists from Phase 1. New work is just the walkthrough state and Next/Previous UI.
+
 ---
 
 ## System Context
