@@ -15,6 +15,21 @@
       {{ expanded ? '▼' : '▲' }} County Rankings
     </button>
     <div v-show="expanded" id="ranking-content" class="ranking-content">
+      <!-- Active filter pills (threshold filters from LLM) -->
+      <div v-if="filterPills.length > 0" class="ranking-filter-row">
+        <span class="ranking-filter-label">Filters:</span>
+        <span
+          v-for="(pill, i) in filterPills"
+          :key="i"
+          class="ranking-filter-pill"
+        >{{ pill }}</span>
+        <button
+          class="ranking-filter-clear"
+          @click="$emit('clear-filters')"
+          aria-label="Clear filters"
+          title="Clear all filters"
+        >×</button>
+      </div>
       <div class="ranking-controls">
         <select
           v-model="selectedState"
@@ -29,9 +44,10 @@
           @click="showBottom = !showBottom"
           :aria-label="showBottom ? 'Show top counties' : 'Show bottom counties'"
         >
-          {{ showBottom ? 'Bottom 20' : 'Top 20' }}
+          {{ showBottom ? `Bottom ${effectiveLimit}` : `Top ${effectiveLimit}` }}
         </button>
       </div>
+      <div class="ranking-count">{{ countLabel }}</div>
       <div class="ranking-list">
         <div
           v-for="(county, index) in displayedCounties"
@@ -49,7 +65,7 @@
           <span class="ranking-score">{{ county.score }}</span>
         </div>
         <div v-if="displayedCounties.length === 0" class="ranking-empty">
-          No counties match the filter
+          {{ filterPills.length > 0 ? 'No counties match the filters' : 'No counties match' }}
         </div>
       </div>
     </div>
@@ -58,8 +74,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { CountyScore } from '@/types/mapTypes'
+import type { CountyScore, ScoringFilter } from '@/types/mapTypes'
 import { FIPS_TO_STATE } from '@/config/stateFips'
+import { LAYER_REGISTRY } from '@/config/layerRegistry'
 
 interface CountyDisplay {
   geoId: string
@@ -78,15 +95,38 @@ interface Props {
   getCountyName: (geoId: string) => string
   /** v-model: currently selected state filter (name, abbr, or empty) */
   selectedState?: string
+  /** Active threshold filters from LLM (for pill display) */
+  activeFilters?: ScoringFilter[]
+  /** LLM-specified display limit (number of rows). null/undefined = show all */
+  displayLimit?: number | null
 }
 
-const props = withDefaults(defineProps<Props>(), { selectedState: '' })
+const props = withDefaults(defineProps<Props>(), {
+  selectedState: '',
+  activeFilters: () => [],
+  displayLimit: null,
+})
 
 const emit = defineEmits<{
   toggle: []
   'select-county': [geoId: string]
   'update:selectedState': [value: string]
+  'clear-filters': []
 }>()
+
+/** Short, terse filter pill text: "pct_Black > 30" */
+const filterPills = computed(() => {
+  return (props.activeFilters || []).map((f) => {
+    const layer = LAYER_REGISTRY[f.layerId]
+    const shortId = layer?.id || f.layerId
+    switch (f.operator) {
+      case 'greater_than': return `${shortId} > ${f.value}`
+      case 'less_than': return `${shortId} < ${f.value}`
+      case 'between': return `${shortId} ${f.value}–${f.max ?? '?'}`
+      default: return shortId
+    }
+  })
+})
 
 const showBottom = ref(false)
 
@@ -128,10 +168,16 @@ const getStateAbbr = (stateName: string): string => {
   return abbrs[stateName] || stateName.substring(0, 2).toUpperCase()
 }
 
-const displayedCounties = computed<CountyDisplay[]>(() => {
-  let filtered = props.rankedCounties.filter(c => c.score !== null)
+/** Effective limit: LLM-specified limit, capped at 50. Defaults to 20 when not set. */
+const effectiveLimit = computed(() => {
+  const raw = props.displayLimit
+  if (typeof raw === 'number' && raw > 0) return Math.min(50, raw)
+  return 20
+})
 
-  // Apply state filter (match against full name or abbreviation)
+/** Ranked counties that pass the state filter (before slicing by limit) */
+const stateFilteredCounties = computed(() => {
+  let filtered = props.rankedCounties.filter(c => c.score !== null)
   if (selectedState.value) {
     const filter = selectedState.value.toUpperCase()
     filtered = filtered.filter(c => {
@@ -139,14 +185,18 @@ const displayedCounties = computed<CountyDisplay[]>(() => {
       return name.toUpperCase() === filter || getStateAbbr(name) === filter
     })
   }
+  return filtered
+})
+
+const displayedCounties = computed<CountyDisplay[]>(() => {
+  const filtered = stateFilteredCounties.value
 
   // Sort: top (descending) or bottom (ascending)
   const sorted = showBottom.value
     ? [...filtered].sort((a, b) => (a.score as number) - (b.score as number))
     : filtered // already sorted descending from rankedCounties
 
-  // Take top/bottom 20
-  const sliced = sorted.slice(0, 20)
+  const sliced = sorted.slice(0, effectiveLimit.value)
 
   return sliced.map((c, i) => ({
     geoId: c.geoId,
@@ -156,6 +206,16 @@ const displayedCounties = computed<CountyDisplay[]>(() => {
     score: (c.score as number).toFixed(1),
     displayRank: showBottom.value ? filtered.length - i : i + 1,
   }))
+})
+
+/** Human-readable count: "Showing 5 of 42 matching counties" with filter awareness */
+const countLabel = computed(() => {
+  const shown = displayedCounties.value.length
+  const total = stateFilteredCounties.value.length
+  const hasFilters = filterPills.value.length > 0 || !!selectedState.value
+  const noun = hasFilters ? 'matching counties' : 'counties'
+  if (shown === total) return `Showing ${shown} ${noun}`
+  return `Showing ${shown} of ${total} ${noun}`
 })
 </script>
 
@@ -197,6 +257,49 @@ const displayedCounties = computed<CountyDisplay[]>(() => {
   padding: 0 10px 10px;
   max-height: 50vh;
   overflow-y: auto;
+}
+
+.ranking-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+  font-size: 10px;
+}
+
+.ranking-filter-label {
+  color: #888;
+  font-weight: 600;
+}
+
+.ranking-filter-pill {
+  background: #eaf5ef;
+  color: #2d6a4f;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.ranking-filter-clear {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #888;
+  font-size: 14px;
+  padding: 0 4px;
+  line-height: 1;
+}
+.ranking-filter-clear:hover {
+  color: #c0392b;
+}
+
+.ranking-count {
+  font-size: 10px;
+  color: #888;
+  padding: 2px 0 6px;
 }
 
 .ranking-controls {

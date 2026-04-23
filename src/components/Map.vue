@@ -146,9 +146,12 @@
       :visible="showRankingPanel"
       :ranked-counties="rankedCounties"
       :get-county-name="getCountyName"
+      :active-filters="activeFilters"
+      :display-limit="activeLimit"
       v-model:selected-state="rankingStateFilter"
       @toggle="toggleRankingPanel"
       @select-county="selectCountyFromRanking"
+      @clear-filters="clearActiveFilters"
     />
   </div>
 </template>
@@ -395,6 +398,11 @@ const scoringQuery = computed<ScoringQuery>(() => {
 // Phase 4a: reactive filters and display limit (set by LLM, cleared manually)
 const activeFilters = ref<ScoringFilter[]>([]);
 const activeLimit = ref<number | null>(null);
+
+/** Clear threshold filters without changing the scoring query or selected layers */
+const clearActiveFilters = () => {
+  activeFilters.value = [];
+};
 
 // Initialize scoring engine
 const dataMaps: DataMaps = {
