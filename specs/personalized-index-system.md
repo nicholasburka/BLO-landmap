@@ -272,9 +272,24 @@ Phases 1-3 support **scoring** (rank all counties by weighted factors) and **map
 - Score remaining counties by: `median_income_by_race` (weight 8, higher_better) + `median_home_value` (weight 6, lower_better)
 - Result: "Among counties with majority Black population and above-average life expectancy, here are the most affordable with best income"
 
-### 4.3 LLM Integration
+### 4.3 Result-Count Queries
 
-The system prompt would need to support a `filters` field in addition to `layers`:
+**What:** Users ask for a specific number of top/bottom results.
+
+**Examples:**
+- "Show me the top 5 locations for affordable housing and good schools"
+- "What are the 10 worst counties for pollution exposure?"
+- "Give me the best 3 counties for Black homeownership"
+
+**Implementation:**
+- LLM response includes a `limit` field (default: 20)
+- Ranking panel respects the limit (shows only top N results)
+- Choropleth could highlight only the top-N counties, dimming the rest — or stay as the full gradient with top-N emphasized
+- Option to show "top" vs "bottom" (worst) results based on query intent
+
+### 4.4 LLM Integration
+
+The system prompt would need to support `filters` and `limit` fields in addition to `layers`:
 ```json
 {
   "filters": [
@@ -284,11 +299,13 @@ The system prompt would need to support a `filters` field in addition to `layers
   "layers": [
     { "layerId": "median_income_by_race", "weight": 8, "direction": "higher_better" }
   ],
+  "limit": 5,
+  "sort": "top",
   "explanation": "..."
 }
 ```
 
-### 4.4 Implementation Considerations
+### 4.5 Implementation Considerations
 - Scoring engine needs a pre-filter step: exclude counties that don't pass all filter conditions
 - Choropleth should visually distinguish filtered-out counties (transparent or greyed out)
 - Ranking panel only shows counties that pass all filters
