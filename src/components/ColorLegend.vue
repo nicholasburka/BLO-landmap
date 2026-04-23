@@ -15,6 +15,10 @@
         <span class="legend-scoring-name">{{ sl.name }}</span>
       </div>
     </div>
+    <div v-if="hasActiveFilters" class="legend-filter-note">
+      <span class="legend-filter-swatch"></span>
+      <span>Grey = excluded by filter</span>
+    </div>
   </div>
 </template>
 
@@ -38,6 +42,7 @@ interface Props {
   selectedTransportationLayers: string[]
   showContaminationChoropleth: boolean
   layerDirections?: Record<string, string>
+  hasActiveFilters?: boolean
 }
 
 const props = defineProps<Props>()
@@ -193,6 +198,27 @@ const scoringLayers = computed(() => {
 
 .legend-scoring-name {
   font-size: 11px;
+}
+
+.legend-filter-note {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: #888;
+  font-style: italic;
+}
+
+.legend-filter-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  background: rgba(200, 200, 200, 0.6);
+  border-radius: 2px;
+  border: 1px solid #ccc;
 }
 
 @media (max-width: 768px) {

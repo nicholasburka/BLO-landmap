@@ -132,6 +132,7 @@
         :selected-transportation-layers="selectedTransportationLayers"
         :show-contamination-choropleth="showContaminationChoropleth"
         :layer-directions="layerDirections"
+        :has-active-filters="activeFilters.length > 0"
       />
 
       <AveragesPanel
@@ -901,7 +902,12 @@ const updateChoroplethColors = () => {
           if (useMultiLayerScoring) {
             // Multi-layer: use dynamic scoring engine
             const countyScore = personalizedScores.value.get(geoID);
-            finalColor = getColorForDynamicScore(countyScore?.score ?? null);
+            if (countyScore?.filteredOut) {
+              // Filtered out by threshold: muted grey, keeps geographic context
+              finalColor = [200, 200, 200, 0.4];
+            } else {
+              finalColor = getColorForDynamicScore(countyScore?.score ?? null);
+            }
           } else if (selectedDemographicLayers.value.length === 1) {
             // Single demographic layer selected
             const layer = selectedDemographicLayers.value[0];
@@ -1262,9 +1268,9 @@ watch(
   { deep: true }
 );
 
-// Recolor choropleth when scoring query changes (weights/directions adjusted)
+// Recolor choropleth when scoring query or filters change
 let recolorTimeout: ReturnType<typeof setTimeout> | null = null;
-watch(scoringQuery, () => {
+watch([scoringQuery, activeFilters], () => {
   // Debounce at 100ms to avoid jank during rapid slider movement
   if (recolorTimeout) clearTimeout(recolorTimeout);
   recolorTimeout = setTimeout(() => {
