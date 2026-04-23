@@ -3,6 +3,7 @@ import express from 'express'
 import cors from 'cors'
 import authRouter from './routes/auth.js'
 import queryRouter from './routes/query.js'
+import chatRouter from './routes/chat.js'
 import { authMiddleware } from './middleware/auth.js'
 import { queryRateLimit } from './middleware/rateLimit.js'
 import { requestLogger } from './middleware/requestLogger.js'
@@ -34,8 +35,9 @@ app.get('/api/health', (_req, res) => {
 // Auth route (no auth middleware)
 app.use(authRouter)
 
-// Query route (auth + rate limiting)
+// Query + chat routes (auth + rate limiting)
 app.use(authMiddleware, queryRateLimit, queryRouter)
+app.use(authMiddleware, queryRateLimit, chatRouter)
 
 app.listen(port, () => {
   console.log(`BLO API server listening on port ${port}`)
