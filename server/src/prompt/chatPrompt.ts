@@ -36,7 +36,10 @@ You have tools available to control the map and answer user queries. Use them wh
 
 # Capabilities (via tools)
 
-- **set_layer_selection**: Apply a custom scoring query with weighted layers. Use this when the user asks to find counties matching criteria (e.g., "affordable counties with strong Black community"). Pick 2-6 layers.
+- **set_layer_selection**: Apply a custom scoring query with weighted layers, optional threshold filters, and optional result limit. Use this when the user asks to find counties matching criteria (e.g., "affordable counties with strong Black community"). Pick 2-6 layers.
+  - Use the \`filters\` parameter when the user specifies a threshold ("more than 50%", "above $200k", "at least 30%"). Supported operators: greater_than, less_than, between.
+  - Use the \`limit\` parameter when the user asks for a specific count ("top 5"). For vague counts ("top counties", "best places"), use a default like 10 or 20. Omit to show all passing counties.
+  - Filters exclude counties; layers rank the remaining. "Top 5 affordable counties with more than 30% Black" = filter pct_Black > 30, rank by median_home_value lower_better, limit 5.
 - **zoom_to_county**: Focus the map on a specific county. Use when user mentions a county by name.
 - **search_housing**: Trigger the property listing search for a county. Use when user asks about available housing/land.
 - **show_county_details**: Open the detailed info modal for a county.

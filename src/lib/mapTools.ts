@@ -15,6 +15,19 @@ export interface LayerSelection {
   direction: 'higher_better' | 'lower_better'
 }
 
+export interface ScoringFilter {
+  layerId: string
+  operator: 'greater_than' | 'less_than' | 'between'
+  value: number
+  max?: number
+}
+
+export interface LayerSelectionOptions {
+  filters?: ScoringFilter[]
+  limit?: number
+  explanation?: string
+}
+
 /** A single ranked county result, used to describe the current ranking to the LLM */
 export interface RankedCountyInfo {
   rank: number
@@ -27,8 +40,8 @@ export interface RankedCountyInfo {
 /** Context injected by Map.vue — gives tools access to app state + mutators */
 export interface ToolContext {
   map: mapboxgl.Map | null
-  /** Apply a new layer selection (replaces current selection) */
-  setLayerSelection: (layers: LayerSelection[], explanation?: string) => void
+  /** Apply a new layer selection (replaces current selection), with optional filters and display limit */
+  setLayerSelection: (layers: LayerSelection[], options?: LayerSelectionOptions) => void
   /** Open the county detail modal for a given GEOID */
   openCountyModal: (geoId: string) => void
   /** Expand or collapse the ranking panel */
@@ -181,14 +194,25 @@ export async function executeTool(
         if (!Array.isArray(toolInput.layers) || toolInput.layers.length === 0) {
           return 'Error: layers array is required and must be non-empty.'
         }
-        ctx.setLayerSelection(toolInput.layers, toolInput.explanation)
+        const options: LayerSelectionOptions = {
+          filters: Array.isArray(toolInput.filters) ? toolInput.filters : undefined,
+          limit: typeof toolInput.limit === 'number' ? toolInput.limit : undefined,
+          explanation: toolInput.explanation,
+        }
+        ctx.setLayerSelection(toolInput.layers, options)
         const layerNames = toolInput.layers.map((l: LayerSelection) => l.layerId).join(', ')
-        // Wait for reactive scoring to complete, then include top 10 counties
-        const topCounties = await ctx.getTopRankedCounties(10)
+        // Wait for reactive scoring to complete, then include top N counties
+        const resultCount = options.limit ?? 10
+        const topCounties = await ctx.getTopRankedCounties(Math.max(resultCount, 10))
+        const filterSummary = options.filters && options.filters.length > 0
+          ? ` Filters applied: ${options.filters.map(f => `${f.layerId} ${f.operator} ${f.value}${f.max != null ? '-' + f.max : ''}`).join(', ')}.`
+          : ''
         const topList = topCounties
+          .slice(0, resultCount)
           .map((c) => `${c.rank}. ${c.name}, ${c.state} (GEOID ${c.geoId}, score ${c.score.toFixed(1)})`)
           .join('\n')
-        return `Applied scoring query with ${toolInput.layers.length} layers: ${layerNames}. Map recolored.\n\nTop 10 counties by this score:\n${topList}`
+        const emptyNote = topCounties.length === 0 ? '\n\nNo counties match the current criteria.' : ''
+        return `Applied scoring query with ${toolInput.layers.length} layers: ${layerNames}.${filterSummary} Map recolored.\n\nTop ${Math.min(resultCount, topCounties.length)} counties:\n${topList}${emptyNote}`
       }
 
       case 'toggle_ranking_panel': {

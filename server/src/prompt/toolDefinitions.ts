@@ -40,13 +40,13 @@ export const TOOL_DEFINITIONS: Anthropic.Messages.Tool[] = [
   },
   {
     name: 'set_layer_selection',
-    description: "Apply a new scoring query to the map. This replaces any currently active layers, sets weights and directions, and recolors the choropleth based on a custom composite score. Use this when the user asks to find counties matching criteria like 'best for homeownership' or 'affordable with good schools'.",
+    description: "Apply a new scoring query to the map. This replaces any currently active layers, sets weights and directions, and recolors the choropleth based on a custom composite score. Optionally includes threshold filters (excludes counties below/above a value) and a result limit (top N). Use this when the user asks to find counties matching criteria like 'best for homeownership', 'top 5 affordable with more than 30% Black'.",
     input_schema: {
       type: 'object',
       properties: {
         layers: {
           type: 'array',
-          description: 'Array of 2-6 layer selections',
+          description: 'Array of 2-6 layer selections for ranking',
           items: {
             type: 'object',
             properties: {
@@ -56,6 +56,24 @@ export const TOOL_DEFINITIONS: Anthropic.Messages.Tool[] = [
             },
             required: ['layerId', 'weight', 'direction'],
           },
+        },
+        filters: {
+          type: 'array',
+          description: "Optional threshold filters that exclude counties not meeting the criteria. Use when the user specifies a cutoff (e.g., 'more than 50%', 'under $200k').",
+          items: {
+            type: 'object',
+            properties: {
+              layerId: { type: 'string', description: 'Exact layer ID from the registry' },
+              operator: { type: 'string', enum: ['greater_than', 'less_than', 'between'], description: 'Comparison operator' },
+              value: { type: 'number', description: "The threshold value in the layer's natural units" },
+              max: { type: 'number', description: 'Only for between: the upper bound (value is the lower bound)' },
+            },
+            required: ['layerId', 'operator', 'value'],
+          },
+        },
+        limit: {
+          type: 'number',
+          description: "Optional: show only the top N counties in the ranking. Clamped to 1-50. Omit to show all passing counties. Use 10-20 as a reasonable default when the user says 'top counties' without a number.",
         },
         explanation: { type: 'string', description: 'Brief explanation of why these layers were selected, shown to the user' },
       },

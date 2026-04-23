@@ -17,8 +17,17 @@ export interface LayerSelection {
   direction: 'higher_better' | 'lower_better'
 }
 
+export interface ScoringFilter {
+  layerId: string
+  operator: 'greater_than' | 'less_than' | 'between'
+  value: number
+  max?: number
+}
+
 export interface QueryResponse {
   layers: LayerSelection[]
+  filters?: ScoringFilter[]
+  limit?: number
   explanation: string
 }
 

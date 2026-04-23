@@ -9,10 +9,21 @@ export interface LayerSelection {
   direction: 'higher_better' | 'lower_better'
 }
 
+export interface ScoringFilter {
+  layerId: string
+  operator: 'greater_than' | 'less_than' | 'between'
+  value: number
+  max?: number
+}
+
 export interface QueryResponse {
   layers: LayerSelection[]
+  filters?: ScoringFilter[]
+  limit?: number
   explanation: string
 }
+
+const VALID_OPERATORS = new Set(['greater_than', 'less_than', 'between'])
 
 const client = new Anthropic()
 const systemPrompt = buildSystemPrompt()
@@ -59,15 +70,50 @@ export async function queryHaiku(userPrompt: string): Promise<QueryResponse> {
 
   // Filter to valid layer IDs and clamp weights
   const validLayers = parsed.layers
-    .filter(l => VALID_LAYER_IDS.has(l.layerId))
-    .map(l => ({
+    .filter((l: any) => VALID_LAYER_IDS.has(l.layerId))
+    .map((l: any) => ({
       layerId: l.layerId,
       weight: Math.max(1, Math.min(10, Math.round(l.weight))),
       direction: l.direction === 'lower_better' ? 'lower_better' as const : 'higher_better' as const,
     }))
 
+  // Validate and clean filters
+  let validFilters: ScoringFilter[] | undefined
+  if (Array.isArray(parsed.filters)) {
+    validFilters = parsed.filters
+      .filter((f: any) =>
+        f &&
+        typeof f.layerId === 'string' &&
+        VALID_LAYER_IDS.has(f.layerId) &&
+        typeof f.operator === 'string' &&
+        VALID_OPERATORS.has(f.operator) &&
+        typeof f.value === 'number' &&
+        !isNaN(f.value)
+      )
+      .map((f: any) => {
+        const out: ScoringFilter = {
+          layerId: f.layerId,
+          operator: f.operator,
+          value: f.value,
+        }
+        if (f.operator === 'between' && typeof f.max === 'number' && !isNaN(f.max)) {
+          out.max = f.max
+        }
+        return out
+      })
+    if (validFilters.length === 0) validFilters = undefined
+  }
+
+  // Clamp limit to 1-50
+  let validLimit: number | undefined
+  if (typeof parsed.limit === 'number' && !isNaN(parsed.limit)) {
+    validLimit = Math.max(1, Math.min(50, Math.round(parsed.limit)))
+  }
+
   return {
     layers: validLayers,
+    filters: validFilters,
+    limit: validLimit,
     explanation: parsed.explanation || 'Query processed.',
   }
 }

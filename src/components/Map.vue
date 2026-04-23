@@ -175,7 +175,7 @@ import {
   MAPBOX_ACCESS_TOKEN,
   MAP_CONFIG,
 } from "@/config/constants";
-import type { ColorBlend, ScoringQuery } from "@/types/mapTypes";
+import type { ColorBlend, ScoringQuery, ScoringFilter } from "@/types/mapTypes";
 import { LAYER_REGISTRY } from "@/config/layerRegistry";
 import { usePersonalizedScore, type DataMaps } from "@/composables/usePersonalizedScore";
 // BLO_PRESET available in @/config/presets for future "load preset" feature
@@ -391,6 +391,10 @@ const scoringQuery = computed<ScoringQuery>(() => {
   });
 });
 
+// Phase 4a: reactive filters and display limit (set by LLM, cleared manually)
+const activeFilters = ref<ScoringFilter[]>([]);
+const activeLimit = ref<number | null>(null);
+
 // Initialize scoring engine
 const dataMaps: DataMaps = {
   diversityData,
@@ -402,7 +406,18 @@ const dataMaps: DataMaps = {
   transportationData,
 };
 
-const { scores: personalizedScores, rankedCounties } = usePersonalizedScore(scoringQuery, dataMaps);
+const {
+  scores: personalizedScores,
+  rankedCounties,
+  filteredOutCountyIds,
+} = usePersonalizedScore(scoringQuery, dataMaps, activeFilters);
+
+/** Ranked counties after applying display limit */
+const limitedRankedCounties = computed(() => {
+  const limit = activeLimit.value;
+  if (limit == null) return rankedCounties.value;
+  return rankedCounties.value.slice(0, limit);
+});
 
 /** Handle prompt query result: auto-select layers with weights and directions */
 const handleQueryResult = (result: QueryResponse) => {
@@ -466,6 +481,11 @@ const handleQueryResult = (result: QueryResponse) => {
 
   layerWeights.value = newWeights;
   layerDirections.value = newDirections;
+
+  // Phase 4a: apply filters and limit from the response
+  activeFilters.value = result.filters ? [...result.filters] : [];
+  activeLimit.value = typeof result.limit === 'number' ? result.limit : null;
+
   showDiversityChoropleth.value = true;
   updateChoroplethVisibility();
   updateChoroplethColors();
@@ -1557,8 +1577,13 @@ const handleGeocoderResult = (result: any) => {
 
 const toolContext: ToolContext = {
   get map() { return map.value; },
-  setLayerSelection: (layers, explanation) => {
-    handleQueryResult({ layers, explanation: explanation || '' });
+  setLayerSelection: (layers, options) => {
+    handleQueryResult({
+      layers,
+      explanation: options?.explanation || '',
+      filters: options?.filters,
+      limit: options?.limit,
+    });
   },
   openCountyModal: (geoId) => {
     openCountyModalById(geoId);

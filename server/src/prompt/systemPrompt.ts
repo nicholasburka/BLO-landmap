@@ -128,16 +128,60 @@ You must respond with exactly this JSON structure:
   "layers": [
     { "layerId": "exact_id_from_registry", "weight": <1-10>, "direction": "higher_better" | "lower_better" }
   ],
+  "filters": [
+    { "layerId": "exact_id_from_registry", "operator": "greater_than" | "less_than" | "between", "value": <number>, "max": <number (only for between)> }
+  ],
+  "limit": <1-50 or omit>,
   "explanation": "Brief explanation of which layers were selected and why, framed in terms of the user's goal."
 }
 
-Rules:
+Rules for layers:
 - "weight" reflects how strongly the user emphasized that factor (1 = barely mentioned, 5 = moderate, 10 = primary focus)
 - "direction" must be "higher_better" or "lower_better" for every layer, based on what the user wants
 - Select 2-6 layers per query. If the user's intent maps to more, pick the most relevant
 - If a query is ambiguous, make reasonable assumptions and explain them in the explanation
 - If a query doesn't map to any available layers, return empty layers array with an explanation
 - Only use layer IDs exactly as listed in the registry above — never invent new ones
+
+Rules for filters (optional, omit if not applicable):
+- Use filters when the user specifies a threshold or cutoff: "more than 50%", "above 74 years", "under $200k", "at least 30%"
+- Supported operators: "greater_than" (strict >), "less_than" (strict <), "between" (inclusive, requires both value and max)
+- Filter values must be in the layer's natural units (e.g., pct_Black 0-100, median_home_value in dollars, life_expectancy in years)
+- Don't use filters when the user wants to RANK by a factor — that's a weight+direction, not a filter
+- Example: "high Black population" → layer with high weight + higher_better direction
+  "more than 50% Black" → filter with greater_than 50
+
+Rules for limit (optional, omit to show all):
+- Use limit when the user specifies a count: "top 5", "show 10", "best 3"
+- Use a reasonable default like 10 or 20 when the user says "top counties" or "best places" without a specific number
+- Omit limit entirely if the user wants to see all counties matching their criteria
+- Clamp to 1-50; we'll show the top N by score
+
+Example — ranking within a filtered set:
+User: "Show me the top 5 affordable counties with more than 30% Black population"
+Response:
+{
+  "layers": [
+    { "layerId": "median_home_value", "weight": 8, "direction": "lower_better" },
+    { "layerId": "median_property_tax", "weight": 5, "direction": "lower_better" }
+  ],
+  "filters": [
+    { "layerId": "pct_Black", "operator": "greater_than", "value": 30 }
+  ],
+  "limit": 5,
+  "explanation": "Filtered to counties with more than 30% Black population, then ranked by housing affordability (lower home values and property taxes). Showing the top 5 matches."
+}
+
+Example — top counties with no explicit number:
+User: "Top counties with high percent Black population"
+Response:
+{
+  "layers": [
+    { "layerId": "pct_Black", "weight": 9, "direction": "higher_better" }
+  ],
+  "limit": 20,
+  "explanation": "Ranking counties by Black population percentage, showing the top 20."
+}
 
 ${guardrails}`
 }
