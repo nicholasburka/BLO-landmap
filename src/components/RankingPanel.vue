@@ -47,7 +47,15 @@
           {{ showBottom ? `Bottom ${effectiveLimit}` : `Top ${effectiveLimit}` }}
         </button>
       </div>
-      <div class="ranking-count">{{ countLabel }}</div>
+      <div class="ranking-count-row">
+        <span class="ranking-count">{{ countLabel }}</span>
+        <button
+          v-if="displayedCounties.length > 0"
+          class="walk-through-btn"
+          @click="$emit('start-walkthrough')"
+          title="Step through results with Next/Previous"
+        >Walk through</button>
+      </div>
       <div class="ranking-list">
         <div
           v-for="(county, index) in displayedCounties"
@@ -112,6 +120,7 @@ const emit = defineEmits<{
   'select-county': [geoId: string]
   'update:selectedState': [value: string]
   'clear-filters': []
+  'start-walkthrough': []
 }>()
 
 /** Short, terse filter pill text: "pct_Black > 30" */
@@ -296,10 +305,31 @@ const countLabel = computed(() => {
   color: #c0392b;
 }
 
+.ranking-count-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 0 6px;
+}
+
 .ranking-count {
   font-size: 10px;
   color: #888;
-  padding: 2px 0 6px;
+}
+
+.walk-through-btn {
+  background: #eaf5ef;
+  color: #2d6a4f;
+  border: 1px solid #c0d9c8;
+  border-radius: 3px;
+  font-size: 10px;
+  padding: 3px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.walk-through-btn:hover {
+  background: #d4e9db;
 }
 
 .ranking-controls {

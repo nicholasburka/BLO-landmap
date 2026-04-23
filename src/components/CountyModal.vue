@@ -16,6 +16,29 @@
     >
       &times;
     </button>
+    <div v-if="walkthroughActive" class="walkthrough-bar">
+      <button
+        class="walkthrough-btn"
+        @click="$emit('walkthrough-prev')"
+        :disabled="walkthroughIndex <= 0"
+        aria-label="Previous county"
+      >←</button>
+      <span class="walkthrough-counter">
+        {{ walkthroughIndex + 1 }} of {{ walkthroughTotal }}
+      </span>
+      <button
+        class="walkthrough-btn"
+        @click="$emit('walkthrough-next')"
+        :disabled="walkthroughIndex >= walkthroughTotal - 1"
+        aria-label="Next county"
+      >→</button>
+      <button
+        class="walkthrough-exit"
+        @click="$emit('walkthrough-exit')"
+        aria-label="Exit walkthrough"
+        title="Exit walkthrough (Esc)"
+      >Exit tour</button>
+    </div>
     <div class="detailed-popup-content">
       <h2 :id="'modal-title-' + countyId">{{ countyName }}, {{ stateName }}</h2>
 
@@ -122,7 +145,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { getStateNameFromFips } from '@/config/stateFips'
 import type {
   CountyDiversityData,
@@ -151,13 +174,43 @@ interface Props {
   housingData?: HousingData
   equityData?: EquityData
   transportationData?: TransportationData
+  /** Phase 4a: walkthrough state — if active, show Next/Previous controls */
+  walkthroughActive?: boolean
+  walkthroughIndex?: number
+  walkthroughTotal?: number
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  walkthroughActive: false,
+  walkthroughIndex: 0,
+  walkthroughTotal: 0,
+})
 
-defineEmits<{
+const emit = defineEmits<{
   close: []
+  'walkthrough-next': []
+  'walkthrough-prev': []
+  'walkthrough-exit': []
 }>()
+
+// Phase 4a: keyboard shortcuts for walkthrough
+onMounted(() => {
+  const handler = (e: KeyboardEvent) => {
+    if (!props.walkthroughActive || !props.show) return
+    if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      emit('walkthrough-next')
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      emit('walkthrough-prev')
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      emit('walkthrough-exit')
+    }
+  }
+  window.addEventListener('keydown', handler)
+  onBeforeUnmount(() => window.removeEventListener('keydown', handler))
+})
 
 // Load national averages on mount
 onMounted(async () => {
@@ -477,6 +530,58 @@ const getBlackProgressIndexDiff = computed(() => {
   outline: 2px solid #4a90e2;
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+.walkthrough-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 60px 10px 20px;
+  background: #f0f7f2;
+  border-bottom: 1px solid #d4e6da;
+  font-size: 13px;
+  color: #2d6a4f;
+  font-weight: 500;
+}
+
+.walkthrough-btn {
+  background: white;
+  border: 1px solid #c0d9c8;
+  border-radius: 4px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #2d6a4f;
+  transition: all 0.15s;
+}
+.walkthrough-btn:hover:not(:disabled) {
+  background: #e0efe5;
+  border-color: #2d6a4f;
+}
+.walkthrough-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.walkthrough-counter {
+  font-variant-numeric: tabular-nums;
+  min-width: 60px;
+  text-align: center;
+}
+
+.walkthrough-exit {
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 6px;
+  margin-left: 4px;
+}
+.walkthrough-exit:hover {
+  color: #c0392b;
+  text-decoration: underline;
 }
 
 @media (max-width: 768px) {

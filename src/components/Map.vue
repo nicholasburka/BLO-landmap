@@ -120,7 +120,13 @@
       :housing-data="currentCounty?.id ? housingData[currentCounty.id] : undefined"
       :equity-data="currentCounty?.id ? equityData[currentCounty.id] : undefined"
       :transportation-data="currentCounty?.id ? transportationData[currentCounty.id] : undefined"
-      @close="closeDetailedPopup"
+      :walkthrough-active="walkthroughActive"
+      :walkthrough-index="walkthroughIndex"
+      :walkthrough-total="limitedRankedCounties.length"
+      @close="handleModalClose"
+      @walkthrough-next="walkthroughNext"
+      @walkthrough-prev="walkthroughPrev"
+      @walkthrough-exit="exitWalkthrough"
     />
 
     <div class="bottom-left-panels">
@@ -152,6 +158,7 @@
       @toggle="toggleRankingPanel"
       @select-county="selectCountyFromRanking"
       @clear-filters="clearActiveFilters"
+      @start-walkthrough="startWalkthrough"
     />
   </div>
 </template>
@@ -404,6 +411,10 @@ const clearActiveFilters = () => {
   activeFilters.value = [];
 };
 
+// Phase 4a: walkthrough state
+const walkthroughActive = ref(false);
+const walkthroughIndex = ref(0);
+
 // Initialize scoring engine
 const dataMaps: DataMaps = {
   diversityData,
@@ -427,6 +438,46 @@ const limitedRankedCounties = computed(() => {
   if (limit == null) return rankedCounties.value;
   return rankedCounties.value.slice(0, limit);
 });
+
+/** Phase 4a: walkthrough handlers */
+const startWalkthrough = () => {
+  if (limitedRankedCounties.value.length === 0) return;
+  walkthroughActive.value = true;
+  walkthroughIndex.value = 0;
+  openCountyAtWalkthroughIndex();
+};
+
+const openCountyAtWalkthroughIndex = () => {
+  const county = limitedRankedCounties.value[walkthroughIndex.value];
+  if (!county) return;
+  selectCountyFromRanking(county.geoId);
+};
+
+const walkthroughNext = () => {
+  if (walkthroughIndex.value < limitedRankedCounties.value.length - 1) {
+    walkthroughIndex.value++;
+    openCountyAtWalkthroughIndex();
+  }
+};
+
+const walkthroughPrev = () => {
+  if (walkthroughIndex.value > 0) {
+    walkthroughIndex.value--;
+    openCountyAtWalkthroughIndex();
+  }
+};
+
+const exitWalkthrough = () => {
+  walkthroughActive.value = false;
+  walkthroughIndex.value = 0;
+  showDetailedPopup.value = false;
+};
+
+/** When the modal is closed (X button), also exit walkthrough */
+const handleModalClose = () => {
+  showDetailedPopup.value = false;
+  walkthroughActive.value = false;
+};
 
 /** Handle prompt query result: auto-select layers with weights and directions */
 const handleQueryResult = (result: QueryResponse) => {
