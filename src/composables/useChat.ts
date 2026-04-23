@@ -9,6 +9,7 @@
 
 import { ref, type Ref } from 'vue'
 import { executeTool, type ToolContext } from '@/lib/mapTools'
+import { useAuth } from '@/composables/useAuth'
 
 // Anthropic content block types (minimal subset we need)
 export interface TextBlock {
@@ -49,7 +50,6 @@ interface ChatResponse {
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
-const TOKEN_KEY = 'blo-session-token'
 const MAX_MESSAGES_SENT = 20
 const MAX_TOOL_CALLS_PER_TURN = 10
 
@@ -57,10 +57,7 @@ export function useChat(toolCtx: ToolContext) {
   const messages: Ref<ChatMessage[]> = ref([])
   const isThinking = ref(false)
   const error: Ref<string | null> = ref(null)
-
-  function getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY)
-  }
+  const { getToken, clearAuth } = useAuth()
 
   /** Build the message array to send to the server (last N, in Anthropic format) */
   function buildRequestMessages(): any[] {
@@ -95,8 +92,10 @@ export function useChat(toolCtx: ToolContext) {
       clearTimeout(timeout)
 
       if (res.status === 401) {
-        localStorage.removeItem(TOKEN_KEY)
-        error.value = 'Session expired. Please sign in again.'
+        clearAuth('Session expired. Please sign in again.')
+        error.value = null
+        // Clear conversation on auth loss so stale messages don't show
+        messages.value = []
         return null
       }
       if (res.status === 429) {

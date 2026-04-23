@@ -12,74 +12,138 @@
         />
         <button type="submit" class="auth-submit" :disabled="!password">Go</button>
       </form>
-      <p v-if="error" class="prompt-error">{{ error }}</p>
+      <p v-if="authError" class="prompt-error">{{ authError }}</p>
     </div>
 
-    <!-- Prompt input -->
+    <!-- Chat panel -->
     <div v-else class="prompt-main">
+      <!-- Input row -->
       <form @submit.prevent="handleSubmit" class="prompt-form">
         <input
           v-model="query"
           type="text"
-          placeholder="Describe what you're looking for..."
+          placeholder="Ask a question or describe what you're looking for..."
           class="prompt-input"
-          :disabled="isLoading"
-          aria-label="Search query for county livability"
+          :disabled="isThinking"
+          aria-label="Chat input"
           maxlength="500"
+          @keydown.enter.prevent="handleSubmit"
         />
-        <button type="submit" class="prompt-submit" :disabled="isLoading || !query.trim()">
-          <span v-if="!isLoading">Search</span>
+        <button type="submit" class="prompt-submit" :disabled="isThinking || !query.trim()">
+          <span v-if="!isThinking">Send</span>
           <span v-else class="prompt-spinner"></span>
         </button>
+        <button
+          v-if="messages.length > 0"
+          type="button"
+          class="prompt-clear"
+          @click="clearConversation"
+          aria-label="Clear conversation"
+          title="Clear conversation"
+        >×</button>
       </form>
 
-      <!-- Suggested chips -->
-      <div v-if="!explanation && !isLoading" class="prompt-chips">
+      <!-- Suggested chips (only when conversation is empty) -->
+      <div v-if="messages.length === 0 && !isThinking" class="prompt-chips">
         <button
           v-for="chip in suggestedQueries"
           :key="chip"
           class="prompt-chip"
           @click="submitChip(chip)"
-          :disabled="isLoading"
+          :disabled="isThinking"
         >{{ chip }}</button>
       </div>
 
-      <!-- Explanation -->
-      <div v-if="explanation" class="prompt-explanation">
-        <p>{{ explanation }}</p>
+      <!-- Conversation history -->
+      <div v-if="messages.length > 0 || isThinking" class="chat-history" :class="{ collapsed: !historyExpanded }">
+        <div class="chat-history-header">
+          <span class="chat-history-count">{{ visibleMessages.length }} message{{ visibleMessages.length === 1 ? '' : 's' }}</span>
+          <button
+            type="button"
+            class="chat-toggle"
+            @click="historyExpanded = !historyExpanded"
+            :aria-label="historyExpanded ? 'Collapse conversation' : 'Expand conversation'"
+          >{{ historyExpanded ? '▼' : '▲' }}</button>
+        </div>
+        <div v-if="historyExpanded" ref="scrollRef" class="chat-messages">
+          <div
+            v-for="(msg, idx) in visibleMessages"
+            :key="idx"
+            class="chat-message"
+            :class="msg.role"
+          >
+            <div v-if="msg.displayText" class="chat-text">{{ msg.displayText }}</div>
+            <div v-if="msg.toolCalls && msg.toolCalls.length > 0" class="chat-tools">
+              <div v-for="(tc, tcIdx) in msg.toolCalls" :key="tcIdx" class="chat-tool">
+                <span class="chat-tool-name">→ {{ describeToolCall(tc.name, tc.input) }}</span>
+                <span v-if="tc.result" class="chat-tool-result">{{ tc.result }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-if="isThinking" class="chat-message assistant thinking">
+            <span class="chat-dot"></span>
+            <span class="chat-dot"></span>
+            <span class="chat-dot"></span>
+          </div>
+        </div>
       </div>
 
       <!-- Error -->
-      <p v-if="error" class="prompt-error">{{ error }}</p>
+      <p v-if="chatError" class="prompt-error">{{ chatError }}</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { usePromptQuery, type QueryResponse } from '@/composables/usePromptQuery'
+import { ref, computed, nextTick, watch } from 'vue'
+import { usePromptQuery } from '@/composables/usePromptQuery'
+import type { ChatMessage } from '@/composables/useChat'
 
-const emit = defineEmits<{
-  'query-result': [result: QueryResponse]
+const props = defineProps<{
+  messages: ChatMessage[]
+  isThinking: boolean
+  chatError: string | null
+  sendMessage: (text: string) => Promise<void>
+  clearConversation: () => void
 }>()
 
-const {
-  isAuthenticated,
-  isLoading,
-  error,
-  explanation,
-  authenticate,
-  submitQuery,
-} = usePromptQuery()
+// Reuse usePromptQuery just for authentication state
+const { isAuthenticated, authenticate, error: authError } = usePromptQuery()
 
 const password = ref('')
 const query = ref('')
+const historyExpanded = ref(true)
+const scrollRef = ref<HTMLElement | null>(null)
 
 const suggestedQueries = [
-  'Affordable counties with strong Black community',
-  'Best places for Black homeownership',
-  'Low pollution, good wages, diverse neighborhoods',
+  'Show me the top 5 counties for Black homeownership',
+  'Affordable counties with low pollution',
+  'Zoom to Mecklenburg County, NC',
 ]
+
+/** Only show messages that have something to display (skip empty tool_result messages) */
+const visibleMessages = computed(() =>
+  props.messages.filter((m) => m.displayText || (m.toolCalls && m.toolCalls.length > 0))
+)
+
+function describeToolCall(name: string, input: any): string {
+  switch (name) {
+    case 'zoom_to_county':
+      return `Zoom to ${input.county_name}${input.state ? ', ' + input.state : ''}`
+    case 'search_housing':
+      return `Search housing in ${input.county_name}${input.state ? ', ' + input.state : ''}`
+    case 'set_layer_selection':
+      return `Apply ${input.layers?.length || 0} scoring layers`
+    case 'toggle_ranking_panel':
+      return input.expanded ? 'Open ranking panel' : 'Close ranking panel'
+    case 'filter_ranking_by_state':
+      return input.state ? `Filter ranking to ${input.state}` : 'Clear ranking filter'
+    case 'show_county_details':
+      return `Show details for ${input.county_name}${input.state ? ', ' + input.state : ''}`
+    default:
+      return name
+  }
+}
 
 async function handleAuth() {
   await authenticate(password.value)
@@ -87,20 +151,26 @@ async function handleAuth() {
 }
 
 async function handleSubmit() {
-  if (!query.value.trim()) return
-  const result = await submitQuery(query.value.trim())
-  if (result) {
-    emit('query-result', result)
-  }
+  const text = query.value.trim()
+  if (!text || props.isThinking) return
+  query.value = ''
+  historyExpanded.value = true
+  await props.sendMessage(text)
 }
 
 async function submitChip(chip: string) {
   query.value = chip
-  const result = await submitQuery(chip)
-  if (result) {
-    emit('query-result', result)
-  }
+  await handleSubmit()
 }
+
+// Auto-scroll to latest message
+watch(() => props.messages.length, () => {
+  nextTick(() => {
+    if (scrollRef.value) {
+      scrollRef.value.scrollTop = scrollRef.value.scrollHeight
+    }
+  })
+})
 </script>
 
 <style scoped>
@@ -110,7 +180,7 @@ async function submitChip(chip: string) {
   left: 310px;
   right: 270px;
   z-index: 5;
-  max-width: 500px;
+  max-width: 600px;
 }
 
 .auth-form,
@@ -163,6 +233,19 @@ async function submitChip(chip: string) {
   cursor: not-allowed;
 }
 
+.prompt-clear {
+  padding: 0 12px;
+  background: transparent;
+  color: #999;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+.prompt-clear:hover {
+  color: #c0392b;
+}
+
 .prompt-spinner {
   display: inline-block;
   width: 14px;
@@ -207,20 +290,108 @@ async function submitChip(chip: string) {
   cursor: not-allowed;
 }
 
-.prompt-explanation {
+.chat-history {
   margin-top: 6px;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.98);
   border-radius: 6px;
-  border-left: 3px solid #4a7c59;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-.prompt-explanation p {
-  margin: 0;
+.chat-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 11px;
+  color: #888;
+}
+
+.chat-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 10px;
+  color: #888;
+}
+
+.chat-messages {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 8px 12px;
+}
+
+.chat-message {
+  margin: 6px 0;
   font-size: 12px;
   line-height: 1.5;
-  color: #444;
+}
+
+.chat-message.user .chat-text {
+  background: #e8f4ea;
+  padding: 6px 10px;
+  border-radius: 12px 12px 4px 12px;
+  display: inline-block;
+  max-width: 85%;
+  color: #2c3e50;
+  margin-left: auto;
+}
+
+.chat-message.user {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.chat-message.assistant .chat-text {
+  color: #333;
+  padding: 4px 0;
+}
+
+.chat-tools {
+  margin: 4px 0;
+  padding-left: 10px;
+  border-left: 2px solid #ddd;
+}
+
+.chat-tool {
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  color: #666;
+  margin: 2px 0;
+}
+
+.chat-tool-name {
+  font-style: italic;
+}
+
+.chat-tool-result {
+  color: #888;
+  font-size: 10px;
+  padding-left: 12px;
+}
+
+.chat-message.thinking {
+  display: flex;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.chat-dot {
+  width: 6px;
+  height: 6px;
+  background: #999;
+  border-radius: 50%;
+  animation: blink 1.2s infinite;
+}
+.chat-dot:nth-child(2) { animation-delay: 0.2s; }
+.chat-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.3; }
+  40% { opacity: 1; }
 }
 
 .prompt-error {
@@ -241,6 +412,9 @@ async function submitChip(chip: string) {
     right: auto;
     max-width: none;
     margin: 8px;
+  }
+  .chat-messages {
+    max-height: 200px;
   }
 }
 </style>

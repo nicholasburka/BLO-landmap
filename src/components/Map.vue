@@ -28,7 +28,13 @@
         Clear Search
       </button>
     </div>
-    <PromptInput @query-result="handleQueryResult" />
+    <PromptInput
+      :messages="chat.messages.value"
+      :is-thinking="chat.isThinking.value"
+      :chat-error="chat.error.value"
+      :send-message="chat.sendMessage"
+      :clear-conversation="chat.clearConversation"
+    />
 
     <div v-if="listings.length > 0" id="listings-panel" class="listings-panel">
       <h3>
