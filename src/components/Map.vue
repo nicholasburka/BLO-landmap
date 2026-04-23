@@ -1582,6 +1582,22 @@ const toolContext: ToolContext = {
   zoomToGeoId: (geoId) => {
     zoomToGeoId(geoId);
   },
+  getTopRankedCounties: async (limit) => {
+    // Wait for reactive scoring engine to catch up (layer state change → scoringQuery → scores)
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const ranked = rankedCounties.value.slice(0, limit);
+    return ranked.map((c, i) => {
+      const name = getCountyName(c.geoId);
+      const div = diversityData.value[c.geoId];
+      return {
+        rank: i + 1,
+        geoId: c.geoId,
+        name,
+        state: div?.stateName || '',
+        score: c.score ?? 0,
+      };
+    });
+  },
 };
 
 const chat = useChat(toolContext);

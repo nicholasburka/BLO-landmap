@@ -15,6 +15,15 @@ export interface LayerSelection {
   direction: 'higher_better' | 'lower_better'
 }
 
+/** A single ranked county result, used to describe the current ranking to the LLM */
+export interface RankedCountyInfo {
+  rank: number
+  geoId: string
+  name: string
+  state: string
+  score: number
+}
+
 /** Context injected by Map.vue — gives tools access to app state + mutators */
 export interface ToolContext {
   map: mapboxgl.Map | null
@@ -30,6 +39,8 @@ export interface ToolContext {
   triggerHousingSearch: (county: CountyLookup) => void
   /** Zoom to a GEOID using the counties GeoJSON (Map.vue owns this logic) */
   zoomToGeoId: (geoId: string) => void
+  /** Read the current top-N ranked counties (after scoring has run) */
+  getTopRankedCounties: (limit: number) => Promise<RankedCountyInfo[]>
 }
 
 /** Anthropic tool definitions passed to Claude */
@@ -172,7 +183,12 @@ export async function executeTool(
         }
         ctx.setLayerSelection(toolInput.layers, toolInput.explanation)
         const layerNames = toolInput.layers.map((l: LayerSelection) => l.layerId).join(', ')
-        return `Applied scoring query with ${toolInput.layers.length} layers: ${layerNames}. Map recolored and ranking panel updated.`
+        // Wait for reactive scoring to complete, then include top 10 counties
+        const topCounties = await ctx.getTopRankedCounties(10)
+        const topList = topCounties
+          .map((c) => `${c.rank}. ${c.name}, ${c.state} (GEOID ${c.geoId}, score ${c.score.toFixed(1)})`)
+          .join('\n')
+        return `Applied scoring query with ${toolInput.layers.length} layers: ${layerNames}. Map recolored.\n\nTop 10 counties by this score:\n${topList}`
       }
 
       case 'toggle_ranking_panel': {
