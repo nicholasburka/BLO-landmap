@@ -76,17 +76,25 @@ interface Props {
   rankedCounties: CountyScore[]
   /** Function to resolve county name from GEOID */
   getCountyName: (geoId: string) => string
+  /** v-model: currently selected state filter (name, abbr, or empty) */
+  selectedState?: string
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { selectedState: '' })
 
-defineEmits<{
+const emit = defineEmits<{
   toggle: []
   'select-county': [geoId: string]
+  'update:selectedState': [value: string]
 }>()
 
-const selectedState = ref('')
 const showBottom = ref(false)
+
+/** Two-way binding for the state dropdown */
+const selectedState = computed({
+  get: () => props.selectedState,
+  set: (v: string) => emit('update:selectedState', v),
+})
 
 /** Build sorted list of state names for the dropdown */
 const stateList = computed(() => {
@@ -123,9 +131,13 @@ const getStateAbbr = (stateName: string): string => {
 const displayedCounties = computed<CountyDisplay[]>(() => {
   let filtered = props.rankedCounties.filter(c => c.score !== null)
 
-  // Apply state filter
+  // Apply state filter (match against full name or abbreviation)
   if (selectedState.value) {
-    filtered = filtered.filter(c => getStateName(c.geoId) === selectedState.value)
+    const filter = selectedState.value.toUpperCase()
+    filtered = filtered.filter(c => {
+      const name = getStateName(c.geoId)
+      return name.toUpperCase() === filter || getStateAbbr(name) === filter
+    })
   }
 
   // Sort: top (descending) or bottom (ascending)

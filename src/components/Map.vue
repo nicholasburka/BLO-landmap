@@ -139,6 +139,7 @@
       :visible="showRankingPanel"
       :ranked-counties="rankedCounties"
       :get-county-name="getCountyName"
+      v-model:selected-state="rankingStateFilter"
       @toggle="toggleRankingPanel"
       @select-county="selectCountyFromRanking"
     />
@@ -180,6 +181,9 @@ import ColorLegend from "@/components/ColorLegend.vue";
 import RankingPanel from "@/components/RankingPanel.vue";
 import PromptInput from "@/components/PromptInput.vue";
 import type { QueryResponse } from "@/composables/usePromptQuery";
+import { useChat } from "@/composables/useChat";
+import { initCountyLookup, findCounty } from "@/lib/countyLookup";
+import type { ToolContext } from "@/lib/mapTools";
 
 const mapContainer = ref<HTMLElement | null>(null);
 const map = ref<mapboxgl.Map | null>(null);
@@ -258,12 +262,29 @@ const handleOutsideClick = (event: MouseEvent) => {
 
 const averagesPanelExpanded = ref(false);
 const rankingPanelExpanded = ref(false);
+const rankingStateFilter = ref('');
 
 const toggleRankingPanel = () => {
   rankingPanelExpanded.value = !rankingPanelExpanded.value;
 };
 
 const showRankingPanel = computed(() => allSelectedLayers.value.length >= 2);
+
+/** Zoom the map to a county's bounds by GEOID */
+const zoomToGeoId = (geoId: string): boolean => {
+  if (!countiesData.value?.features || !map.value) return false;
+  const feature = countiesData.value.features.find(
+    (f: any) => f.properties?.GEOID === geoId
+  );
+  if (!feature) return false;
+  const bounds = new mapboxgl.LngLatBounds();
+  const coords = feature.geometry.type === 'MultiPolygon'
+    ? feature.geometry.coordinates.flat(2)
+    : feature.geometry.coordinates.flat(1);
+  coords.forEach((coord: number[]) => bounds.extend(coord as [number, number]));
+  map.value.fitBounds(bounds, { padding: 50, maxZoom: 10 });
+  return true;
+};
 
 /** Resolve county name from GEOID using diversity data or other data maps */
 const getCountyName = (geoId: string): string => {
@@ -281,21 +302,14 @@ const selectCountyFromRanking = (geoId: string) => {
   const name = getCountyName(geoId);
   currentCounty.value = { id: geoId, name };
   showDetailedPopup.value = true;
+  zoomToGeoId(geoId);
+};
 
-  // Zoom to county if we have GeoJSON data
-  if (countiesData.value?.features) {
-    const feature = countiesData.value.features.find(
-      (f: any) => f.properties?.GEOID === geoId
-    );
-    if (feature && map.value) {
-      const bounds = new mapboxgl.LngLatBounds();
-      const coords = feature.geometry.type === 'MultiPolygon'
-        ? feature.geometry.coordinates.flat(2)
-        : feature.geometry.coordinates.flat(1);
-      coords.forEach((coord: number[]) => bounds.extend(coord as [number, number]));
-      map.value.fitBounds(bounds, { padding: 50, maxZoom: 10 });
-    }
-  }
+/** Open county modal by GEOID only (used by LLM tool) */
+const openCountyModalById = (geoId: string) => {
+  const name = getCountyName(geoId);
+  currentCounty.value = { id: geoId, name };
+  showDetailedPopup.value = true;
 };
 
 // Dynamic scoring state
@@ -1533,6 +1547,39 @@ const handleGeocoderResult = (result: any) => {
   }
 };
 
+// ============= Phase 3: LLM chat with tool use =============
+
+const toolContext: ToolContext = {
+  get map() { return map.value; },
+  setLayerSelection: (layers, explanation) => {
+    handleQueryResult({ layers, explanation: explanation || '' });
+  },
+  openCountyModal: (geoId) => {
+    openCountyModalById(geoId);
+    zoomToGeoId(geoId);
+  },
+  toggleRankingPanel: (expanded) => {
+    rankingPanelExpanded.value = expanded;
+  },
+  setRankingStateFilter: (stateName) => {
+    rankingStateFilter.value = stateName;
+    // Also expand the ranking panel so the user sees the filter take effect
+    if (stateName) rankingPanelExpanded.value = true;
+  },
+  triggerHousingSearch: (county) => {
+    // Center map on the county first, then the user can click "Find land for sale"
+    zoomToGeoId(county.geoId);
+    // Note: full housing search requires a geocoder result shape; this opens
+    // the county and lets the existing listings flow work. Full auto-trigger
+    // deferred as a refinement.
+  },
+  zoomToGeoId: (geoId) => {
+    zoomToGeoId(geoId);
+  },
+};
+
+const chat = useChat(toolContext);
+
 onMounted(async () => {
   mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
   debugLog("Component mounted");
@@ -1542,6 +1589,13 @@ onMounted(async () => {
   } catch (error) {
     console.error("Error loading counties data:", error);
     return;
+  }
+
+  // Initialize the county name lookup for LLM tools
+  try {
+    await initCountyLookup();
+  } catch (err) {
+    console.warn("County lookup failed to initialize:", err);
   }
 
   debugLog("Initializing map");
