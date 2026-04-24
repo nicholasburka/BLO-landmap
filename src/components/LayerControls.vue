@@ -71,27 +71,19 @@
               >ⓘ</button>
               <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
             </span>
-            <div v-if="showScoringControls && isLayerSelected(layer.id)" class="scoring-controls">
-              <div class="weight-control">
-                <label :for="'weight-' + layer.id" class="weight-label">Weight: {{ getWeight(layer.id) }}</label>
-                <input
-                  type="range"
-                  :id="'weight-' + layer.id"
-                  min="1" max="10"
-                  :value="getWeight(layer.id)"
-                  @input="$emit('update-weight', layer.id, Number(($event.target as HTMLInputElement).value))"
-                  :aria-label="'Weight for ' + layer.name"
-                  class="weight-slider"
-                />
-              </div>
-              <button
-                type="button"
-                class="direction-toggle"
-                @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))"
-                :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))"
-                :title="directionTooltip(layer.id, getDirection(layer.id))"
-              >{{ directionLabel(getDirection(layer.id)) }}</button>
-            </div>
+            <LayerScoringControls
+              v-if="showScoringControls && isLayerSelected(layer.id)"
+              :layer-id="layer.id"
+              :layer-name="getLayerName(layer.id)"
+              :weight="getWeight(layer.id)"
+              :direction="getDirection(layer.id)"
+              :filter="getFilter(layer.id)"
+              :range="getRange(layer.id)"
+              :unit="getUnit(layer.id)"
+              @update-weight="(id, w) => $emit('update-weight', id, w)"
+              @update-direction="(id, d) => $emit('update-direction', id, d)"
+              @update-filter="(id, f) => $emit('update-filter', id, f)"
+            />
           </div>
         </div>
       </template>
@@ -119,13 +111,19 @@
               >ⓘ</button>
               <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
             </span>
-            <div v-if="showScoringControls && isLayerSelected(layer.id)" class="scoring-controls">
-              <div class="weight-control">
-                <label :for="'weight-' + layer.id" class="weight-label">Weight: {{ getWeight(layer.id) }}</label>
-                <input type="range" :id="'weight-' + layer.id" min="1" max="10" :value="getWeight(layer.id)" @input="$emit('update-weight', layer.id, Number(($event.target as HTMLInputElement).value))" :aria-label="'Weight for ' + layer.name" class="weight-slider" />
-              </div>
-              <button type="button" class="direction-toggle" @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))" :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))" :title="directionTooltip(layer.id, getDirection(layer.id))">{{ directionLabel(getDirection(layer.id)) }}</button>
-            </div>
+            <LayerScoringControls
+              v-if="showScoringControls && isLayerSelected(layer.id)"
+              :layer-id="layer.id"
+              :layer-name="getLayerName(layer.id)"
+              :weight="getWeight(layer.id)"
+              :direction="getDirection(layer.id)"
+              :filter="getFilter(layer.id)"
+              :range="getRange(layer.id)"
+              :unit="getUnit(layer.id)"
+              @update-weight="(id, w) => $emit('update-weight', id, w)"
+              @update-direction="(id, d) => $emit('update-direction', id, d)"
+              @update-filter="(id, f) => $emit('update-filter', id, f)"
+            />
           </div>
         </div>
       </template>
@@ -153,13 +151,19 @@
               >ⓘ</button>
               <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
             </span>
-            <div v-if="showScoringControls && isLayerSelected(layer.id)" class="scoring-controls">
-              <div class="weight-control">
-                <label :for="'weight-' + layer.id" class="weight-label">Weight: {{ getWeight(layer.id) }}</label>
-                <input type="range" :id="'weight-' + layer.id" min="1" max="10" :value="getWeight(layer.id)" @input="$emit('update-weight', layer.id, Number(($event.target as HTMLInputElement).value))" :aria-label="'Weight for ' + layer.name" class="weight-slider" />
-              </div>
-              <button type="button" class="direction-toggle" @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))" :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))" :title="directionTooltip(layer.id, getDirection(layer.id))">{{ directionLabel(getDirection(layer.id)) }}</button>
-            </div>
+            <LayerScoringControls
+              v-if="showScoringControls && isLayerSelected(layer.id)"
+              :layer-id="layer.id"
+              :layer-name="getLayerName(layer.id)"
+              :weight="getWeight(layer.id)"
+              :direction="getDirection(layer.id)"
+              :filter="getFilter(layer.id)"
+              :range="getRange(layer.id)"
+              :unit="getUnit(layer.id)"
+              @update-weight="(id, w) => $emit('update-weight', id, w)"
+              @update-direction="(id, d) => $emit('update-direction', id, d)"
+              @update-filter="(id, f) => $emit('update-filter', id, f)"
+            />
           </div>
         </div>
       </template>
@@ -187,13 +191,19 @@
               >ⓘ</button>
               <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
             </span>
-            <div v-if="showScoringControls && isLayerSelected(layer.id)" class="scoring-controls">
-              <div class="weight-control">
-                <label :for="'weight-' + layer.id" class="weight-label">Weight: {{ getWeight(layer.id) }}</label>
-                <input type="range" :id="'weight-' + layer.id" min="1" max="10" :value="getWeight(layer.id)" @input="$emit('update-weight', layer.id, Number(($event.target as HTMLInputElement).value))" :aria-label="'Weight for ' + layer.name" class="weight-slider" />
-              </div>
-              <button type="button" class="direction-toggle" @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))" :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))" :title="directionTooltip(layer.id, getDirection(layer.id))">{{ directionLabel(getDirection(layer.id)) }}</button>
-            </div>
+            <LayerScoringControls
+              v-if="showScoringControls && isLayerSelected(layer.id)"
+              :layer-id="layer.id"
+              :layer-name="getLayerName(layer.id)"
+              :weight="getWeight(layer.id)"
+              :direction="getDirection(layer.id)"
+              :filter="getFilter(layer.id)"
+              :range="getRange(layer.id)"
+              :unit="getUnit(layer.id)"
+              @update-weight="(id, w) => $emit('update-weight', id, w)"
+              @update-direction="(id, d) => $emit('update-direction', id, d)"
+              @update-filter="(id, f) => $emit('update-filter', id, f)"
+            />
           </div>
         </div>
       </template>
@@ -221,13 +231,19 @@
               >ⓘ</button>
               <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
             </span>
-            <div v-if="showScoringControls && isLayerSelected(layer.id)" class="scoring-controls">
-              <div class="weight-control">
-                <label :for="'weight-' + layer.id" class="weight-label">Weight: {{ getWeight(layer.id) }}</label>
-                <input type="range" :id="'weight-' + layer.id" min="1" max="10" :value="getWeight(layer.id)" @input="$emit('update-weight', layer.id, Number(($event.target as HTMLInputElement).value))" :aria-label="'Weight for ' + layer.name" class="weight-slider" />
-              </div>
-              <button type="button" class="direction-toggle" @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))" :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))" :title="directionTooltip(layer.id, getDirection(layer.id))">{{ directionLabel(getDirection(layer.id)) }}</button>
-            </div>
+            <LayerScoringControls
+              v-if="showScoringControls && isLayerSelected(layer.id)"
+              :layer-id="layer.id"
+              :layer-name="getLayerName(layer.id)"
+              :weight="getWeight(layer.id)"
+              :direction="getDirection(layer.id)"
+              :filter="getFilter(layer.id)"
+              :range="getRange(layer.id)"
+              :unit="getUnit(layer.id)"
+              @update-weight="(id, w) => $emit('update-weight', id, w)"
+              @update-direction="(id, d) => $emit('update-direction', id, d)"
+              @update-filter="(id, f) => $emit('update-filter', id, f)"
+            />
           </div>
         </div>
       </template>
@@ -326,13 +342,19 @@
               >ⓘ</button>
               <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
             </span>
-            <div v-if="showScoringControls && isLayerSelected(layer.id)" class="scoring-controls">
-              <div class="weight-control">
-                <label :for="'weight-' + layer.id" class="weight-label">Weight: {{ getWeight(layer.id) }}</label>
-                <input type="range" :id="'weight-' + layer.id" min="1" max="10" :value="getWeight(layer.id)" @input="$emit('update-weight', layer.id, Number(($event.target as HTMLInputElement).value))" :aria-label="'Weight for ' + layer.name" class="weight-slider" />
-              </div>
-              <button type="button" class="direction-toggle" @click="$emit('update-direction', layer.id, nextDirection(getDirection(layer.id)))" :aria-label="'Direction for ' + layer.name + ': ' + directionLabel(getDirection(layer.id))" :title="directionTooltip(layer.id, getDirection(layer.id))">{{ directionLabel(getDirection(layer.id)) }}</button>
-            </div>
+            <LayerScoringControls
+              v-if="showScoringControls && isLayerSelected(layer.id)"
+              :layer-id="layer.id"
+              :layer-name="getLayerName(layer.id)"
+              :weight="getWeight(layer.id)"
+              :direction="getDirection(layer.id)"
+              :filter="getFilter(layer.id)"
+              :range="getRange(layer.id)"
+              :unit="getUnit(layer.id)"
+              @update-weight="(id, w) => $emit('update-weight', id, w)"
+              @update-direction="(id, d) => $emit('update-direction', id, d)"
+              @update-filter="(id, f) => $emit('update-filter', id, f)"
+            />
           </div>
         </div>
       </template>
@@ -352,6 +374,8 @@ import type {
   TransportationLayer,
   ContaminationLayer,
 } from '@/config/layerConfig'
+import type { ScoringFilter } from '@/types/mapTypes'
+import LayerScoringControls from '@/components/LayerScoringControls.vue'
 
 interface Props {
   expanded: boolean
@@ -375,6 +399,8 @@ interface Props {
   showScoringControls?: boolean
   layerWeights?: Record<string, number>
   layerDirections?: Record<string, string>
+  /** Active threshold filters, indexed by layer id (one per layer max) */
+  activeFilters?: ScoringFilter[]
 }
 
 const props = defineProps<Props>()
@@ -391,6 +417,8 @@ defineEmits<{
   'toggle-contamination-choropleth': []
   'update-weight': [layerId: string, weight: number]
   'update-direction': [layerId: string, direction: string]
+  /** null → clear the filter for this layer */
+  'update-filter': [layerId: string, filter: ScoringFilter | null]
 }>()
 
 /** Check if a layer is currently selected (across all category arrays) */
@@ -407,6 +435,21 @@ const isLayerSelected = (layerId: string): boolean => {
 const getWeight = (layerId: string): number => {
   return props.layerWeights?.[layerId] ?? 5
 }
+
+/** Look up the active filter for a given layer, or null if none. */
+const getFilter = (layerId: string): ScoringFilter | null => {
+  return props.activeFilters?.find(f => f.layerId === layerId) ?? null
+}
+
+/** Per-layer range + unit sourced from the registry — used by the filter slider. */
+const getRange = (layerId: string): { min: number; max: number } => {
+  const reg = LAYER_REGISTRY[layerId]
+  return reg?.range ?? { min: 0, max: 100 }
+}
+
+const getUnit = (layerId: string): string => LAYER_REGISTRY[layerId]?.unit ?? ''
+
+const getLayerName = (layerId: string): string => LAYER_REGISTRY[layerId]?.name ?? layerId
 
 const getDirection = (layerId: string): string => {
   return props.layerDirections?.[layerId] ?? LAYER_REGISTRY[layerId]?.direction ?? 'neutral'
@@ -754,53 +797,6 @@ button.tooltip-icon:focus {
   opacity: 1;
 }
 
-/* Scoring controls (weight slider + direction toggle) */
-.scoring-controls {
-  width: 100%;
-  margin-top: 4px;
-  padding: 4px 0 4px 22px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.weight-control {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-}
-
-.weight-label {
-  font-size: 11px;
-  color: #666;
-  white-space: nowrap;
-  min-width: 52px;
-}
-
-.weight-slider {
-  flex: 1;
-  height: 4px;
-  cursor: pointer;
-  accent-color: #4a90e2;
-  max-width: 80px;
-}
-
-.direction-toggle {
-  font-size: 10px;
-  padding: 2px 6px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  background: #f8f8f8;
-  cursor: pointer;
-  white-space: nowrap;
-  color: #555;
-  transition: all 0.15s ease;
-}
-
-.direction-toggle:hover {
-  border-color: #4a90e2;
-  color: #4a90e2;
-  background: #f0f7ff;
-}
+/* Scoring controls (weight / direction / filter) moved into
+   <LayerScoringControls> — styles live in that component. */
 </style>

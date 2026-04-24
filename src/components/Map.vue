@@ -99,6 +99,7 @@
       :show-scoring-controls="showScoringControls"
       :layer-weights="layerWeights"
       :layer-directions="layerDirections"
+      :active-filters="activeFilters"
       @toggle="toggleLayerControl"
       @toggle-demographic="toggleDemographicLayer"
       @toggle-economic="toggleEconomicLayer"
@@ -110,6 +111,7 @@
       @toggle-contamination-choropleth="toggleContaminationChoropleth"
       @update-weight="updateLayerWeight"
       @update-direction="updateLayerDirection"
+      @update-filter="updateLayerFilter"
     >
       <LoadingIndicator :loaded="layersLoaded" :progress="loadingProgress" />
     </LayerControls>
@@ -369,6 +371,13 @@ const updateLayerDirection = (layerId: string, direction: string) => {
   layerDirections.value = { ...layerDirections.value, [layerId]: direction }
 }
 
+/** Phase 4b: manual threshold filter edit from LayerControls.
+ *  Replaces any existing filter for this layer; null removes it. */
+const updateLayerFilter = (layerId: string, filter: ScoringFilter | null) => {
+  const others = activeFilters.value.filter(f => f.layerId !== layerId)
+  activeFilters.value = filter ? [...others, filter] : others
+}
+
 const toggleAveragesPanel = () => {
   averagesPanelExpanded.value = !averagesPanelExpanded.value;
 };
@@ -612,8 +621,12 @@ const handleQueryResult = (result: QueryResponse) => {
   layerWeights.value = newWeights;
   layerDirections.value = newDirections;
 
-  // Phase 4a: apply filters and limit from the response
-  activeFilters.value = result.filters ? [...result.filters] : [];
+  // Phase 4a: apply filters and limit from the response.
+  // Phase 4b: distinguish "LLM didn't touch filters" (undefined → preserve)
+  // from "LLM explicitly cleared filters" (empty array → clear).
+  if (result.filters !== undefined) {
+    activeFilters.value = [...result.filters];
+  }
   activeLimit.value = typeof result.limit === 'number' ? result.limit : null;
 
   showDiversityChoropleth.value = true;
@@ -1765,7 +1778,9 @@ const toolContext: ToolContext = {
   },
 };
 
-const chat = useChat(toolContext);
+const chat = useChat(toolContext, {
+  getActiveFilters: () => activeFilters.value,
+});
 
 onMounted(async () => {
   mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;

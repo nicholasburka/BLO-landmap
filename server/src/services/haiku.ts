@@ -129,20 +129,50 @@ export interface ChatResponse {
   stopReason: Anthropic.Messages.Message['stop_reason']
 }
 
+/** Context the client sends alongside the message history.
+ *  Used to let the LLM know about map state it couldn't otherwise see. */
+export interface ClientChatContext {
+  /** Currently-applied threshold filters. LLM is instructed to preserve
+   *  them across tool calls unless the user asks to change them. */
+  activeFilters?: ScoringFilter[]
+}
+
+function renderActiveFiltersContext(ctx?: ClientChatContext): string {
+  const filters = ctx?.activeFilters
+  if (!filters || filters.length === 0) return ''
+  const rendered = filters.map(f => {
+    const op = f.operator
+    if (op === 'between') return `${f.layerId} between ${f.value} and ${f.max ?? '?'}`
+    const symbol = op === 'greater_than' ? '>' : op === 'less_than' ? '<' : '?'
+    return `${f.layerId} ${symbol} ${f.value}`
+  }).join(', ')
+  return [
+    '',
+    '## Active filters on the map right now',
+    '',
+    `The user has these threshold filters applied: ${rendered}.`,
+    '',
+    'Rules for `filters` in set_layer_selection calls:',
+    '- **Preserve** (include exact same filter objects in your `filters` field) when the user is refining scoring, adding layers, or asking anything that does not mention the filter.',
+    '- **Replace** (emit a new array with different thresholds) when the user asks to change a threshold (e.g. "use 40% instead").',
+    '- **Clear** (emit an empty array `"filters": []` — NOT omit the field, NOT say "done" without emitting) when the user asks to clear, remove, or drop a filter. Omitting the field means "keep as-is" in this system.',
+    '- **Add** (include old filters plus the new one) when the user adds a new criterion alongside existing ones.',
+  ].join('\n')
+}
+
 /**
  * Send a multi-turn conversation to Haiku with tool use enabled.
- * The caller passes in message history (user messages + assistant messages with
- * tool_use blocks + user messages with tool_result blocks) and this function
- * returns the next assistant message.
  */
 export async function chatHaiku(
   messages: Anthropic.Messages.MessageParam[],
   clientIp: string,
+  context?: ClientChatContext,
 ): Promise<ChatResponse> {
+  const systemWithContext = chatSystemPrompt + renderActiveFiltersContext(context)
   const message = await client.messages.create({
     model: MODEL,
     max_tokens: 2048,
-    system: chatSystemPrompt,
+    system: systemWithContext,
     tools: TOOL_DEFINITIONS,
     messages,
   })

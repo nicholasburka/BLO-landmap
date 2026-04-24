@@ -1,23 +1,25 @@
 import { Router } from 'express'
 import type Anthropic from '@anthropic-ai/sdk'
-import { chatHaiku } from '../services/haiku.js'
+import { chatHaiku, type ClientChatContext } from '../services/haiku.js'
 
 const router = Router()
 
 /**
  * POST /api/chat
  *
- * Body: { messages: Anthropic message history }
- *
- * The client sends the full conversation history (capped at last ~20 messages
- * by the client). Server forwards to Claude with tool definitions. If Claude
- * calls tools, the response contains tool_use blocks for the client to execute;
- * the client then sends the next request with tool_result blocks appended.
+ * Body: { messages, context? }
+ *   - messages: Anthropic message history
+ *   - context.activeFilters: threshold filters currently applied on the map
+ *     (Phase 4b). Server includes them in the system prompt so the LLM
+ *     knows not to clobber user-set filters unless asked.
  *
  * Server is stateless — no conversation storage.
  */
 router.post('/api/chat', async (req, res) => {
-  const { messages } = req.body as { messages?: Anthropic.Messages.MessageParam[] }
+  const { messages, context } = req.body as {
+    messages?: Anthropic.Messages.MessageParam[]
+    context?: ClientChatContext
+  }
 
   if (!Array.isArray(messages) || messages.length === 0) {
     res.status(400).json({ error: 'messages array is required and must be non-empty' })
@@ -39,7 +41,7 @@ router.post('/api/chat', async (req, res) => {
 
   try {
     const clientIp = (res.locals.clientIp as string) || 'unknown'
-    const result = await chatHaiku(messages, clientIp)
+    const result = await chatHaiku(messages, clientIp, context)
     res.json({
       message: result.message,
       stopReason: result.stopReason,

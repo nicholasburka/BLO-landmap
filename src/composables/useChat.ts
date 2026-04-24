@@ -10,6 +10,7 @@
 import { ref, type Ref } from 'vue'
 import { executeTool, type ToolContext } from '@/lib/mapTools'
 import { useAuth } from '@/composables/useAuth'
+import type { ScoringFilter } from '@/types/mapTypes'
 
 // Anthropic content block types (minimal subset we need)
 export interface TextBlock {
@@ -53,7 +54,13 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 const MAX_MESSAGES_SENT = 20
 const MAX_TOOL_CALLS_PER_TURN = 10
 
-export function useChat(toolCtx: ToolContext) {
+export interface ChatOptions {
+  /** Return the currently-active threshold filters so the server can
+   *  instruct the LLM to preserve them across turns. */
+  getActiveFilters?: () => ScoringFilter[]
+}
+
+export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
   const messages: Ref<ChatMessage[]> = ref([])
   const isThinking = ref(false)
   const error: Ref<string | null> = ref(null)
@@ -86,7 +93,12 @@ export function useChat(toolCtx: ToolContext) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ messages: buildRequestMessages() }),
+        body: JSON.stringify({
+          messages: buildRequestMessages(),
+          context: {
+            activeFilters: options.getActiveFilters?.() ?? [],
+          },
+        }),
         signal: controller.signal,
       })
       clearTimeout(timeout)
