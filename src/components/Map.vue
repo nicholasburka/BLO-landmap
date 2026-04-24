@@ -1,5 +1,5 @@
 <template>
-  <div id="map" ref="mapContainer" style="width: 100%; height: 80vh">
+  <div id="map" ref="mapContainer" class="map-root">
     <!-- Geocoder: top-left labeled pill. Always visible so users can find it,
          but visually subordinate to the orange "Ask" input at top-center. -->
     <div
@@ -1978,6 +1978,15 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Map fills the parent's remaining space (App.vue sets <main> to flex: 1
+   of a 100vh container). No more 80vh hardcode + 20vh of empty space. */
+.map-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
 .bottom-left-panels {
   position: absolute;
   bottom: 10px;
@@ -2338,6 +2347,17 @@ onMounted(async () => {
 .geocoder {
   width: 100%;
   z-index: 100 !important;
+}
+
+/* Mobile: both inputs stack in the flex flow, geocoder first. */
+@media (max-width: 768px) {
+  .geocoder-wrap {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: auto;
+    margin: 8px 8px 0;
+  }
 }
 
 :global(.mapboxgl-ctrl-geocoder) {
