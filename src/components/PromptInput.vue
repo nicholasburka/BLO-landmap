@@ -117,7 +117,15 @@
             class="chat-message"
             :class="msg.role"
           >
-            <div v-if="msg.displayText" class="chat-text">{{ msg.displayText }}</div>
+            <div
+              v-if="msg.displayText && msg.role === 'assistant'"
+              class="chat-text"
+              v-html="renderMarkdown(msg.displayText)"
+            ></div>
+            <div
+              v-else-if="msg.displayText"
+              class="chat-text"
+            >{{ msg.displayText }}</div>
             <div v-if="msg.toolCalls && msg.toolCalls.length > 0" class="chat-tools">
               <div v-for="(tc, tcIdx) in msg.toolCalls" :key="tcIdx" class="chat-tool">
                 <span class="chat-tool-name">→ {{ describeToolCall(tc.name, tc.input) }}</span>
@@ -144,6 +152,7 @@ import { ref, computed, nextTick, watch } from 'vue'
 import { usePromptQuery } from '@/composables/usePromptQuery'
 import type { ChatMessage } from '@/composables/useChat'
 import type { ScoringFilter } from '@/types/mapTypes'
+import { renderMarkdown } from '@/lib/renderMarkdown'
 
 interface ScoringChip {
   id: string
@@ -519,14 +528,26 @@ watch(() => props.messages.length, () => {
   cursor: not-allowed;
 }
 
-/* Chat history */
+/* Chat history — desktop: left-anchored column so the map center stays
+   visible. Mobile: overrides below revert to the original inline flow.
+   top value chosen to clear the Ask input + any active-query status strip
+   sitting at top-center. */
 .chat-history {
-  margin-top: 8px;
+  position: fixed;
+  top: 220px;
+  left: 10px;
+  width: 340px;
+  /* Leave room for Color Key + County Averages stack at bottom-left */
+  max-height: calc(100vh - 480px);
+  z-index: 4;
   background: rgba(255, 255, 255, 0.98);
   border: 1px solid var(--blo-cream-divider);
   border-radius: var(--blo-radius-panel);
   box-shadow: var(--blo-shadow-panel);
   overflow: hidden;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .chat-history-header {
@@ -549,8 +570,10 @@ watch(() => props.messages.length, () => {
 }
 
 .chat-messages {
-  /* Hard cap so the map is never occluded by a long conversation */
-  max-height: min(30vh, 320px);
+  /* Inside the fixed left-column card: fill what's left and scroll internally */
+  flex: 1;
+  min-height: 0;
+  max-height: min(60vh, 480px);
   overflow-y: auto;
   padding: 8px 12px;
 }
@@ -586,6 +609,47 @@ watch(() => props.messages.length, () => {
   padding: 4px 0;
   /* UX-03: gentle fade-in for assistant responses */
   animation: chat-text-in 260ms ease-out;
+}
+
+/* Markdown elements inside assistant messages. v-html renders children,
+   so scoped selectors use :deep() to reach in. */
+.chat-message.assistant .chat-text :deep(p) {
+  margin: 0 0 8px;
+}
+.chat-message.assistant .chat-text :deep(p:last-child) {
+  margin-bottom: 0;
+}
+.chat-message.assistant .chat-text :deep(strong),
+.chat-message.assistant .chat-text :deep(b) {
+  font-weight: 600;
+  color: var(--blo-ink);
+}
+.chat-message.assistant .chat-text :deep(em),
+.chat-message.assistant .chat-text :deep(i) {
+  font-style: italic;
+}
+.chat-message.assistant .chat-text :deep(ul),
+.chat-message.assistant .chat-text :deep(ol) {
+  margin: 6px 0 8px 0;
+  padding-left: 20px;
+}
+.chat-message.assistant .chat-text :deep(li) {
+  margin: 2px 0;
+}
+.chat-message.assistant .chat-text :deep(a) {
+  color: var(--blo-green-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.chat-message.assistant .chat-text :deep(a:hover) {
+  color: var(--blo-green);
+}
+.chat-message.assistant .chat-text :deep(code) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  background: var(--blo-cream-deep);
+  padding: 1px 5px;
+  border-radius: 4px;
 }
 
 @keyframes chat-text-in {
@@ -662,6 +726,15 @@ watch(() => props.messages.length, () => {
     right: auto;
     max-width: none;
     margin: 8px;
+  }
+  /* On mobile revert chat history to inline flow — no room for a left column */
+  .chat-history {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: auto;
+    margin-top: 8px;
+    z-index: auto;
   }
   .chat-messages {
     max-height: min(25vh, 200px);
