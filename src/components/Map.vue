@@ -1,7 +1,7 @@
 <template>
   <div id="map" ref="mapContainer" style="width: 100%; height: 80vh">
-    <!-- UX-02: geocoder repositioned to bottom-right (Mapbox utility convention).
-         Collapsed to 36px icon by default; expands on hover / focus-within. -->
+    <!-- Geocoder: top-left labeled pill. Always visible so users can find it,
+         but visually subordinate to the orange "Ask" input at top-center. -->
     <div
       class="geocoder-wrap"
       v-show="!showDetailedPopup"
@@ -2325,21 +2325,14 @@ onMounted(async () => {
 
 /* Duplicate #detailed-popup styles removed - now in CountyModal.vue */
 
-/* UX-02: geocoder lives in the Mapbox-utility zone (bottom-right).
-   Collapsed to a 36px icon by default; expands to 240px on hover/focus.
-   Keeps the top of the viewport clean for the AI "Ask" input. */
+/* Geocoder: always-visible labeled pill in top-left. Narrow + neutral so it
+   stays clearly subordinate to the orange "Ask" input at top-center. */
 .geocoder-wrap {
   position: absolute;
-  bottom: 110px;
-  right: 10px;
+  top: 10px;
+  left: 10px;
   z-index: 2;
-  width: 36px;
-  transition: width 180ms ease;
-}
-
-.geocoder-wrap:hover,
-.geocoder-wrap:focus-within {
-  width: 240px;
+  width: 220px;
 }
 
 .geocoder {
