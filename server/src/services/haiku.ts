@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { buildSystemPrompt, VALID_LAYER_IDS } from '../prompt/systemPrompt.js'
 import { buildChatPrompt } from '../prompt/chatPrompt.js'
 import { TOOL_DEFINITIONS } from '../prompt/toolDefinitions.js'
+import { recordUsage } from '../middleware/budget.js'
 
 export interface LayerSelection {
   layerId: string
@@ -38,6 +39,7 @@ export async function queryHaiku(userPrompt: string): Promise<QueryResponse> {
     system: systemPrompt,
     messages: [{ role: 'user', content: userPrompt }],
   })
+  recordUsage(message.usage?.input_tokens ?? 0, message.usage?.output_tokens ?? 0)
 
   // Extract text content
   const textBlock = message.content.find(block => block.type === 'text')
@@ -143,6 +145,7 @@ export async function chatHaiku(
     tools: TOOL_DEFINITIONS,
     messages,
   })
+  recordUsage(message.usage?.input_tokens ?? 0, message.usage?.output_tokens ?? 0)
 
   return {
     message,

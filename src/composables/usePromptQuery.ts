@@ -32,11 +32,10 @@ export interface QueryResponse {
 }
 
 export function usePromptQuery() {
-  const { isAuthenticated, authError, authenticate, clearAuth } = useAuth()
+  const { isAuthenticated, authError, clearAuth } = useAuth()
   return {
     isAuthenticated,
     error: authError,
-    authenticate,
     signOut: () => clearAuth(),
   }
 }

@@ -1,22 +1,7 @@
 <template>
   <div class="prompt-panel" style="pointer-events: auto" @click.stop>
-    <!-- Password gate -->
-    <div v-if="!isAuthenticated" class="prompt-auth">
-      <form @submit.prevent="handleAuth" class="auth-form">
-        <input
-          v-model="password"
-          type="password"
-          placeholder="Enter beta password"
-          class="auth-input"
-          aria-label="Beta password"
-        />
-        <button type="submit" class="auth-submit" :disabled="!password">Go</button>
-      </form>
-      <p v-if="authError" class="prompt-error">{{ authError }}</p>
-    </div>
-
-    <!-- Chat panel -->
-    <div v-else class="prompt-main">
+    <!-- Chat panel (silent auto-session — no password gate) -->
+    <div class="prompt-main">
       <!-- Input row: the "Ask" input — unmistakably the AI entry point -->
       <form @submit.prevent="handleSubmit" class="prompt-form" :class="{ 'prompt-form--thinking': isThinking }">
         <span class="prompt-leading" aria-hidden="true">
@@ -149,7 +134,6 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue'
-import { usePromptQuery } from '@/composables/usePromptQuery'
 import type { ChatMessage } from '@/composables/useChat'
 import type { ScoringFilter } from '@/types/mapTypes'
 import { renderMarkdown } from '@/lib/renderMarkdown'
@@ -181,10 +165,6 @@ defineEmits<{
   (e: 'clear-query'): void
 }>()
 
-// Reuse usePromptQuery just for authentication state
-const { isAuthenticated, authenticate, error: authError } = usePromptQuery()
-
-const password = ref('')
 const query = ref('')
 const historyExpanded = ref(true)
 const scrollRef = ref<HTMLElement | null>(null)
@@ -239,11 +219,6 @@ function describeToolCall(name: string, input: any): string {
   }
 }
 
-async function handleAuth() {
-  await authenticate(password.value)
-  password.value = ''
-}
-
 async function handleSubmit() {
   const text = query.value.trim()
   if (!text || props.isThinking) return
@@ -276,43 +251,6 @@ watch(() => props.messages.length, () => {
   z-index: 5;
   max-width: 620px;
 }
-
-.auth-form {
-  display: flex;
-  gap: 4px;
-  background: white;
-  border-radius: var(--blo-radius-panel);
-  box-shadow: var(--blo-shadow-panel);
-  padding: 4px;
-}
-
-.auth-input {
-  flex: 1;
-  border: none;
-  padding: 8px 12px;
-  font-size: 14px;
-  border-radius: 4px;
-  outline: none;
-  min-width: 0;
-}
-
-.auth-input::placeholder {
-  color: var(--blo-stone-soft);
-}
-
-.auth-submit {
-  padding: 8px 16px;
-  background: var(--blo-ink);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.auth-submit:hover { background: var(--blo-ink-soft); }
-.auth-submit:disabled { background: var(--blo-stone-soft); cursor: not-allowed; }
 
 /* The "Ask" input — reserved orange accent makes it unmistakably the AI entry point */
 .prompt-form {

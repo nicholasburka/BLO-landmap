@@ -2,11 +2,13 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import authRouter from './routes/auth.js'
+import sessionRouter from './routes/session.js'
 import queryRouter from './routes/query.js'
 import chatRouter from './routes/chat.js'
 import { authMiddleware } from './middleware/auth.js'
 import { queryRateLimit } from './middleware/rateLimit.js'
 import { requestLogger } from './middleware/requestLogger.js'
+import { dailyBudgetMiddleware, getUsageSnapshot } from './middleware/budget.js'
 
 const app = express()
 const port = process.env.PORT || 3001
@@ -29,15 +31,16 @@ app.use(requestLogger)
 
 // Health check (no auth)
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok' })
+  res.json({ status: 'ok', usage: getUsageSnapshot() })
 })
 
-// Auth route (no auth middleware)
+// Session mint + legacy password auth (no auth middleware on these)
+app.use(sessionRouter)
 app.use(authRouter)
 
-// Query + chat routes (auth + rate limiting)
-app.use(authMiddleware, queryRateLimit, queryRouter)
-app.use(authMiddleware, queryRateLimit, chatRouter)
+// Query + chat routes (auth + rate limiting + daily budget)
+app.use(authMiddleware, queryRateLimit, dailyBudgetMiddleware, queryRouter)
+app.use(authMiddleware, queryRateLimit, dailyBudgetMiddleware, chatRouter)
 
 app.listen(port, () => {
   console.log(`BLO API server listening on port ${port}`)
