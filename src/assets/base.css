@@ -21,6 +21,34 @@
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
 }
 
+/* BLO brand tokens — anchored in blacklandownership.com */
+:root {
+  --blo-green: #37b34a;
+  --blo-green-deep: #1f7a2e;
+  --blo-green-soft: rgba(55, 179, 74, 0.12);
+
+  --blo-ink: #111111;
+  --blo-ink-soft: #2a2a2a;
+
+  --blo-cream: #f7f4ee;
+  --blo-cream-deep: #ede8dd;
+  --blo-cream-divider: #e0d9ca;
+
+  --blo-stone: #6b6560;
+  --blo-stone-soft: #9a948e;
+
+  /* Reserved exclusively for the AI / "Ask" input — do not reuse. */
+  --blo-orange: #ff6b1c;
+  --blo-orange-deep: #e0530b;
+  --blo-orange-soft: rgba(255, 107, 28, 0.10);
+  --blo-orange-ring: rgba(255, 107, 28, 0.35);
+
+  --blo-shadow-panel: 0 4px 16px rgba(17, 17, 17, 0.08);
+  --blo-shadow-panel-strong: 0 8px 28px rgba(17, 17, 17, 0.14);
+  --blo-radius-panel: 10px;
+  --blo-radius-input: 999px;
+}
+
 /* semantic color variables for this project */
 :root {
   --color-background: var(--vt-c-white);

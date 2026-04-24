@@ -17,20 +17,26 @@
 
     <!-- Chat panel -->
     <div v-else class="prompt-main">
-      <!-- Input row -->
-      <form @submit.prevent="handleSubmit" class="prompt-form">
+      <!-- Input row: the "Ask" input — unmistakably the AI entry point -->
+      <form @submit.prevent="handleSubmit" class="prompt-form" :class="{ 'prompt-form--thinking': isThinking }">
+        <span class="prompt-leading" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
+            <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
+          </svg>
+        </span>
         <input
           v-model="query"
           type="text"
           placeholder="Ask a question or describe what you're looking for..."
           class="prompt-input"
           :disabled="isThinking"
-          aria-label="Chat input"
+          aria-label="Ask about county livability"
           maxlength="500"
           @keydown.enter.prevent="handleSubmit"
         />
         <button type="submit" class="prompt-submit" :disabled="isThinking || !query.trim()">
-          <span v-if="!isThinking">Send</span>
+          <span v-if="!isThinking">Ask</span>
           <span v-else class="prompt-spinner"></span>
         </button>
         <button
@@ -42,6 +48,45 @@
           title="Clear conversation"
         >×</button>
       </form>
+
+      <!-- Active-query status strip: visible trace of what's currently scoring the map -->
+      <div v-if="hasActiveQuery" class="query-status">
+        <div class="query-status-row">
+          <span class="query-status-label">Scoring</span>
+          <span
+            v-for="chip in scoringChips"
+            :key="'layer-' + chip.id"
+            class="query-chip query-chip--layer"
+            :title="chip.name"
+          >
+            {{ chip.name }}
+            <span class="query-chip-arrow" :class="chip.directionClass">{{ chip.arrow }}</span>
+          </span>
+        </div>
+        <div v-if="filterChips.length > 0 || displayLimit" class="query-status-row">
+          <span v-if="filterChips.length > 0" class="query-status-label">Filter</span>
+          <span
+            v-for="chip in filterChips"
+            :key="'filter-' + chip.key"
+            class="query-chip query-chip--filter"
+          >{{ chip.label }}</span>
+          <span v-if="displayLimit" class="query-chip query-chip--limit">Top {{ displayLimit }}</span>
+          <button
+            type="button"
+            class="query-clear-all"
+            @click="$emit('clear-query')"
+            aria-label="Clear current query"
+          >Clear ×</button>
+        </div>
+        <div v-else class="query-status-row query-status-row--actions">
+          <button
+            type="button"
+            class="query-clear-all"
+            @click="$emit('clear-query')"
+            aria-label="Clear current query"
+          >Clear ×</button>
+        </div>
+      </div>
 
       <!-- Suggested chips (only when conversation is empty) -->
       <div v-if="messages.length === 0 && !isThinking" class="prompt-chips">
@@ -98,6 +143,19 @@
 import { ref, computed, nextTick, watch } from 'vue'
 import { usePromptQuery } from '@/composables/usePromptQuery'
 import type { ChatMessage } from '@/composables/useChat'
+import type { ScoringFilter } from '@/types/mapTypes'
+
+interface ScoringChip {
+  id: string
+  name: string
+  arrow: string
+  directionClass: string
+}
+
+interface FilterChip {
+  key: string
+  label: string
+}
 
 const props = defineProps<{
   messages: ChatMessage[]
@@ -105,6 +163,13 @@ const props = defineProps<{
   chatError: string | null
   sendMessage: (text: string) => Promise<void>
   clearConversation: () => void
+  scoringChips?: ScoringChip[]
+  activeFilters?: ScoringFilter[]
+  displayLimit?: number | null
+}>()
+
+defineEmits<{
+  (e: 'clear-query'): void
 }>()
 
 // Reuse usePromptQuery just for authentication state
@@ -124,6 +189,26 @@ const suggestedQueries = [
 /** Only show messages that have something to display (skip empty tool_result messages) */
 const visibleMessages = computed(() =>
   props.messages.filter((m) => m.displayText || (m.toolCalls && m.toolCalls.length > 0))
+)
+
+const scoringChips = computed<ScoringChip[]>(() => props.scoringChips ?? [])
+
+const filterChips = computed<FilterChip[]>(() => {
+  const filters = props.activeFilters ?? []
+  return filters.map((f) => {
+    let label = ''
+    switch (f.operator) {
+      case 'greater_than': label = `${f.layerId} > ${f.value}`; break
+      case 'less_than':    label = `${f.layerId} < ${f.value}`; break
+      case 'between':      label = `${f.layerId} ${f.value}-${f.max ?? '?'}`; break
+      default:             label = `${f.layerId} ? ${f.value}`
+    }
+    return { key: `${f.layerId}-${f.operator}`, label }
+  })
+})
+
+const hasActiveQuery = computed(
+  () => scoringChips.value.length > 0 || filterChips.value.length > 0 || !!props.displayLimit,
 )
 
 function describeToolCall(name: string, input: any): string {
@@ -180,21 +265,19 @@ watch(() => props.messages.length, () => {
   left: 310px;
   right: 270px;
   z-index: 5;
-  max-width: 600px;
+  max-width: 620px;
 }
 
-.auth-form,
-.prompt-form {
+.auth-form {
   display: flex;
   gap: 4px;
   background: white;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: var(--blo-radius-panel);
+  box-shadow: var(--blo-shadow-panel);
   padding: 4px;
 }
 
-.auth-input,
-.prompt-input {
+.auth-input {
   flex: 1;
   border: none;
   padding: 8px 12px;
@@ -204,15 +287,13 @@ watch(() => props.messages.length, () => {
   min-width: 0;
 }
 
-.auth-input::placeholder,
-.prompt-input::placeholder {
-  color: #999;
+.auth-input::placeholder {
+  color: var(--blo-stone-soft);
 }
 
-.auth-submit,
-.prompt-submit {
+.auth-submit {
   padding: 8px 16px;
-  background: #4a7c59;
+  background: var(--blo-ink);
   color: white;
   border: none;
   border-radius: 4px;
@@ -221,30 +302,85 @@ watch(() => props.messages.length, () => {
   cursor: pointer;
   white-space: nowrap;
 }
+.auth-submit:hover { background: var(--blo-ink-soft); }
+.auth-submit:disabled { background: var(--blo-stone-soft); cursor: not-allowed; }
 
-.auth-submit:hover,
-.prompt-submit:hover {
-  background: #3d6b4a;
+/* The "Ask" input — reserved orange accent makes it unmistakably the AI entry point */
+.prompt-form {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--blo-cream);
+  border: 1px solid var(--blo-orange-ring);
+  border-radius: var(--blo-radius-input);
+  box-shadow: var(--blo-shadow-panel);
+  padding: 4px 4px 4px 12px;
+  transition: box-shadow 120ms ease, border-color 120ms ease;
 }
 
-.auth-submit:disabled,
+.prompt-form:focus-within {
+  border-color: var(--blo-orange);
+  box-shadow: 0 0 0 3px var(--blo-orange-soft), var(--blo-shadow-panel);
+}
+
+.prompt-form--thinking {
+  border-color: var(--blo-orange);
+  box-shadow: 0 0 0 3px var(--blo-orange-soft), var(--blo-shadow-panel);
+}
+
+.prompt-leading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blo-orange);
+  flex-shrink: 0;
+}
+
+.prompt-input {
+  flex: 1;
+  border: none;
+  padding: 8px 10px;
+  font-size: 14px;
+  background: transparent;
+  color: var(--blo-ink);
+  border-radius: 4px;
+  outline: none;
+  min-width: 0;
+}
+
+.prompt-input::placeholder {
+  color: var(--blo-stone);
+  font-style: italic;
+}
+
+.prompt-submit {
+  padding: 8px 18px;
+  background: var(--blo-orange);
+  color: white;
+  border: none;
+  border-radius: var(--blo-radius-input);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 120ms ease;
+}
+.prompt-submit:hover { background: var(--blo-orange-deep); }
 .prompt-submit:disabled {
-  background: #999;
+  background: var(--blo-stone-soft);
   cursor: not-allowed;
 }
 
 .prompt-clear {
-  padding: 0 12px;
+  padding: 0 10px;
   background: transparent;
-  color: #999;
+  color: var(--blo-stone);
   border: none;
   cursor: pointer;
   font-size: 22px;
   line-height: 1;
 }
-.prompt-clear:hover {
-  color: #c0392b;
-}
+.prompt-clear:hover { color: var(--blo-ink); }
 
 .prompt-spinner {
   display: inline-block;
@@ -260,29 +396,122 @@ watch(() => props.messages.length, () => {
   to { transform: rotate(360deg); }
 }
 
+/* Active-query status strip */
+.query-status {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(247, 244, 238, 0.96);
+  border: 1px solid var(--blo-cream-divider);
+  border-radius: var(--blo-radius-panel);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.query-status-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 22px;
+}
+
+.query-status-row--actions {
+  justify-content: flex-end;
+}
+
+.query-status-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--blo-stone);
+  margin-right: 2px;
+}
+
+.query-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: var(--blo-radius-input);
+  background: white;
+  border: 1px solid var(--blo-cream-divider);
+  color: var(--blo-ink-soft);
+}
+
+.query-chip--layer {
+  border-color: var(--blo-green-soft);
+  background: var(--blo-green-soft);
+  color: var(--blo-green-deep);
+}
+
+.query-chip--filter {
+  background: white;
+  border-color: var(--blo-cream-divider);
+  color: var(--blo-ink-soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px;
+}
+
+.query-chip--limit {
+  background: var(--blo-ink);
+  color: white;
+  border-color: var(--blo-ink);
+  font-weight: 600;
+}
+
+.query-chip-arrow {
+  font-weight: 700;
+}
+.query-chip-arrow.dir-higher { color: var(--blo-green-deep); }
+.query-chip-arrow.dir-lower  { color: #c0392b; }
+
+.query-clear-all {
+  margin-left: auto;
+  padding: 2px 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blo-stone);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--blo-radius-input);
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+.query-clear-all:hover {
+  color: var(--blo-ink);
+  border-color: var(--blo-cream-divider);
+}
+
+/* Suggested starter chips */
 .prompt-chips {
   display: flex;
   gap: 6px;
-  margin-top: 6px;
+  margin-top: 8px;
   flex-wrap: wrap;
 }
 
 .prompt-chip {
   padding: 4px 10px;
   background: white;
-  border: 1px solid #ddd;
-  border-radius: 14px;
+  border: 1px solid var(--blo-cream-divider);
+  border-radius: var(--blo-radius-input);
   font-size: 11px;
-  color: #555;
+  color: var(--blo-stone);
   cursor: pointer;
   transition: all 0.15s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(17, 17, 17, 0.06);
 }
 
 .prompt-chip:hover {
-  border-color: #4a7c59;
-  color: #4a7c59;
-  background: #f0f7f2;
+  border-color: var(--blo-orange-ring);
+  color: var(--blo-orange-deep);
+  background: var(--blo-orange-soft);
 }
 
 .prompt-chip:disabled {
@@ -290,11 +519,13 @@ watch(() => props.messages.length, () => {
   cursor: not-allowed;
 }
 
+/* Chat history */
 .chat-history {
-  margin-top: 6px;
+  margin-top: 8px;
   background: rgba(255, 255, 255, 0.98);
-  border-radius: 6px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--blo-cream-divider);
+  border-radius: var(--blo-radius-panel);
+  box-shadow: var(--blo-shadow-panel);
   overflow: hidden;
 }
 
@@ -303,9 +534,9 @@ watch(() => props.messages.length, () => {
   justify-content: space-between;
   align-items: center;
   padding: 6px 12px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--blo-cream-divider);
   font-size: 11px;
-  color: #888;
+  color: var(--blo-stone);
 }
 
 .chat-toggle {
@@ -314,11 +545,12 @@ watch(() => props.messages.length, () => {
   cursor: pointer;
   padding: 2px 6px;
   font-size: 10px;
-  color: #888;
+  color: var(--blo-stone);
 }
 
 .chat-messages {
-  max-height: 320px;
+  /* Hard cap so the map is never occluded by a long conversation */
+  max-height: min(30vh, 320px);
   overflow-y: auto;
   padding: 8px 12px;
 }
@@ -330,12 +562,12 @@ watch(() => props.messages.length, () => {
 }
 
 .chat-message.user .chat-text {
-  background: #e8f4ea;
+  background: var(--blo-green-soft);
   padding: 6px 10px;
   border-radius: 12px 12px 4px 12px;
   display: inline-block;
   max-width: 85%;
-  color: #2c3e50;
+  color: var(--blo-ink);
   margin-left: auto;
 }
 
@@ -345,21 +577,21 @@ watch(() => props.messages.length, () => {
 }
 
 .chat-message.assistant .chat-text {
-  color: #333;
+  color: var(--blo-ink-soft);
   padding: 4px 0;
 }
 
 .chat-tools {
   margin: 4px 0;
   padding-left: 10px;
-  border-left: 2px solid #ddd;
+  border-left: 2px solid var(--blo-cream-divider);
 }
 
 .chat-tool {
   display: flex;
   flex-direction: column;
   font-size: 11px;
-  color: #666;
+  color: var(--blo-stone);
   margin: 2px 0;
 }
 
@@ -368,7 +600,7 @@ watch(() => props.messages.length, () => {
 }
 
 .chat-tool-result {
-  color: #888;
+  color: var(--blo-stone-soft);
   font-size: 10px;
   padding-left: 12px;
 }
@@ -382,7 +614,7 @@ watch(() => props.messages.length, () => {
 .chat-dot {
   width: 6px;
   height: 6px;
-  background: #999;
+  background: var(--blo-stone-soft);
   border-radius: 50%;
   animation: blink 1.2s infinite;
 }
@@ -414,7 +646,7 @@ watch(() => props.messages.length, () => {
     margin: 8px;
   }
   .chat-messages {
-    max-height: 200px;
+    max-height: min(25vh, 200px);
   }
 }
 </style>

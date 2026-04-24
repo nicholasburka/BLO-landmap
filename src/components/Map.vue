@@ -1,11 +1,13 @@
 <template>
   <div id="map" ref="mapContainer" style="width: 100%; height: 80vh">
     <div
-      id="geocoder"
-      class="geocoder"
+      class="geocoder-wrap"
       v-show="!showDetailedPopup"
       style="position: absolute; top: 10px; left: 10px; z-index: 1"
-    ></div>
+    >
+      <span class="geocoder-label">Find a place</span>
+      <div id="geocoder" class="geocoder"></div>
+    </div>
     <div
       id="search-listings"
       class="search-listings"
@@ -34,6 +36,10 @@
       :chat-error="chat.error.value"
       :send-message="chat.sendMessage"
       :clear-conversation="chat.clearConversation"
+      :scoring-chips="scoringChips"
+      :active-filters="activeFilters"
+      :display-limit="activeLimit"
+      @clear-query="clearActiveQuery"
     />
 
     <div v-if="listings.length > 0" id="listings-panel" class="listings-panel">
@@ -285,7 +291,11 @@ const toggleRankingPanel = () => {
   rankingPanelExpanded.value = !rankingPanelExpanded.value;
 };
 
-const showRankingPanel = computed(() => allSelectedLayers.value.length >= 2);
+const showRankingPanel = computed(() =>
+  allSelectedLayers.value.length >= 2 ||
+  activeFilters.value.length > 0 ||
+  (activeLimit.value != null && allSelectedLayers.value.length >= 1)
+);
 
 /** Zoom the map to a county's bounds by GEOID */
 const zoomToGeoId = (geoId: string): boolean => {
@@ -409,6 +419,43 @@ const activeLimit = ref<number | null>(null);
 /** Clear threshold filters without changing the scoring query or selected layers */
 const clearActiveFilters = () => {
   activeFilters.value = [];
+};
+
+/** Chips describing the active scoring query, shown in the status strip above the map */
+const scoringChips = computed(() => {
+  return allSelectedLayers.value.map(layerId => {
+    const reg = LAYER_REGISTRY[layerId];
+    const dir = layerDirections.value[layerId] ?? reg?.direction ?? 'higher_better';
+    return {
+      id: layerId,
+      name: reg?.name ?? layerId,
+      arrow: dir === 'lower_better' ? '↓' : '↑',
+      directionClass: dir === 'lower_better' ? 'dir-lower' : 'dir-higher',
+    };
+  });
+});
+
+/** Clear-all for the status strip: revert selected layers, filters, and limit to neutral */
+const clearActiveQuery = () => {
+  selectedDemographicLayers.value = [];
+  selectedEconomicLayers.value = [];
+  selectedHousingLayers.value = [];
+  selectedEquityLayers.value = [];
+  selectedTransportationLayers.value = [];
+  showContaminationChoropleth.value = false;
+  demographicLayers.forEach(l => { l.visible = false; });
+  economicLayers.forEach(l => { l.visible = false; });
+  housingLayers.forEach(l => { l.visible = false; });
+  equityLayers.forEach(l => { l.visible = false; });
+  transportationLayers.forEach(l => { l.visible = false; });
+  layerWeights.value = {};
+  layerDirections.value = {};
+  activeFilters.value = [];
+  activeLimit.value = null;
+  rankingPanelExpanded.value = false;
+  rankingStateFilter.value = '';
+  updateChoroplethVisibility();
+  updateChoroplethColors();
 };
 
 // Phase 4a: walkthrough state
@@ -549,6 +596,11 @@ const handleQueryResult = (result: QueryResponse) => {
   showDiversityChoropleth.value = true;
   updateChoroplethVisibility();
   updateChoroplethColors();
+
+  // UX-01: auto-open the ranking panel so the answer is visible without hunting for it
+  if (result.layers.length >= 2 || result.filters?.length || result.limit != null) {
+    rankingPanelExpanded.value = true;
+  }
 };
 
 /** Clear BLO precomputed layer when user selects a different layer */
@@ -2250,35 +2302,68 @@ onMounted(async () => {
 
 /* Duplicate #detailed-popup styles removed - now in CountyModal.vue */
 
+.geocoder-wrap {
+  width: 220px;
+}
+
+.geocoder-label {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--blo-stone);
+  background: rgba(247, 244, 238, 0.92);
+  padding: 2px 8px 1px;
+  border-radius: 4px 4px 0 0;
+  width: fit-content;
+  border: 1px solid var(--blo-cream-divider);
+  border-bottom: none;
+}
+
 .geocoder {
-  width: 50%;
-  max-width: 300px;
+  width: 220px;
   z-index: 100 !important;
 }
 
 :global(.mapboxgl-ctrl-geocoder) {
   z-index: 100 !important;
-}
-
-:global(.mapboxgl-ctrl-geocoder) {
   width: 100%;
   max-width: 100%;
-  font-size: 15px;
-  line-height: 20px;
-  box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.1);
+  min-width: 0 !important;
+  font-size: 13px;
+  line-height: 18px;
+  background: white;
+  border: 1px solid var(--blo-cream-divider);
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(17, 17, 17, 0.06);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+:global(.mapboxgl-ctrl-geocoder:focus-within) {
+  border-color: var(--blo-stone-soft);
+  box-shadow: 0 2px 10px rgba(17, 17, 17, 0.10);
 }
 
 :global(.mapboxgl-ctrl-geocoder--input) {
-  height: 36px;
+  height: 30px;
+  font-size: 13px;
+  color: var(--blo-ink-soft);
+}
+
+:global(.mapboxgl-ctrl-geocoder--input::placeholder) {
+  color: var(--blo-stone-soft);
+  font-size: 12px;
 }
 
 :global(.mapboxgl-ctrl-geocoder--icon) {
-  top: 8px;
+  top: 6px;
+  fill: var(--blo-stone);
 }
 
 :global(.mapboxgl-ctrl-geocoder--button) {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
 }
 
 .layer-control-toggle {
