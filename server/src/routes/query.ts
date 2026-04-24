@@ -17,7 +17,8 @@ router.post('/api/query', async (req, res) => {
   }
 
   try {
-    const result = await queryHaiku(prompt.trim())
+    const clientIp = (res.locals.clientIp as string) || 'unknown'
+    const result = await queryHaiku(prompt.trim(), clientIp)
     res.json(result)
   } catch (err) {
     console.error('Query error:', err)

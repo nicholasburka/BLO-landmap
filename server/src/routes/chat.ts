@@ -38,7 +38,8 @@ router.post('/api/chat', async (req, res) => {
   }
 
   try {
-    const result = await chatHaiku(messages)
+    const clientIp = (res.locals.clientIp as string) || 'unknown'
+    const result = await chatHaiku(messages, clientIp)
     res.json({
       message: result.message,
       stopReason: result.stopReason,

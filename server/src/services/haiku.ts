@@ -32,14 +32,14 @@ const chatSystemPrompt = buildChatPrompt()
 
 const MODEL = 'claude-haiku-4-5-20251001'
 
-export async function queryHaiku(userPrompt: string): Promise<QueryResponse> {
+export async function queryHaiku(userPrompt: string, clientIp: string): Promise<QueryResponse> {
   const message = await client.messages.create({
     model: MODEL,
     max_tokens: 1024,
     system: systemPrompt,
     messages: [{ role: 'user', content: userPrompt }],
   })
-  recordUsage(message.usage?.input_tokens ?? 0, message.usage?.output_tokens ?? 0)
+  recordUsage(clientIp, message.usage?.input_tokens ?? 0, message.usage?.output_tokens ?? 0)
 
   // Extract text content
   const textBlock = message.content.find(block => block.type === 'text')
@@ -136,7 +136,8 @@ export interface ChatResponse {
  * returns the next assistant message.
  */
 export async function chatHaiku(
-  messages: Anthropic.Messages.MessageParam[]
+  messages: Anthropic.Messages.MessageParam[],
+  clientIp: string,
 ): Promise<ChatResponse> {
   const message = await client.messages.create({
     model: MODEL,
@@ -145,7 +146,7 @@ export async function chatHaiku(
     tools: TOOL_DEFINITIONS,
     messages,
   })
-  recordUsage(message.usage?.input_tokens ?? 0, message.usage?.output_tokens ?? 0)
+  recordUsage(clientIp, message.usage?.input_tokens ?? 0, message.usage?.output_tokens ?? 0)
 
   return {
     message,

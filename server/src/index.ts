@@ -13,6 +13,11 @@ import { dailyBudgetMiddleware, getUsageSnapshot } from './middleware/budget.js'
 const app = express()
 const port = process.env.PORT || 3001
 
+// Honor X-Forwarded-For from Railway / proxies so req.ip is the real client.
+// Without this, all per-IP rate-limit + budget checks collapse onto the
+// proxy's IP. "true" = trust the immediate upstream hop.
+app.set('trust proxy', 1)
+
 // CORS
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean)
 app.use(cors({
