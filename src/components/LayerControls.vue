@@ -621,18 +621,21 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  /* Mobile: pill goes to bottom-right (clear of the bottom-left Color Key
+     stack AND of Mapbox's bottom-right zoom/bearing controls). Content
+     panel opens upward and rightward-anchored. */
   #layer-control-container {
     position: fixed !important;
     top: auto !important;
-    bottom: 20px !important;
-    right: auto !important;
-    left: 10px !important;
+    bottom: 180px !important;
+    left: auto !important;
+    right: 10px !important;
     max-width: calc(100vw - 20px) !important;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .layer-control-toggle {
-    font-size: 14px;
+    font-size: 13px;
     width: auto !important;
     min-width: 140px;
     box-sizing: border-box;
@@ -642,7 +645,8 @@ onMounted(() => {
   .layer-control-content {
     position: absolute !important;
     bottom: 100% !important;
-    left: 0 !important;
+    right: 0 !important;
+    left: auto !important;
     margin-bottom: 8px !important;
     width: auto !important;
     max-width: calc(100vw - 40px) !important;
