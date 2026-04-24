@@ -1,5 +1,5 @@
 <template>
-  <div v-if="activeLayers.length > 0" class="color-legend">
+  <div v-if="activeLayers.length > 0" class="color-legend blo-panel blo-panel--reference">
     <div class="legend-header">Color Key</div>
     <div v-for="layer in activeLayers" :key="layer.id" class="legend-item">
       <div class="legend-label">{{ layer.name }}</div>
@@ -116,11 +116,10 @@ const scoringLayers = computed(() => {
 </script>
 
 <style scoped>
+/* Surface is provided by .blo-panel--reference (see base.css). This rule only
+   owns layout concerns local to the legend. */
 .color-legend {
-  background: white;
   padding: 12px;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   min-width: 200px;
   pointer-events: auto;
 }

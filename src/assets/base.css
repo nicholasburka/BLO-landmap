@@ -86,6 +86,29 @@
   font-weight: normal;
 }
 
+/* UX-02: unified panel tier classes. Components reach for these via a class
+   attribute instead of redeclaring their own bg/shadow/radius every time. */
+.blo-panel {
+  border-radius: var(--blo-radius-panel);
+  border: 1px solid var(--blo-cream-divider);
+}
+
+.blo-panel--primary {
+  background: var(--blo-cream);
+  box-shadow: var(--blo-shadow-panel-strong);
+}
+
+.blo-panel--reference {
+  background: rgba(247, 244, 238, 0.92);
+  backdrop-filter: saturate(1.1) blur(6px);
+  box-shadow: var(--blo-shadow-panel);
+}
+
+.blo-panel--control {
+  background: white;
+  box-shadow: var(--blo-shadow-panel);
+}
+
 body {
   min-height: 100vh;
   color: var(--color-text);

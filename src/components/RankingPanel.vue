@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="visible"
-    class="ranking-panel"
+    class="ranking-panel blo-panel blo-panel--primary"
     style="pointer-events: auto"
     @click.stop
   >
@@ -68,8 +68,10 @@
           :aria-label="`${county.name}, ${county.state}: score ${county.score}`"
         >
           <span class="ranking-rank">{{ county.displayRank }}</span>
-          <span class="ranking-name">{{ county.name }}</span>
-          <span class="ranking-state">{{ county.stateAbbr }}</span>
+          <span class="ranking-name">
+            <span class="ranking-county">{{ county.name }}</span>
+            <span class="ranking-state">{{ county.stateAbbr }}</span>
+          </span>
           <span class="ranking-score">{{ county.score }}</span>
         </div>
         <div v-if="displayedCounties.length === 0" class="ranking-empty">
@@ -229,10 +231,9 @@ const countLabel = computed(() => {
 </script>
 
 <style scoped>
+/* Surface from .blo-panel--primary; only layout concerns below. */
 .ranking-panel {
-  background: white;
-  border-radius: 4px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 320px;
   max-width: 320px;
   position: absolute;
   bottom: 10px;
@@ -241,25 +242,26 @@ const countLabel = computed(() => {
 }
 
 .ranking-toggle {
-  background-color: white;
+  background-color: transparent;
+  color: var(--blo-ink);
   border: none;
-  padding: 10px 12px;
+  padding: 10px 14px;
   cursor: pointer;
   width: 100%;
   text-align: left;
-  font-weight: 600;
-  border-radius: 4px;
-  min-height: 40px;
+  font-weight: 700;
   font-size: 14px;
+  letter-spacing: 0.01em;
+  border-bottom: 1px solid var(--blo-cream-divider);
 }
 
 .ranking-toggle:hover {
-  background-color: #f0f0f0;
+  color: var(--blo-green-deep);
 }
 
-.ranking-toggle:focus {
-  outline: 2px solid #4a90e2;
-  outline-offset: 2px;
+.ranking-toggle:focus-visible {
+  outline: 2px solid var(--blo-green);
+  outline-offset: -2px;
 }
 
 .ranking-content {
@@ -362,57 +364,84 @@ const countLabel = computed(() => {
   color: #4a90e2;
 }
 
+/* UX-02: rows become cards. "Places to consider", not spreadsheet rows. */
 .ranking-list {
   display: flex;
   flex-direction: column;
+  gap: 6px;
 }
 
 .ranking-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
   align-items: center;
-  gap: 6px;
-  padding: 5px 4px;
-  border-bottom: 1px solid #f0f0f0;
+  gap: 10px;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid var(--blo-cream-divider);
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 12px;
-  transition: background-color 0.1s;
+  transition: border-color 120ms ease, transform 120ms ease, box-shadow 120ms ease;
 }
 
 .ranking-row:hover {
-  background-color: #f0f7ff;
+  border-color: var(--blo-green);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(55, 179, 74, 0.10);
 }
 
-.ranking-row:last-child {
-  border-bottom: none;
+.ranking-row:focus-visible {
+  outline: 2px solid var(--blo-green);
+  outline-offset: 2px;
 }
 
 .ranking-rank {
-  color: #888;
+  color: var(--blo-stone);
   font-size: 11px;
-  min-width: 24px;
-  text-align: right;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-align: center;
+  background: var(--blo-cream-deep);
+  border-radius: var(--blo-radius-input);
+  padding: 3px 0;
 }
 
 .ranking-name {
-  flex: 1;
-  font-weight: 500;
-  color: #2c3e50;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ranking-county {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--blo-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .ranking-state {
-  color: #888;
-  font-size: 11px;
-  min-width: 20px;
+  color: var(--blo-stone);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background: var(--blo-cream-deep);
+  padding: 1px 6px;
+  border-radius: var(--blo-radius-input);
+  flex-shrink: 0;
 }
 
 .ranking-score {
-  font-weight: 600;
-  color: #2d8a4e;
-  min-width: 36px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--blo-green-deep);
+  min-width: 40px;
   text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .ranking-empty {

@@ -8,11 +8,18 @@
     <button
       @click="$emit('toggle')"
       class="layer-control-toggle"
+      :class="{ 'layer-control-toggle--collapsed': !expanded }"
       :aria-expanded="expanded"
       aria-controls="layer-control"
       aria-label="Toggle layer controls"
     >
-      {{ expanded ? '▼' : '▲' }} Data Layers
+      <span class="layer-control-gear" aria-hidden="true">⚙</span>
+      <span class="layer-control-title">Data Layers</span>
+      <span
+        v-if="!expanded && activeLayerCount && activeLayerCount > 0"
+        class="layer-control-badge"
+      >{{ activeLayerCount }}</span>
+      <span class="layer-control-chevron" aria-hidden="true">{{ expanded ? '▾' : '◂' }}</span>
     </button>
     <div
       id="layer-control"
@@ -348,6 +355,8 @@ import type {
 
 interface Props {
   expanded: boolean
+  /** Count of currently-active layers (for the collapsed rail badge) */
+  activeLayerCount?: number
   demographicLayers: DemographicLayer[]
   economicLayers?: EconomicLayer[]
   housingLayers?: HousingLayer[]
@@ -494,9 +503,13 @@ onMounted(() => {
 .layer-control-content {
   background: white;
   padding: 10px;
-  border-radius: 4px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  max-height: 70vh;
+  margin-top: 6px;
+  border-radius: var(--blo-radius-panel);
+  border: 1px solid var(--blo-cream-divider);
+  box-shadow: var(--blo-shadow-panel);
+  /* UX-02: cap height so the ranking panel (bottom-right) remains visible
+     when both are open at the same time. Content scrolls internally. */
+  max-height: 50vh;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -540,21 +553,66 @@ onMounted(() => {
 }
 
 .layer-control-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   background-color: white;
-  border: none;
-  padding: 12px 15px;
+  color: var(--blo-ink);
+  border: 1px solid var(--blo-cream-divider);
+  padding: 8px 14px;
   cursor: pointer;
-  border-radius: 4px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  width: 100%;
+  border-radius: var(--blo-radius-input);
+  box-shadow: var(--blo-shadow-panel);
   text-align: left;
   font-weight: 600;
-  min-height: 44px;
-  font-size: 16px;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  transition: background-color 120ms ease, border-color 120ms ease;
+  width: auto;
+  min-width: 0;
+}
+
+/* When collapsed, the toggle is the ONLY UI showing — keep it compact + pill-like */
+.layer-control-toggle--collapsed {
+  background-color: var(--blo-cream);
+  padding: 6px 12px;
+  font-size: 12px;
 }
 
 .layer-control-toggle:hover {
-  background-color: #f0f0f0;
+  background-color: var(--blo-cream);
+  border-color: var(--blo-stone-soft);
+}
+
+.layer-control-gear {
+  font-size: 14px;
+  color: var(--blo-stone);
+  line-height: 1;
+}
+
+.layer-control-title {
+  white-space: nowrap;
+}
+
+.layer-control-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: var(--blo-green);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--blo-radius-input);
+  line-height: 1;
+}
+
+.layer-control-chevron {
+  font-size: 10px;
+  color: var(--blo-stone-soft);
+  margin-left: 2px;
 }
 
 .layer-control-toggle:focus {

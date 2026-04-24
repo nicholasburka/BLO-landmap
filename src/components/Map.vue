@@ -1,11 +1,11 @@
 <template>
   <div id="map" ref="mapContainer" style="width: 100%; height: 80vh">
+    <!-- UX-02: geocoder repositioned to bottom-right (Mapbox utility convention).
+         Collapsed to 36px icon by default; expands on hover / focus-within. -->
     <div
       class="geocoder-wrap"
       v-show="!showDetailedPopup"
-      style="position: absolute; top: 10px; left: 10px; z-index: 1"
     >
-      <span class="geocoder-label">Find a place</span>
       <div id="geocoder" class="geocoder"></div>
     </div>
     <div
@@ -81,6 +81,7 @@
     </div>
     <LayerControls
       :expanded="layerControlExpanded"
+      :active-layer-count="activeLayerCount"
       :demographic-layers="demographicLayers"
       :economic-layers="economicLayers"
       :housing-layers="housingLayers"
@@ -256,7 +257,22 @@ const {
   clearSearch,
 } = usePropertyListings(map, geocoderRef);
 
-const layerControlExpanded = ref(true);
+// UX-02: collapse Data Layers by default on first visit; remember per-user
+// preference so power-users who expand it aren't re-collapsed every session.
+const LAYER_PANEL_PREF_KEY = 'blo:layerControlExpanded';
+const layerControlExpanded = ref<boolean>(
+  (() => {
+    try {
+      const stored = localStorage.getItem(LAYER_PANEL_PREF_KEY);
+      if (stored === 'true') return true;
+      if (stored === 'false') return false;
+    } catch { /* localStorage unavailable */ }
+    return false;
+  })()
+);
+watch(layerControlExpanded, (val) => {
+  try { localStorage.setItem(LAYER_PANEL_PREF_KEY, String(val)); } catch { /* ignore */ }
+});
 const showContaminationLayers = ref(false);
 const showContaminationChoropleth = ref(false);
 const showDiversityChoropleth = ref(true); // Start with true since BLO layer is pre-selected
@@ -420,6 +436,13 @@ const activeLimit = ref<number | null>(null);
 const clearActiveFilters = () => {
   activeFilters.value = [];
 };
+
+/** Count of visibly-active layers including BLO index, for the collapsed LayerControls badge */
+const activeLayerCount = computed(() => {
+  const nonBLO = allSelectedLayers.value.length;
+  const bloActive = selectedDemographicLayers.value.includes('combined_scores_v2') ? 1 : 0;
+  return nonBLO + bloActive;
+});
 
 /** Chips describing the active scoring query, shown in the status strip above the map */
 const scoringChips = computed(() => {
@@ -2302,53 +2325,53 @@ onMounted(async () => {
 
 /* Duplicate #detailed-popup styles removed - now in CountyModal.vue */
 
+/* UX-02: geocoder lives in the Mapbox-utility zone (bottom-right).
+   Collapsed to a 36px icon by default; expands to 240px on hover/focus.
+   Keeps the top of the viewport clean for the AI "Ask" input. */
 .geocoder-wrap {
-  width: 220px;
+  position: absolute;
+  bottom: 110px;
+  right: 10px;
+  z-index: 2;
+  width: 36px;
+  transition: width 180ms ease;
 }
 
-.geocoder-label {
-  display: block;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--blo-stone);
-  background: rgba(247, 244, 238, 0.92);
-  padding: 2px 8px 1px;
-  border-radius: 4px 4px 0 0;
-  width: fit-content;
-  border: 1px solid var(--blo-cream-divider);
-  border-bottom: none;
+.geocoder-wrap:hover,
+.geocoder-wrap:focus-within {
+  width: 240px;
 }
 
 .geocoder {
-  width: 220px;
+  width: 100%;
   z-index: 100 !important;
 }
 
 :global(.mapboxgl-ctrl-geocoder) {
   z-index: 100 !important;
-  width: 100%;
+  width: 100% !important;
   max-width: 100%;
   min-width: 0 !important;
   font-size: 13px;
   line-height: 18px;
   background: white;
   border: 1px solid var(--blo-cream-divider);
-  border-radius: 4px;
-  box-shadow: 0 2px 6px rgba(17, 17, 17, 0.06);
+  border-radius: var(--blo-radius-input);
+  box-shadow: 0 2px 6px rgba(17, 17, 17, 0.08);
   transition: border-color 120ms ease, box-shadow 120ms ease;
+  overflow: hidden;
 }
 
 :global(.mapboxgl-ctrl-geocoder:focus-within) {
   border-color: var(--blo-stone-soft);
-  box-shadow: 0 2px 10px rgba(17, 17, 17, 0.10);
+  box-shadow: 0 2px 10px rgba(17, 17, 17, 0.12);
 }
 
 :global(.mapboxgl-ctrl-geocoder--input) {
-  height: 30px;
+  height: 34px;
   font-size: 13px;
   color: var(--blo-ink-soft);
+  padding-left: 38px;
 }
 
 :global(.mapboxgl-ctrl-geocoder--input::placeholder) {
@@ -2357,13 +2380,24 @@ onMounted(async () => {
 }
 
 :global(.mapboxgl-ctrl-geocoder--icon) {
-  top: 6px;
+  top: 9px;
+  left: 10px;
   fill: var(--blo-stone);
 }
 
 :global(.mapboxgl-ctrl-geocoder--button) {
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
+}
+
+/* Hide the powered-by-mapbox strip inside the suggestions dropdown — we keep
+   the attribution on the map itself */
+:global(.mapboxgl-ctrl-geocoder .suggestions) {
+  background: white;
+  border: 1px solid var(--blo-cream-divider);
+  border-radius: var(--blo-radius-panel);
+  margin-top: 4px;
+  box-shadow: var(--blo-shadow-panel);
 }
 
 .layer-control-toggle {

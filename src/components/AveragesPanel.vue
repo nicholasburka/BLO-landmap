@@ -1,6 +1,7 @@
 <template>
   <div
     id="averages-panel"
+    class="blo-panel blo-panel--reference"
     :class="{ 'averages-panel-collapsed': !expanded }"
     style="pointer-events: auto"
     @click.stop
@@ -42,11 +43,9 @@ defineEmits<{
 </script>
 
 <style scoped>
+/* Surface provided by .blo-panel--reference — layout concerns only below. */
 #averages-panel {
-  background: white;
   padding: 10px;
-  border-radius: 4px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   max-width: 300px;
 }
 
@@ -55,20 +54,20 @@ defineEmits<{
 }
 
 .averages-panel-toggle {
-  background-color: white;
+  background-color: transparent;
+  color: var(--blo-ink-soft);
   border: none;
-  padding: 12px 15px;
+  padding: 8px 6px;
   cursor: pointer;
   width: 100%;
   text-align: left;
   font-weight: 600;
-  border-radius: 4px;
-  min-height: 44px;
-  font-size: 16px;
+  font-size: 13px;
+  letter-spacing: 0.01em;
 }
 
 .averages-panel-toggle:hover {
-  background-color: #f0f0f0;
+  color: var(--blo-ink);
 }
 
 .averages-panel-toggle:focus {
