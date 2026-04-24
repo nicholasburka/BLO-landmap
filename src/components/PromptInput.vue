@@ -578,7 +578,25 @@ watch(() => props.messages.length, () => {
 
 .chat-message.assistant .chat-text {
   color: var(--blo-ink-soft);
+  font-family: var(--blo-font-display);
+  font-weight: 400;
+  font-size: 13.5px;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
   padding: 4px 0;
+  /* UX-03: gentle fade-in for assistant responses */
+  animation: chat-text-in 260ms ease-out;
+}
+
+@keyframes chat-text-in {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-message.assistant .chat-text {
+    animation: none;
+  }
 }
 
 .chat-tools {

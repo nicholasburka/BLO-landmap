@@ -47,6 +47,10 @@
   --blo-shadow-panel-strong: 0 8px 28px rgba(17, 17, 17, 0.14);
   --blo-radius-panel: 10px;
   --blo-radius-input: 999px;
+
+  /* Display serif for editorial headers, county names, AI responses.
+     Body stays on system sans (no --blo-font-body until we choose one). */
+  --blo-font-display: 'Fraunces', 'Source Serif 4', Georgia, serif;
 }
 
 /* semantic color variables for this project */

@@ -32,8 +32,9 @@ import MapComponent from './components/Map.vue'
 }
 
 header {
-  background-color: #f0f0f0;
-  padding: 1rem;
+  background-color: var(--blo-cream);
+  border-bottom: 1px solid var(--blo-cream-divider);
+  padding: 12px 20px;
 }
 
 nav {
@@ -60,14 +61,17 @@ nav {
 
 .site-title {
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #2c3e50;
+  font-family: var(--blo-font-display);
+  font-size: 1.4rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--blo-ink);
 }
 
 main {
   flex-grow: 1;
   display: flex;
+  min-height: 0;
 }
 
 /* Ensure the MapComponent takes up all available space */
@@ -76,11 +80,22 @@ main > :first-child {
 }
 
 nav a {
-  color: #2c3e50;
+  color: var(--blo-stone);
   text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: var(--blo-radius-input);
+  transition: color 120ms ease, background-color 120ms ease;
+}
+
+nav a:hover {
+  color: var(--blo-ink);
+  background-color: rgba(17, 17, 17, 0.04);
 }
 
 nav a.router-link-exact-active {
-  color: #42b983;
+  color: var(--blo-green-deep);
+  font-weight: 600;
 }
 </style>

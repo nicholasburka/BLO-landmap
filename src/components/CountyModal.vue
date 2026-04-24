@@ -603,8 +603,11 @@ const getBlackProgressIndexDiff = computed(() => {
 
 .detailed-popup-content h2 {
   margin-top: 0;
-  color: #333;
-  font-size: 24px;
+  color: var(--blo-ink);
+  font-family: var(--blo-font-display);
+  font-weight: 500;
+  font-size: 28px;
+  letter-spacing: -0.01em;
   margin-bottom: 20px;
 }
 

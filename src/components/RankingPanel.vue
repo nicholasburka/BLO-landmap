@@ -12,7 +12,14 @@
       aria-controls="ranking-content"
       aria-label="Toggle county ranking panel"
     >
-      {{ expanded ? '▼' : '▲' }} County Rankings
+      <span class="ranking-toggle-motif" aria-hidden="true">
+        <svg viewBox="0 0 28 14" width="26" height="13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12 L7 5 L11 9 L16 3 L22 8 L27 4" />
+          <path d="M1 12 H27" opacity="0.35" />
+        </svg>
+      </span>
+      <span class="ranking-toggle-label">County Rankings</span>
+      <span class="ranking-toggle-chevron" aria-hidden="true">{{ expanded ? '▾' : '▸' }}</span>
     </button>
     <div v-show="expanded" id="ranking-content" class="ranking-content">
       <!-- Active filter pills (threshold filters from LLM) -->
@@ -61,6 +68,7 @@
           v-for="(county, index) in displayedCounties"
           :key="county.geoId"
           class="ranking-row"
+          :style="{ '--i': index }"
           @click="$emit('select-county', county.geoId)"
           role="button"
           tabindex="0"
@@ -245,14 +253,18 @@ const countLabel = computed(() => {
   background-color: transparent;
   color: var(--blo-ink);
   border: none;
-  padding: 10px 14px;
+  padding: 12px 14px;
   cursor: pointer;
   width: 100%;
   text-align: left;
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.01em;
+  font-family: var(--blo-font-display);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: -0.005em;
   border-bottom: 1px solid var(--blo-cream-divider);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .ranking-toggle:hover {
@@ -262,6 +274,22 @@ const countLabel = computed(() => {
 .ranking-toggle:focus-visible {
   outline: 2px solid var(--blo-green);
   outline-offset: -2px;
+}
+
+.ranking-toggle-motif {
+  display: inline-flex;
+  align-items: center;
+  color: var(--blo-green);
+  flex-shrink: 0;
+}
+
+.ranking-toggle-label {
+  flex: 1;
+}
+
+.ranking-toggle-chevron {
+  font-size: 12px;
+  color: var(--blo-stone-soft);
 }
 
 .ranking-content {
@@ -382,6 +410,26 @@ const countLabel = computed(() => {
   border-radius: 8px;
   cursor: pointer;
   transition: border-color 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+  /* UX-03: stagger-fade on mount. --i is set inline per-card (0, 1, 2, ...) */
+  opacity: 0;
+  transform: translateY(4px);
+  animation: ranking-row-in 320ms ease-out forwards;
+  animation-delay: calc(var(--i, 0) * 35ms);
+}
+
+@keyframes ranking-row-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ranking-row {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .ranking-row:hover {
@@ -414,8 +462,10 @@ const countLabel = computed(() => {
 }
 
 .ranking-county {
-  font-weight: 600;
-  font-size: 13px;
+  font-family: var(--blo-font-display);
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: -0.005em;
   color: var(--blo-ink);
   overflow: hidden;
   text-overflow: ellipsis;
