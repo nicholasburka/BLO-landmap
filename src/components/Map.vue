@@ -31,10 +31,6 @@
       :chat-error="chat.error.value"
       :send-message="chat.sendMessage"
       :clear-conversation="chat.clearConversation"
-      :scoring-chips="scoringChips"
-      :active-filters="activeFilters"
-      :display-limit="activeLimit"
-      @clear-query="clearActiveQuery"
       @select-place="handlePlaceSelection"
     />
 
@@ -75,42 +71,9 @@
         </div>
       </div>
     </div>
-    <LayerControls
-      :expanded="layerControlExpanded"
-      :active-layer-count="activeLayerCount"
-      :demographic-layers="demographicLayers"
-      :economic-layers="economicLayers"
-      :housing-layers="housingLayers"
-      :equity-layers="equityLayers"
-      :transportation-layers="transportationLayers"
-      :contamination-layers="contaminationLayers"
-      :selected-demographic-layers="selectedDemographicLayers"
-      :selected-economic-layers="selectedEconomicLayers"
-      :selected-housing-layers="selectedHousingLayers"
-      :selected-equity-layers="selectedEquityLayers"
-      :selected-transportation-layers="selectedTransportationLayers"
-      :show-contamination-layers="showContaminationLayers"
-      :show-contamination-choropleth="showContaminationChoropleth"
-      :dev-mode-only="DEV_MODE_DEMOGRAPHICS_ONLY"
-      :show-scoring-controls="showScoringControls"
-      :layer-weights="layerWeights"
-      :layer-directions="layerDirections"
-      :active-filters="activeFilters"
-      @toggle="toggleLayerControl"
-      @toggle-demographic="toggleDemographicLayer"
-      @toggle-economic="toggleEconomicLayer"
-      @toggle-housing="toggleHousingLayer"
-      @toggle-equity="toggleEquityLayer"
-      @toggle-transportation="toggleTransportationLayer"
-      @toggle-contamination="toggleContaminationLayer"
-      @toggle-contamination-layers="toggleContaminationLayers"
-      @toggle-contamination-choropleth="toggleContaminationChoropleth"
-      @update-weight="updateLayerWeight"
-      @update-direction="updateLayerDirection"
-      @update-filter="updateLayerFilter"
-    >
-      <LoadingIndicator :loaded="layersLoaded" :progress="loadingProgress" />
-    </LayerControls>
+    <!-- Phase 4d L4: standalone LayerControls pill removed.
+         Layer picking now lives inside the Lens "Layers" tab. -->
+    <LoadingIndicator :loaded="layersLoaded" :progress="loadingProgress" />
 
     <CountyModal
       :show="showDetailedPopup"
@@ -134,23 +97,69 @@
       @walkthrough-exit="exitWalkthrough"
     />
 
-    <div class="bottom-left-panels">
-      <ColorLegend
-        :selected-demographic-layers="selectedDemographicLayers"
-        :selected-economic-layers="selectedEconomicLayers"
-        :selected-housing-layers="selectedHousingLayers"
-        :selected-equity-layers="selectedEquityLayers"
-        :selected-transportation-layers="selectedTransportationLayers"
-        :show-contamination-choropleth="showContaminationChoropleth"
-        :layer-directions="layerDirections"
-        :has-active-filters="activeFilters.length > 0"
-      />
-
-      <AveragesPanel
-        :expanded="averagesPanelExpanded"
-        @toggle="toggleAveragesPanel"
-      />
-    </div>
+    <!-- Phase 4d: the Lens — single primary surface for "what does this
+         map mean right now?" Replaces ColorLegend, AveragesPanel, and
+         the standalone Data Layers pill. -->
+    <Lens>
+      <template #header>
+        <LensHeader
+          :scoring-chips="scoringChips"
+          :active-filters="activeFilters"
+          :limit="activeLimit"
+          :default-layer-name="defaultLensLayerName"
+          @clear="clearActiveQuery"
+        />
+      </template>
+      <template #legend>
+        <LensLegend
+          :selected-demographic-layers="selectedDemographicLayers"
+          :selected-economic-layers="selectedEconomicLayers"
+          :selected-housing-layers="selectedHousingLayers"
+          :selected-equity-layers="selectedEquityLayers"
+          :selected-transportation-layers="selectedTransportationLayers"
+          :show-contamination-choropleth="showContaminationChoropleth"
+          :layer-directions="layerDirections"
+          :layer-weights="layerWeights"
+          :has-active-filters="activeFilters.length > 0"
+        />
+      </template>
+      <template #layers>
+        <LensLayers
+          :demographic-layers="demographicLayers"
+          :economic-layers="economicLayers"
+          :housing-layers="housingLayers"
+          :equity-layers="equityLayers"
+          :transportation-layers="transportationLayers"
+          :contamination-layers="contaminationLayers"
+          :selected-demographic-layers="selectedDemographicLayers"
+          :selected-economic-layers="selectedEconomicLayers"
+          :selected-housing-layers="selectedHousingLayers"
+          :selected-equity-layers="selectedEquityLayers"
+          :selected-transportation-layers="selectedTransportationLayers"
+          :show-contamination-layers="showContaminationLayers"
+          :show-contamination-choropleth="showContaminationChoropleth"
+          :dev-mode-only="DEV_MODE_DEMOGRAPHICS_ONLY"
+          :show-scoring-controls="showScoringControls"
+          :layer-weights="layerWeights"
+          :layer-directions="layerDirections"
+          :active-filters="activeFilters"
+          @toggle-demographic="toggleDemographicLayer"
+          @toggle-economic="toggleEconomicLayer"
+          @toggle-housing="toggleHousingLayer"
+          @toggle-equity="toggleEquityLayer"
+          @toggle-transportation="toggleTransportationLayer"
+          @toggle-contamination="toggleContaminationLayer"
+          @toggle-contamination-layers="toggleContaminationLayers"
+          @toggle-contamination-choropleth="toggleContaminationChoropleth"
+          @update-weight="updateLayerWeight"
+          @update-direction="updateLayerDirection"
+          @update-filter="updateLayerFilter"
+        />
+      </template>
+      <template #context>
+        <LensContext :scoring-layer-ids="allSelectedLayers" />
+      </template>
+    </Lens>
 
     <RankingPanel
       :expanded="rankingPanelExpanded"
@@ -212,10 +221,13 @@ import { usePersonalizedScore, type DataMaps } from "@/composables/usePersonaliz
 import CountyModal from "@/components/CountyModal.vue";
 import LayerControls from "@/components/LayerControls.vue";
 import LoadingIndicator from "@/components/LoadingIndicator.vue";
-import AveragesPanel from "@/components/AveragesPanel.vue";
-import ColorLegend from "@/components/ColorLegend.vue";
 import RankingPanel from "@/components/RankingPanel.vue";
 import WalkthroughRail from "@/components/WalkthroughRail.vue";
+import Lens from "@/components/Lens.vue";
+import LensHeader from "@/components/LensHeader.vue";
+import LensLegend from "@/components/LensLegend.vue";
+import LensLayers from "@/components/LensLayers.vue";
+import LensContext from "@/components/LensContext.vue";
 import PromptInput from "@/components/PromptInput.vue";
 import type { QueryResponse } from "@/composables/usePromptQuery";
 import { useChat } from "@/composables/useChat";
@@ -270,22 +282,8 @@ const {
   clearSearch,
 } = usePropertyListings(map, geocoderRef);
 
-// UX-02: collapse Data Layers by default on first visit; remember per-user
-// preference so power-users who expand it aren't re-collapsed every session.
-const LAYER_PANEL_PREF_KEY = 'blo:layerControlExpanded';
-const layerControlExpanded = ref<boolean>(
-  (() => {
-    try {
-      const stored = localStorage.getItem(LAYER_PANEL_PREF_KEY);
-      if (stored === 'true') return true;
-      if (stored === 'false') return false;
-    } catch { /* localStorage unavailable */ }
-    return false;
-  })()
-);
-watch(layerControlExpanded, (val) => {
-  try { localStorage.setItem(LAYER_PANEL_PREF_KEY, String(val)); } catch { /* ignore */ }
-});
+// Phase 4d: Data Layers panel + its expanded state are gone — layer
+// picking now lives inside the Lens "Layers" tab which is always visible.
 const showContaminationLayers = ref(false);
 const showContaminationChoropleth = ref(false);
 const showDiversityChoropleth = ref(true); // Start with true since BLO layer is pre-selected
@@ -312,7 +310,6 @@ const handleOutsideClick = (event: MouseEvent) => {
   }
 };
 
-const averagesPanelExpanded = ref(false);
 const rankingPanelExpanded = ref(false);
 const rankingStateFilter = ref('');
 
@@ -399,16 +396,8 @@ const updateLayerFilter = (layerId: string, filter: ScoringFilter | null) => {
   activeFilters.value = filter ? [...others, filter] : others
 }
 
-const toggleAveragesPanel = () => {
-  averagesPanelExpanded.value = !averagesPanelExpanded.value;
-};
-
 const closeDetailedPopup = () => {
   showDetailedPopup.value = false;
-};
-
-const toggleLayerControl = () => {
-  layerControlExpanded.value = !layerControlExpanded.value;
 };
 
 const toggleContaminationChoropleth = () => {
@@ -467,12 +456,17 @@ const clearActiveFilters = () => {
   activeFilters.value = [];
 };
 
-/** Count of visibly-active layers including BLO index, for the collapsed LayerControls badge */
-const activeLayerCount = computed(() => {
-  const nonBLO = allSelectedLayers.value.length;
-  const bloActive = selectedDemographicLayers.value.includes('combined_scores_v2') ? 1 : 0;
-  return nonBLO + bloActive;
-});
+/** Phase 4d: name shown in the Lens header when no query is active.
+ *  Reflects whatever single layer is rendering by default. */
+const defaultLensLayerName = computed(() => {
+  if (allSelectedLayers.value.length === 0) {
+    return showContaminationChoropleth.value ? 'Contamination' : 'BLO Livability Index'
+  }
+  if (allSelectedLayers.value.length === 1) {
+    return LAYER_REGISTRY[allSelectedLayers.value[0]]?.name ?? allSelectedLayers.value[0]
+  }
+  return 'BLO Livability Index'
+})
 
 /** Chips describing the active scoring query, shown in the status strip above the map */
 const scoringChips = computed(() => {
@@ -2362,25 +2356,7 @@ onMounted(async () => {
   min-height: 0;
 }
 
-.bottom-left-panels {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  z-index: 5;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: 300px;
-  pointer-events: none;
-}
-
-@media (max-width: 768px) {
-  .bottom-left-panels {
-    bottom: 10px;
-    left: 10px;
-    max-width: 200px;
-  }
-}
+/* Phase 4d: .bottom-left-panels removed — Lens owns this slot */
 
 .download-csv-button {
   background-color: #4caf50;

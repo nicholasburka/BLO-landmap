@@ -71,44 +71,9 @@
         </li>
       </ul>
 
-      <!-- Active-query status strip: visible trace of what's currently scoring the map -->
-      <div v-if="hasActiveQuery" class="query-status">
-        <div class="query-status-row">
-          <span class="query-status-label">Scoring</span>
-          <span
-            v-for="chip in scoringChips"
-            :key="'layer-' + chip.id"
-            class="query-chip query-chip--layer"
-            :title="chip.name"
-          >
-            {{ chip.name }}
-            <span class="query-chip-arrow" :class="chip.directionClass">{{ chip.arrow }}</span>
-          </span>
-        </div>
-        <div v-if="filterChips.length > 0 || displayLimit" class="query-status-row">
-          <span v-if="filterChips.length > 0" class="query-status-label">Filter</span>
-          <span
-            v-for="chip in filterChips"
-            :key="'filter-' + chip.key"
-            class="query-chip query-chip--filter"
-          >{{ chip.label }}</span>
-          <span v-if="displayLimit" class="query-chip query-chip--limit">Top {{ displayLimit }}</span>
-          <button
-            type="button"
-            class="query-clear-all"
-            @click="$emit('clear-query')"
-            aria-label="Clear current query"
-          >Clear ×</button>
-        </div>
-        <div v-else class="query-status-row query-status-row--actions">
-          <button
-            type="button"
-            class="query-clear-all"
-            @click="$emit('clear-query')"
-            aria-label="Clear current query"
-          >Clear ×</button>
-        </div>
-      </div>
+      <!-- Phase 4d L2: active-query strip removed — content moved to the
+           Lens header (bottom-left). PromptInput is now strictly the
+           input + chat. The Map.vue Lens owns "what am I looking at." -->
 
       <!-- Suggested chips (only when conversation is empty) -->
       <div v-if="messages.length === 0 && !isThinking" class="prompt-chips">
@@ -172,21 +137,8 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, watch, onBeforeUnmount } from 'vue'
 import type { ChatMessage } from '@/composables/useChat'
-import type { ScoringFilter } from '@/types/mapTypes'
 import { renderMarkdown } from '@/lib/renderMarkdown'
 import { MAPBOX_ACCESS_TOKEN } from '@/config/constants'
-
-interface ScoringChip {
-  id: string
-  name: string
-  arrow: string
-  directionClass: string
-}
-
-interface FilterChip {
-  key: string
-  label: string
-}
 
 /** A Mapbox geocoder feature shape we pass back to the parent for zooming. */
 export interface PlaceSuggestion {
@@ -203,13 +155,9 @@ const props = defineProps<{
   chatError: string | null
   sendMessage: (text: string) => Promise<void>
   clearConversation: () => void
-  scoringChips?: ScoringChip[]
-  activeFilters?: ScoringFilter[]
-  displayLimit?: number | null
 }>()
 
 const emit = defineEmits<{
-  (e: 'clear-query'): void
   (e: 'select-place', suggestion: PlaceSuggestion): void
 }>()
 
@@ -339,26 +287,6 @@ const suggestedQueries = [
 /** Only show messages that have something to display (skip empty tool_result messages) */
 const visibleMessages = computed(() =>
   props.messages.filter((m) => m.displayText || (m.toolCalls && m.toolCalls.length > 0))
-)
-
-const scoringChips = computed<ScoringChip[]>(() => props.scoringChips ?? [])
-
-const filterChips = computed<FilterChip[]>(() => {
-  const filters = props.activeFilters ?? []
-  return filters.map((f) => {
-    let label = ''
-    switch (f.operator) {
-      case 'greater_than': label = `${f.layerId} > ${f.value}`; break
-      case 'less_than':    label = `${f.layerId} < ${f.value}`; break
-      case 'between':      label = `${f.layerId} ${f.value}-${f.max ?? '?'}`; break
-      default:             label = `${f.layerId} ? ${f.value}`
-    }
-    return { key: `${f.layerId}-${f.operator}`, label }
-  })
-})
-
-const hasActiveQuery = computed(
-  () => scoringChips.value.length > 0 || filterChips.value.length > 0 || !!props.displayLimit,
 )
 
 function describeToolCall(name: string, input: any): string {
@@ -585,97 +513,7 @@ watch(() => props.messages.length, () => {
   background: var(--blo-cream-deep, #ede8dd);
 }
 
-/* Active-query status strip */
-.query-status {
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: rgba(247, 244, 238, 0.96);
-  border: 1px solid var(--blo-cream-divider);
-  border-radius: var(--blo-radius-panel);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.query-status-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  min-height: 22px;
-}
-
-.query-status-row--actions {
-  justify-content: flex-end;
-}
-
-.query-status-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--blo-stone);
-  margin-right: 2px;
-}
-
-.query-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 9px;
-  font-size: 11px;
-  font-weight: 500;
-  border-radius: var(--blo-radius-input);
-  background: white;
-  border: 1px solid var(--blo-cream-divider);
-  color: var(--blo-ink-soft);
-}
-
-.query-chip--layer {
-  border-color: var(--blo-green-soft);
-  background: var(--blo-green-soft);
-  color: var(--blo-green-deep);
-}
-
-.query-chip--filter {
-  background: white;
-  border-color: var(--blo-cream-divider);
-  color: var(--blo-ink-soft);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10.5px;
-}
-
-.query-chip--limit {
-  background: var(--blo-ink);
-  color: white;
-  border-color: var(--blo-ink);
-  font-weight: 600;
-}
-
-.query-chip-arrow {
-  font-weight: 700;
-}
-.query-chip-arrow.dir-higher { color: var(--blo-green-deep); }
-.query-chip-arrow.dir-lower  { color: #c0392b; }
-
-.query-clear-all {
-  margin-left: auto;
-  padding: 2px 10px;
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--blo-stone);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--blo-radius-input);
-  cursor: pointer;
-  transition: color 120ms ease, border-color 120ms ease;
-}
-.query-clear-all:hover {
-  color: var(--blo-ink);
-  border-color: var(--blo-cream-divider);
-}
+/* Phase 4d L2: active-query CSS removed — chips now live in Lens header */
 
 /* Suggested starter chips */
 .prompt-chips {

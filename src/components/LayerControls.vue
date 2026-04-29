@@ -1,11 +1,17 @@
 <template>
   <div
-    id="layer-control-container"
-    :class="{ 'layer-control-collapsed': !expanded }"
-    style="position: absolute; top: 50px; right: 10px; z-index: 10; pointer-events: auto"
+    :id="embedded ? undefined : 'layer-control-container'"
+    :class="{
+      'layer-control-collapsed': !embedded && !expanded,
+      'layer-control-embedded': embedded,
+    }"
+    :style="embedded
+      ? undefined
+      : 'position: absolute; top: 50px; right: 10px; z-index: 10; pointer-events: auto'"
     @click.stop
   >
     <button
+      v-if="!embedded"
       @click="$emit('toggle')"
       class="layer-control-toggle"
       :class="{ 'layer-control-toggle--collapsed': !expanded }"
@@ -22,10 +28,11 @@
       <span class="layer-control-chevron" aria-hidden="true">{{ expanded ? '▾' : '◂' }}</span>
     </button>
     <div
-      id="layer-control"
-      v-show="expanded"
+      :id="embedded ? undefined : 'layer-control'"
+      v-show="embedded || expanded"
       @click.stop
       class="layer-control-content"
+      :class="{ 'layer-control-content--embedded': embedded }"
     >
       <!-- BLO Livability Index (no category) -->
       <div v-for="layer in demographicLayers.filter(l => !l.category)" :key="layer.id" class="layer-item">
@@ -381,6 +388,10 @@ interface Props {
   expanded: boolean
   /** Count of currently-active layers (for the collapsed rail badge) */
   activeLayerCount?: number
+  /** Phase 4d: when true, render WITHOUT the absolute-positioned pill +
+   *  toggle. Used when embedded inside the Lens "Layers" tab. The host
+   *  provides the panel chrome; we just contribute the picker UI. */
+  embedded?: boolean
   demographicLayers: DemographicLayer[]
   economicLayers?: EconomicLayer[]
   housingLayers?: HousingLayer[]
@@ -555,6 +566,19 @@ onMounted(() => {
   max-height: 50vh;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+/* Phase 4d: embedded mode — host (the Lens) provides the chrome; strip
+   the standalone panel treatment so we render flush inside the tab. */
+.layer-control-content--embedded {
+  background: transparent;
+  padding: 0;
+  margin-top: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  max-height: none;
+  overflow: visible;
 }
 
 .layer-control-collapsed #layer-control {
