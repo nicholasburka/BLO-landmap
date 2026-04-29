@@ -34,8 +34,11 @@ export const DATA_PATHS = {
 
 // Map configuration
 export const MAP_CONFIG = {
+  // Centered on the geographic center of the contiguous US
   DEFAULT_CENTER: [-98.5795, 39.8283] as [number, number],
-  DEFAULT_ZOOM: 2,
+  // Phase 4d cleanup: tighten initial framing so the user sees the CONUS,
+  // not an oceans-and-Greenland world view.
+  DEFAULT_ZOOM: 3.5,
   GEOCODER_COUNTRIES: 'us',
 } as const
 

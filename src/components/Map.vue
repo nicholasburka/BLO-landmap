@@ -88,13 +88,10 @@
       :housing-data="currentCounty?.id ? housingData[currentCounty.id] : undefined"
       :equity-data="currentCounty?.id ? equityData[currentCounty.id] : undefined"
       :transportation-data="currentCounty?.id ? transportationData[currentCounty.id] : undefined"
-      :walkthrough-active="walkthroughActive"
-      :walkthrough-index="walkthroughIndex"
-      :walkthrough-total="limitedRankedCounties.length"
+      :walkthrough-active="false"
+      :walkthrough-index="0"
+      :walkthrough-total="0"
       @close="handleModalClose"
-      @walkthrough-next="walkthroughNext"
-      @walkthrough-prev="walkthroughPrev"
-      @walkthrough-exit="exitWalkthrough"
     />
 
     <!-- Phase 4d: the Lens — single primary surface for "what does this
@@ -107,7 +104,9 @@
           :active-filters="activeFilters"
           :limit="activeLimit"
           :default-layer-name="defaultLensLayerName"
+          :can-walk-through="canWalkThrough"
           @clear="clearActiveQuery"
+          @walk-through="startWalkthrough"
         />
       </template>
       <template #legend>
@@ -482,15 +481,18 @@ const scoringChips = computed(() => {
   });
 });
 
-/** Clear-all for the status strip: revert selected layers, filters, and limit to neutral */
+/** Clear-all for the status strip: revert selected layers, filters, and limit
+ *  to the BLO Livability Index default state. The Lens header advertises
+ *  "Showing BLO Livability Index" when no query is active, so the actual
+ *  visible layer must match — Phase 4d cleanup restores BLO here. */
 const clearActiveQuery = () => {
-  selectedDemographicLayers.value = [];
+  selectedDemographicLayers.value = ['combined_scores_v2'];
   selectedEconomicLayers.value = [];
   selectedHousingLayers.value = [];
   selectedEquityLayers.value = [];
   selectedTransportationLayers.value = [];
   showContaminationChoropleth.value = false;
-  demographicLayers.forEach(l => { l.visible = false; });
+  demographicLayers.forEach(l => { l.visible = l.id === 'combined_scores_v2'; });
   economicLayers.forEach(l => { l.visible = false; });
   housingLayers.forEach(l => { l.visible = false; });
   equityLayers.forEach(l => { l.visible = false; });
@@ -502,6 +504,9 @@ const clearActiveQuery = () => {
   rankingPanelExpanded.value = false;
   rankingStateFilter.value = '';
   hasActiveScoringQuery.value = false;
+  showDiversityChoropleth.value = true;
+  // D3: chat narration goes stale once the query clears — drop it.
+  chat.clearConversation();
   updateChoroplethVisibility();
   updateChoroplethColors();
 };
@@ -533,6 +538,14 @@ const limitedRankedCounties = computed(() => {
   if (limit == null) return rankedCounties.value;
   return rankedCounties.value.slice(0, limit);
 });
+
+/** Phase 4d cleanup: walkthrough is reachable from the Lens header when
+ *  there's at least one ranked county to tour. Discoverable on mobile
+ *  (RankingPanel is display:none there) and when the RankingPanel is
+ *  collapsed on desktop. */
+const canWalkThrough = computed(() =>
+  hasActiveScoringQuery.value && limitedRankedCounties.value.length > 0,
+)
 
 /** Phase 4c: GEOIDs of the top-N counties when a limit is active. Drives
  *  choropleth dim logic (non-top-N counties render at reduced alpha) and

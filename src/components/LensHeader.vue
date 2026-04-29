@@ -10,13 +10,23 @@
     <div v-else class="lens-hd-active">
       <div class="lens-hd-active-row">
         <span class="lens-hd-label">Active query</span>
-        <button
-          type="button"
-          class="lens-hd-clear"
-          @click="$emit('clear')"
-          aria-label="Clear current query"
-          title="Clear current query"
-        >Clear ×</button>
+        <div class="lens-hd-actions">
+          <button
+            v-if="canWalkThrough"
+            type="button"
+            class="lens-hd-walk"
+            @click.stop="$emit('walk-through')"
+            aria-label="Walk through ranked counties"
+            title="Walk through the ranked counties one by one"
+          >▶ Walk through</button>
+          <button
+            type="button"
+            class="lens-hd-clear"
+            @click.stop="$emit('clear')"
+            aria-label="Clear current query"
+            title="Clear current query"
+          >Clear ×</button>
+        </div>
       </div>
       <div class="lens-hd-chips">
         <span
@@ -64,9 +74,17 @@ const props = defineProps<{
   limit: number | null
   /** Shown in the empty/no-query state, e.g. "BLO Livability Index". */
   defaultLayerName: string
+  /** Render the inline "▶ Walk through" CTA when there's a ranked result
+   *  worth touring. Phase 4d cleanup makes the tour reachable on mobile
+   *  (where RankingPanel is hidden) and discoverable when the panel is
+   *  collapsed on desktop. */
+  canWalkThrough?: boolean
 }>()
 
-defineEmits<{ (e: 'clear'): void }>()
+defineEmits<{
+  (e: 'clear'): void
+  (e: 'walk-through'): void
+}>()
 
 const filterChips = computed<FilterChip[]>(() =>
   props.activeFilters.map((f) => {
@@ -128,6 +146,28 @@ const hasActiveQuery = computed(
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--blo-stone, #6b6560);
+}
+
+.lens-hd-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lens-hd-walk {
+  background: var(--blo-green-deep, #1f7a2e);
+  color: white;
+  border: 1px solid var(--blo-green-deep, #1f7a2e);
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 10px;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+}
+.lens-hd-walk:hover {
+  background: var(--blo-ink, #111);
+  border-color: var(--blo-ink, #111);
 }
 
 .lens-hd-clear {
