@@ -1,13 +1,8 @@
 <template>
   <div id="map" ref="mapContainer" class="map-root">
-    <!-- Geocoder: top-left labeled pill. Always visible so users can find it,
-         but visually subordinate to the orange "Ask" input at top-center. -->
-    <div
-      class="geocoder-wrap"
-      v-show="!showDetailedPopup"
-    >
-      <div id="geocoder" class="geocoder"></div>
-    </div>
+    <!-- Phase 4c: the dedicated geocoder input is gone. Place lookup now
+         lives inline inside the Ask input via `PromptInput`'s suggestion
+         strip — one visible input, two intents auto-detected. -->
     <div
       id="search-listings"
       class="search-listings"
@@ -40,6 +35,7 @@
       :active-filters="activeFilters"
       :display-limit="activeLimit"
       @clear-query="clearActiveQuery"
+      @select-place="handlePlaceSelection"
     />
 
     <div v-if="listings.length > 0" id="listings-panel" class="listings-panel">
@@ -2103,6 +2099,16 @@ const handleGeocoderResult = (result: any) => {
   }
 };
 
+/** Phase 4c: handle a place suggestion picked inside the unified Ask input.
+ *  PromptInput emits this when the user clicks a suggestion in its inline
+ *  strip. We mirror the behavior of the prior geocoder selection flow:
+ *  set currentGeocoderResult so the "Find land for sale" button appears,
+ *  then fly the map and drop a marker. */
+const handlePlaceSelection = (suggestion: { center: [number, number]; name: string; raw: any }) => {
+  currentGeocoderResult.value = suggestion.raw;
+  handleGeocoderResult(suggestion.raw);
+};
+
 // ============= Phase 3: LLM chat with tool use =============
 
 const toolContext: ToolContext = {
@@ -2185,6 +2191,11 @@ onMounted(async () => {
     zoom: MAP_CONFIG.DEFAULT_ZOOM,
   });
 
+  // Phase 4c: Geocoder instance is kept for `usePropertyListings`
+  // (it consumes `geocoderRef.value.clear()` to reset the search bar) but
+  // its DOM is no longer rendered. Place lookup happens via direct fetch
+  // calls inside PromptInput; selection routes here through
+  // `handlePlaceSelection` which sets `currentGeocoderResult` and flies the map.
   geocoder = new MapboxGeocoder({
     accessToken: mapboxgl.accessToken,
     mapboxgl: mapboxgl,
@@ -2192,36 +2203,7 @@ onMounted(async () => {
     types: "country,region,postcode,district,place",
     placeholder: "Search for a location",
   });
-
-  // Set geocoder ref for composables
   geocoderRef.value = geocoder;
-
-  const geocoderContainer = document.getElementById("geocoder");
-  if (geocoderContainer) {
-    geocoderContainer.appendChild(geocoder.onAdd(map.value!));
-
-    // Add event listener for the 'result' event
-    geocoder.on("result", function (e) {
-      currentGeocoderResult.value = e.result;
-      handleGeocoderResult(e.result);
-    });
-
-    // Add event listener for the Enter key press
-    const geocoderInput = geocoderContainer.querySelector("input");
-    if (geocoderInput) {
-      geocoderInput.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          const query = (e.target as HTMLInputElement).value;
-          geocoder.query(query);
-        }
-      });
-    }
-  }
-
-  geocoder.on("error", function (e) {
-    console.error("Geocoder error:", e);
-  });
 
   map.value.on("load", async function () {
     debugLog("Map loaded");
@@ -2727,84 +2709,7 @@ onMounted(async () => {
 
 /* Duplicate #detailed-popup styles removed - now in CountyModal.vue */
 
-/* Geocoder: always-visible labeled pill in top-left. Narrow + neutral so it
-   stays clearly subordinate to the orange "Ask" input at top-center. */
-.geocoder-wrap {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 2;
-  width: 220px;
-}
-
-.geocoder {
-  width: 100%;
-  z-index: 100 !important;
-}
-
-/* Mobile: both inputs stack in the flex flow, geocoder first. */
-@media (max-width: 768px) {
-  .geocoder-wrap {
-    position: relative;
-    top: auto;
-    left: auto;
-    width: auto;
-    margin: 8px 8px 0;
-  }
-}
-
-:global(.mapboxgl-ctrl-geocoder) {
-  z-index: 100 !important;
-  width: 100% !important;
-  max-width: 100%;
-  min-width: 0 !important;
-  font-size: 13px;
-  line-height: 18px;
-  background: white;
-  border: 1px solid var(--blo-cream-divider);
-  border-radius: var(--blo-radius-input);
-  box-shadow: 0 2px 6px rgba(17, 17, 17, 0.08);
-  transition: border-color 120ms ease, box-shadow 120ms ease;
-  overflow: hidden;
-}
-
-:global(.mapboxgl-ctrl-geocoder:focus-within) {
-  border-color: var(--blo-stone-soft);
-  box-shadow: 0 2px 10px rgba(17, 17, 17, 0.12);
-}
-
-:global(.mapboxgl-ctrl-geocoder--input) {
-  height: 34px;
-  font-size: 13px;
-  color: var(--blo-ink-soft);
-  padding-left: 38px;
-}
-
-:global(.mapboxgl-ctrl-geocoder--input::placeholder) {
-  color: var(--blo-stone-soft);
-  font-size: 12px;
-}
-
-:global(.mapboxgl-ctrl-geocoder--icon) {
-  top: 9px;
-  left: 10px;
-  fill: var(--blo-stone);
-}
-
-:global(.mapboxgl-ctrl-geocoder--button) {
-  width: 34px;
-  height: 34px;
-}
-
-/* Hide the powered-by-mapbox strip inside the suggestions dropdown — we keep
-   the attribution on the map itself */
-:global(.mapboxgl-ctrl-geocoder .suggestions) {
-  background: white;
-  border: 1px solid var(--blo-cream-divider);
-  border-radius: var(--blo-radius-panel);
-  margin-top: 4px;
-  box-shadow: var(--blo-shadow-panel);
-}
+/* Phase 4c: dedicated geocoder DOM removed — see PromptInput's place-strip */
 
 .layer-control-toggle {
   background-color: white;
@@ -2834,11 +2739,6 @@ onMounted(async () => {
 }
 
 @media (max-width: 768px) {
-  .geocoder {
-    width: calc(100% - 20px);
-    max-width: none;
-  }
-
   #layer-control-container {
     top: auto;
     bottom: 10px;

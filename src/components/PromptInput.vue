@@ -13,12 +13,14 @@
         <input
           v-model="query"
           type="text"
-          placeholder="Ask a question or describe what you're looking for..."
+          placeholder="Ask about a place or the data — e.g., 'top 5 affordable counties' or 'Mecklenburg County'"
           class="prompt-input"
           :disabled="isThinking"
-          aria-label="Ask about county livability"
+          aria-label="Ask about a place or the data"
+          aria-autocomplete="list"
+          :aria-activedescendant="highlightedIndex >= 0 ? 'place-suggestion-' + highlightedIndex : undefined"
           maxlength="500"
-          @keydown.enter.prevent="handleSubmit"
+          @keydown="onKeydown"
         />
         <button type="submit" class="prompt-submit" :disabled="isThinking || !query.trim()">
           <span v-if="!isThinking">Ask</span>
@@ -33,6 +35,41 @@
           title="Clear conversation"
         >×</button>
       </form>
+
+      <!-- Inline place-suggestion strip — shows when input pattern-matches a place
+           lookup AND no data-query verbs trip the suppression heuristic. Click
+           routes to the map (zoom + marker); Enter without highlight still
+           submits to chat. -->
+      <ul
+        v-if="placeSuggestions.length > 0 && !isThinking"
+        class="place-strip"
+        role="listbox"
+        aria-label="Place suggestions"
+      >
+        <li
+          v-for="(s, i) in placeSuggestions"
+          :key="s.id"
+          :id="'place-suggestion-' + i"
+          role="option"
+          :aria-selected="i === highlightedIndex"
+          class="place-suggestion"
+          :class="{ 'place-suggestion--active': i === highlightedIndex }"
+          @click="selectSuggestion(s)"
+          @mouseenter="highlightedIndex = i"
+        >
+          <span class="place-pin" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </span>
+          <span class="place-text">
+            <span class="place-name">{{ s.name }}</span>
+            <span v-if="s.context" class="place-context">{{ s.context }}</span>
+          </span>
+          <span v-if="i === highlightedIndex" class="place-enter-hint" aria-hidden="true">↩</span>
+        </li>
+      </ul>
 
       <!-- Active-query status strip: visible trace of what's currently scoring the map -->
       <div v-if="hasActiveQuery" class="query-status">
@@ -133,10 +170,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, watch } from 'vue'
+import { ref, computed, nextTick, watch, onBeforeUnmount } from 'vue'
 import type { ChatMessage } from '@/composables/useChat'
 import type { ScoringFilter } from '@/types/mapTypes'
 import { renderMarkdown } from '@/lib/renderMarkdown'
+import { MAPBOX_ACCESS_TOKEN } from '@/config/constants'
 
 interface ScoringChip {
   id: string
@@ -150,6 +188,15 @@ interface FilterChip {
   label: string
 }
 
+/** A Mapbox geocoder feature shape we pass back to the parent for zooming. */
+export interface PlaceSuggestion {
+  id: string
+  name: string
+  context: string
+  center: [number, number]
+  raw: any
+}
+
 const props = defineProps<{
   messages: ChatMessage[]
   isThinking: boolean
@@ -161,13 +208,127 @@ const props = defineProps<{
   displayLimit?: number | null
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'clear-query'): void
+  (e: 'select-place', suggestion: PlaceSuggestion): void
 }>()
 
 const query = ref('')
 const historyExpanded = ref(true)
 const scrollRef = ref<HTMLElement | null>(null)
+
+// ============= Phase 4c: Inline place suggestions =============
+//
+// As the user types, we run a debounced Mapbox geocoder lookup in the
+// background. If the input pattern-matches a place query (and not a data
+// query — see suppression regex), suggestions render below the input.
+// Pressing Enter always submits to chat; clicking a suggestion zooms.
+
+const placeSuggestions = ref<PlaceSuggestion[]>([])
+const highlightedIndex = ref(-1) // -1 = input focused; 0..N = suggestion index
+let placeAbort: AbortController | null = null
+let placeDebounce: ReturnType<typeof setTimeout> | null = null
+
+/** Tokens that signal "this is a data query, not a place lookup". When any
+ *  of these patterns hit, suggestions are suppressed. We err on the side of
+ *  *showing* suggestions when ambiguous — Enter still goes to chat, so the
+ *  cost of a false positive is just visual noise, while a false negative
+ *  hides a useful affordance. */
+const SUPPRESSION_PATTERNS: RegExp[] = [
+  /\b(top|best|worst|affordable|expensive|with|where|under|over|rank(?:ed|ing)?|score|index|filter|find counties|show me|rate|rates)\b/i,
+  /\bmore than\b/i,
+  /\bless than\b/i,
+  /\bhigher than\b/i,
+  /\blower than\b/i,
+  /\bbetween\b.*\band\b/i,
+  /\bcompared to\b/i,
+  /[%$]/,
+  /\b\d+\s*(percent|pct|k|thousand|million)\b/i,
+]
+
+function shouldSuppressSuggestions(text: string): boolean {
+  return SUPPRESSION_PATTERNS.some((re) => re.test(text))
+}
+
+async function fetchPlaceSuggestions(text: string, signal: AbortSignal): Promise<PlaceSuggestion[]> {
+  if (!MAPBOX_ACCESS_TOKEN) return []
+  const encoded = encodeURIComponent(text)
+  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encoded}.json` +
+    `?access_token=${MAPBOX_ACCESS_TOKEN}` +
+    `&country=us&types=district,region,place&limit=4&autocomplete=true`
+  const res = await fetch(url, { signal })
+  if (!res.ok) return []
+  const data = await res.json()
+  return (data.features || []).map((f: any) => ({
+    id: f.id,
+    name: f.text,
+    context: f.place_name?.replace(new RegExp('^' + (f.text || '') + ',?\\s*'), '') || '',
+    center: f.center as [number, number],
+    raw: f,
+  }))
+}
+
+watch(query, (text) => {
+  highlightedIndex.value = -1
+  if (placeDebounce) clearTimeout(placeDebounce)
+  if (placeAbort) placeAbort.abort()
+
+  const trimmed = text.trim()
+  if (!trimmed || shouldSuppressSuggestions(trimmed)) {
+    placeSuggestions.value = []
+    return
+  }
+
+  placeDebounce = setTimeout(async () => {
+    const ctrl = new AbortController()
+    placeAbort = ctrl
+    try {
+      const results = await fetchPlaceSuggestions(trimmed, ctrl.signal)
+      // Race guard: only commit if this is still the active query
+      if (query.value.trim() === trimmed) {
+        placeSuggestions.value = results
+      }
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') placeSuggestions.value = []
+    }
+  }, 150)
+})
+
+onBeforeUnmount(() => {
+  if (placeDebounce) clearTimeout(placeDebounce)
+  if (placeAbort) placeAbort.abort()
+})
+
+function selectSuggestion(s: PlaceSuggestion): void {
+  emit('select-place', s)
+  query.value = ''
+  placeSuggestions.value = []
+  highlightedIndex.value = -1
+}
+
+/** Keyboard navigation between input and suggestion strip. */
+function onKeydown(e: KeyboardEvent): void {
+  if (placeSuggestions.value.length === 0) {
+    // No suggestions — Enter falls through to form submit handler
+    return
+  }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault()
+    highlightedIndex.value = Math.min(highlightedIndex.value + 1, placeSuggestions.value.length - 1)
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault()
+    highlightedIndex.value = Math.max(highlightedIndex.value - 1, -1)
+  } else if (e.key === 'Escape') {
+    placeSuggestions.value = []
+    highlightedIndex.value = -1
+  } else if (e.key === 'Enter' && highlightedIndex.value >= 0) {
+    // A suggestion is highlighted — pick it instead of submitting to chat
+    e.preventDefault()
+    const s = placeSuggestions.value[highlightedIndex.value]
+    if (s) selectSuggestion(s)
+  }
+  // Otherwise Enter goes through to form @submit (chat path)
+}
 
 const suggestedQueries = [
   'Show me the top 5 counties for Black homeownership',
@@ -243,13 +404,16 @@ watch(() => props.messages.length, () => {
 </script>
 
 <style scoped>
+/* Phase 4c: unified input now claims the full top-of-map width minus
+   the right-side Data Layers pill. The geocoder used to sit at left:10
+   in 220px; that real estate is now part of this single input. */
 .prompt-panel {
   position: absolute;
   top: 10px;
-  left: 310px;
+  left: 10px;
   right: 270px;
   z-index: 5;
-  max-width: 620px;
+  max-width: 720px;
 }
 
 /* The "Ask" input — reserved orange accent makes it unmistakably the AI entry point */
@@ -341,6 +505,84 @@ watch(() => props.messages.length, () => {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Inline place-suggestion strip — sits directly under the Ask input pill.
+   Visually distinct from the example chips below (rectangular, list-style)
+   so users read it as "did you mean a place?" not "preset queries". */
+.place-strip {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 4px;
+  background: white;
+  border: 1px solid var(--blo-cream-divider);
+  border-radius: var(--blo-radius-panel);
+  box-shadow: var(--blo-shadow-panel);
+  overflow: hidden;
+  animation: place-fade-in 140ms ease-out;
+}
+@keyframes place-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.place-suggestion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--blo-ink-soft, #2a2a2a);
+  transition: background 100ms ease;
+}
+.place-suggestion + .place-suggestion {
+  margin-top: 2px;
+}
+.place-suggestion:hover,
+.place-suggestion--active {
+  background: var(--blo-cream, #f7f4ee);
+  color: var(--blo-ink, #111);
+}
+
+.place-pin {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  color: var(--blo-green-deep, #1f7a2e);
+  flex-shrink: 0;
+}
+
+.place-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+.place-name {
+  font-weight: 600;
+  color: var(--blo-ink, #111);
+}
+.place-context {
+  font-size: 11px;
+  color: var(--blo-stone, #6b6560);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.place-enter-hint {
+  font-size: 12px;
+  color: var(--blo-stone, #6b6560);
+  margin-left: auto;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--blo-cream-deep, #ede8dd);
 }
 
 /* Active-query status strip */
