@@ -544,6 +544,16 @@ const limitedRankedCounties = computed(() => {
   return rankedCounties.value.slice(0, limit);
 });
 
+/** Phase 4c: GEOIDs of the top-N counties when a limit is active. Drives
+ *  choropleth dim logic (non-top-N counties render at reduced alpha) and
+ *  walkthrough overlays (set outline + numbered markers).
+ *  Empty when no limit is set — choropleth renders normally. */
+const topNGeoIds = computed<Set<string>>(() => {
+  if (activeLimit.value == null) return new Set();
+  if (allSelectedLayers.value.length < 1) return new Set();
+  return new Set(limitedRankedCounties.value.map(c => c.geoId));
+});
+
 /** Look up the raw value for a layer in the appropriate data map.
  *  Mirrors `getRawLayerValue` from the tooltip closure but takes geoId
  *  as a parameter so it can be used outside that closure (e.g. by
@@ -631,16 +641,46 @@ const openCountyAtWalkthroughIndex = () => {
   stepWalkthroughTo(county.geoId);
 };
 
+/** Token cancelled when the user advances/exits before the entry auto-fit
+ *  has handed off to the step-in flyTo. Prevents an in-flight auto-step
+ *  from overriding the user's manual choice. */
+let walkthroughEntryHandoff: ReturnType<typeof setTimeout> | null = null;
+
 const startWalkthrough = () => {
   if (limitedRankedCounties.value.length === 0) return;
   walkthroughActive.value = true;
   walkthroughIndex.value = 0;
   showDetailedPopup.value = false;
-  openCountyAtWalkthroughIndex();
+
+  // Phase 4c: first show the geographic distribution of the answer for
+  // ~1000ms (matches fitToTopN duration), THEN step into county 1. If the
+  // user clicks Next/Prev/Exit during the dwell, the handoff is cancelled
+  // so we don't override their input with a stale auto-step.
+  const fitFired = fitToTopN();
+  if (walkthroughEntryHandoff) clearTimeout(walkthroughEntryHandoff);
+  if (fitFired && limitedRankedCounties.value.length > 1) {
+    walkthroughEntryHandoff = setTimeout(() => {
+      walkthroughEntryHandoff = null;
+      if (walkthroughActive.value && walkthroughIndex.value === 0) {
+        openCountyAtWalkthroughIndex();
+      }
+    }, 1100);
+  } else {
+    openCountyAtWalkthroughIndex();
+  }
+};
+
+/** Helper: any manual step or exit cancels the entry handoff. */
+const cancelEntryHandoff = () => {
+  if (walkthroughEntryHandoff) {
+    clearTimeout(walkthroughEntryHandoff);
+    walkthroughEntryHandoff = null;
+  }
 };
 
 const walkthroughNext = () => {
   if (walkthroughIndex.value < limitedRankedCounties.value.length - 1) {
+    cancelEntryHandoff();
     walkthroughIndex.value++;
     openCountyAtWalkthroughIndex();
   }
@@ -648,12 +688,14 @@ const walkthroughNext = () => {
 
 const walkthroughPrev = () => {
   if (walkthroughIndex.value > 0) {
+    cancelEntryHandoff();
     walkthroughIndex.value--;
     openCountyAtWalkthroughIndex();
   }
 };
 
 const exitWalkthrough = () => {
+  cancelEntryHandoff();
   walkthroughActive.value = false;
   walkthroughIndex.value = 0;
   showDetailedPopup.value = false;
@@ -675,6 +717,14 @@ const handleModalClose = () => {
 /** Handle prompt query result: auto-select layers with weights and directions */
 const handleQueryResult = (result: QueryResponse) => {
   if (!result.layers || result.layers.length === 0) return;
+
+  // Phase 4c: any new query result invalidates a walkthrough in progress —
+  // it would be referring to the old ranked set. Exit cleanly so overlays
+  // and the rail don't show stale state, then let the user re-enter the
+  // walkthrough from the new ranking via the panel.
+  if (walkthroughActive.value) {
+    exitWalkthrough();
+  }
 
   // Clear everything
   selectedDemographicLayers.value = [];
@@ -889,6 +939,193 @@ const toggleTransportationLayer = (layerId: string) => {
   updateChoroplethVisibility();
   updateChoroplethColors();
 };
+
+// ============= Phase 4c: Walkthrough overlays =============
+//
+// Two outline layers driven by Mapbox `filter` expressions on the counties
+// source — set outline (all top-N) and active outline (current step). DOM
+// markers (numbered chips) anchored at county centroids via mapboxgl.Marker.
+// All overlays clear when walkthrough exits or the query clears.
+
+const SET_OUTLINE_LAYER = "walkthrough-set-outline";
+const ACTIVE_OUTLINE_LAYER = "walkthrough-active-outline";
+
+/** Created once on map load. Filters update reactively via watchers. */
+const addWalkthroughOverlayLayers = () => {
+  if (!map.value) return;
+  if (map.value.getLayer(SET_OUTLINE_LAYER)) return;
+
+  // Set outline — all top-N counties get a medium ink-soft border.
+  map.value.addLayer({
+    id: SET_OUTLINE_LAYER,
+    type: "line",
+    source: "counties",
+    paint: {
+      "line-color": "#2a2a2a",
+      "line-width": 1.2,
+      "line-opacity": 0.85,
+    },
+    filter: ["==", ["get", "GEOID"], "__none__"],
+    layout: { visibility: "none" },
+  });
+
+  // Active outline — single current county gets a heavy ink border on top.
+  map.value.addLayer({
+    id: ACTIVE_OUTLINE_LAYER,
+    type: "line",
+    source: "counties",
+    paint: {
+      "line-color": "#111111",
+      "line-width": 2.8,
+      "line-opacity": 1.0,
+    },
+    filter: ["==", ["get", "GEOID"], "__none__"],
+    layout: { visibility: "none" },
+  });
+};
+
+/** Update the set-outline filter to match all top-N geoIds. */
+const updateSetOutline = () => {
+  if (!map.value || !map.value.getLayer(SET_OUTLINE_LAYER)) return;
+  const ids = Array.from(topNGeoIds.value);
+  const visible = walkthroughActive.value && ids.length > 0;
+  if (visible) {
+    map.value.setFilter(SET_OUTLINE_LAYER, ["in", ["get", "GEOID"], ["literal", ids]]);
+    map.value.setLayoutProperty(SET_OUTLINE_LAYER, "visibility", "visible");
+  } else {
+    map.value.setLayoutProperty(SET_OUTLINE_LAYER, "visibility", "none");
+  }
+};
+
+/** Update the active-outline filter to match the current walkthrough county. */
+const updateActiveOutline = () => {
+  if (!map.value || !map.value.getLayer(ACTIVE_OUTLINE_LAYER)) return;
+  const id = currentCounty.value?.id;
+  const visible = walkthroughActive.value && !!id;
+  if (visible) {
+    map.value.setFilter(ACTIVE_OUTLINE_LAYER, ["==", ["get", "GEOID"], id]);
+    map.value.setLayoutProperty(ACTIVE_OUTLINE_LAYER, "visibility", "visible");
+  } else {
+    map.value.setLayoutProperty(ACTIVE_OUTLINE_LAYER, "visibility", "none");
+  }
+};
+
+// ----- Numbered marker chips -----
+
+/** Pool of mapboxgl.Markers, keyed by GEOID. Recycled across walkthrough steps. */
+const walkthroughMarkers = new Map<string, mapboxgl.Marker>();
+
+/** Compute polygon centroid (rough — average of vertices). Sufficient for marker
+ *  placement on a county polygon since we only need a label anchor. */
+const computeCentroid = (feature: any): [number, number] | null => {
+  if (!feature?.geometry) return null;
+  const coords = feature.geometry.type === "MultiPolygon"
+    ? feature.geometry.coordinates.flat(2)
+    : feature.geometry.coordinates.flat(1);
+  if (coords.length === 0) return null;
+  let sx = 0, sy = 0, n = 0;
+  for (const c of coords as [number, number][]) {
+    sx += c[0]; sy += c[1]; n++;
+  }
+  return n > 0 ? [sx / n, sy / n] : null;
+};
+
+const buildMarkerEl = (rank: number, isActive: boolean): HTMLElement => {
+  const el = document.createElement("div");
+  el.className = "walkthrough-marker" + (isActive ? " walkthrough-marker--active" : "");
+  el.setAttribute("aria-hidden", "true");
+  el.textContent = String(rank);
+  return el;
+};
+
+const clearAllWalkthroughMarkers = () => {
+  walkthroughMarkers.forEach(m => m.remove());
+  walkthroughMarkers.clear();
+};
+
+/** Sync markers to the current walkthrough state. Idempotent — adds missing,
+ *  updates active treatment, removes stale. */
+const updateWalkthroughMarkers = () => {
+  if (!map.value || !countiesData.value) return;
+
+  if (!walkthroughActive.value) {
+    clearAllWalkthroughMarkers();
+    return;
+  }
+
+  const counties = limitedRankedCounties.value;
+  const activeId = currentCounty.value?.id;
+  const wantedIds = new Set(counties.map(c => c.geoId));
+
+  // Remove markers no longer needed
+  for (const [geoId, marker] of walkthroughMarkers) {
+    if (!wantedIds.has(geoId)) {
+      marker.remove();
+      walkthroughMarkers.delete(geoId);
+    }
+  }
+
+  // Add or refresh markers for current top-N
+  counties.forEach((c, i) => {
+    const isActive = c.geoId === activeId;
+    const existing = walkthroughMarkers.get(c.geoId);
+    if (existing) {
+      // Refresh active state by replacing the element class
+      const el = existing.getElement();
+      if (isActive) el.classList.add("walkthrough-marker--active");
+      else el.classList.remove("walkthrough-marker--active");
+      return;
+    }
+    const feature = countiesData.value?.features.find(
+      (f: any) => f.properties?.GEOID === c.geoId
+    );
+    const centroid = computeCentroid(feature);
+    if (!centroid) return;
+    const el = buildMarkerEl(i + 1, isActive);
+    const marker = new mapboxgl.Marker({ element: el, anchor: "center" })
+      .setLngLat(centroid)
+      .addTo(map.value!);
+    walkthroughMarkers.set(c.geoId, marker);
+  });
+};
+
+// ----- Walkthrough auto-fit (entry) -----
+
+/** Fit map bounds to the union of all top-N counties — gives the user the
+ *  geographic distribution of the answer before stepping into county 1. */
+const fitToTopN = (): boolean => {
+  if (!map.value || !countiesData.value) return false;
+  const counties = limitedRankedCounties.value;
+  if (counties.length === 0) return false;
+  const bounds = new mapboxgl.LngLatBounds();
+  let hasAny = false;
+  for (const c of counties) {
+    const feature = countiesData.value.features.find(
+      (f: any) => f.properties?.GEOID === c.geoId
+    );
+    if (!feature) continue;
+    const coords = feature.geometry.type === "MultiPolygon"
+      ? feature.geometry.coordinates.flat(2)
+      : feature.geometry.coordinates.flat(1);
+    coords.forEach((coord: number[]) => bounds.extend(coord as [number, number]));
+    hasAny = true;
+  }
+  if (!hasAny) return false;
+  map.value.fitBounds(bounds, { padding: 100, maxZoom: 9, duration: 1000 });
+  return true;
+};
+
+// ----- Watchers wiring overlays to state -----
+
+watch([walkthroughActive, topNGeoIds], () => {
+  updateSetOutline();
+  updateWalkthroughMarkers();
+});
+
+watch([walkthroughActive, currentCounty], () => {
+  updateActiveOutline();
+  updateWalkthroughMarkers();
+}, { deep: true });
 
 const updateChoroplethVisibility = () => {
   if (!map.value) return;
@@ -1155,6 +1392,13 @@ const updateChoroplethColors = () => {
     // Check if we should use multi-layer combined scoring
     const useMultiLayerScoring = allSelectedLayers.value.length >= 2;
 
+    // Phase 4c: dim non-top-N counties when a limit is active. Top-N stays
+    // fully saturated; everyone else's alpha is reduced so the answer the
+    // user asked for ("top 5") is visually prominent on the map.
+    const topN = topNGeoIds.value;
+    const dimActive = topN.size > 0;
+    const DIM_ALPHA = 0.35;
+
     expression = [
       "match",
       ["get", "GEOID"],
@@ -1207,6 +1451,17 @@ const updateChoroplethColors = () => {
             finalColor = colors.contaminationColor;
           } else {
             finalColor = [0, 0, 0, 0];
+          }
+
+          // Phase 4c: dim non-top-N counties (preserves filtered-out greying).
+          // Filtered-out counties keep their muted-grey 0.4 alpha; passing-but-not-top-N
+          // gets multiplied down to DIM_ALPHA.
+          if (dimActive && !topN.has(geoID)) {
+            const isFilteredOut = useMultiLayerScoring &&
+              personalizedScores.value.get(geoID)?.filteredOut;
+            if (!isFilteredOut) {
+              finalColor = [finalColor[0], finalColor[1], finalColor[2], finalColor[3] * DIM_ALPHA];
+            }
           }
 
           return [geoID, ["rgba", ...finalColor]];
@@ -1540,6 +1795,12 @@ watch([scoringQuery, activeFilters], () => {
     updateChoroplethColors();
   }, 100);
 }, { deep: true });
+
+// Phase 4c: re-render choropleth when the top-N set changes (limit toggled,
+// limit value changed, or scoring query changed in a way that reorders ranks).
+watch(topNGeoIds, () => {
+  updateChoroplethColors();
+});
 
 const popup = ref<mapboxgl.Popup | null>(null);
 
@@ -1998,6 +2259,7 @@ onMounted(async () => {
     }
 
     addCountyChoroplethLayer();
+    addWalkthroughOverlayLayers();
 
     // Add contamination layers
     if (!DEV_MODE_DEMOGRAPHICS_ONLY) {

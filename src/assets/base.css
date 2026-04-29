@@ -139,3 +139,36 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Phase 4c — walkthrough numbered markers (anchored to map via mapboxgl.Marker;
+   live in document root, so styles must be unscoped). */
+.walkthrough-marker {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--blo-cream, #f7f4ee);
+  color: var(--blo-ink, #111);
+  border: 1.5px solid var(--blo-ink, #111);
+  font-family: var(--blo-font-display, 'Fraunces', serif);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  transform: translateY(0);
+  transition: transform 180ms ease, background 180ms ease, color 180ms ease;
+  pointer-events: none;
+  user-select: none;
+}
+.walkthrough-marker--active {
+  background: var(--blo-green-deep, #1f7a2e);
+  color: white;
+  border-color: var(--blo-green-deep, #1f7a2e);
+  width: 26px;
+  height: 26px;
+  font-size: 13px;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(31, 122, 46, 0.45);
+}
