@@ -169,6 +169,20 @@
       @clear-filters="clearActiveFilters"
       @start-walkthrough="startWalkthrough"
     />
+
+    <WalkthroughRail
+      :visible="walkthroughActive && !showDetailedPopup"
+      :rank="walkthroughIndex + 1"
+      :total="limitedRankedCounties.length"
+      :county-name="currentCounty?.name || ''"
+      :state-name="currentCounty?.id ? getStateName(currentCounty.id) : ''"
+      :score="walkthroughScore"
+      :stats="walkthroughStats"
+      @prev="walkthroughPrev"
+      @next="walkthroughNext"
+      @exit="exitWalkthrough"
+      @view-details="openWalkthroughDetails"
+    />
   </div>
 </template>
 
@@ -205,6 +219,7 @@ import LoadingIndicator from "@/components/LoadingIndicator.vue";
 import AveragesPanel from "@/components/AveragesPanel.vue";
 import ColorLegend from "@/components/ColorLegend.vue";
 import RankingPanel from "@/components/RankingPanel.vue";
+import WalkthroughRail from "@/components/WalkthroughRail.vue";
 import PromptInput from "@/components/PromptInput.vue";
 import type { QueryResponse } from "@/composables/usePromptQuery";
 import { useChat } from "@/composables/useChat";
@@ -309,14 +324,22 @@ const toggleRankingPanel = () => {
   rankingPanelExpanded.value = !rankingPanelExpanded.value;
 };
 
+/** True after an LLM-driven scoring query produces ≥1 layer. Reset by
+ *  clearActiveQuery. Drives RankingPanel mount so single-layer "top 5"
+ *  queries surface results (and walkthrough nav) instead of disappearing. */
+const hasActiveScoringQuery = ref(false);
+
 const showRankingPanel = computed(() =>
+  (hasActiveScoringQuery.value && allSelectedLayers.value.length >= 1) ||
   allSelectedLayers.value.length >= 2 ||
-  activeFilters.value.length > 0 ||
-  (activeLimit.value != null && allSelectedLayers.value.length >= 1)
+  activeFilters.value.length > 0
 );
 
-/** Zoom the map to a county's bounds by GEOID */
-const zoomToGeoId = (geoId: string): boolean => {
+/** Zoom the map to a county's bounds by GEOID.
+ *  `regional: true` caps zoom at 7 and adds extra padding so neighboring counties
+ *  remain visible — the right framing for walkthrough mode where county-tight
+ *  zoom would just show a single polygon with no comparative context. */
+const zoomToGeoId = (geoId: string, opts?: { regional?: boolean }): boolean => {
   if (!countiesData.value?.features || !map.value) return false;
   const feature = countiesData.value.features.find(
     (f: any) => f.properties?.GEOID === geoId
@@ -327,7 +350,9 @@ const zoomToGeoId = (geoId: string): boolean => {
     ? feature.geometry.coordinates.flat(2)
     : feature.geometry.coordinates.flat(1);
   coords.forEach((coord: number[]) => bounds.extend(coord as [number, number]));
-  map.value.fitBounds(bounds, { padding: 50, maxZoom: 10 });
+  const padding = opts?.regional ? 160 : 50;
+  const maxZoom = opts?.regional ? 7 : 10;
+  map.value.fitBounds(bounds, { padding, maxZoom, duration: 700 });
   return true;
 };
 
@@ -486,6 +511,7 @@ const clearActiveQuery = () => {
   activeLimit.value = null;
   rankingPanelExpanded.value = false;
   rankingStateFilter.value = '';
+  hasActiveScoringQuery.value = false;
   updateChoroplethVisibility();
   updateChoroplethColors();
 };
@@ -518,18 +544,99 @@ const limitedRankedCounties = computed(() => {
   return rankedCounties.value.slice(0, limit);
 });
 
-/** Phase 4a: walkthrough handlers */
-const startWalkthrough = () => {
-  if (limitedRankedCounties.value.length === 0) return;
-  walkthroughActive.value = true;
-  walkthroughIndex.value = 0;
-  openCountyAtWalkthroughIndex();
+/** Look up the raw value for a layer in the appropriate data map.
+ *  Mirrors `getRawLayerValue` from the tooltip closure but takes geoId
+ *  as a parameter so it can be used outside that closure (e.g. by
+ *  WalkthroughRail). Returns undefined when the layer or county is missing. */
+const getRawLayerValueFor = (layerId: string, geoId: string): any => {
+  const reg = LAYER_REGISTRY[layerId];
+  if (!reg) return undefined;
+  const key = reg.dataKey;
+  switch (layerId) {
+    case 'combined_scores_v2':
+      return combinedScoresV2Data.value[geoId]?.blo_score_v2;
+    case 'diversity_index':
+      return diversityData.value[geoId]?.diversityIndex;
+    case 'pct_Black':
+      return diversityData.value[geoId]?.pct_Black;
+    case 'life_expectancy':
+      return lifeExpectancyData.value[geoId]?.lifeExpectancy;
+    case 'contamination': {
+      const c = countyContaminationCounts[geoId] as any;
+      return typeof c === 'number' ? c : c?.total;
+    }
+    case 'avg_weekly_wage':
+    case 'median_income_by_race':
+      return (economicData.value[geoId] as any)?.[key];
+    case 'median_home_value':
+    case 'median_property_tax':
+    case 'homeownership_by_race':
+      return (housingData.value[geoId] as any)?.[key];
+    case 'poverty_by_race':
+    case 'black_progress_index':
+      return (equityData.value[geoId] as any)?.[key];
+    case 'commute_time':
+    case 'drove_alone':
+    case 'public_transit':
+      return (transportationData.value[geoId] as any)?.[key];
+    default:
+      return undefined;
+  }
+};
+
+/** Resolve a state name from diversityData (which carries STNAME). */
+const getStateName = (geoId: string): string => {
+  return diversityData.value[geoId]?.stateName || '';
+};
+
+/** Stat lines shown in the walkthrough rail — one per active scoring layer
+ *  (the layers the user actually asked about), formatted via the registry. */
+const walkthroughStats = computed(() => {
+  const geoId = currentCounty.value?.id;
+  if (!geoId) return [];
+  return allSelectedLayers.value.map(layerId => {
+    const reg = LAYER_REGISTRY[layerId];
+    const raw = getRawLayerValueFor(layerId, geoId);
+    return {
+      layerId,
+      name: reg?.name ?? layerId,
+      value: reg?.formatValue(raw) ?? '?',
+    };
+  });
+});
+
+/** Composite score for the walkthrough's current county (when ≥2 layers active). */
+const walkthroughScore = computed(() => {
+  const geoId = currentCounty.value?.id;
+  if (!geoId) return null;
+  if (allSelectedLayers.value.length < 2) return null;
+  return personalizedScores.value.get(geoId)?.score ?? null;
+});
+
+/** Phase 4a/4c: walkthrough handlers
+ *
+ *  Walkthrough no longer auto-opens the centered CountyModal — that was
+ *  occluding the map on every step. Instead we set `currentCounty`, do a
+ *  regional zoom, and let `WalkthroughRail` render alongside the map.
+ *  The full modal is opt-in via the rail's "View full details" button. */
+const stepWalkthroughTo = (geoId: string) => {
+  const name = getCountyName(geoId);
+  currentCounty.value = { id: geoId, name };
+  zoomToGeoId(geoId, { regional: true });
 };
 
 const openCountyAtWalkthroughIndex = () => {
   const county = limitedRankedCounties.value[walkthroughIndex.value];
   if (!county) return;
-  selectCountyFromRanking(county.geoId);
+  stepWalkthroughTo(county.geoId);
+};
+
+const startWalkthrough = () => {
+  if (limitedRankedCounties.value.length === 0) return;
+  walkthroughActive.value = true;
+  walkthroughIndex.value = 0;
+  showDetailedPopup.value = false;
+  openCountyAtWalkthroughIndex();
 };
 
 const walkthroughNext = () => {
@@ -552,10 +659,17 @@ const exitWalkthrough = () => {
   showDetailedPopup.value = false;
 };
 
-/** When the modal is closed (X button), also exit walkthrough */
+/** Opt-in: open the full CountyModal from the walkthrough rail. Modal and
+ *  rail are mutually exclusive surfaces — closing the modal returns to the rail. */
+const openWalkthroughDetails = () => {
+  if (!currentCounty.value?.id) return;
+  showDetailedPopup.value = true;
+};
+
+/** Modal close: just close the modal. Walkthrough (if active) stays alive
+ *  so the rail returns to view. Exit-walkthrough is its own explicit action. */
 const handleModalClose = () => {
   showDetailedPopup.value = false;
-  walkthroughActive.value = false;
 };
 
 /** Handle prompt query result: auto-select layers with weights and directions */
@@ -633,8 +747,10 @@ const handleQueryResult = (result: QueryResponse) => {
   updateChoroplethVisibility();
   updateChoroplethColors();
 
+  hasActiveScoringQuery.value = result.layers.length > 0;
+
   // UX-01: auto-open the ranking panel so the answer is visible without hunting for it
-  if (result.layers.length >= 2 || result.filters?.length || result.limit != null) {
+  if (result.layers.length >= 1) {
     rankingPanelExpanded.value = true;
   }
 };
