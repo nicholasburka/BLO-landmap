@@ -183,6 +183,9 @@ const getStateAbbr = (stateName: string): string => {
     'South Carolina': 'SC', 'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX',
     'Utah': 'UT', 'Vermont': 'VT', 'Virginia': 'VA', 'Washington': 'WA',
     'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY',
+    // US territories
+    'American Samoa': 'AS', 'Guam': 'GU', 'Northern Mariana Islands': 'MP',
+    'Puerto Rico': 'PR', 'U.S. Virgin Islands': 'VI',
   }
   return abbrs[stateName] || stateName.substring(0, 2).toUpperCase()
 }

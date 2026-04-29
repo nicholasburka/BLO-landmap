@@ -222,7 +222,7 @@ function computeScores(
       })
     }
 
-    // Skip counties with no available data
+    // Skip counties with no available data at all
     if (availableWeight === 0) {
       results.set(geoId, {
         geoId,
@@ -233,8 +233,14 @@ function computeScores(
       continue
     }
 
-    // Weight redistribution: divide by available weight, scale to 0-100
-    const score = (weightedSum / availableWeight) * 100
+    // Penalize missing data: divide by the TOTAL declared weight, not just
+    // the available portion. A county missing one of two equally-weighted
+    // layers maxes out at ~50% — its single available layer can no longer
+    // pump the composite to 100%. This keeps incomplete counties in the
+    // ranking (so the user can still see them) but pushes them down where
+    // they belong instead of letting them tie complete-data counties at the top.
+    const totalDeclaredWeight = layers.reduce((sum, l) => sum + l.query.weight, 0)
+    const score = (weightedSum / totalDeclaredWeight) * 100
 
     results.set(geoId, { geoId, score, components, missingLayers })
   }

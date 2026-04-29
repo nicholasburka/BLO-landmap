@@ -348,7 +348,10 @@ const zoomToGeoId = (geoId: string, opts?: { regional?: boolean }): boolean => {
   return true;
 };
 
-/** Resolve county name from GEOID using diversity data or other data maps */
+/** Resolve county name from GEOID. Tries the data maps first, then falls
+ *  back to the polygon GeoJSON's NAME property — which covers ~3220 features
+ *  including territories that aren't in diversityData. Last resort is the
+ *  raw GEOID string, but we should rarely hit that now. */
 const getCountyName = (geoId: string): string => {
   const div = diversityData.value[geoId];
   if (div?.countyName) return div.countyName;
@@ -356,6 +359,12 @@ const getCountyName = (geoId: string): string => {
   if (econ?.county_name) return econ.county_name;
   const housing = housingData.value[geoId];
   if (housing?.county_name) return housing.county_name;
+  // GeoJSON fallback: polygon features include NAME for every county we draw
+  const feature = countiesData.value?.features.find(
+    (f: any) => f.properties?.GEOID === geoId
+  );
+  const geoName = feature?.properties?.NAME;
+  if (geoName && typeof geoName === 'string') return geoName;
   return geoId;
 };
 

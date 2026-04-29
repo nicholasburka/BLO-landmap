@@ -54,6 +54,12 @@ export const FIPS_TO_STATE: { [key: string]: string } = {
   '54': 'West Virginia',
   '55': 'Wisconsin',
   '56': 'Wyoming',
+  // US territories — included so rankings/modals can render names instead of "Unknown"
+  '60': 'American Samoa',
+  '66': 'Guam',
+  '69': 'Northern Mariana Islands',
+  '72': 'Puerto Rico',
+  '78': 'U.S. Virgin Islands',
 } as const
 
 /**
