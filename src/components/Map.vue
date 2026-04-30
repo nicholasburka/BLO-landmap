@@ -1917,6 +1917,14 @@ const addTooltip = () => {
   };
 
   map.value.on("mousemove", "county-choropleth", (e) => {
+    // Phase 4e cleanup: when the inspect rail or walkthrough rail is open,
+    // the rail already shows the active county's stats — the hover popup
+    // duplicates that content right next to the cursor. Suppress it so
+    // the rail is the single source of "what is this county."
+    if (inspectActive.value || walkthroughActive.value) {
+      tooltip.remove();
+      return;
+    }
     if (e.features && e.features.length > 0) {
       const feature = e.features[0];
       const countyId = feature.properties.GEOID;

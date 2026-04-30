@@ -1,39 +1,8 @@
 <template>
-  <div
-    :id="embedded ? undefined : 'layer-control-container'"
-    :class="{
-      'layer-control-collapsed': !embedded && !expanded,
-      'layer-control-embedded': embedded,
-    }"
-    :style="embedded
-      ? undefined
-      : 'position: absolute; top: 50px; right: 10px; z-index: 10; pointer-events: auto'"
-    @click.stop
-  >
-    <button
-      v-if="!embedded"
-      @click="$emit('toggle')"
-      class="layer-control-toggle"
-      :class="{ 'layer-control-toggle--collapsed': !expanded }"
-      :aria-expanded="expanded"
-      aria-controls="layer-control"
-      aria-label="Toggle layer controls"
-    >
-      <span class="layer-control-gear" aria-hidden="true">⚙</span>
-      <span class="layer-control-title">Data Layers</span>
-      <span
-        v-if="!expanded && activeLayerCount && activeLayerCount > 0"
-        class="layer-control-badge"
-      >{{ activeLayerCount }}</span>
-      <span class="layer-control-chevron" aria-hidden="true">{{ expanded ? '▾' : '◂' }}</span>
-    </button>
-    <div
-      :id="embedded ? undefined : 'layer-control'"
-      v-show="embedded || expanded"
-      @click.stop
-      class="layer-control-content"
-      :class="{ 'layer-control-content--embedded': embedded }"
-    >
+  <!-- Phase 4d: this component is mounted only inside the Lens "Layers"
+       tab. The standalone pill-and-toggle chrome (top-right "Data Layers"
+       button) was retired with the Lens; this is the picker UI only. -->
+  <div class="layer-control-content layer-control-content--embedded" @click.stop>
       <!-- BLO Livability Index (no category) -->
       <div v-for="layer in demographicLayers.filter(l => !l.category)" :key="layer.id" class="layer-item">
         <input
@@ -365,8 +334,6 @@
           </div>
         </div>
       </template>
-    </div>
-    <slot></slot>
   </div>
 </template>
 
@@ -385,13 +352,6 @@ import type { ScoringFilter } from '@/types/mapTypes'
 import LayerScoringControls from '@/components/LayerScoringControls.vue'
 
 interface Props {
-  expanded: boolean
-  /** Count of currently-active layers (for the collapsed rail badge) */
-  activeLayerCount?: number
-  /** Phase 4d: when true, render WITHOUT the absolute-positioned pill +
-   *  toggle. Used when embedded inside the Lens "Layers" tab. The host
-   *  provides the panel chrome; we just contribute the picker UI. */
-  embedded?: boolean
   demographicLayers: DemographicLayer[]
   economicLayers?: EconomicLayer[]
   housingLayers?: HousingLayer[]
@@ -417,7 +377,6 @@ interface Props {
 const props = defineProps<Props>()
 
 defineEmits<{
-  toggle: []
   'toggle-demographic': [layerId: string]
   'toggle-economic': [layerId: string]
   'toggle-housing': [layerId: string]
@@ -550,39 +509,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
-#layer-control-container {
-  max-width: 250px;
-}
-
+/* The host (Lens "Layers" tab) owns the panel chrome — this just renders
+   the picker UI flush inside whatever container it's mounted in. */
 .layer-control-content {
-  background: white;
-  padding: 10px;
-  margin-top: 6px;
-  border-radius: var(--blo-radius-panel);
-  border: 1px solid var(--blo-cream-divider);
-  box-shadow: var(--blo-shadow-panel);
-  /* UX-02: cap height so the ranking panel (bottom-right) remains visible
-     when both are open at the same time. Content scrolls internally. */
-  max-height: 50vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-/* Phase 4d: embedded mode — host (the Lens) provides the chrome; strip
-   the standalone panel treatment so we render flush inside the tab. */
-.layer-control-content--embedded {
   background: transparent;
   padding: 0;
-  margin-top: 0;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  max-height: none;
-  overflow: visible;
-}
-
-.layer-control-collapsed #layer-control {
-  display: none;
 }
 
 .category-header {
@@ -619,135 +550,19 @@ onMounted(() => {
   transform: rotate(90deg);
 }
 
-.layer-control-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background-color: white;
-  color: var(--blo-ink);
-  border: 1px solid var(--blo-cream-divider);
-  padding: 8px 14px;
-  cursor: pointer;
-  border-radius: var(--blo-radius-input);
-  box-shadow: var(--blo-shadow-panel);
-  text-align: left;
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: 0.01em;
-  transition: background-color 120ms ease, border-color 120ms ease;
-  width: auto;
-  min-width: 0;
-}
-
-/* When collapsed, the toggle is the ONLY UI showing — keep it compact + pill-like */
-.layer-control-toggle--collapsed {
-  background-color: var(--blo-cream);
-  padding: 6px 12px;
-  font-size: 12px;
-}
-
-.layer-control-toggle:hover {
-  background-color: var(--blo-cream);
-  border-color: var(--blo-stone-soft);
-}
-
-.layer-control-gear {
-  font-size: 14px;
-  color: var(--blo-stone);
-  line-height: 1;
-}
-
-.layer-control-title {
-  white-space: nowrap;
-}
-
-.layer-control-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  background: var(--blo-green);
-  color: white;
-  font-size: 11px;
-  font-weight: 700;
-  border-radius: var(--blo-radius-input);
-  line-height: 1;
-}
-
-.layer-control-chevron {
-  font-size: 10px;
-  color: var(--blo-stone-soft);
-  margin-left: 2px;
-}
-
-.layer-control-toggle:focus {
-  outline: 2px solid #4a90e2;
-  outline-offset: 2px;
-}
+/* Phase 4d: standalone pill/toggle CSS removed — picker is embed-only now */
 
 @media (max-width: 768px) {
-  /* Mobile: pill goes to bottom-right (clear of the bottom-left Color Key
-     stack AND of Mapbox's bottom-right zoom/bearing controls). Content
-     panel opens upward and rightward-anchored. */
-  #layer-control-container {
-    position: fixed !important;
-    top: auto !important;
-    bottom: 180px !important;
-    left: auto !important;
-    right: 10px !important;
-    max-width: calc(100vw - 20px) !important;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-
-  .layer-control-toggle {
-    font-size: 13px;
-    width: auto !important;
-    min-width: 140px;
-    box-sizing: border-box;
-    position: relative;
-  }
-
-  .layer-control-content {
-    position: absolute !important;
-    bottom: 100% !important;
-    right: 0 !important;
-    left: auto !important;
-    margin-bottom: 8px !important;
-    width: auto !important;
-    max-width: calc(100vw - 40px) !important;
-    min-width: 280px !important;
-    box-sizing: border-box !important;
-    overflow-x: hidden !important;
-  }
-
-  #layer-control {
-    max-height: 50vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  #layer-control h3 {
-    font-size: 14px;
-    word-wrap: break-word;
-  }
-
+  /* Mobile: items wrap so long layer names don't push past the drawer edge */
   .layer-item {
     display: flex;
     align-items: flex-start;
     flex-wrap: wrap;
   }
-
   .layer-item label {
     word-wrap: break-word;
     overflow-wrap: break-word;
     max-width: calc(100% - 50px);
-  }
-
-  .layer-control-collapsed {
-    max-height: none;
   }
 }
 

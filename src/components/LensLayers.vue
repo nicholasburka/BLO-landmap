@@ -1,10 +1,8 @@
 <template>
-  <!-- Phase 4d L4: thin wrapper that mounts LayerControls in `embedded`
-       mode — host (the Lens) provides the panel chrome and tab handling;
-       LayerControls just contributes the picker UI. -->
+  <!-- Phase 4d L4: thin wrapper around the layer-picker UI for use inside
+       the Lens "Layers" tab. Phase 4e cleanup: no more `embedded` /
+       `expanded` props — LayerControls is embed-only now. -->
   <LayerControls
-    embedded
-    :expanded="true"
     :demographic-layers="demographicLayers"
     :economic-layers="economicLayers"
     :housing-layers="housingLayers"
