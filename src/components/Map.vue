@@ -91,6 +91,7 @@
       :walkthrough-active="false"
       :walkthrough-index="0"
       :walkthrough-total="0"
+      :co-rail="walkthroughActive || inspectActive"
       @close="handleModalClose"
     />
 
@@ -174,8 +175,9 @@
       @start-walkthrough="startWalkthrough"
     />
 
-    <WalkthroughRail
-      :visible="walkthroughActive && !showDetailedPopup"
+    <CountyRail
+      :visible="walkthroughActive || inspectActive"
+      :mode="walkthroughActive ? 'walk' : 'inspect'"
       :rank="walkthroughIndex + 1"
       :total="limitedRankedCounties.length"
       :county-name="currentCounty?.name || ''"
@@ -184,7 +186,7 @@
       :stats="walkthroughStats"
       @prev="walkthroughPrev"
       @next="walkthroughNext"
-      @exit="exitWalkthrough"
+      @exit="handleRailExit"
       @view-details="openWalkthroughDetails"
     />
   </div>
@@ -221,7 +223,7 @@ import CountyModal from "@/components/CountyModal.vue";
 import LayerControls from "@/components/LayerControls.vue";
 import LoadingIndicator from "@/components/LoadingIndicator.vue";
 import RankingPanel from "@/components/RankingPanel.vue";
-import WalkthroughRail from "@/components/WalkthroughRail.vue";
+import CountyRail from "@/components/CountyRail.vue";
 import Lens from "@/components/Lens.vue";
 import LensHeader from "@/components/LensHeader.vue";
 import LensLegend from "@/components/LensLegend.vue";
@@ -368,19 +370,16 @@ const getCountyName = (geoId: string): string => {
   return geoId;
 };
 
-/** Handle county selection from ranking panel — zoom and open modal */
+/** Handle county selection from ranking panel — opens the inspect rail
+ *  (Phase 4e). The map zooms regionally so the user sees the county in
+ *  context, not as a single polygon filling the screen. */
 const selectCountyFromRanking = (geoId: string) => {
-  const name = getCountyName(geoId);
-  currentCounty.value = { id: geoId, name };
-  showDetailedPopup.value = true;
-  zoomToGeoId(geoId);
+  inspectCounty(geoId);
 };
 
-/** Open county modal by GEOID only (used by LLM tool) */
+/** Open county inspection by GEOID — used by the LLM `show_county_details` tool. */
 const openCountyModalById = (geoId: string) => {
-  const name = getCountyName(geoId);
-  currentCounty.value = { id: geoId, name };
-  showDetailedPopup.value = true;
+  inspectCounty(geoId);
 };
 
 // Dynamic scoring state
@@ -516,6 +515,8 @@ const clearActiveQuery = () => {
   showDiversityChoropleth.value = true;
   // D3: chat narration goes stale once the query clears — drop it.
   chat.clearConversation();
+  // Phase 4e: clear any open inspect rail; its context is gone too.
+  if (inspectActive.value) closeInspect();
   updateChoroplethVisibility();
   updateChoroplethColors();
 };
@@ -523,6 +524,11 @@ const clearActiveQuery = () => {
 // Phase 4a: walkthrough state
 const walkthroughActive = ref(false);
 const walkthroughIndex = ref(0);
+
+// Phase 4e: single-county inspect mode. Mutually exclusive with walkthrough —
+// only one rail mode is active at a time. Inspect is the default response to
+// any "show me this county" intent (direct click, place pick, LLM tool).
+const inspectActive = ref(false);
 
 // Initialize scoring engine
 const dataMaps: DataMaps = {
@@ -611,12 +617,24 @@ const getStateName = (geoId: string): string => {
   return diversityData.value[geoId]?.stateName || '';
 };
 
-/** Stat lines shown in the walkthrough rail — one per active scoring layer
- *  (the layers the user actually asked about), formatted via the registry. */
+/** Default snapshot layers used by inspect mode when no scoring query is
+ *  active — gives the rail something useful to show on a casual click. */
+const INSPECT_DEFAULT_LAYERS = [
+  'pct_Black',
+  'diversity_index',
+  'median_home_value',
+  'life_expectancy',
+] as const;
+
+/** Stat lines shown in the rail — one per active scoring layer when a query
+ *  is running; otherwise a default snapshot for inspect mode. */
 const walkthroughStats = computed(() => {
   const geoId = currentCounty.value?.id;
   if (!geoId) return [];
-  return allSelectedLayers.value.map(layerId => {
+  const layerIds = allSelectedLayers.value.length > 0
+    ? allSelectedLayers.value
+    : (inspectActive.value ? [...INSPECT_DEFAULT_LAYERS] : []);
+  return layerIds.map(layerId => {
     const reg = LAYER_REGISTRY[layerId];
     const raw = getRawLayerValueFor(layerId, geoId);
     return {
@@ -627,12 +645,20 @@ const walkthroughStats = computed(() => {
   });
 });
 
-/** Composite score for the walkthrough's current county (when ≥2 layers active). */
+/** Composite score shown in the rail header.
+ *  - 2+ active scoring layers → custom composite from personalizedScores.
+ *  - Single layer or no query → BLO Livability v2 score (the default
+ *    "what is this county like overall" answer). */
 const walkthroughScore = computed(() => {
   const geoId = currentCounty.value?.id;
   if (!geoId) return null;
-  if (allSelectedLayers.value.length < 2) return null;
-  return personalizedScores.value.get(geoId)?.score ?? null;
+  if (allSelectedLayers.value.length >= 2) {
+    const s = personalizedScores.value.get(geoId)?.score;
+    return s != null ? s : null;
+  }
+  // Default fallback: BLO Livability Index v2 score (1–5 range)
+  const blo = combinedScoresV2Data.value[geoId]?.blo_score_v2;
+  return typeof blo === 'number' ? blo : null;
 });
 
 /** Phase 4a/4c: walkthrough handlers
@@ -713,15 +739,41 @@ const exitWalkthrough = () => {
   showDetailedPopup.value = false;
 };
 
-/** Opt-in: open the full CountyModal from the walkthrough rail. Modal and
- *  rail are mutually exclusive surfaces — closing the modal returns to the rail. */
+/** Phase 4e: open the inspect rail for a single county. Used by direct
+ *  click, place selection, and the LLM `show_county_details` tool. Closes
+ *  any active walkthrough first — they're mutually exclusive surfaces. */
+const inspectCounty = (geoId: string) => {
+  if (!geoId) return;
+  if (walkthroughActive.value) exitWalkthrough();
+  currentCounty.value = { id: geoId, name: getCountyName(geoId) };
+  inspectActive.value = true;
+  showDetailedPopup.value = false;
+  zoomToGeoId(geoId, { regional: true });
+};
+
+/** Close the inspect rail. The full modal (if open as the opt-in detail
+ *  layer) closes too, since inspect is the surface that owns the modal. */
+const closeInspect = () => {
+  inspectActive.value = false;
+  showDetailedPopup.value = false;
+  currentCounty.value = null;
+};
+
+/** Rail's "exit" emit routes here. The rail's mode tells us which to call. */
+const handleRailExit = () => {
+  if (walkthroughActive.value) exitWalkthrough();
+  else closeInspect();
+};
+
+/** Opt-in: open the full CountyModal from whichever rail is active.
+ *  The modal coexists with the rail (Phase 4e); it does not replace it. */
 const openWalkthroughDetails = () => {
   if (!currentCounty.value?.id) return;
   showDetailedPopup.value = true;
 };
 
-/** Modal close: just close the modal. Walkthrough (if active) stays alive
- *  so the rail returns to view. Exit-walkthrough is its own explicit action. */
+/** Modal close: just close the modal. The active rail (walk or inspect)
+ *  stays alive. Exit/Close is its own explicit action via the rail. */
 const handleModalClose = () => {
   showDetailedPopup.value = false;
 };
@@ -734,9 +786,10 @@ const handleQueryResult = (result: QueryResponse) => {
   // it would be referring to the old ranked set. Exit cleanly so overlays
   // and the rail don't show stale state, then let the user re-enter the
   // walkthrough from the new ranking via the panel.
-  if (walkthroughActive.value) {
-    exitWalkthrough();
-  }
+  // Phase 4e: same logic applies to inspect mode — a new query is a new
+  // context, so close any active inspection card.
+  if (walkthroughActive.value) exitWalkthrough();
+  if (inspectActive.value) closeInspect();
 
   // Clear everything
   selectedDemographicLayers.value = [];
@@ -2062,20 +2115,8 @@ const addTooltip = () => {
   });
 };
 
-const showDetailedPopupForFeature = (
-  feature: mapboxgl.MapboxGeoJSONFeature
-) => {
-  const countyId = feature.properties.GEOID;
-  const countyName = feature.properties.NAME;
-
-  debugLog("Showing modal for county:", countyId, countyName);
-
-  currentCounty.value = {
-    id: countyId,
-    name: countyName,
-  };
-  showDetailedPopup.value = true;
-};
+// Phase 4e: showDetailedPopupForFeature removed — county clicks route
+// through `inspectCounty(geoId)` which opens the rail, not the modal.
 
 
 const showGeocoderError = (message: string) => {
@@ -2117,12 +2158,75 @@ const handleGeocoderResult = (result: any) => {
 
 /** Phase 4c: handle a place suggestion picked inside the unified Ask input.
  *  PromptInput emits this when the user clicks a suggestion in its inline
- *  strip. We mirror the behavior of the prior geocoder selection flow:
- *  set currentGeocoderResult so the "Find land for sale" button appears,
- *  then fly the map and drop a marker. */
+ *  strip. Phase 4e: we now try to resolve the place to a US county GEOID
+ *  first (so "Charlotte" opens the inspect rail for Mecklenburg County
+ *  instead of dropping a pin on city streets). Falls back to the prior
+ *  generic flyTo+marker behavior when resolution fails (e.g. national
+ *  parks, cross-county places). */
 const handlePlaceSelection = (suggestion: { center: [number, number]; name: string; raw: any }) => {
   currentGeocoderResult.value = suggestion.raw;
-  handleGeocoderResult(suggestion.raw);
+  const geoId = resolvePlaceToCountyGeoId(suggestion);
+  if (geoId) {
+    inspectCounty(geoId);
+  } else {
+    handleGeocoderResult(suggestion.raw);
+  }
+};
+
+/** Ray-casting point-in-polygon test for a single ring of [lng, lat] points. */
+const pointInRing = (point: [number, number], ring: [number, number][]): boolean => {
+  const [x, y] = point;
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i];
+    const [xj, yj] = ring[j];
+    const intersect = ((yi > y) !== (yj > y)) &&
+      (x < ((xj - xi) * (y - yi)) / ((yj - yi) || 1e-12) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+};
+
+/** Test whether a point sits inside a Polygon or MultiPolygon feature.
+ *  For Polygon, the first ring is the outer boundary; subsequent rings
+ *  are holes (we treat any-ring containment as inside, accepting some
+ *  imprecision around enclaves — fine for county boundaries). */
+const pointInFeature = (point: [number, number], feature: any): boolean => {
+  if (!feature?.geometry) return false;
+  const geom = feature.geometry;
+  if (geom.type === 'Polygon') {
+    return pointInRing(point, geom.coordinates[0] as [number, number][]);
+  }
+  if (geom.type === 'MultiPolygon') {
+    for (const polygon of geom.coordinates) {
+      if (pointInRing(point, polygon[0] as [number, number][])) return true;
+    }
+  }
+  return false;
+};
+
+/** Resolve a Mapbox place feature to a county GEOID. Tries the fast path
+ *  (Mapbox returned a `district` type — already a county) before doing a
+ *  point-in-polygon walk over the county GeoJSON. Returns null when no
+ *  containing county is found (e.g. multi-county features, the place is
+ *  outside the US). */
+const resolvePlaceToCountyGeoId = (
+  suggestion: { center: [number, number]; name: string; raw: any },
+): string | null => {
+  if (!countiesData.value) return null;
+  const features = countiesData.value.features;
+  // Fast path: Mapbox `district` features for US counties have the
+  // GEOID embedded in the place context. We don't currently parse it
+  // — the point-in-polygon path is reliable enough for v1.
+  const center = suggestion.center;
+  if (!Array.isArray(center) || center.length < 2) return null;
+  for (const f of features) {
+    if (pointInFeature(center, f)) {
+      const geoId = (f as any).properties?.GEOID;
+      if (typeof geoId === 'string') return geoId;
+    }
+  }
+  return null;
 };
 
 // ============= Phase 3: LLM chat with tool use =============
@@ -2315,15 +2419,17 @@ onMounted(async () => {
   });
 
   map.value.on("click", (e) => {
+    // Phase 4e: county click is a no-op during walkthrough so the user
+    // can't accidentally derail the tour. They have to Exit first to switch.
+    if (walkthroughActive.value) return;
     const features = map.value?.queryRenderedFeatures(e.point, {
       layers: ["county-choropleth"],
     });
     if (features && features.length > 0) {
       const feature = features[0];
-      debugLog("Clicked feature:", feature);
-      debugLog("Feature ID:", feature.properties.GEOID);
-      debugLog("Feature properties:", feature.properties);
-      showDetailedPopupForFeature(feature);
+      const countyId = feature.properties?.GEOID;
+      debugLog("Clicked feature:", countyId);
+      if (countyId) inspectCounty(countyId);
     } else {
       debugLog("No feature found at click point");
     }

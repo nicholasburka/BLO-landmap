@@ -2,7 +2,10 @@
   <div
     v-if="show"
     id="detailed-popup"
-    :class="{ 'desktop-view': isDesktopView }"
+    :class="{
+      'desktop-view': isDesktopView,
+      'detailed-popup--with-rail': coRail,
+    }"
     @click.stop
     role="dialog"
     aria-modal="true"
@@ -178,12 +181,17 @@ interface Props {
   walkthroughActive?: boolean
   walkthroughIndex?: number
   walkthroughTotal?: number
+  /** Phase 4e: when true, the rail (walk or inspect) is visible alongside
+   *  the modal — reposition center-left so the modal doesn't sit on top
+   *  of it. */
+  coRail?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   walkthroughActive: false,
   walkthroughIndex: 0,
   walkthroughTotal: 0,
+  coRail: false,
 })
 
 const emit = defineEmits<{
@@ -502,6 +510,19 @@ const getBlackProgressIndexDiff = computed(() => {
 
 #detailed-popup.desktop-view {
   max-width: 600px;
+}
+
+/* Phase 4e: when the rail (walk or inspect) is visible at right, shift the
+   modal so it sits in the available left half — the rail and its spotlight
+   stay visible behind the modal's siblings, not occluded by it. */
+@media (min-width: 769px) {
+  #detailed-popup.detailed-popup--with-rail {
+    left: 0;
+    right: calc(320px + 32px);
+    transform: translateY(-50%);
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 .detailed-popup-close {

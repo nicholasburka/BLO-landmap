@@ -136,7 +136,7 @@ export const TOOL_DEFINITIONS = [
   },
   {
     name: 'show_county_details',
-    description: 'Open the detailed information modal for a specific county, showing all its data across demographics, economics, housing, equity, transportation, environment, and health.',
+    description: 'Open an inspection panel for a specific county. The map zooms regionally and the right-side rail shows the county name, score, and key stats. Use this when the user wants details about a specific county.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -229,8 +229,11 @@ export async function executeTool(
       case 'show_county_details': {
         const resolved = resolveCounty(toolInput.county_name, toolInput.state)
         if ('error' in resolved) return resolved.error
+        // Phase 4e: openCountyModal now routes through inspectCounty in
+        // Map.vue — opens the right-side inspect rail, not the centered
+        // modal. Same tool API, different surface.
         ctx.openCountyModal(resolved.match.geoId)
-        return `Opened details for ${resolved.match.name}, ${resolved.match.stateAbbr}.`
+        return `Opened inspection for ${resolved.match.name}, ${resolved.match.stateAbbr}.`
       }
 
       default:

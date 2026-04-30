@@ -1,21 +1,26 @@
 <template>
   <aside
     v-if="visible"
-    class="walkthrough-rail blo-panel blo-panel--primary"
+    class="county-rail blo-panel blo-panel--primary"
+    :class="{
+      'county-rail--walk': mode === 'walk',
+      'county-rail--inspect': mode === 'inspect',
+    }"
     role="complementary"
-    aria-label="County walkthrough"
+    :aria-label="mode === 'walk' ? 'County walkthrough' : 'County inspection'"
     @click.stop
   >
     <header class="rail-header">
-      <span class="rail-rank">
+      <span v-if="mode === 'walk'" class="rail-rank">
         {{ rank }}<span class="rail-rank-of"> of {{ total }}</span>
       </span>
+      <span v-else class="rail-eyebrow">Inspect</span>
       <button
         class="rail-exit"
         type="button"
         @click="$emit('exit')"
-        aria-label="Exit walkthrough"
-        title="Exit walkthrough (Esc)"
+        :aria-label="mode === 'walk' ? 'Exit walkthrough' : 'Close inspection'"
+        :title="mode === 'walk' ? 'Exit walkthrough (Esc)' : 'Close (Esc)'"
       >×</button>
     </header>
 
@@ -42,7 +47,7 @@
       @click="$emit('view-details')"
     >View full details ▸</button>
 
-    <footer class="rail-nav">
+    <footer v-if="mode === 'walk'" class="rail-nav">
       <button
         class="rail-nav-btn"
         type="button"
@@ -64,8 +69,12 @@
 <script setup lang="ts">
 defineProps<{
   visible: boolean
-  rank: number
-  total: number
+  /** "walk" — multi-county tour with prev/next/rank.
+   *  "inspect" — single-county glance, X to close. */
+  mode: 'walk' | 'inspect'
+  /** Walk-mode only — ignored in inspect mode. */
+  rank?: number
+  total?: number
   countyName: string
   stateName: string
   score: number | null
@@ -81,7 +90,7 @@ defineEmits<{
 </script>
 
 <style scoped>
-.walkthrough-rail {
+.county-rail {
   position: fixed;
   top: 80px;
   right: 16px;
@@ -97,6 +106,15 @@ defineEmits<{
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
   border-radius: 12px;
   animation: rail-slide-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.rail-eyebrow {
+  font-family: var(--blo-font-display, 'Fraunces', serif);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blo-stone, #6b6560);
 }
 
 @keyframes rail-slide-in {
@@ -269,7 +287,7 @@ defineEmits<{
 }
 
 @media (max-width: 768px) {
-  .walkthrough-rail {
+  .county-rail {
     top: auto;
     right: 8px;
     left: 8px;
