@@ -40,6 +40,16 @@ def calculate_diversity_index(group):
 # Read the CSV file
 df = pd.read_csv('../source-data/census/countyCensus-est2023-alldata.csv', encoding='latin-1')
 
+# Census PEP file ships every county once per (YEAR, AGEGRP) combination —
+# 5 vintages (1=Apr 2020 base, 2=2020, 3=2021, 4=2022, 5=2023) × 19 age
+# groups (0=total, 1-18=brackets). The original groupby summed all 95 rows
+# per county, inflating populations ~10x (Wake County ended up at 11.5M
+# instead of 1.19M). Filter to the latest vintage + total age group BEFORE
+# aggregating so each county contributes exactly one row.
+LATEST_YEAR = df['YEAR'].max()  # 5 in the 2023 vintage file
+df = df[(df['YEAR'] == LATEST_YEAR) & (df['AGEGRP'] == 0)].copy()
+print(f"Filtered to YEAR={LATEST_YEAR}, AGEGRP=0: {len(df)} county rows")
+
 # Group by county and calculate diversity index and aggregate statistics
 county_diversity = df.groupby(['STATE', 'COUNTY', 'STNAME', 'CTYNAME']).apply(calculate_diversity_index).reset_index()
 
