@@ -190,6 +190,25 @@ const hasActiveQuery = computed(
   gap: 4px 6px;
 }
 
+/* Mobile: chips don't wrap or truncate — they scroll horizontally with a
+   fade-mask hint on the right edge. Keeps every chip's full layer name
+   readable in the peek state where vertical space is precious. */
+@media (max-width: 768px) {
+  .lens-hd-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 14px;
+    mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+    scrollbar-width: none;
+  }
+  .lens-hd-chips::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 .lens-hd-chip {
   display: inline-flex;
   align-items: center;

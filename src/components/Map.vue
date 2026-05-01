@@ -95,6 +95,10 @@
       @close="handleModalClose"
     />
 
+    <!-- Phase 4f: one-time welcome card explaining the BLO Livability
+         Index. Auto-dismisses on click and via localStorage. -->
+    <WelcomeCard />
+
     <!-- Phase 4d: the Lens — single primary surface for "what does this
          map mean right now?" Replaces ColorLegend, AveragesPanel, and
          the standalone Data Layers pill. -->
@@ -229,6 +233,7 @@ import LensHeader from "@/components/LensHeader.vue";
 import LensLegend from "@/components/LensLegend.vue";
 import LensLayers from "@/components/LensLayers.vue";
 import LensContext from "@/components/LensContext.vue";
+import WelcomeCard from "@/components/WelcomeCard.vue";
 import PromptInput from "@/components/PromptInput.vue";
 import type { QueryResponse } from "@/composables/usePromptQuery";
 import { useChat } from "@/composables/useChat";
@@ -1014,6 +1019,7 @@ const toggleTransportationLayer = (layerId: string) => {
 
 const SET_OUTLINE_LAYER = "walkthrough-set-outline";
 const ACTIVE_OUTLINE_LAYER = "walkthrough-active-outline";
+const HOVER_OUTLINE_LAYER = "county-hover-outline";
 
 /** Created once on map load. Filters update reactively via watchers. */
 const addWalkthroughOverlayLayers = () => {
@@ -1043,6 +1049,21 @@ const addWalkthroughOverlayLayers = () => {
       "line-color": "#111111",
       "line-width": 2.8,
       "line-opacity": 1.0,
+    },
+    filter: ["==", ["get", "GEOID"], "__none__"],
+    layout: { visibility: "none" },
+  });
+
+  // Phase 4f: hover outline — thin ink line on the county under the cursor.
+  // Sits on top of fill but below the heavier active/set outlines.
+  map.value.addLayer({
+    id: HOVER_OUTLINE_LAYER,
+    type: "line",
+    source: "counties",
+    paint: {
+      "line-color": "#111111",
+      "line-width": 1.5,
+      "line-opacity": 0.6,
     },
     filter: ["==", ["get", "GEOID"], "__none__"],
     layout: { visibility: "none" },
@@ -1917,6 +1938,18 @@ const addTooltip = () => {
   };
 
   map.value.on("mousemove", "county-choropleth", (e) => {
+    // Phase 4f: hover outline + cursor cue. Skip when a rail is open
+    // — the active county already has a heavier outline and clicks are
+    // routed to the rail anyway, so the hover signal would compete.
+    if (!inspectActive.value && !walkthroughActive.value) {
+      const hoverGeo = e.features?.[0]?.properties?.GEOID;
+      if (typeof hoverGeo === 'string' && map.value?.getLayer(HOVER_OUTLINE_LAYER)) {
+        map.value.setFilter(HOVER_OUTLINE_LAYER, ["==", ["get", "GEOID"], hoverGeo]);
+        map.value.setLayoutProperty(HOVER_OUTLINE_LAYER, "visibility", "visible");
+      }
+      if (map.value) map.value.getCanvas().style.cursor = 'pointer';
+    }
+
     // Phase 4e cleanup: when the inspect rail or walkthrough rail is open,
     // the rail already shows the active county's stats — the hover popup
     // duplicates that content right next to the cursor. Suppress it so
@@ -2120,8 +2153,23 @@ const addTooltip = () => {
 
   map.value.on("mouseleave", "county-choropleth", () => {
     tooltip.remove();
+    // Phase 4f: clear the hover outline + restore default cursor.
+    if (map.value?.getLayer(HOVER_OUTLINE_LAYER)) {
+      map.value.setLayoutProperty(HOVER_OUTLINE_LAYER, "visibility", "none");
+    }
+    if (map.value) map.value.getCanvas().style.cursor = '';
   });
 };
+
+/** Phase 4f: hide the hover outline immediately when a rail opens — the
+ *  active-county outline is heavier and would compete visually. */
+watch([inspectActive, walkthroughActive], () => {
+  if (!map.value || !map.value.getLayer(HOVER_OUTLINE_LAYER)) return;
+  if (inspectActive.value || walkthroughActive.value) {
+    map.value.setLayoutProperty(HOVER_OUTLINE_LAYER, "visibility", "none");
+    map.value.getCanvas().style.cursor = '';
+  }
+});
 
 // Phase 4e: showDetailedPopupForFeature removed — county clicks route
 // through `inspectCounty(geoId)` which opens the rail, not the modal.
@@ -2146,6 +2194,22 @@ const showGeocoderError = (message: string) => {
   }, 3000);
 };
 
+/** Phase 4f: themed place marker — cream + ink + green-deep dot with a
+ *  brief BLO-orange pulse ring. Replaces the bright Mapbox blue default
+ *  so the marker fits the BLO design system. */
+const buildBloPlaceMarker = (): HTMLElement => {
+  const wrap = document.createElement('div');
+  wrap.className = 'blo-place-marker';
+  const dot = document.createElement('div');
+  dot.className = 'blo-place-marker-dot';
+  const pulse = document.createElement('div');
+  pulse.className = 'blo-place-marker-pulse';
+  pulse.setAttribute('aria-hidden', 'true');
+  wrap.appendChild(pulse);
+  wrap.appendChild(dot);
+  return wrap;
+};
+
 const handleGeocoderResult = (result: any) => {
   debugLog("Geocoder result:", result);
 
@@ -2155,7 +2219,9 @@ const handleGeocoderResult = (result: any) => {
       zoom: 10,
     });
 
-    new mapboxgl.Marker().setLngLat(result.center).addTo(map.value!);
+    new mapboxgl.Marker({ element: buildBloPlaceMarker(), anchor: 'center' })
+      .setLngLat(result.center)
+      .addTo(map.value!);
   } else {
     console.error("No coordinates found for this result");
     showGeocoderError(

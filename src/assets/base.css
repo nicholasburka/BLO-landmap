@@ -172,3 +172,35 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 3px 10px rgba(31, 122, 46, 0.45);
 }
+
+/* Phase 4f — themed place marker (used on geocoder fallback when a place
+   doesn't resolve to a county; otherwise the inspect rail outlines the
+   resolved county). Cream dot with ink ring + a brief BLO-orange pulse. */
+.blo-place-marker {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  user-select: none;
+}
+.blo-place-marker-dot {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--blo-cream, #f7f4ee);
+  border: 1.5px solid var(--blo-ink, #111);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+.blo-place-marker-pulse {
+  position: absolute;
+  inset: -8px;
+  border-radius: 999px;
+  background: rgba(255, 107, 28, 0.30); /* var(--blo-orange) at .3 */
+  animation: blo-place-pulse 720ms cubic-bezier(0.2, 0.8, 0.2, 1) 1;
+  animation-fill-mode: forwards;
+  pointer-events: none;
+}
+@keyframes blo-place-pulse {
+  0%   { transform: scale(0.6); opacity: 0.85; }
+  100% { transform: scale(1.4); opacity: 0;    }
+}

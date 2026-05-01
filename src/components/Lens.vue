@@ -66,7 +66,15 @@
       </div>
 
       <!-- Tab panels: only one visible at a time, cross-fade between -->
-      <div class="lens-body">
+      <div
+        class="lens-body"
+        :class="{
+          'lens-body--scroll-up': showScrollUp,
+          'lens-body--scroll-down': showScrollDown,
+        }"
+        ref="lensBodyEl"
+        @scroll="updateScrollAffordance"
+      >
         <transition name="lens-fade" mode="out-in">
           <section
             :key="activeTab"
@@ -92,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 
 type TabId = 'legend' | 'layers' | 'context'
 
@@ -170,6 +178,52 @@ function focusTab(id: TabId): void {
     el?.focus()
   })
 }
+
+// Phase 4f: scroll-affordance fades. Track whether the body has content
+// above and/or below the visible area, expose as classes on the scroll
+// container — the CSS pseudo-elements pick those up.
+const lensBodyEl = ref<HTMLElement | null>(null)
+const showScrollUp = ref(false)
+const showScrollDown = ref(false)
+
+function updateScrollAffordance(): void {
+  const el = lensBodyEl.value
+  if (!el) {
+    showScrollUp.value = false
+    showScrollDown.value = false
+    return
+  }
+  const max = el.scrollHeight - el.clientHeight
+  showScrollUp.value = el.scrollTop > 4
+  showScrollDown.value = max - el.scrollTop > 4
+}
+
+// Re-evaluate when the active tab changes (wait past the 150ms cross-fade)
+// AND whenever the body content resizes (categories accordion expand,
+// chips wrap, etc.). ResizeObserver fires for any DOM change inside
+// the body, including children — exactly the trigger we need.
+function scheduleAffordanceCheck(): void {
+  nextTick(updateScrollAffordance)
+  setTimeout(updateScrollAffordance, 180)
+}
+watch(activeTab, scheduleAffordanceCheck)
+
+let resizeObserver: ResizeObserver | null = null
+onMounted(() => {
+  scheduleAffordanceCheck()
+  if (lensBodyEl.value && typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver(() => updateScrollAffordance())
+    resizeObserver.observe(lensBodyEl.value)
+    // Also observe direct children — scrollHeight only updates when child
+    // size changes, which the parent observer might miss.
+    Array.from(lensBodyEl.value.children).forEach((c) => resizeObserver!.observe(c))
+  }
+  window.addEventListener('resize', updateScrollAffordance)
+})
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect()
+  window.removeEventListener('resize', updateScrollAffordance)
+})
 </script>
 
 <style scoped>
@@ -256,7 +310,37 @@ function focusTab(id: TabId): void {
   flex: 1 1 auto;
   min-height: 80px;
   overflow-y: auto;
+  position: relative;
 }
+
+/* Phase 4f: scroll-affordance fades. Sticky pseudo-elements that overlay
+   the top and bottom 16px of the scroll container; opacity is driven by
+   the parent class so they only show when there's something to scroll. */
+.lens-body::before,
+.lens-body::after {
+  content: "";
+  position: sticky;
+  left: 0;
+  right: 0;
+  display: block;
+  height: 16px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  z-index: 1;
+}
+.lens-body::before {
+  top: 0;
+  margin-bottom: -16px;
+  background: linear-gradient(to bottom, var(--blo-cream, #f7f4ee), transparent);
+}
+.lens-body::after {
+  bottom: 0;
+  margin-top: -16px;
+  background: linear-gradient(to top, var(--blo-cream, #f7f4ee), transparent);
+}
+.lens-body--scroll-up::before { opacity: 1; }
+.lens-body--scroll-down::after { opacity: 1; }
 
 .lens-panel {
   padding: 12px 14px 14px;
