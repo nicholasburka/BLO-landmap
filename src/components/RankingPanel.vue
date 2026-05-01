@@ -80,7 +80,9 @@
             <span class="ranking-county">{{ county.name }}</span>
             <span class="ranking-state">{{ county.stateAbbr }}</span>
           </span>
-          <span class="ranking-score">{{ county.score }}</span>
+          <span class="ranking-score" title="Composite match score (0–100); higher matches the query more closely">
+            {{ county.score }}<span class="ranking-score-unit">/100</span>
+          </span>
         </div>
         <div v-if="displayedCounties.length === 0" class="ranking-empty">
           {{ filterPills.length > 0 ? 'No counties match the filters' : 'No counties match' }}
@@ -492,9 +494,17 @@ const countLabel = computed(() => {
   font-weight: 700;
   font-size: 13px;
   color: var(--blo-green-deep);
-  min-width: 40px;
+  min-width: 56px;
   text-align: right;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ranking-score-unit {
+  font-weight: 500;
+  font-size: 10.5px;
+  color: var(--blo-stone, #6b6560);
+  margin-left: 1px;
+  letter-spacing: 0.02em;
 }
 
 .ranking-empty {
@@ -506,8 +516,19 @@ const countLabel = computed(() => {
 }
 
 @media (max-width: 768px) {
+  /* Mobile: ranking panel anchors top-right under the header. Default
+     state is collapsed (just the toggle button) so it doesn't fight
+     the chat history; user expands to see the full list. */
   .ranking-panel {
-    display: none;
+    position: fixed;
+    top: 70px;
+    right: 8px;
+    bottom: auto;
+    left: auto;
+    width: auto;
+    max-width: calc(100vw - 16px);
+    max-height: calc(100vh - 200px);
+    z-index: 7;
   }
 }
 </style>

@@ -201,19 +201,26 @@ const emit = defineEmits<{
   'walkthrough-exit': []
 }>()
 
-// Phase 4a: keyboard shortcuts for walkthrough
+// Keyboard shortcuts:
+//   Escape — closes the modal whenever it's open. Walkthrough mode also
+//            uses Escape to exit the tour, but Phase 4e routed walkthrough
+//            nav back to the rail, so for the modal Escape is just close.
+//   Arrow keys — kept for the legacy walkthrough modal flow.
 onMounted(() => {
   const handler = (e: KeyboardEvent) => {
-    if (!props.walkthroughActive || !props.show) return
-    if (e.key === 'ArrowRight') {
+    if (!props.show) return
+    if (e.key === 'Escape') {
       e.preventDefault()
-      emit('walkthrough-next')
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault()
-      emit('walkthrough-prev')
-    } else if (e.key === 'Escape') {
-      e.preventDefault()
-      emit('walkthrough-exit')
+      if (props.walkthroughActive) emit('walkthrough-exit')
+      else emit('close')
+    } else if (props.walkthroughActive) {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        emit('walkthrough-next')
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        emit('walkthrough-prev')
+      }
     }
   }
   window.addEventListener('keydown', handler)

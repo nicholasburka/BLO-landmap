@@ -19,7 +19,7 @@
             :aria-label="'Info about ' + layer.name"
             :aria-describedby="'tooltip-' + layer.id"
           >ⓘ</button>
-          <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
+          <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip" v-html="layer.tooltip"></span>
         </span>
       </div>
 
@@ -45,7 +45,7 @@
                 :aria-label="'Info about ' + layer.name"
                 :aria-describedby="'tooltip-' + layer.id"
               >ⓘ</button>
-              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
+              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip" v-html="layer.tooltip"></span>
             </span>
             <LayerScoringControls
               v-if="showScoringControls && isLayerSelected(layer.id)"
@@ -85,7 +85,7 @@
                 :aria-label="'Info about ' + layer.name"
                 :aria-describedby="'tooltip-' + layer.id"
               >ⓘ</button>
-              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
+              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip" v-html="layer.tooltip"></span>
             </span>
             <LayerScoringControls
               v-if="showScoringControls && isLayerSelected(layer.id)"
@@ -125,7 +125,7 @@
                 :aria-label="'Info about ' + layer.name"
                 :aria-describedby="'tooltip-' + layer.id"
               >ⓘ</button>
-              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
+              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip" v-html="layer.tooltip"></span>
             </span>
             <LayerScoringControls
               v-if="showScoringControls && isLayerSelected(layer.id)"
@@ -165,7 +165,7 @@
                 :aria-label="'Info about ' + layer.name"
                 :aria-describedby="'tooltip-' + layer.id"
               >ⓘ</button>
-              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
+              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip" v-html="layer.tooltip"></span>
             </span>
             <LayerScoringControls
               v-if="showScoringControls && isLayerSelected(layer.id)"
@@ -205,7 +205,7 @@
                 :aria-label="'Info about ' + layer.name"
                 :aria-describedby="'tooltip-' + layer.id"
               >ⓘ</button>
-              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
+              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip" v-html="layer.tooltip"></span>
             </span>
             <LayerScoringControls
               v-if="showScoringControls && isLayerSelected(layer.id)"
@@ -267,7 +267,7 @@
                   :aria-label="'Info about ' + layer.name"
                   :aria-describedby="'tooltip-' + layer.id"
                 >ⓘ</button>
-                <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
+                <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip" v-html="layer.tooltip"></span>
               </span>
             </div>
           </div>
@@ -316,7 +316,7 @@
                 :aria-label="'Info about ' + layer.name"
                 :aria-describedby="'tooltip-' + layer.id"
               >ⓘ</button>
-              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.tooltip }}</span>
+              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip" v-html="layer.tooltip"></span>
             </span>
             <LayerScoringControls
               v-if="showScoringControls && isLayerSelected(layer.id)"
@@ -620,20 +620,33 @@ button.tooltip-icon:focus {
   border-radius: 6px;
   font-size: 12px;
   line-height: 1.4;
-  max-width: 250px;
+  max-width: 260px;
   width: max-content;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   z-index: 10001;
-  pointer-events: none;
+  /* Allow tooltip content (e.g. the BLO methodology link) to receive
+     pointer events. The wrapper's :hover keeps the popup visible while
+     the user moves into it via :hover on the popup itself too. */
+  pointer-events: auto;
   transition: opacity 0.15s ease;
   white-space: normal;
   text-align: left;
 }
 
 .tooltip-wrapper:hover .tooltip-popup,
-.tooltip-wrapper:focus-within .tooltip-popup {
+.tooltip-wrapper:focus-within .tooltip-popup,
+.tooltip-popup:hover {
   visibility: visible;
   opacity: 1;
+}
+
+/* Make any embedded links visible against the dark tooltip background. */
+.tooltip-popup :deep(a) {
+  color: #9be29b;
+  text-decoration: underline;
+}
+.tooltip-popup :deep(a:hover) {
+  color: white;
 }
 
 /* Scoring controls (weight / direction / filter) moved into

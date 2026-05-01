@@ -55,11 +55,17 @@ export interface TransportationLayer {
   tooltip?: string
 }
 
-/** Helper: build tooltip from registry description + source */
+/** Helper: build tooltip from registry description + source. The BLO
+ *  composite gets a "See methodology" link to the About page so users
+ *  can follow the weights/sources path the audit flagged as hidden. */
 function tip(id: string): string {
   const r = LAYER_REGISTRY[id]
   if (!r) return ''
-  return `${r.description} (${r.source})`
+  const base = `${r.description} (${r.source})`
+  if (id === 'combined_scores_v2') {
+    return `${base} See <a href="/about" target="_blank" rel="noopener">methodology, weights, and disclaimer</a>.`
+  }
+  return base
 }
 
 export const DEMOGRAPHIC_LAYERS: DemographicLayer[] = [
@@ -111,7 +117,9 @@ export const CONTAMINATION_LAYERS: ContaminationLayer[] = [
     id: 'air_pollution_sources',
     name: 'Air Pollution Sources',
     file: '/datasets/epa-contamination/air_pollution_sources.geojson',
-    color: '#00FF00',
+    // Magenta — contrasts with the green choropleth so dots stay visible
+    // when overlaid (#00FF00 was nearly invisible against BLO green).
+    color: '#d946ef',
     visible: false,
     tooltip: 'Facilities that emit air pollutants tracked by EPA. (EPA)',
   },

@@ -269,7 +269,21 @@ export function usePersonalizedScore(
     for (const cs of scores.value.values()) {
       if (cs.score !== null && !cs.filteredOut) ranked.push(cs)
     }
-    ranked.sort((a, b) => (b.score as number) - (a.score as number))
+    // Sort by score (descending), then by population (descending) as a
+    // tiebreaker so single-layer queries with many tied 100s (e.g.
+    // "highest Black poverty rate" — small counties commonly hit 100%)
+    // don't return an arbitrary order. Larger counties surface first
+    // since they're more journalistically representative and less
+    // dominated by small-sample noise. Final fallback: GEOID for
+    // deterministic ordering when all else ties.
+    ranked.sort((a, b) => {
+      const ds = (b.score as number) - (a.score as number)
+      if (Math.abs(ds) > 1e-9) return ds
+      const popA = dataMaps.diversityData.value[a.geoId]?.totalPopulation ?? 0
+      const popB = dataMaps.diversityData.value[b.geoId]?.totalPopulation ?? 0
+      if (popA !== popB) return popB - popA
+      return a.geoId.localeCompare(b.geoId)
+    })
     return ranked
   })
 

@@ -187,6 +187,7 @@
       :county-name="currentCounty?.name || ''"
       :state-name="currentCounty?.id ? getStateName(currentCounty.id) : ''"
       :score="walkthroughScore"
+      :score-scale="walkthroughScoreScale"
       :stats="walkthroughStats"
       @prev="walkthroughPrev"
       @next="walkthroughNext"
@@ -665,6 +666,11 @@ const walkthroughScore = computed(() => {
   const blo = combinedScoresV2Data.value[geoId]?.blo_score_v2;
   return typeof blo === 'number' ? blo : null;
 });
+
+/** Score scale: 100 for the custom composite (≥2 layers), 5 for BLO. */
+const walkthroughScoreScale = computed<5 | 100>(() =>
+  allSelectedLayers.value.length >= 2 ? 100 : 5,
+);
 
 /** Phase 4a/4c: walkthrough handlers
  *
@@ -1291,7 +1297,7 @@ const addContaminationLayer = async (map: mapboxgl.Map, layer: any) => {
       type: "geojson",
       data: data,
       attribution:
-        "Data source: U.S. Environmental Protection Agency - add link here",
+        'Data source: <a href="https://www.epa.gov/frs" target="_blank" rel="noopener">U.S. EPA Facility Registry Service</a>',
     });
 
     map.addLayer({
@@ -2378,8 +2384,16 @@ onMounted(async () => {
   }
 
   debugLog("Initializing map");
+  // Guard against the case where async work above (initCountyLookup,
+  // useMapData) finishes after the component has been torn down or
+  // before the template ref is bound. The error is benign — Vite HMR
+  // can disconnect the container — but the stack trace is noisy.
+  if (!mapContainer.value) {
+    console.warn("Map container not ready; skipping map init.");
+    return;
+  }
   map.value = new mapboxgl.Map({
-    container: mapContainer.value!,
+    container: mapContainer.value,
     style: "mapbox://styles/mapbox/light-v10",
     center: MAP_CONFIG.DEFAULT_CENTER,
     zoom: MAP_CONFIG.DEFAULT_ZOOM,

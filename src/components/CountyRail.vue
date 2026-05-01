@@ -30,8 +30,10 @@
     </div>
 
     <div v-if="score != null" class="rail-score">
-      <span class="rail-score-label">Composite score</span>
-      <span class="rail-score-value">{{ score.toFixed(1) }}</span>
+      <span class="rail-score-label">{{ scoreLabel }}</span>
+      <span class="rail-score-value">
+        {{ score.toFixed(scoreScale === 5 ? 2 : 1) }}<span class="rail-score-unit"> / {{ scoreScale }}</span>
+      </span>
     </div>
 
     <ul v-if="stats.length > 0" class="rail-stats">
@@ -67,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   visible: boolean
   /** "walk" — multi-county tour with prev/next/rank.
    *  "inspect" — single-county glance, X to close. */
@@ -79,7 +81,19 @@ defineProps<{
   stateName: string
   score: number | null
   stats: { layerId: string; name: string; value: string }[]
+  /** Scale denominator for the score: 5 for BLO Livability (default and
+   *  single-layer), 100 for the multi-layer custom composite. */
+  scoreScale?: 5 | 100
+  /** Optional override for the score label. Defaults to context-appropriate
+   *  copy: "BLO Livability Index" (default), "Match score" (custom). */
+  scoreLabel?: string
 }>()
+
+import { computed } from 'vue'
+const scoreScale = computed(() => props.scoreScale ?? 5)
+const scoreLabel = computed(() =>
+  props.scoreLabel ?? (props.scoreScale === 100 ? 'Match score' : 'BLO Livability Index'),
+)
 
 defineEmits<{
   prev: []
@@ -202,6 +216,13 @@ defineEmits<{
   font-weight: 700;
   color: var(--blo-green-deep, #1f7a2e);
   line-height: 1;
+}
+.rail-score-unit {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--blo-stone, #6b6560);
+  letter-spacing: 0.02em;
 }
 
 .rail-stats {
