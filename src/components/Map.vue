@@ -91,7 +91,7 @@
       :walkthrough-active="false"
       :walkthrough-index="0"
       :walkthrough-total="0"
-      :co-rail="walkthroughActive || inspectActive"
+      :co-rail="walkthroughActive"
       @close="handleModalClose"
     />
 
@@ -180,7 +180,7 @@
     />
 
     <CountyRail
-      :visible="walkthroughActive || inspectActive"
+      :visible="walkthroughActive || (inspectActive && !showDetailedPopup)"
       :mode="walkthroughActive ? 'walk' : 'inspect'"
       :rank="walkthroughIndex + 1"
       :total="limitedRankedCounties.length"
