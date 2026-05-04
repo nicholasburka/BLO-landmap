@@ -29,11 +29,21 @@ export function usePropertyListings(mapRef: Ref<mapboxgl.Map | null>, geocoderRe
       marker.getElement().style.zIndex = '1'
       marker.getElement().style.filter = 'brightness(1.5)'
 
-      // Center map on the marker
-      mapRef.value?.flyTo({
+      // Pan to the pin while preserving the user's current zoom. The
+      // old behavior hard-jumped to zoom 10, which pulled the county
+      // outline off-screen and broke the spatial context the user had
+      // just established by inspecting the county. If they're already
+      // at a usable zoom (≥ 7 — county-regional or closer) we just
+      // pan; if they're way out (rare for this flow) we ease them in
+      // to a sensible county-relative zoom.
+      const map = mapRef.value
+      if (!map) return
+      const currentZoom = map.getZoom()
+      const target: { center: [number, number]; zoom?: number } = {
         center: [listing.longitude, listing.latitude],
-        zoom: 10,
-      })
+      }
+      if (currentZoom < 7) target.zoom = 8
+      map.easeTo({ ...target, duration: 500 })
     }
   }
 
