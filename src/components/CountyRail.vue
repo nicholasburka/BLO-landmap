@@ -30,16 +30,32 @@
     </div>
 
     <div v-if="score != null" class="rail-score">
-      <span class="rail-score-label">{{ scoreLabel }}</span>
-      <span class="rail-score-value">
-        {{ score.toFixed(scoreScale === 5 ? 2 : 1) }}<span class="rail-score-unit"> / {{ scoreScale }}</span>
-      </span>
+      <div class="rail-score-row">
+        <span class="rail-score-label">{{ scoreLabel }}</span>
+        <span class="rail-score-value">
+          {{ score.toFixed(scoreScale === 5 ? 2 : 1) }}<span class="rail-score-unit"> / {{ scoreScale }}</span>
+        </span>
+      </div>
+      <div v-if="scoreRank" class="rail-score-rank">
+        rank {{ formatRank(scoreRank.rank) }} of {{ scoreRank.total.toLocaleString() }}
+      </div>
     </div>
 
     <ul v-if="stats.length > 0" class="rail-stats">
-      <li v-for="stat in stats" :key="stat.layerId" class="rail-stat">
+      <li
+        v-for="stat in stats"
+        :key="stat.layerId"
+        class="rail-stat"
+        :class="{
+          'rail-stat--good': stat.delta === 'good',
+          'rail-stat--bad': stat.delta === 'bad',
+        }"
+      >
         <span class="rail-stat-label">{{ stat.name }}</span>
-        <span class="rail-stat-value">{{ stat.value }}</span>
+        <span class="rail-stat-value">
+          <span v-if="stat.delta === 'good' || stat.delta === 'bad'" class="rail-stat-pip" aria-hidden="true"></span>
+          {{ stat.value }}
+        </span>
       </li>
     </ul>
 
@@ -80,13 +96,16 @@ const props = defineProps<{
   countyName: string
   stateName: string
   score: number | null
-  stats: { layerId: string; name: string; value: string }[]
+  stats: { layerId: string; name: string; value: string; delta?: 'good' | 'bad' | 'neutral' }[]
   /** Scale denominator for the score: 5 for BLO Livability (default and
    *  single-layer), 100 for the multi-layer custom composite. */
   scoreScale?: 5 | 100
   /** Optional override for the score label. Defaults to context-appropriate
    *  copy: "BLO Livability Index" (default), "Match score" (custom). */
   scoreLabel?: string
+  /** Where this county sits among all scored counties for the current
+   *  metric. Rendered as "rank N of M" under the score. */
+  scoreRank?: { rank: number; total: number } | null
 }>()
 
 import { computed } from 'vue'
@@ -94,6 +113,18 @@ const scoreScale = computed(() => props.scoreScale ?? 5)
 const scoreLabel = computed(() =>
   props.scoreLabel ?? (props.scoreScale === 100 ? 'Match score' : 'BLO Livability Index'),
 )
+
+/** "1st", "2nd", "3rd", "1,234th" — small contextual ordinal label. */
+function formatRank(n: number): string {
+  const v = n % 100
+  if (v >= 11 && v <= 13) return `${n.toLocaleString()}th`
+  switch (n % 10) {
+    case 1: return `${n.toLocaleString()}st`
+    case 2: return `${n.toLocaleString()}nd`
+    case 3: return `${n.toLocaleString()}rd`
+    default: return `${n.toLocaleString()}th`
+  }
+}
 
 defineEmits<{
   prev: []
@@ -196,12 +227,17 @@ defineEmits<{
 
 .rail-score {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 4px;
   padding: 10px 12px;
   background: white;
   border: 1px solid var(--blo-cream-divider, #e0d9ca);
   border-radius: 8px;
+}
+.rail-score-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
 }
 .rail-score-label {
   font-size: 11px;
@@ -224,6 +260,17 @@ defineEmits<{
   color: var(--blo-stone, #6b6560);
   letter-spacing: 0.02em;
 }
+/* Subtle ordinal rank — same row as score, smaller, ink-soft. Tells the
+   user where this county actually sits in the distribution without
+   competing with the headline number. */
+.rail-score-rank {
+  font-size: 11px;
+  font-feature-settings: "tnum";
+  color: var(--blo-stone, #6b6560);
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+  text-align: right;
+}
 
 .rail-stats {
   list-style: none;
@@ -245,6 +292,18 @@ defineEmits<{
   background: white;
   font-size: 13px;
   gap: 12px;
+  /* Phase 4f: subtle left border carries the good/bad signal without
+     making the row feel "highlighted." Default neutral state has no border. */
+  border-left: 3px solid transparent;
+}
+/* Comparison vs national average — color tinted from the BLO palette. */
+.rail-stat--good {
+  border-left-color: var(--blo-green-deep, #1f7a2e);
+  background: linear-gradient(to right, rgba(31, 122, 46, 0.045), white 60%);
+}
+.rail-stat--bad {
+  border-left-color: #c0392b;
+  background: linear-gradient(to right, rgba(192, 57, 43, 0.045), white 60%);
 }
 .rail-stat-label {
   color: var(--blo-ink-soft, #2a2a2a);
@@ -255,6 +314,22 @@ defineEmits<{
   font-feature-settings: "tnum";
   text-align: right;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+/* Tiny pip beside the value — reinforces the row tint with a glance-readable dot. */
+.rail-stat-pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+.rail-stat--good .rail-stat-pip {
+  background: var(--blo-green-deep, #1f7a2e);
+}
+.rail-stat--bad .rail-stat-pip {
+  background: #c0392b;
 }
 
 .rail-details {

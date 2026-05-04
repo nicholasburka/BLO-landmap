@@ -188,6 +188,7 @@
       :state-name="currentCounty?.id ? getStateName(currentCounty.id) : ''"
       :score="walkthroughScore"
       :score-scale="walkthroughScoreScale"
+      :score-rank="walkthroughRank"
       :stats="walkthroughStats"
       @prev="walkthroughPrev"
       @next="walkthroughNext"
@@ -222,6 +223,7 @@ import {
 } from "@/config/constants";
 import type { ColorBlend, ScoringQuery, ScoringFilter } from "@/types/mapTypes";
 import { LAYER_REGISTRY } from "@/config/layerRegistry";
+import { NATIONAL_AVERAGES } from "@/config/nationalAverages";
 import { usePersonalizedScore, type DataMaps } from "@/composables/usePersonalizedScore";
 // BLO_PRESET available in @/config/presets for future "load preset" feature
 import CountyModal from "@/components/CountyModal.vue";
@@ -632,8 +634,18 @@ const INSPECT_DEFAULT_LAYERS = [
   'life_expectancy',
 ] as const;
 
+/** Layers we DON'T color in the rail because they're descriptive rather than
+ *  better/worse — e.g. % Black population is a demographic fact, not a quality
+ *  metric. The rest follow LAYER_REGISTRY[id].direction vs national average. */
+const NEUTRAL_LAYER_IDS = new Set(['pct_Black', 'diversity_index']);
+
 /** Stat lines shown in the rail — one per active scoring layer when a query
- *  is running; otherwise a default snapshot for inspect mode. */
+ *  is running; otherwise a default snapshot for inspect mode. Each row gets
+ *  a `delta` of 'good' | 'bad' | 'neutral' based on:
+ *    - LAYER_REGISTRY[id].direction (higher_better vs lower_better)
+ *    - county value vs the national average for that layer
+ *  Coloring is suppressed for descriptive layers (pct_Black, diversity_index)
+ *  where "better" isn't a meaningful frame. */
 const walkthroughStats = computed(() => {
   const geoId = currentCounty.value?.id;
   if (!geoId) return [];
@@ -643,12 +655,55 @@ const walkthroughStats = computed(() => {
   return layerIds.map(layerId => {
     const reg = LAYER_REGISTRY[layerId];
     const raw = getRawLayerValueFor(layerId, geoId);
+    const avg = NATIONAL_AVERAGES[layerId]?.value;
+    const dir = reg?.direction;
+    let delta: 'good' | 'bad' | 'neutral' = 'neutral';
+    if (
+      typeof raw === 'number' &&
+      typeof avg === 'number' &&
+      avg > 0 &&
+      dir &&
+      !NEUTRAL_LAYER_IDS.has(layerId)
+    ) {
+      // Within ±2% of average → neutral; otherwise green/red by direction.
+      const ratio = raw / avg;
+      if (Math.abs(ratio - 1) < 0.02) delta = 'neutral';
+      else if (dir === 'higher_better') delta = raw > avg ? 'good' : 'bad';
+      else delta = raw < avg ? 'good' : 'bad';
+    }
     return {
       layerId,
       name: reg?.name ?? layerId,
       value: reg?.formatValue(raw) ?? '?',
+      delta,
     };
   });
+});
+
+/** Rank context shown under the score in the rail header. Computed from
+ *  the BLO Livability score (default) or the active composite (≥2 layers).
+ *  Returns { rank, total } where rank is 1-indexed (1 = best). */
+const walkthroughRank = computed<{ rank: number; total: number } | null>(() => {
+  const geoId = currentCounty.value?.id;
+  if (!geoId) return null;
+  if (allSelectedLayers.value.length >= 2) {
+    // Composite: rank within rankedCounties (already sorted descending)
+    const idx = rankedCounties.value.findIndex(c => c.geoId === geoId);
+    if (idx === -1) return null;
+    return { rank: idx + 1, total: rankedCounties.value.length };
+  }
+  // Default: rank by BLO v2 score across all counties with that score
+  const target = combinedScoresV2Data.value[geoId]?.blo_score_v2;
+  if (typeof target !== 'number') return null;
+  let better = 0;
+  let total = 0;
+  for (const v of Object.values(combinedScoresV2Data.value)) {
+    const s = (v as any)?.blo_score_v2;
+    if (typeof s !== 'number') continue;
+    total++;
+    if (s > target) better++;
+  }
+  return { rank: better + 1, total };
 });
 
 /** Composite score shown in the rail header.

@@ -29,6 +29,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { LAYER_REGISTRY } from '@/config/layerRegistry'
+import { NATIONAL_AVERAGES } from '@/config/nationalAverages'
 
 interface Row {
   id: string
@@ -37,27 +38,6 @@ interface Row {
   /** Where the average sits within [layer.range.min, layer.range.max] as a 0–100 percent. Null if range is missing. */
   tickPercent: number | null
   note?: string
-}
-
-/** National averages by layer ID. Single source of truth for the Lens Context tab.
- *  Sourced from the existing inline values in Map.vue / AveragesPanel.vue and from
- *  the per-layer descriptions in LAYER_REGISTRY. */
-const NATIONAL_AVERAGES: Record<string, { value: number; note?: string }> = {
-  combined_scores_v2: { value: 2.42 },
-  pct_Black: { value: 9.47 },
-  diversity_index: { value: 0.3289 },
-  life_expectancy: { value: 77.74 },
-  contamination: { value: 8.77, note: 'Sites per county' },
-  avg_weekly_wage: { value: 1070 },
-  median_income_by_race: { value: 52493 },
-  median_home_value: { value: 231974 },
-  median_property_tax: { value: 2124 },
-  homeownership_by_race: { value: 50.64 },
-  poverty_by_race: { value: 29.44 },
-  black_progress_index: { value: 74.02 },
-  commute_time: { value: 5 }, // ordinal scale 1-9
-  drove_alone: { value: 76 },
-  public_transit: { value: 5 },
 }
 
 /** Default layers shown when no scoring is active — the "national snapshot." */
@@ -75,7 +55,7 @@ const props = defineProps<{
 }>()
 
 const headerLabel = computed(() =>
-  props.scoringLayerIds.length > 0 ? 'National avg for active layers' : 'National snapshot',
+  props.scoringLayerIds.length > 0 ? 'National average for active layers' : 'National average',
 )
 
 const rows = computed<Row[]>(() => {
