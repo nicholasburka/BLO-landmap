@@ -225,12 +225,11 @@ export function usePropertyListings(mapRef: Ref<mapboxgl.Map | null>, geocoderRe
     // Clear listings array (this will hide the panel)
     listings.value = []
 
-    // Clear geocoder input
-    if (geocoderRef.value) {
-      geocoderRef.value.clear()
-    }
-
-    // Reset geocoder result
+    // Reset geocoder result. Skip geocoderRef.value.clear() — Phase 4c
+    // removed the geocoder DOM, so the underlying _inputEl is undefined
+    // and calling .clear() throws. The exception used to abort the rest
+    // of clearSearch (and propagate up through inspectCounty), leaving
+    // the rail stuck on its previous view after a county switch.
     currentGeocoderResult.value = null
     // Drop any in-flight selection/hover so subsequent searches start clean
     selectedListingId.value = null
