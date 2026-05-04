@@ -319,11 +319,19 @@ watch(() => props.visible, (open) => {
 watch(() => props.currentGeoId, (newId, oldId) => {
   if (oldId != null && newId !== oldId) view.value = 'detail'
 })
-// If the listings view is open and results vanish (clearSearch, county
-// switch that wiped state), bounce back to detail so the user isn't
-// staring at an empty scroll area.
-watch(() => props.landSearch?.results.length ?? 0, (n) => {
-  if (view.value === 'listings' && n === 0) view.value = 'detail'
+// Two-way listings view sync against the result count:
+//   - 0 → N (search just returned): auto-swap to listings IF the user
+//     is on detail. Skips the redundant "view N listings →" click.
+//     Only if on detail — don't yank them off the rank view if they're
+//     mid-browse.
+//   - N → 0 (clearSearch, county switch): if listings view is open,
+//     bounce back to detail so they're not staring at an empty scroll.
+watch(() => props.landSearch?.results.length ?? 0, (n, prev) => {
+  if (n > 0 && (prev ?? 0) === 0 && view.value === 'detail') {
+    view.value = 'listings'
+  } else if (view.value === 'listings' && n === 0) {
+    view.value = 'detail'
+  }
 })
 
 const rankListEl = ref<HTMLOListElement | null>(null)
