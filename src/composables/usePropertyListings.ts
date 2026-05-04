@@ -181,8 +181,19 @@ export function usePropertyListings(mapRef: Ref<mapboxgl.Map | null>, geocoderRe
       const data = await response.json()
       debugLog('got rentcast data')
       debugLog(data)
-      listings.value = data
-      if (data.length === 0) {
+      // Sort by days-on-market ascending so the freshest listings come
+      // first — stale 1500+-day-old listings dominating the top of the
+      // list reads as "this market is dead" even when there's a recent
+      // listing 10 cards down. Missing dom values sink to the bottom.
+      const sortedData = Array.isArray(data)
+        ? [...data].sort((a: any, b: any) => {
+            const da = typeof a?.daysOnMarket === 'number' ? a.daysOnMarket : Number.POSITIVE_INFINITY
+            const db = typeof b?.daysOnMarket === 'number' ? b.daysOnMarket : Number.POSITIVE_INFINITY
+            return da - db
+          })
+        : []
+      listings.value = sortedData
+      if (sortedData.length === 0) {
         alert(
           'No lots found within 100 miles of this point, try somewhere else.'
         )
@@ -192,7 +203,7 @@ export function usePropertyListings(mapRef: Ref<mapboxgl.Map | null>, geocoderRe
       // selects the listing in the rail (handled by parent watcher on
       // selectedListingId). The default mapbox SVG element is reused;
       // we just stamp data-listing-id and a click handler on it.
-      data.forEach((listing: any) => {
+      sortedData.forEach((listing: any) => {
         const marker = new mapboxgl.Marker({ color: '#1f7a2e' })
           .setLngLat([listing.longitude, listing.latitude])
           .addTo(mapRef.value!)
