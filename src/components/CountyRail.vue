@@ -82,6 +82,29 @@
         type="button"
         @click="$emit('view-details')"
       >View full details ▸</button>
+
+      <!-- Find land for sale: contextual CTA. Hidden until the parent
+           wires `landSearch` (so a rail in a context without listings
+           support — e.g. the walkthrough — won't show a dead button). -->
+      <div v-if="landSearch" class="rail-land">
+        <button
+          type="button"
+          class="rail-land-btn"
+          :disabled="landSearch.loading || landSearch.disabled"
+          @click="$emit('search-land')"
+        >
+          <span v-if="landSearch.loading" class="rail-land-spinner" aria-hidden="true"></span>
+          <span v-else class="rail-land-icon" aria-hidden="true">⌂</span>
+          <span>{{ landSearch.loading ? 'Searching listings…' : 'Find land for sale' }}</span>
+        </button>
+        <p v-if="landSearch.resultCount > 0" class="rail-land-result">
+          {{ landSearch.resultCount }} {{ landSearch.resultCount === 1 ? 'listing' : 'listings' }} found
+          <button type="button" class="rail-land-clear" @click="$emit('clear-land')">clear</button>
+        </p>
+        <p v-else-if="landSearch.attempted && !landSearch.loading" class="rail-land-empty">
+          No listings nearby — try another county.
+        </p>
+      </div>
     </template>
 
     <!-- =============== RANK VIEW (from "rank N of M" click) =============== -->
@@ -174,6 +197,17 @@ const props = defineProps<{
   rankCounties?: RankRow[]
   /** GEOID of the currently-inspected county — highlighted in the rank list. */
   currentGeoId?: string | null
+  /** Optional land-for-sale CTA state. When omitted, no CTA renders.
+   *  When present, the rail surfaces a "Find land for sale" button and
+   *  reports its current loading/result/empty state back to the user. */
+  landSearch?: {
+    loading: boolean
+    /** True after the user has run at least one search this session. */
+    attempted: boolean
+    /** Disable button (e.g. no county selected, no API key). */
+    disabled?: boolean
+    resultCount: number
+  } | null
 }>()
 
 const emit = defineEmits<{
@@ -183,6 +217,8 @@ const emit = defineEmits<{
   'view-details': []
   'view-rank': []
   'select-county': [geoId: string]
+  'search-land': []
+  'clear-land': []
 }>()
 
 import { computed, ref, watch, nextTick } from 'vue'
@@ -477,6 +513,75 @@ function formatRank(n: number): string {
 }
 .rail-details:hover {
   border-color: var(--blo-stone-soft, #9a948e);
+}
+
+/* Land-for-sale CTA — sits below the inspect details as the primary
+   "act on this county" affordance. Solid green so it visually outweighs
+   the secondary "View full details" link. */
+.rail-land {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--blo-cream-divider, #e0d9ca);
+}
+.rail-land-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 9px 16px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  background: var(--blo-green-deep, #1f7a2e);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.rail-land-btn:hover:not(:disabled) {
+  background: #196624;
+}
+.rail-land-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.rail-land-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+.rail-land-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: rail-land-spin 0.7s linear infinite;
+}
+@keyframes rail-land-spin {
+  to { transform: rotate(360deg); }
+}
+.rail-land-result,
+.rail-land-empty {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--blo-stone, #6b6560);
+}
+.rail-land-clear {
+  margin-left: 8px;
+  padding: 0;
+  font: inherit;
+  color: var(--blo-green-deep, #1f7a2e);
+  background: transparent;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.rail-land-clear:hover {
+  color: #154e1e;
 }
 
 .rail-nav {

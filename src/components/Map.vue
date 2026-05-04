@@ -2,29 +2,11 @@
   <div id="map" ref="mapContainer" class="map-root">
     <!-- Phase 4c: the dedicated geocoder input is gone. Place lookup now
          lives inline inside the Ask input via `PromptInput`'s suggestion
-         strip — one visible input, two intents auto-detected. -->
-    <div
-      id="search-listings"
-      class="search-listings"
-      v-show="!showDetailedPopup && currentGeocoderResult"
-      style="position: absolute; top: 60px; left: 10px; z-index: 1"
-    >
-      <button
-        @click="searchListings"
-        class="listings-button"
-        :disabled="!currentGeocoderResult || isSearchResultsLoading"
-      >
-        <span v-if="!isSearchResultsLoading">Find land for sale</span>
-        <div v-else class="loader"></div>
-      </button>
-      <button
-        v-if="listings.length > 0"
-        @click="clearSearch"
-        class="clear-search-button"
-      >
-        Clear Search
-      </button>
-    </div>
+         strip — one visible input, two intents auto-detected.
+         The "Find land for sale" CTA is now a contextual action inside
+         CountyRail (below) rather than a floating top-left button — the
+         rail is the canonical place for county-scoped actions. -->
+
     <PromptInput
       :messages="chat.messages.value"
       :is-thinking="chat.isThinking.value"
@@ -192,11 +174,14 @@
       :stats="walkthroughStats"
       :rank-counties="rankExplorerCounties"
       :current-geo-id="currentCounty?.id || null"
+      :land-search="railLandSearchState"
       @prev="walkthroughPrev"
       @next="walkthroughNext"
       @exit="handleRailExit"
       @view-details="openWalkthroughDetails"
       @select-county="inspectCounty"
+      @search-land="handleRailSearchLand"
+      @clear-land="clearSearch"
     />
   </div>
 </template>
@@ -293,6 +278,20 @@ const {
   searchListings,
   clearSearch,
 } = usePropertyListings(map, geocoderRef);
+
+/** Has the user run a land search for the current county at least once?
+ *  Drives the "No listings nearby" empty-state copy in the rail —
+ *  without this we'd flash the empty state for an unsearched county. */
+const landSearchAttempted = ref(false);
+
+/** Run the rail's "Find land for sale" CTA. The composable already
+ *  centers on map.getCenter() when no geocoder result is set, and
+ *  inspectCounty() has just zoomed to the county — so map center IS
+ *  the county center. No extra parameter plumbing required. */
+const handleRailSearchLand = async () => {
+  landSearchAttempted.value = true;
+  await searchListings();
+};
 
 // Phase 4d: Data Layers panel + its expanded state are gone — layer
 // picking now lives inside the Lens "Layers" tab which is always visible.
@@ -693,6 +692,19 @@ const walkthroughStats = computed(() => {
 // AND auto-returns to detail. Implemented as a view inside CountyRail
 // (not a separate panel) so we don't add another floating surface.
 
+/** Land-for-sale CTA state for the inspect rail. Returns null in walk
+ *  mode — the walkthrough is about scanning multiple counties, not
+ *  shopping for parcels in any one of them. */
+const railLandSearchState = computed(() => {
+  if (walkthroughActive.value) return null;
+  if (!inspectActive.value || !currentCounty.value) return null;
+  return {
+    loading: isSearchResultsLoading.value,
+    attempted: landSearchAttempted.value,
+    resultCount: listings.value.length,
+  };
+});
+
 /** All counties sorted by the active scoring metric (BLO v2 by default,
  *  composite when ≥2 scoring layers). One pass over the data; filtered
  *  to entries that have BOTH a score and a name, so the list is clean. */
@@ -883,6 +895,12 @@ const exitWalkthrough = () => {
 const inspectCounty = (geoId: string) => {
   if (!geoId) return;
   if (walkthroughActive.value) exitWalkthrough();
+  // Different county → discard last search's "no results" state so the
+  // rail doesn't show a stale empty-message under the new county.
+  if (currentCounty.value?.id !== geoId) {
+    landSearchAttempted.value = false;
+    if (listings.value.length > 0) clearSearch();
+  }
   currentCounty.value = { id: geoId, name: getCountyName(geoId) };
   inspectActive.value = true;
   showDetailedPopup.value = false;
