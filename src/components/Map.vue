@@ -2718,6 +2718,16 @@ onMounted(async () => {
     // Phase 4e: county click is a no-op during walkthrough so the user
     // can't accidentally derail the tour. They have to Exit first to switch.
     if (walkthroughActive.value) return;
+    // Marker clicks bubble to the map's click event in mapbox-gl. Without
+    // this guard, clicking a property pin would also fire the county
+    // click handler — which calls inspectCounty, which (when the underlying
+    // county differs from the current one) wipes the active land search.
+    // Bail when the original DOM click target is inside a marker.
+    const target = (e.originalEvent?.target as HTMLElement | null);
+    if (target && target.closest(".mapboxgl-marker")) {
+      debugLog("Click landed on a marker — skipping county inspect");
+      return;
+    }
     const features = map.value?.queryRenderedFeatures(e.point, {
       layers: ["county-choropleth"],
     });
