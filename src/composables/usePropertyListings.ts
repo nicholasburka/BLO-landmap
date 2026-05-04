@@ -1,4 +1,4 @@
-import { ref, type Ref } from 'vue'
+import { ref, watch, type Ref } from 'vue'
 import mapboxgl from 'mapbox-gl'
 import type MapboxGeocoder from '@mapbox/mapbox-gl-geocoder'
 import Papa from 'papaparse'
@@ -10,41 +10,43 @@ export function usePropertyListings(mapRef: Ref<mapboxgl.Map | null>, geocoderRe
   const listingsPanelExpanded = ref(true)
   const isSearchResultsLoading = ref(false)
   const currentGeocoderResult = ref<any>(null)
+  /** ID of the listing whose card is "selected" in the rail. Set by either
+   *  a marker click on the map or a card click in the rail. Drives the
+   *  --selected style on the matching marker element. */
+  const selectedListingId = ref<string | null>(null)
+  /** ID of the listing currently hovered in the rail's card list. Drives
+   *  the --hovered style on the matching marker so the user can see
+   *  which pin corresponds to which row. */
+  const hoveredListingId = ref<string | null>(null)
+
+  /** Apply the selected/hovered classes to the matching marker elements,
+   *  one pass over the markers array. Cheap (60 entries) and idempotent. */
+  const refreshMarkerStyles = () => {
+    for (let i = 0; i < listingMarkers.value.length; i++) {
+      const marker = listingMarkers.value[i]
+      const id = listings.value[i]?.id
+      const el = marker.getElement()
+      el.classList.toggle('listing-marker--selected', id != null && id === selectedListingId.value)
+      el.classList.toggle('listing-marker--hovered', id != null && id === hoveredListingId.value)
+    }
+  }
 
   const toggleListings = () => {
     listingsPanelExpanded.value = !listingsPanelExpanded.value
   }
 
+  /** Pan the map to a listing while preserving the user's current zoom.
+   *  Marker hover/selected styling is handled by CSS classes via
+   *  refreshMarkerStyles — this function is purely the camera move. */
   const highlightMarker = (listing: any) => {
-    // Remove highlight from all markers
-    listingMarkers.value.forEach((marker) => {
-      marker.getElement().style.zIndex = '0'
-      marker.getElement().style.filter = 'none'
-    })
-
-    // Find and highlight the corresponding marker
-    const markerIndex = listings.value.findIndex((l) => l.id === listing.id)
-    if (markerIndex !== -1) {
-      const marker = listingMarkers.value[markerIndex]
-      marker.getElement().style.zIndex = '1'
-      marker.getElement().style.filter = 'brightness(1.5)'
-
-      // Pan to the pin while preserving the user's current zoom. The
-      // old behavior hard-jumped to zoom 10, which pulled the county
-      // outline off-screen and broke the spatial context the user had
-      // just established by inspecting the county. If they're already
-      // at a usable zoom (≥ 7 — county-regional or closer) we just
-      // pan; if they're way out (rare for this flow) we ease them in
-      // to a sensible county-relative zoom.
-      const map = mapRef.value
-      if (!map) return
-      const currentZoom = map.getZoom()
-      const target: { center: [number, number]; zoom?: number } = {
-        center: [listing.longitude, listing.latitude],
-      }
-      if (currentZoom < 7) target.zoom = 8
-      map.easeTo({ ...target, duration: 500 })
+    const map = mapRef.value
+    if (!map) return
+    const currentZoom = map.getZoom()
+    const target: { center: [number, number]; zoom?: number } = {
+      center: [listing.longitude, listing.latitude],
     }
+    if (currentZoom < 7) target.zoom = 8
+    map.easeTo({ ...target, duration: 500 })
   }
 
   const downloadCSV = () => {
@@ -186,25 +188,28 @@ export function usePropertyListings(mapRef: Ref<mapboxgl.Map | null>, geocoderRe
         )
       }
 
-      // Add markers for each listing
+      // Add markers for each listing. No popup — clicking a pin instead
+      // selects the listing in the rail (handled by parent watcher on
+      // selectedListingId). The default mapbox SVG element is reused;
+      // we just stamp data-listing-id and a click handler on it.
       data.forEach((listing: any) => {
-        const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-        <div class="listing-popup">
-          <h4>${listing.formattedAddress}</h4>
-          <p>Price: $${listing.price.toLocaleString()}</p>
-          <p>Lot Size: ${listing.lotSize} sq ft</p>
-          <p>Days on Market: ${listing.daysOnMarket}</p>
-          <a href="${listing.listingOffice?.website}" target="_blank">View Website</a>
-        </div>
-      `)
-
-        const marker = new mapboxgl.Marker()
+        const marker = new mapboxgl.Marker({ color: '#1f7a2e' })
           .setLngLat([listing.longitude, listing.latitude])
-          .setPopup(popup)
           .addTo(mapRef.value!)
+
+        const el = marker.getElement()
+        el.classList.add('listing-marker')
+        el.dataset.listingId = listing.id
+        el.style.cursor = 'pointer'
+        el.addEventListener('click', (ev) => {
+          ev.stopPropagation()
+          selectedListingId.value = listing.id
+        })
 
         listingMarkers.value.push(marker)
       })
+      // Reapply any pending selected/hovered state to the new markers
+      refreshMarkerStyles()
     } catch (error) {
       console.error('Error fetching listings:', error)
     } finally {
@@ -227,7 +232,14 @@ export function usePropertyListings(mapRef: Ref<mapboxgl.Map | null>, geocoderRe
 
     // Reset geocoder result
     currentGeocoderResult.value = null
+    // Drop any in-flight selection/hover so subsequent searches start clean
+    selectedListingId.value = null
+    hoveredListingId.value = null
   }
+
+  // Restyle markers whenever selection/hover state changes. Cheap and
+  // idempotent — skips if no markers exist yet.
+  watch([selectedListingId, hoveredListingId], refreshMarkerStyles)
 
   return {
     // State
@@ -236,6 +248,8 @@ export function usePropertyListings(mapRef: Ref<mapboxgl.Map | null>, geocoderRe
     listingsPanelExpanded,
     isSearchResultsLoading,
     currentGeocoderResult,
+    selectedListingId,
+    hoveredListingId,
 
     // Methods
     toggleListings,

@@ -162,11 +162,15 @@
           >· download CSV</button>
         </p>
       </div>
-      <ul class="rail-listings-list">
+      <ul class="rail-listings-list" ref="listingsListEl">
         <li
           v-for="listing in landSearch.results"
           :key="listing.id"
           class="rail-listing-card"
+          :class="{ 'rail-listing-card--selected': listing.id === landSearch.selectedListingId }"
+          :data-listing-id="listing.id"
+          @mouseenter="$emit('hover-listing', listing.id)"
+          @mouseleave="$emit('hover-listing', null)"
         >
           <button
             type="button"
@@ -280,6 +284,10 @@ const props = defineProps<{
       daysOnMarket?: number | null
       listingOffice?: { website?: string } | null
     }>
+    /** Currently-selected listing id (set by either a card click or a
+     *  marker click on the map). Drives the --selected card style and
+     *  the auto-scroll-into-view in the listings list. */
+    selectedListingId?: string | null
   } | null
 }>()
 
@@ -293,6 +301,7 @@ const emit = defineEmits<{
   'search-land': []
   'clear-land': []
   'select-listing': [listingId: string]
+  'hover-listing': [listingId: string | null]
   'download-listings': []
 }>()
 
@@ -333,16 +342,39 @@ watch(() => props.landSearch?.results.length ?? 0, (n, prev) => {
     view.value = 'detail'
   }
 })
+// Marker-click selections that fire while the rail is on detail (e.g.
+// the user backed out and is reading stats, then clicks a pin) should
+// take them to the listings view to see the highlighted card. Skips
+// rank for the same reason as above.
+watch(() => props.landSearch?.selectedListingId, (id) => {
+  if (id && view.value === 'detail') view.value = 'listings'
+})
 
 const rankListEl = ref<HTMLOListElement | null>(null)
+const listingsListEl = ref<HTMLUListElement | null>(null)
 
 function scrollCurrentRowIntoView(): void {
   if (view.value !== 'rank' || !props.currentGeoId || !rankListEl.value) return
   const el = rankListEl.value.querySelector(`[data-geoid="${props.currentGeoId}"]`) as HTMLElement | null
   if (el) el.scrollIntoView({ block: 'center', behavior: 'auto' })
 }
+
+/** Scroll the selected listing card into view when the selection changes
+ *  via a marker click on the map (so the user sees what they just
+ *  picked). Smooth so it doesn't feel like a jump-cut. */
+function scrollSelectedListingIntoView(): void {
+  const id = props.landSearch?.selectedListingId
+  if (view.value !== 'listings' || !id || !listingsListEl.value) return
+  const el = listingsListEl.value.querySelector(`[data-listing-id="${id}"]`) as HTMLElement | null
+  if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+}
+
 watch(view, (v) => {
   if (v === 'rank') nextTick(scrollCurrentRowIntoView)
+  if (v === 'listings') nextTick(scrollSelectedListingIntoView)
+})
+watch(() => props.landSearch?.selectedListingId, () => {
+  nextTick(scrollSelectedListingIntoView)
 })
 
 function onPickRow(geoId: string): void {
@@ -763,6 +795,20 @@ function formatRank(n: number): string {
 .rail-listing-card:hover {
   border-color: var(--blo-green-deep, #1f7a2e);
   box-shadow: 0 1px 4px rgba(31, 122, 46, 0.08);
+}
+/* Selected: matches the amber halo on the corresponding pin. The two
+   colors (green border + amber accent) are intentionally different
+   from each other so the bidirectional pin↔card link reads at a
+   glance — "the green-with-amber thing on the map IS the green-with-
+   amber thing in the list." */
+.rail-listing-card--selected {
+  border-color: #d97706;
+  background: #fef7e8;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.25);
+}
+.rail-listing-card--selected:hover {
+  border-color: #d97706;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.35);
 }
 .rail-listing-card-btn {
   display: flex;

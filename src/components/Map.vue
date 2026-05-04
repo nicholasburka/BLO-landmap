@@ -151,6 +151,7 @@
       @search-land="handleRailSearchLand"
       @clear-land="clearSearch"
       @select-listing="handleRailSelectListing"
+      @hover-listing="handleRailHoverListing"
       @download-listings="downloadCSV"
     />
   </div>
@@ -243,11 +244,23 @@ const {
   listings,
   isSearchResultsLoading,
   currentGeocoderResult,
+  selectedListingId,
+  hoveredListingId,
   highlightMarker,
   downloadCSV,
   searchListings,
   clearSearch,
 } = usePropertyListings(map, geocoderRef);
+
+/** Marker-click → swap rail to listings view + pan to the marker, all
+ *  driven off selectedListingId set inside the composable. We don't
+ *  need to touch the rail directly — selectedListingId flows in via
+ *  landSearch so the rail can scroll/highlight on its own. */
+watch(selectedListingId, (id) => {
+  if (!id) return;
+  const listing = listings.value.find((l: any) => l.id === id);
+  if (listing) highlightMarker(listing);
+});
 
 /** Has the user run a land search for the current county at least once?
  *  Drives the "No listings nearby" empty-state copy in the rail —
@@ -263,13 +276,18 @@ const handleRailSearchLand = async () => {
   await searchListings();
 };
 
-/** Listing row click in the rail's listings view → reuse the existing
- *  highlightMarker which finds the marker by listing id, dims siblings,
- *  and flies the map to it. Listing shape is RentCast — we just need
- *  the id, and highlightMarker resolves the rest. */
+/** Listing row click in the rail's listings view → flow through the
+ *  same selectedListingId ref the marker click uses. The watcher above
+ *  takes it from there (pan map + restyle marker), and the rail
+ *  reads selectedListingId back via landSearch to highlight its card. */
 const handleRailSelectListing = (listingId: string) => {
-  const listing = listings.value.find((l: any) => l.id === listingId);
-  if (listing) highlightMarker(listing);
+  selectedListingId.value = listingId;
+};
+
+/** Rail card hover → tint the matching map pin so the user can see
+ *  which row corresponds to which dot on the map. */
+const handleRailHoverListing = (listingId: string | null) => {
+  hoveredListingId.value = listingId;
 };
 
 // Phase 4d: Data Layers panel + its expanded state are gone — layer
@@ -684,6 +702,7 @@ const railLandSearchState = computed(() => {
     attempted: landSearchAttempted.value,
     resultCount: listings.value.length,
     results: listings.value,
+    selectedListingId: selectedListingId.value,
   };
 });
 
@@ -3164,5 +3183,38 @@ onMounted(async () => {
     width: 100%;
     max-height: 50vh;
   }
+}
+</style>
+
+<!-- Unscoped: mapboxgl mounts marker DOM outside the component tree, so
+     scoped selectors don't apply. These rules style the listing pins
+     and respond to hover/selected state set by the composable. -->
+<style>
+.mapboxgl-marker.listing-marker {
+  z-index: 1;
+}
+.mapboxgl-marker.listing-marker svg {
+  transition: transform 0.15s ease, filter 0.15s ease;
+  transform-origin: bottom center;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+}
+.mapboxgl-marker.listing-marker:hover svg,
+.mapboxgl-marker.listing-marker--hovered svg {
+  transform: scale(1.25);
+  filter: drop-shadow(0 2px 6px rgba(31, 122, 46, 0.45)) brightness(1.1);
+}
+/* Selected: bigger pop, warm amber halo, raised z-index. The fill
+   stays BLO green so the user's eye travels naturally between
+   the green card border and the green pin — the difference is the
+   amber halo and the larger scale. */
+.mapboxgl-marker.listing-marker--selected {
+  z-index: 3;
+}
+.mapboxgl-marker.listing-marker--selected svg {
+  transform: scale(1.55);
+  filter:
+    drop-shadow(0 0 0 #d97706)
+    drop-shadow(0 0 6px rgba(217, 119, 6, 0.85))
+    drop-shadow(0 3px 8px rgba(0, 0, 0, 0.3));
 }
 </style>
