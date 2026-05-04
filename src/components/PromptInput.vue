@@ -321,11 +321,21 @@ async function submitChip(chip: string) {
   await handleSubmit()
 }
 
-// Auto-scroll to latest message
+// Scroll the LATEST message to the TOP of the scroll area when a new
+// message arrives. The previous behavior (scrollTop = scrollHeight)
+// pinned the very BOTTOM in view, which on multi-paragraph assistant
+// replies meant the user saw the closing line and had to scroll up to
+// read what was actually being said. Top-aligned puts the new message's
+// opening words in their eyeline.
 watch(() => props.messages.length, () => {
   nextTick(() => {
-    if (scrollRef.value) {
-      scrollRef.value.scrollTop = scrollRef.value.scrollHeight
+    if (!scrollRef.value) return
+    const items = scrollRef.value.querySelectorAll('.chat-message')
+    const last = items[items.length - 1] as HTMLElement | undefined
+    if (last) {
+      // offsetTop is relative to the scroll container's offsetParent — for
+      // a position:relative container, that's the container itself.
+      scrollRef.value.scrollTop = last.offsetTop - 8
     }
   })
 })

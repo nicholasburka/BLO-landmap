@@ -6,47 +6,34 @@
       <span class="lens-hd-default">{{ defaultLayerName }}</span>
     </div>
 
-    <!-- Active state — uppercase label, chips wrap -->
+    <!-- Active state. Two-row layout so the descriptor has room to
+         breathe even on narrow rails:
+           row 1: ACTIVE QUERY eyebrow ··· Clear ×
+           row 2: <descriptor> (e.g. "Black Homeownership")
+         The scoring layer's full name lives in the Legend tab below
+         and the rank/walk entry is in the Rankings panel + the rail.
+         Filter chips remain because they're not surfaced anywhere
+         else and they materially change the result set. -->
     <div v-else class="lens-hd-active">
       <div class="lens-hd-active-row">
         <span class="lens-hd-label">Active query</span>
-        <div class="lens-hd-actions">
-          <button
-            v-if="canWalkThrough"
-            type="button"
-            class="lens-hd-walk"
-            @click.stop="$emit('walk-through')"
-            aria-label="Walk through ranked counties"
-            title="Walk through the ranked counties one by one"
-          >▶ Walk through</button>
-          <button
-            type="button"
-            class="lens-hd-clear"
-            @click.stop="$emit('clear')"
-            aria-label="Clear current query"
-            title="Clear current query"
-          >Clear ×</button>
-        </div>
+        <button
+          type="button"
+          class="lens-hd-clear"
+          @click.stop="$emit('clear')"
+          aria-label="Clear current query"
+          title="Clear current query"
+        >Clear ×</button>
       </div>
-      <div class="lens-hd-chips">
-        <span
-          v-for="chip in scoringChips"
-          :key="'s-' + chip.id"
-          class="lens-hd-chip lens-hd-chip--scoring"
-          :title="chip.name"
-        >
-          {{ chip.name }}
-          <span class="lens-hd-arrow" :class="chip.directionClass">{{ chip.arrow }}</span>
-        </span>
+      <div v-if="queryDescriptor" class="lens-hd-descriptor" :title="queryDescriptorFull">
+        {{ queryDescriptor }}
+      </div>
+      <div v-if="filterChips.length > 0" class="lens-hd-chips">
         <span
           v-for="chip in filterChips"
           :key="'f-' + chip.key"
           class="lens-hd-chip lens-hd-chip--filter"
         >{{ chip.label }}</span>
-        <span
-          v-if="limit"
-          class="lens-hd-chip lens-hd-chip--limit"
-        >Top {{ limit }}</span>
       </div>
     </div>
   </div>
@@ -102,6 +89,31 @@ const filterChips = computed<FilterChip[]>(() =>
 const hasActiveQuery = computed(
   () => props.scoringChips.length > 0 || filterChips.value.length > 0 || props.limit != null,
 )
+
+/** Short label printed next to "ACTIVE QUERY". Strips trailing
+ *  redundant words so e.g. "Black Homeownership Rate" reads as
+ *  "Black Homeownership" — punchier and still unambiguous since the
+ *  Legend tab below carries the full layer name. */
+function shortenLayerName(name: string): string {
+  return name
+    .replace(/\s+(Rate|Index|Score|Count|Population|Average)$/i, '')
+    .trim()
+}
+
+const queryDescriptor = computed(() => {
+  if (props.scoringChips.length === 0) {
+    if (filterChips.value.length > 0) return 'Filtered'
+    return ''
+  }
+  const primary = shortenLayerName(props.scoringChips[0].name)
+  if (props.scoringChips.length === 1) return primary
+  return `${primary} +${props.scoringChips.length - 1}`
+})
+
+const queryDescriptorFull = computed(() => {
+  if (props.scoringChips.length === 0) return ''
+  return props.scoringChips.map(c => c.name).join(' · ')
+})
 </script>
 
 <style scoped>
@@ -138,6 +150,7 @@ const hasActiveQuery = computed(
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 .lens-hd-label {
   font-family: var(--blo-font-display, 'Fraunces', serif);
@@ -146,6 +159,22 @@ const hasActiveQuery = computed(
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--blo-stone, #6b6560);
+  flex-shrink: 0;
+}
+/* Concise query name — sits on its own row beneath the eyebrow so it
+   has room without competing with the Clear button. Display font for
+   prominence; the Legend tab below shows the full layer name. */
+.lens-hd-descriptor {
+  font-family: var(--blo-font-display, 'Fraunces', serif);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--blo-ink, #111);
+  line-height: 1.25;
+  /* Truncate if a long custom-mix overflows, but the row above gives
+     us full panel width so this rarely fires. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .lens-hd-actions {
@@ -178,6 +207,7 @@ const hasActiveQuery = computed(
   padding: 2px 8px;
   color: var(--blo-stone, #6b6560);
   cursor: pointer;
+  flex-shrink: 0;
 }
 .lens-hd-clear:hover {
   color: var(--blo-ink, #111);

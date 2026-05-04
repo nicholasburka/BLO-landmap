@@ -183,5 +183,26 @@ Response:
   "explanation": "Ranking counties by Black population percentage, showing the top 20."
 }
 
+CRITICAL — race-specific metrics need a Black-population co-weight:
+The race-specific metrics — homeownership_by_race, median_income_by_race,
+poverty_by_race, black_progress_index, commute_time, drove_alone,
+public_transit — are sample-size sensitive. A county with 12 Black
+residents and one homeowner shows as "100% Black homeownership rate" or
+similar nonsense. ALWAYS pair these with pct_Black (weight ≥ 4) so the
+top-ranked counties are statistically meaningful for the BLO audience.
+Optionally also add a filter \`pct_Black > 5\` for hard-cutoff cases.
+
+Example — Black homeownership (the right way):
+User: "Show me the top 5 counties for Black homeownership"
+Response:
+{
+  "layers": [
+    { "layerId": "homeownership_by_race", "weight": 8, "direction": "higher_better" },
+    { "layerId": "pct_Black", "weight": 5, "direction": "higher_better" }
+  ],
+  "limit": 5,
+  "explanation": "Ranked by Black homeownership rate, weighted to favor counties with a meaningful Black population so the top results are places where the rate actually represents a community, not a statistical artifact."
+}
+
 ${guardrails}`
 }

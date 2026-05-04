@@ -68,8 +68,16 @@
             'rail-stat--good': stat.delta === 'good',
             'rail-stat--bad': stat.delta === 'bad',
           }"
+          :title="stat.tooltip || stat.name"
         >
-          <span class="rail-stat-label">{{ stat.name }}</span>
+          <span class="rail-stat-label">
+            {{ stat.name }}
+            <span
+              v-if="stat.tooltip"
+              class="rail-stat-info"
+              aria-hidden="true"
+            >ⓘ</span>
+          </span>
           <span class="rail-stat-value">
             <span v-if="stat.delta === 'good' || stat.delta === 'bad'" class="rail-stat-pip" aria-hidden="true"></span>
             {{ stat.value }}
@@ -247,7 +255,7 @@ const props = defineProps<{
   countyName: string
   stateName: string
   score: number | null
-  stats: { layerId: string; name: string; value: string; delta?: 'good' | 'bad' | 'neutral' }[]
+  stats: { layerId: string; name: string; value: string; delta?: 'good' | 'bad' | 'neutral'; tooltip?: string }[]
   /** Scale denominator for the score: 5 for BLO Livability (default and
    *  single-layer), 100 for the multi-layer custom composite. */
   scoreScale?: 5 | 100
@@ -585,6 +593,8 @@ function formatRank(n: number): string {
   /* Phase 4f: subtle left border carries the good/bad signal without
      making the row feel "highlighted." Default neutral state has no border. */
   border-left: 3px solid transparent;
+  /* help cursor reinforces the title-tooltip affordance */
+  cursor: help;
 }
 /* Comparison vs national average — color tinted from the BLO palette. */
 .rail-stat--good {
@@ -597,6 +607,23 @@ function formatRank(n: number): string {
 }
 .rail-stat-label {
   color: var(--blo-ink-soft, #2a2a2a);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+}
+/* Tiny ⓘ glyph next to label — discoverability hint that the row has a
+   tooltip with the dataset source. Faint by default; row hover lifts it
+   to a readable opacity so it doesn't clutter the at-rest layout. */
+.rail-stat-info {
+  font-size: 10px;
+  color: var(--blo-stone-soft, #9a948e);
+  opacity: 0.55;
+  transition: opacity 0.12s ease, color 0.12s ease;
+  cursor: help;
+}
+.rail-stat:hover .rail-stat-info {
+  opacity: 1;
+  color: var(--blo-stone, #6b6560);
 }
 .rail-stat-value {
   color: var(--blo-ink, #111);

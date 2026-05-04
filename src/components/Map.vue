@@ -672,11 +672,26 @@ const walkthroughStats = computed(() => {
       else if (dir === 'higher_better') delta = raw > avg ? 'good' : 'bad';
       else delta = raw < avg ? 'good' : 'bad';
     }
+    // Tooltip: dataset source + year + a 1-line description if we have one.
+    // The user's pain point: rates like "100% Black homeownership" in
+    // tiny-population counties read as facts when they're sample-size
+    // artifacts. Surfacing the source nudges them to think about
+    // provenance and (eventually) click through to the dataset page.
+    const source = reg?.source ?? '';
+    const year = reg?.year ?? '';
+    const sourceLine = source
+      ? `Source: ${source}${year ? ` (${year})` : ''}`
+      : '';
+    const tooltipParts = [
+      reg?.description,
+      sourceLine,
+    ].filter(Boolean) as string[];
     return {
       layerId,
       name: reg?.name ?? layerId,
       value: reg?.formatValue(raw) ?? '?',
       delta,
+      tooltip: tooltipParts.join('\n'),
     };
   });
 });
