@@ -102,10 +102,14 @@
             v-for="(msg, idx) in visibleMessages"
             :key="idx"
             class="chat-message"
-            :class="msg.role"
+            :class="[msg.role, { 'chat-message--error': msg.isError }]"
           >
+            <div v-if="msg.isError && msg.displayText" class="chat-error-bubble">
+              <span class="chat-error-icon" aria-hidden="true">⚠</span>
+              <span class="chat-error-text">{{ msg.displayText }}</span>
+            </div>
             <div
-              v-if="msg.displayText && msg.role === 'assistant'"
+              v-else-if="msg.displayText && msg.role === 'assistant'"
               class="chat-text"
               v-html="renderMarkdown(msg.displayText)"
             ></div>
@@ -128,8 +132,10 @@
         </div>
       </div>
 
-      <!-- Error -->
-      <p v-if="chatError" class="prompt-error">{{ chatError }}</p>
+      <!-- chatError prop is kept for back-compat with anything still
+           reading it, but errors now render inline in the chat thread
+           above as .chat-message--error bubbles, attached visually to
+           the user query that triggered them. -->
     </div>
   </div>
 </template>
@@ -284,9 +290,10 @@ const suggestedQueries = [
   'Zoom to Mecklenburg County, NC',
 ]
 
-/** Only show messages that have something to display (skip empty tool_result messages) */
+/** Only show messages that have something to display (skip empty tool_result messages).
+ *  Error bubbles count — they have displayText set by useChat.pushError. */
 const visibleMessages = computed(() =>
-  props.messages.filter((m) => m.displayText || (m.toolCalls && m.toolCalls.length > 0))
+  props.messages.filter((m) => m.isError || m.displayText || (m.toolCalls && m.toolCalls.length > 0))
 )
 
 function describeToolCall(name: string, input: any): string {
@@ -317,6 +324,24 @@ async function handleSubmit() {
 }
 
 async function submitChip(chip: string) {
+  // "Zoom to X" chips are deterministic — they don't need an LLM round
+  // trip. Resolve the place via Mapbox geocoder directly and emit
+  // select-place so the parent zooms the map. This keeps basic place
+  // lookup working even when the LLM cap is hit.
+  const zoomMatch = chip.match(/^Zoom to (.+)$/i)
+  if (zoomMatch) {
+    const placeText = zoomMatch[1].trim()
+    try {
+      const ctrl = new AbortController()
+      const results = await fetchPlaceSuggestions(placeText, ctrl.signal)
+      if (results.length > 0) {
+        selectSuggestion(results[0])
+        return
+      }
+    } catch {
+      // Fall through to chat submission as a fallback
+    }
+  }
   query.value = chip
   await handleSubmit()
 }
@@ -772,6 +797,37 @@ watch(() => props.messages.length, () => {
   border-left: 3px solid #c0392b;
   font-size: 12px;
   color: #c0392b;
+}
+
+/* Inline error bubble inside the chat thread. Visually attached to
+   the user query that triggered it instead of floating in a banner.
+   Tinted warning, not catastrophic — usually a transient cap or
+   network blip rather than a hard failure. */
+.chat-message--error {
+  background: transparent;
+  padding: 0;
+  border: none;
+}
+.chat-error-bubble {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  color: #78350f;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.chat-error-icon {
+  font-size: 14px;
+  line-height: 1.2;
+  color: #b45309;
+  flex-shrink: 0;
+}
+.chat-error-text {
+  flex: 1;
 }
 
 @media (max-width: 768px) {

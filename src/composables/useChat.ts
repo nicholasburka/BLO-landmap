@@ -40,6 +40,11 @@ export interface ChatMessage {
   displayText?: string
   /** Tool calls made in this message (for UI rendering) */
   toolCalls?: { name: string; input: any; result?: string }[]
+  /** True for synthetic error messages we surface inline in the chat
+   *  thread (instead of a detached banner). When set, the UI styles the
+   *  bubble as a warning so the user knows their request didn't go
+   *  through. */
+  isError?: boolean
 }
 
 interface ChatResponse {
@@ -75,11 +80,26 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
     }))
   }
 
+  /** Push a synthetic error message into the chat thread so the user
+   *  sees it visually attached to the query they just sent (instead of a
+   *  detached banner above the input). Also sets error.value for any
+   *  external listeners that still care, but the canonical surface is
+   *  the inline bubble. */
+  function pushError(text: string): void {
+    error.value = text
+    messages.value.push({
+      role: 'assistant',
+      content: '',
+      displayText: text,
+      isError: true,
+    })
+  }
+
   /** POST to /api/chat and return the response */
   async function postChat(): Promise<ChatResponse | null> {
     const token = getToken()
     if (!token) {
-      error.value = 'Please sign in first'
+      pushError('Please sign in first.')
       return null
     }
 
@@ -111,21 +131,21 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
         return null
       }
       if (res.status === 429) {
-        error.value = 'Too many requests. Please wait a moment.'
+        pushError('Too many requests. Please wait a moment.')
         return null
       }
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        error.value = data.error || 'Something went wrong. Try again.'
+        pushError(data.error || 'Something went wrong. Try again.')
         return null
       }
 
       return (await res.json()) as ChatResponse
     } catch (err: any) {
       if (err.name === 'AbortError') {
-        error.value = 'Request timed out. Try again.'
+        pushError('Request timed out. Try again.')
       } else {
-        error.value = "Couldn't reach the server. Try again."
+        pushError("Couldn't reach the server. Try again.")
       }
       return null
     }
@@ -203,7 +223,7 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
       })
 
       if (toolCallCount >= MAX_TOOL_CALLS_PER_TURN) {
-        error.value = 'Too many tool calls in one turn. Stopping.'
+        pushError('Too many tool calls in one turn. Stopping.')
         break
       }
     }
