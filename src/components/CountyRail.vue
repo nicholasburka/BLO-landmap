@@ -12,7 +12,7 @@
   >
     <header class="rail-header">
       <button
-        v-if="view === 'rank'"
+        v-if="view === 'rank' || view === 'listings'"
         type="button"
         class="rail-back"
         @click="view = 'detail'"
@@ -98,7 +98,10 @@
           <span>{{ landSearch.loading ? 'Searching listings…' : 'Find land for sale' }}</span>
         </button>
         <p v-if="landSearch.resultCount > 0" class="rail-land-result">
-          {{ landSearch.resultCount }} {{ landSearch.resultCount === 1 ? 'listing' : 'listings' }} found
+          <button type="button" class="rail-land-open" @click="view = 'listings'">
+            view {{ landSearch.resultCount }} {{ landSearch.resultCount === 1 ? 'listing' : 'listings' }}
+            <span class="rail-land-open-arrow" aria-hidden="true">→</span>
+          </button>
           <button type="button" class="rail-land-clear" @click="$emit('clear-land')">clear</button>
         </p>
         <p v-else-if="landSearch.attempted && !landSearch.loading" class="rail-land-empty">
@@ -108,7 +111,7 @@
     </template>
 
     <!-- =============== RANK VIEW (from "rank N of M" click) =============== -->
-    <template v-else>
+    <template v-else-if="view === 'rank'">
       <div class="rail-rank-titles">
         <span class="rail-rank-eyebrow">Ranked by</span>
         <h3 class="rail-rank-title">{{ scoreLabel }}</h3>
@@ -141,6 +144,64 @@
           </button>
         </li>
       </ol>
+    </template>
+
+    <!-- =============== LISTINGS VIEW (from "view N listings" click) =============== -->
+    <template v-else-if="view === 'listings' && landSearch">
+      <div class="rail-listings-head">
+        <span class="rail-listings-eyebrow">Land for sale near</span>
+        <h3 class="rail-listings-title">{{ countyName }}</h3>
+        <p class="rail-listings-sub">
+          {{ landSearch.results.length }} {{ landSearch.results.length === 1 ? 'listing' : 'listings' }}
+          <button
+            v-if="landSearch.results.length > 0"
+            type="button"
+            class="rail-listings-csv"
+            @click="$emit('download-listings')"
+            title="Download all listings as CSV"
+          >· download CSV</button>
+        </p>
+      </div>
+      <ul class="rail-listings-list">
+        <li
+          v-for="listing in landSearch.results"
+          :key="listing.id"
+          class="rail-listing-card"
+        >
+          <button
+            type="button"
+            class="rail-listing-card-btn"
+            @click="$emit('select-listing', listing.id)"
+            :title="`Show ${listing.formattedAddress} on map`"
+          >
+            <div class="rail-listing-row">
+              <span class="rail-listing-price">${{ listing.price.toLocaleString() }}</span>
+              <span class="rail-listing-days" v-if="listing.daysOnMarket != null">{{ listing.daysOnMarket }}d on market</span>
+            </div>
+            <div class="rail-listing-address">{{ listing.formattedAddress }}</div>
+            <div class="rail-listing-meta" v-if="listing.lotSize != null">
+              {{ listing.lotSize.toLocaleString() }} sq ft lot
+            </div>
+          </button>
+          <div class="rail-listing-links">
+            <a
+              v-if="listing.listingOffice && listing.listingOffice.website"
+              :href="listing.listingOffice.website"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="rail-listing-link"
+              @click.stop
+            >Realtor ↗</a>
+            <a
+              :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(listing.formattedAddress)}`"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="rail-listing-link"
+              @click.stop
+            >Google Maps ↗</a>
+          </div>
+        </li>
+      </ul>
     </template>
 
     <footer v-if="view === 'detail' && mode === 'walk'" class="rail-nav">
@@ -199,7 +260,9 @@ const props = defineProps<{
   currentGeoId?: string | null
   /** Optional land-for-sale CTA state. When omitted, no CTA renders.
    *  When present, the rail surfaces a "Find land for sale" button and
-   *  reports its current loading/result/empty state back to the user. */
+   *  reports its current loading/result/empty state back to the user.
+   *  When `results` is non-empty the rail can swap into a listings
+   *  view (third view, after detail and rank). */
   landSearch?: {
     loading: boolean
     /** True after the user has run at least one search this session. */
@@ -207,6 +270,16 @@ const props = defineProps<{
     /** Disable button (e.g. no county selected, no API key). */
     disabled?: boolean
     resultCount: number
+    /** Listing records (RentCast shape — kept loose since the rail only
+     *  reads a few fields and the parent owns the canonical type). */
+    results: Array<{
+      id: string
+      formattedAddress: string
+      price: number
+      lotSize?: number | null
+      daysOnMarket?: number | null
+      listingOffice?: { website?: string } | null
+    }>
   } | null
 }>()
 
@@ -219,6 +292,8 @@ const emit = defineEmits<{
   'select-county': [geoId: string]
   'search-land': []
   'clear-land': []
+  'select-listing': [listingId: string]
+  'download-listings': []
 }>()
 
 import { computed, ref, watch, nextTick } from 'vue'
@@ -229,11 +304,12 @@ const scoreLabel = computed(() =>
 
 const rankCounties = computed(() => props.rankCounties ?? [])
 
-// View mode: detail (default) or rank (swap-in list).
-const view = ref<'detail' | 'rank'>('detail')
+// View mode: detail (default), rank (county-ranking list), or listings
+// (land-for-sale results). Each is a swap-in surface with a back arrow.
+const view = ref<'detail' | 'rank' | 'listings'>('detail')
 
 // Reset to detail whenever the rail closes — reopening should never
-// land on the rank view.
+// land on the rank or listings view.
 watch(() => props.visible, (open) => {
   if (!open) view.value = 'detail'
 })
@@ -242,6 +318,12 @@ watch(() => props.visible, (open) => {
 // list is handled separately via onPickRow().
 watch(() => props.currentGeoId, (newId, oldId) => {
   if (oldId != null && newId !== oldId) view.value = 'detail'
+})
+// If the listings view is open and results vanish (clearSearch, county
+// switch that wiped state), bounce back to detail so the user isn't
+// staring at an empty scroll area.
+watch(() => props.landSearch?.results.length ?? 0, (n) => {
+  if (view.value === 'listings' && n === 0) view.value = 'detail'
 })
 
 const rankListEl = ref<HTMLOListElement | null>(null)
@@ -582,6 +664,152 @@ function formatRank(n: number): string {
 }
 .rail-land-clear:hover {
   color: #154e1e;
+}
+.rail-land-open {
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--blo-green-deep, #1f7a2e);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.rail-land-open:hover {
+  color: #154e1e;
+}
+.rail-land-open-arrow {
+  transition: transform 0.15s ease;
+}
+.rail-land-open:hover .rail-land-open-arrow {
+  transform: translateX(2px);
+}
+
+/* ---- Listings view ---- */
+.rail-listings-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--blo-cream-divider, #e0d9ca);
+}
+.rail-listings-eyebrow {
+  font-family: var(--blo-font-display, 'Fraunces', serif);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blo-stone, #6b6560);
+}
+.rail-listings-title {
+  margin: 0;
+  font-family: var(--blo-font-display, 'Fraunces', serif);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--blo-ink, #111);
+}
+.rail-listings-sub {
+  margin: 2px 0 0 0;
+  font-size: 11.5px;
+  color: var(--blo-stone, #6b6560);
+}
+.rail-listings-csv {
+  padding: 0;
+  margin-left: 4px;
+  font: inherit;
+  color: var(--blo-green-deep, #1f7a2e);
+  background: transparent;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.rail-listings-csv:hover {
+  color: #154e1e;
+}
+.rail-listings-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  /* room for scrollbar */
+  padding-right: 2px;
+}
+.rail-listing-card {
+  display: flex;
+  flex-direction: column;
+  /* Don't let the flex parent squish each card — the list scrolls. */
+  flex-shrink: 0;
+  border: 1px solid var(--blo-cream-divider, #e0d9ca);
+  border-radius: 8px;
+  background: white;
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.rail-listing-card:hover {
+  border-color: var(--blo-green-deep, #1f7a2e);
+  box-shadow: 0 1px 4px rgba(31, 122, 46, 0.08);
+}
+.rail-listing-card-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  padding: 10px 12px 8px;
+  font: inherit;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.rail-listing-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.rail-listing-price {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--blo-ink, #111);
+  font-feature-settings: "tnum";
+}
+.rail-listing-days {
+  font-size: 10.5px;
+  color: var(--blo-stone, #6b6560);
+  white-space: nowrap;
+}
+.rail-listing-address {
+  font-size: 12px;
+  color: var(--blo-ink-soft, #2a2a2a);
+  line-height: 1.35;
+}
+.rail-listing-meta {
+  font-size: 11px;
+  color: var(--blo-stone, #6b6560);
+}
+.rail-listing-links {
+  display: flex;
+  gap: 12px;
+  padding: 6px 12px 9px;
+  border-top: 1px solid var(--blo-cream-divider, #e0d9ca);
+  background: var(--blo-cream, #f7f4ee);
+}
+.rail-listing-link {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blo-green-deep, #1f7a2e);
+  text-decoration: none;
+}
+.rail-listing-link:hover {
+  text-decoration: underline;
 }
 
 .rail-nav {

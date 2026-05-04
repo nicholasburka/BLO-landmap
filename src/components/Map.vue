@@ -16,43 +16,11 @@
       @select-place="handlePlaceSelection"
     />
 
-    <div v-if="listings.length > 0" id="listings-panel" class="listings-panel">
-      <h3>
-        Available Properties
-        <button @click="toggleListings" class="toggle-listings-button">
-          {{ listingsPanelExpanded ? "▼" : "▲" }}
-        </button>
-      </h3>
+    <!-- The floating "Available Properties" panel is gone — its content
+         now lives inside CountyRail's third view (listings), opened from
+         the "view N listings" link under the Find land CTA. The map
+         markers (blue pins) remain as the spatial visualization. -->
 
-      <div v-show="listingsPanelExpanded">
-        <button @click="downloadCSV" class="download-csv-button">
-          Download CSV
-        </button>
-        <div class="listings-container">
-          <div
-            v-for="listing in listings"
-            :key="listing.id"
-            class="listing-card"
-            @click="highlightMarker(listing)"
-          >
-            <h4>{{ listing.formattedAddress }}</h4>
-            <p>Price: ${{ listing.price.toLocaleString() }}</p>
-            <p>Lot Size: {{ listing.lotSize }} sq ft</p>
-            <p>Days on Market: {{ listing.daysOnMarket }}</p>
-            <a :href="listing.listingOffice?.website" target="_blank"
-              >Realtor Website</a
-            >
-            <a
-              :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(listing.formattedAddress)}`"
-              target="_blank"
-              class="google-maps-link"
-            >
-              View on Google Maps
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
     <!-- Phase 4d L4: standalone LayerControls pill removed.
          Layer picking now lives inside the Lens "Layers" tab. -->
     <LoadingIndicator :loaded="layersLoaded" :progress="loadingProgress" />
@@ -182,6 +150,8 @@
       @select-county="inspectCounty"
       @search-land="handleRailSearchLand"
       @clear-land="clearSearch"
+      @select-listing="handleRailSelectListing"
+      @download-listings="downloadCSV"
     />
   </div>
 </template>
@@ -265,14 +235,14 @@ const {
   combinedScoresData
 );
 
-// Initialize property listings composable
+// Initialize property listings composable. listingsPanelExpanded /
+// toggleListings are intentionally not destructured — the floating
+// Available Properties panel was retired in favor of CountyRail's
+// in-rail listings view.
 const {
   listings,
-  listingMarkers,
-  listingsPanelExpanded,
   isSearchResultsLoading,
   currentGeocoderResult,
-  toggleListings,
   highlightMarker,
   downloadCSV,
   searchListings,
@@ -291,6 +261,15 @@ const landSearchAttempted = ref(false);
 const handleRailSearchLand = async () => {
   landSearchAttempted.value = true;
   await searchListings();
+};
+
+/** Listing row click in the rail's listings view → reuse the existing
+ *  highlightMarker which finds the marker by listing id, dims siblings,
+ *  and flies the map to it. Listing shape is RentCast — we just need
+ *  the id, and highlightMarker resolves the rest. */
+const handleRailSelectListing = (listingId: string) => {
+  const listing = listings.value.find((l: any) => l.id === listingId);
+  if (listing) highlightMarker(listing);
 };
 
 // Phase 4d: Data Layers panel + its expanded state are gone — layer
@@ -694,7 +673,9 @@ const walkthroughStats = computed(() => {
 
 /** Land-for-sale CTA state for the inspect rail. Returns null in walk
  *  mode — the walkthrough is about scanning multiple counties, not
- *  shopping for parcels in any one of them. */
+ *  shopping for parcels in any one of them. Includes the raw results
+ *  array so the rail can swap into a listings view (third view, after
+ *  detail and rank) once a search returns. */
 const railLandSearchState = computed(() => {
   if (walkthroughActive.value) return null;
   if (!inspectActive.value || !currentCounty.value) return null;
@@ -702,6 +683,7 @@ const railLandSearchState = computed(() => {
     loading: isSearchResultsLoading.value,
     attempted: landSearchAttempted.value,
     resultCount: listings.value.length,
+    results: listings.value,
   };
 });
 
