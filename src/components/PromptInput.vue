@@ -548,7 +548,12 @@ watch(() => props.messages.length, () => {
 .prompt-chip:hover {
   border-color: var(--blo-orange-ring);
   color: var(--blo-orange-deep);
-  background: var(--blo-orange-soft);
+  /* Opaque peach. The previous --blo-orange-soft is rgba(255,107,28,0.10),
+     which on hover REPLACED the chips white background — the underlying
+     map bled through and made the chip text fight with road labels.
+     This solid color matches the visual intent of orange-soft over
+     white without being transparent. */
+  background: #fff0e6;
 }
 
 .prompt-chip:disabled {
