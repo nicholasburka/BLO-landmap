@@ -67,21 +67,29 @@
           :class="{
             'rail-stat--good': stat.delta === 'good',
             'rail-stat--bad': stat.delta === 'bad',
+            'rail-stat--expanded': expandedStatId === stat.layerId,
           }"
           :title="stat.tooltip || stat.name"
+          @click="stat.tooltip ? toggleStatTooltip(stat.layerId) : null"
         >
-          <span class="rail-stat-label">
-            {{ stat.name }}
-            <span
-              v-if="stat.tooltip"
-              class="rail-stat-info"
-              aria-hidden="true"
-            >ⓘ</span>
-          </span>
-          <span class="rail-stat-value">
-            <span v-if="stat.delta === 'good' || stat.delta === 'bad'" class="rail-stat-pip" aria-hidden="true"></span>
-            {{ stat.value }}
-          </span>
+          <div class="rail-stat-row">
+            <span class="rail-stat-label">
+              {{ stat.name }}
+              <span
+                v-if="stat.tooltip"
+                class="rail-stat-info"
+                aria-hidden="true"
+              >ⓘ</span>
+            </span>
+            <span class="rail-stat-value">
+              <span v-if="stat.delta === 'good' || stat.delta === 'bad'" class="rail-stat-pip" aria-hidden="true"></span>
+              {{ stat.value }}
+            </span>
+          </div>
+          <p
+            v-if="stat.tooltip && expandedStatId === stat.layerId"
+            class="rail-stat-tooltip"
+          >{{ stat.tooltip }}</p>
         </li>
       </ul>
 
@@ -324,6 +332,21 @@ const rankCounties = computed(() => props.rankCounties ?? [])
 // View mode: detail (default), rank (county-ranking list), or listings
 // (land-for-sale results). Each is a swap-in surface with a back arrow.
 const view = ref<'detail' | 'rank' | 'listings'>('detail')
+
+// Stat row that's been tapped to expand its source-tooltip inline.
+// On desktop the title attribute handles hover; on touch there's no
+// hover, so we fall back to tap-to-toggle. Same single source of
+// truth (stat.tooltip) renders either way.
+const expandedStatId = ref<string | null>(null)
+function toggleStatTooltip(layerId: string): void {
+  expandedStatId.value = expandedStatId.value === layerId ? null : layerId
+}
+// Collapse the expanded stat whenever the inspected county changes —
+// otherwise the previous county's expanded source label would persist
+// over the new county's stat row.
+watch(() => props.currentGeoId, () => {
+  expandedStatId.value = null
+})
 
 // Reset to detail whenever the rail closes — reopening should never
 // land on the rank or listings view.
@@ -584,17 +607,26 @@ function formatRank(n: number): string {
 }
 .rail-stat {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   padding: 8px 12px;
   background: white;
   font-size: 13px;
-  gap: 12px;
   /* Phase 4f: subtle left border carries the good/bad signal without
      making the row feel "highlighted." Default neutral state has no border. */
   border-left: 3px solid transparent;
-  /* help cursor reinforces the title-tooltip affordance */
+  /* help cursor reinforces the title-tooltip affordance on desktop;
+     also doubles as a tappable affordance on touch where the row
+     toggles an inline source label. */
   cursor: help;
+}
+/* The label/value row that used to be the .rail-stat itself — now
+   wrapped inside .rail-stat so we can append the expanded tooltip
+   below it on tap (mobile) without breaking the flex layout. */
+.rail-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 /* Comparison vs national average — color tinted from the BLO palette. */
 .rail-stat--good {
@@ -647,6 +679,24 @@ function formatRank(n: number): string {
 }
 .rail-stat--bad .rail-stat-pip {
   background: #c0392b;
+}
+/* Expanded source tooltip — shown when the user taps a stat row on
+   touch (where the title attribute doesn't fire). Inline so the rail
+   doesn't need an absolute-positioned popover competing with the
+   peek/expanded states. */
+.rail-stat-tooltip {
+  margin: 6px 0 0;
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--blo-stone, #6b6560);
+  background: var(--blo-cream, #f7f4ee);
+  border-radius: 4px;
+  white-space: pre-line;
+}
+.rail-stat--expanded .rail-stat-info {
+  color: var(--blo-ink-soft, #2a2a2a);
+  opacity: 1;
 }
 
 .rail-details {

@@ -533,6 +533,29 @@ watch(() => props.messages.length, () => {
   flex-wrap: wrap;
 }
 
+/* Mobile: chips wrap to 3 rows on narrow widths and eat vertical space
+   that the user wants for the map. Switch to a single horizontal
+   scroller with a fade mask so they can swipe through. Same pattern
+   as .lens-hd-chips. */
+@media (max-width: 768px) {
+  .prompt-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 14px;
+    mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent 100%);
+    scrollbar-width: none;
+  }
+  .prompt-chips::-webkit-scrollbar {
+    display: none;
+  }
+  .prompt-chip {
+    flex-shrink: 0;
+  }
+}
+
 .prompt-chip {
   padding: 4px 10px;
   background: white;
