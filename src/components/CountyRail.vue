@@ -5,6 +5,7 @@
     :class="{
       'county-rail--walk': mode === 'walk',
       'county-rail--inspect': mode === 'inspect',
+      'county-rail--collapsed': collapsed,
     }"
     role="complementary"
     :aria-label="mode === 'walk' ? 'County walkthrough' : 'County inspection'"
@@ -23,14 +24,30 @@
         {{ rank }}<span class="rail-rank-of"> of {{ total }}</span>
       </span>
       <span v-else class="rail-eyebrow">Inspect</span>
-      <button
-        class="rail-exit"
-        type="button"
-        @click="$emit('exit')"
-        :aria-label="mode === 'walk' ? 'Exit walkthrough' : 'Close inspection'"
-        :title="mode === 'walk' ? 'Exit walkthrough (Esc)' : 'Close (Esc)'"
-      >×</button>
+      <!-- Collapsed-state context: when the user has minimized the rail
+           on mobile, surface the county name in the header so the bar
+           still reads as "this county is what's selected." Hidden on
+           desktop and when expanded. -->
+      <span v-if="collapsed && countyName" class="rail-header-county">{{ countyName }}</span>
+      <div class="rail-header-actions">
+        <button
+          class="rail-collapse"
+          type="button"
+          @click="collapsed = !collapsed"
+          :aria-label="collapsed ? 'Expand inspection' : 'Collapse inspection'"
+          :title="collapsed ? 'Expand' : 'Collapse'"
+        >{{ collapsed ? '▲' : '▼' }}</button>
+        <button
+          class="rail-exit"
+          type="button"
+          @click="$emit('exit')"
+          :aria-label="mode === 'walk' ? 'Exit walkthrough' : 'Close inspection'"
+          :title="mode === 'walk' ? 'Exit walkthrough (Esc)' : 'Close (Esc)'"
+        >×</button>
+      </div>
     </header>
+
+    <div v-show="!collapsed" class="rail-body">
 
     <!-- =============== DETAIL VIEW (default) =============== -->
     <template v-if="view === 'detail'">
@@ -240,6 +257,7 @@
         aria-label="Next county"
       >Next →</button>
     </footer>
+    </div>
   </aside>
 </template>
 
@@ -346,6 +364,23 @@ function toggleStatTooltip(layerId: string): void {
 // over the new county's stat row.
 watch(() => props.currentGeoId, () => {
   expandedStatId.value = null
+})
+
+// Mobile-only collapse state. The rail covers ~half the screen on
+// mobile by default; users want to peek at the map without losing
+// the inspect context. Collapsed = just the header bar with county
+// name; tap the chevron to expand back.
+const collapsed = ref(false)
+// Whenever a different county is opened, expand the rail so the user
+// sees the new context immediately. Without this, a user who collapsed
+// for one county would have to manually expand for every subsequent one.
+watch(() => props.currentGeoId, () => {
+  collapsed.value = false
+})
+// Switching to rank or listings view should also expand — those views
+// have no value collapsed.
+watch(view, () => {
+  collapsed.value = false
 })
 
 // Reset to detail whenever the rail closes — reopening should never
@@ -501,6 +536,53 @@ function formatRank(n: number): string {
 .rail-exit:hover {
   color: var(--blo-ink, #111);
   border-color: var(--blo-stone-soft, #9a948e);
+}
+
+/* Header right-side cluster: collapse + close. Spaced so they don't
+   crowd each other on either platform. */
+.rail-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Collapse toggle — desktop hides this entirely (the rail is a
+   sidebar so collapsing makes no spatial sense). Mobile shows it
+   between the eyebrow/back-button and the close X. */
+.rail-collapse {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--blo-cream-divider, #e0d9ca);
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--blo-stone, #6b6560);
+  padding: 0;
+}
+.rail-collapse:hover {
+  color: var(--blo-ink, #111);
+  border-color: var(--blo-stone-soft, #9a948e);
+}
+
+/* County name surfaced into the header strip when collapsed —
+   gives the bar visible context instead of being just two
+   buttons floating at the bottom of the screen. Hidden in the
+   expanded state (the body header carries the name). */
+.rail-header-county {
+  display: none;
+  font-family: var(--blo-font-display, 'Fraunces', serif);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--blo-ink, #111);
+  margin-left: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .rail-county {
@@ -1120,6 +1202,27 @@ function formatRank(n: number): string {
     bottom: 8px;
     width: auto;
     max-height: 55vh;
+    transition: max-height 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                padding 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .rail-collapse {
+    display: inline-block;
+  }
+  /* Collapsed state: shrink to just the header bar. The body is
+     v-show'd off and the padding compresses so the rail reads as
+     a single dense strip — gives the user back almost all the
+     vertical real estate the expanded rail was eating. */
+  .county-rail--collapsed {
+    max-height: 60px;
+    padding: 10px 12px;
+    overflow: hidden;
+  }
+  .county-rail--collapsed .rail-header {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .county-rail--collapsed .rail-header-county {
+    display: inline-block;
   }
 }
 </style>
