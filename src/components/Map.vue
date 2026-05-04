@@ -190,10 +190,13 @@
       :score-scale="walkthroughScoreScale"
       :score-rank="walkthroughRank"
       :stats="walkthroughStats"
+      :rank-counties="rankExplorerCounties"
+      :current-geo-id="currentCounty?.id || null"
       @prev="walkthroughPrev"
       @next="walkthroughNext"
       @exit="handleRailExit"
       @view-details="openWalkthroughDetails"
+      @select-county="inspectCounty"
     />
   </div>
 </template>
@@ -634,10 +637,12 @@ const INSPECT_DEFAULT_LAYERS = [
   'life_expectancy',
 ] as const;
 
-/** Layers we DON'T color in the rail because they're descriptive rather than
- *  better/worse — e.g. % Black population is a demographic fact, not a quality
- *  metric. The rest follow LAYER_REGISTRY[id].direction vs national average. */
-const NEUTRAL_LAYER_IDS = new Set(['pct_Black', 'diversity_index']);
+/** Layers we DON'T color in the rail. Empty by default — for the BLO
+ *  audience, both higher Black population and higher diversity are
+ *  positive indicators (the index is built around supporting Black
+ *  community-building), so we lean into the registry's direction
+ *  judgments rather than hiding from them. */
+const NEUTRAL_LAYER_IDS = new Set<string>();
 
 /** Stat lines shown in the rail — one per active scoring layer when a query
  *  is running; otherwise a default snapshot for inspect mode. Each row gets
@@ -679,6 +684,73 @@ const walkthroughStats = computed(() => {
     };
   });
 });
+
+// ============= Phase 4f follow-up: Rank Explorer =============
+//
+// Clicking the "rank N of M" line in the rail swaps the rail's content
+// to a scrollable ranked list of every county. Back arrow returns to
+// the detail view. Clicking any row switches inspect to that county
+// AND auto-returns to detail. Implemented as a view inside CountyRail
+// (not a separate panel) so we don't add another floating surface.
+
+/** All counties sorted by the active scoring metric (BLO v2 by default,
+ *  composite when ≥2 scoring layers). One pass over the data; filtered
+ *  to entries that have BOTH a score and a name, so the list is clean. */
+const rankExplorerCounties = computed(() => {
+  if (allSelectedLayers.value.length >= 2) {
+    return rankedCounties.value
+      .filter(c => c.score != null)
+      .map((c, i) => ({
+        geoId: c.geoId,
+        rank: i + 1,
+        name: getCountyName(c.geoId),
+        stateAbbr: getStateAbbrFromGeo(c.geoId),
+        scoreFmt: (c.score as number).toFixed(1),
+      }));
+  }
+  // BLO Livability default — sort all counties by blo_score_v2 desc.
+  const entries: { geoId: string; score: number }[] = [];
+  for (const [geoId, v] of Object.entries(combinedScoresV2Data.value)) {
+    const s = (v as any)?.blo_score_v2;
+    if (typeof s === 'number') entries.push({ geoId, score: s });
+  }
+  entries.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return a.geoId.localeCompare(b.geoId);
+  });
+  return entries.map((e, i) => ({
+    geoId: e.geoId,
+    rank: i + 1,
+    name: getCountyName(e.geoId),
+    stateAbbr: getStateAbbrFromGeo(e.geoId),
+    scoreFmt: e.score.toFixed(2),
+  }));
+});
+
+/** State postal abbreviation from the first 2 digits of GEOID. Mirrors
+ *  the lookup in RankingPanel + the FIPS map; small inline copy avoids
+ *  extracting a shared helper just for this. */
+const STATE_ABBR_BY_NAME: Record<string, string> = {
+  Alabama: 'AL', Alaska: 'AK', Arizona: 'AZ', Arkansas: 'AR',
+  California: 'CA', Colorado: 'CO', Connecticut: 'CT', Delaware: 'DE',
+  'District of Columbia': 'DC', Florida: 'FL', Georgia: 'GA', Hawaii: 'HI',
+  Idaho: 'ID', Illinois: 'IL', Indiana: 'IN', Iowa: 'IA',
+  Kansas: 'KS', Kentucky: 'KY', Louisiana: 'LA', Maine: 'ME',
+  Maryland: 'MD', Massachusetts: 'MA', Michigan: 'MI', Minnesota: 'MN',
+  Mississippi: 'MS', Missouri: 'MO', Montana: 'MT', Nebraska: 'NE',
+  Nevada: 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM',
+  'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', Ohio: 'OH',
+  Oklahoma: 'OK', Oregon: 'OR', Pennsylvania: 'PA', 'Rhode Island': 'RI',
+  'South Carolina': 'SC', 'South Dakota': 'SD', Tennessee: 'TN', Texas: 'TX',
+  Utah: 'UT', Vermont: 'VT', Virginia: 'VA', Washington: 'WA',
+  'West Virginia': 'WV', Wisconsin: 'WI', Wyoming: 'WY',
+  'American Samoa': 'AS', Guam: 'GU', 'Northern Mariana Islands': 'MP',
+  'Puerto Rico': 'PR', 'U.S. Virgin Islands': 'VI',
+};
+function getStateAbbrFromGeo(geoId: string): string {
+  const name = getStateName(geoId);
+  return STATE_ABBR_BY_NAME[name] || name.substring(0, 2).toUpperCase();
+}
 
 /** Rank context shown under the score in the rail header. Computed from
  *  the BLO Livability score (default) or the active composite (≥2 layers).
@@ -1081,6 +1153,11 @@ const toggleTransportationLayer = (layerId: string) => {
 const SET_OUTLINE_LAYER = "walkthrough-set-outline";
 const ACTIVE_OUTLINE_LAYER = "walkthrough-active-outline";
 const HOVER_OUTLINE_LAYER = "county-hover-outline";
+// Inspect mode (single county selected via click): a soft halo, a crisp
+// green outline, and a fill-opacity drop inside the polygon so the
+// underlying Mapbox basemap detail (roads, towns, water) shows through.
+const INSPECT_HALO_LAYER = "inspect-halo";
+const INSPECT_OUTLINE_LAYER = "inspect-outline";
 
 /** Created once on map load. Filters update reactively via watchers. */
 const addWalkthroughOverlayLayers = () => {
@@ -1129,6 +1206,37 @@ const addWalkthroughOverlayLayers = () => {
     filter: ["==", ["get", "GEOID"], "__none__"],
     layout: { visibility: "none" },
   });
+
+  // Inspect halo — wide, soft green glow that gives the selected county
+  // presence even when the user has zoomed out or is scanning the map.
+  map.value.addLayer({
+    id: INSPECT_HALO_LAYER,
+    type: "line",
+    source: "counties",
+    paint: {
+      "line-color": "#1f7a2e",
+      "line-width": 10,
+      "line-opacity": 0.22,
+      "line-blur": 4,
+    },
+    filter: ["==", ["get", "GEOID"], "__none__"],
+    layout: { visibility: "none" },
+  });
+
+  // Inspect outline — crisp BLO-green border on the selected county.
+  // Sits on top of every other line layer so it's never occluded.
+  map.value.addLayer({
+    id: INSPECT_OUTLINE_LAYER,
+    type: "line",
+    source: "counties",
+    paint: {
+      "line-color": "#1f7a2e",
+      "line-width": 3,
+      "line-opacity": 1,
+    },
+    filter: ["==", ["get", "GEOID"], "__none__"],
+    layout: { visibility: "none" },
+  });
 };
 
 /** Update the set-outline filter to match all top-N geoIds. */
@@ -1154,6 +1262,47 @@ const updateActiveOutline = () => {
     map.value.setLayoutProperty(ACTIVE_OUTLINE_LAYER, "visibility", "visible");
   } else {
     map.value.setLayoutProperty(ACTIVE_OUTLINE_LAYER, "visibility", "none");
+  }
+};
+
+/** Update the inspect-mode highlight (halo + outline + fill reveal) so the
+ *  user can clearly see which county was just clicked, even after the
+ *  map has finished its zoom-to-center. Drops choropleth opacity inside
+ *  the polygon to ~0.4 so basemap labels and roads show through. */
+const updateInspectOutline = () => {
+  if (!map.value) return;
+  const id = inspectActive.value ? currentCounty.value?.id : null;
+  const visible = !!id;
+
+  if (map.value.getLayer(INSPECT_HALO_LAYER)) {
+    if (visible) {
+      map.value.setFilter(INSPECT_HALO_LAYER, ["==", ["get", "GEOID"], id]);
+      map.value.setLayoutProperty(INSPECT_HALO_LAYER, "visibility", "visible");
+    } else {
+      map.value.setLayoutProperty(INSPECT_HALO_LAYER, "visibility", "none");
+    }
+  }
+  if (map.value.getLayer(INSPECT_OUTLINE_LAYER)) {
+    if (visible) {
+      map.value.setFilter(INSPECT_OUTLINE_LAYER, ["==", ["get", "GEOID"], id]);
+      map.value.setLayoutProperty(INSPECT_OUTLINE_LAYER, "visibility", "visible");
+    } else {
+      map.value.setLayoutProperty(INSPECT_OUTLINE_LAYER, "visibility", "none");
+    }
+  }
+  // Reveal basemap detail through the choropleth inside the inspected
+  // county. When nothing is inspected, restore the flat 0.7 opacity.
+  if (map.value.getLayer("county-choropleth")) {
+    if (visible) {
+      map.value.setPaintProperty("county-choropleth", "fill-opacity", [
+        "case",
+        ["==", ["get", "GEOID"], id],
+        0.4,
+        0.7,
+      ]);
+    } else {
+      map.value.setPaintProperty("county-choropleth", "fill-opacity", 0.7);
+    }
   }
 };
 
@@ -1272,6 +1421,10 @@ watch([walkthroughActive, topNGeoIds], () => {
 watch([walkthroughActive, currentCounty], () => {
   updateActiveOutline();
   updateWalkthroughMarkers();
+}, { deep: true });
+
+watch([inspectActive, currentCounty], () => {
+  updateInspectOutline();
 }, { deep: true });
 
 const updateChoroplethVisibility = () => {
