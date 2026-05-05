@@ -129,6 +129,36 @@
             <span class="chat-dot"></span>
             <span class="chat-dot"></span>
           </div>
+          <!-- Inline follow-up input. Appears at the bottom of the chat
+               thread so multi-turn replies feel attached to the
+               conversation rather than requiring a trip back to the top
+               Ask bar. Submits via the same sendMessage handler — no
+               backend changes, just a second visual entry point. -->
+          <form
+            v-if="visibleMessages.length > 0"
+            class="chat-followup"
+            @submit.prevent="submitFollowup"
+          >
+            <input
+              ref="followupRef"
+              v-model="followup"
+              type="text"
+              placeholder="Reply or ask a follow-up…"
+              class="chat-followup-input"
+              :disabled="isThinking"
+              aria-label="Follow-up message"
+              maxlength="500"
+            />
+            <button
+              type="submit"
+              class="chat-followup-send"
+              :disabled="isThinking || !followup.trim()"
+              aria-label="Send follow-up"
+            >
+              <span v-if="!isThinking">↑</span>
+              <span v-else class="prompt-spinner"></span>
+            </button>
+          </form>
         </div>
       </div>
 
@@ -321,6 +351,25 @@ async function handleSubmit() {
   query.value = ''
   historyExpanded.value = true
   await props.sendMessage(text)
+}
+
+// Inline follow-up input state. Distinct from the top-level `query`
+// so neither field interferes with the other; both ultimately call
+// the same sendMessage path.
+const followup = ref('')
+const followupRef = ref<HTMLInputElement | null>(null)
+
+async function submitFollowup() {
+  const text = followup.value.trim()
+  if (!text || props.isThinking) return
+  followup.value = ''
+  historyExpanded.value = true
+  await props.sendMessage(text)
+  // After the reply lands, refocus the follow-up input so the user
+  // can keep going without a click — multi-turn flow stays in one
+  // place. requestAnimationFrame so the DOM has rendered the new
+  // message and the input is no longer disabled.
+  requestAnimationFrame(() => followupRef.value?.focus())
 }
 
 async function submitChip(chip: string) {
@@ -787,6 +836,69 @@ watch(() => props.messages.length, () => {
 @keyframes blink {
   0%, 80%, 100% { opacity: 0.3; }
   40% { opacity: 1; }
+}
+
+/* Inline follow-up at the bottom of the chat thread. Compact pill so
+   it doesn't out-shout the actual conversation, but visibly an input
+   so users know they can type a reply right there instead of scrolling
+   back up to the Ask bar. Sticks to the bottom of the scroll area. */
+.chat-followup {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 6px 6px 6px 10px;
+  background: white;
+  border: 1px solid var(--blo-cream-divider, #e0d9ca);
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgba(17, 17, 17, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.chat-followup:focus-within {
+  border-color: var(--blo-orange-ring, rgba(255, 107, 28, 0.35));
+  box-shadow: 0 1px 4px rgba(255, 107, 28, 0.12);
+}
+.chat-followup-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  color: var(--blo-ink, #111);
+  padding: 4px 0;
+}
+.chat-followup-input::placeholder {
+  color: var(--blo-stone-soft, #9a948e);
+  font-style: italic;
+}
+.chat-followup-input:disabled {
+  cursor: not-allowed;
+}
+.chat-followup-send {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: none;
+  background: var(--blo-ink, #111);
+  color: white;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.chat-followup-send:disabled {
+  background: var(--blo-stone-soft, #9a948e);
+  cursor: not-allowed;
+}
+.chat-followup-send:hover:not(:disabled) {
+  background: var(--blo-orange-deep, #e0530b);
 }
 
 .prompt-error {
