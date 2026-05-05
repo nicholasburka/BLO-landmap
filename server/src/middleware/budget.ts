@@ -46,6 +46,29 @@ function getPerIpBudget(): number {
   return parsePositiveInt(process.env.DAILY_BUDGET_TOKENS_PER_IP, DEFAULT_DAILY_BUDGET_TOKENS_PER_IP)
 }
 
+/** Local-dev escape hatch. Set BUDGET_BYPASS=1 (or true) in your
+ *  server .env to skip both the per-IP and total daily cap checks
+ *  while still recording usage for observability. Intended ONLY for
+ *  local development — production deployments must leave this unset
+ *  so the wallet-protection layer stays armed. The middleware logs
+ *  a one-time banner at first hit so you can see in the server log
+ *  that you're running uncapped. */
+function isBypassEnabled(): boolean {
+  const v = (process.env.BUDGET_BYPASS || '').trim().toLowerCase()
+  return v === '1' || v === 'true' || v === 'yes' || v === 'on'
+}
+
+let bypassWarned = false
+function logBypassOnce(): void {
+  if (bypassWarned) return
+  bypassWarned = true
+  // eslint-disable-next-line no-console
+  console.warn(
+    '[budget] BUDGET_BYPASS is enabled — daily token caps disabled. ' +
+      'Usage is still recorded but limits are not enforced. Do NOT ship with this set.',
+  )
+}
+
 function parsePositiveInt(raw: string | undefined, fallback: number): number {
   if (!raw) return fallback
   const parsed = parseInt(raw, 10)
@@ -75,17 +98,25 @@ export function getUsageSnapshot() {
     totalBudget: getTotalBudget(),
     perIpBudget: getPerIpBudget(),
     uniqueIps: perIp.size,
+    bypassEnabled: isBypassEnabled(),
   }
 }
 
 /** Express middleware: reject 503 when either cap has been reached.
  *  Also stashes the client IP on res.locals so the route handler /
- *  haiku service can attribute usage back to the right bucket. */
+ *  haiku service can attribute usage back to the right bucket.
+ *  Honors BUDGET_BYPASS for local dev — see isBypassEnabled(). */
 export function dailyBudgetMiddleware(req: Request, res: Response, next: NextFunction): void {
   rolloverIfNeeded()
 
   const clientIp = getClientIp(req)
   res.locals.clientIp = clientIp
+
+  if (isBypassEnabled()) {
+    logBypassOnce()
+    next()
+    return
+  }
 
   if (total.totalTokens >= getTotalBudget()) {
     res.status(503).json({
