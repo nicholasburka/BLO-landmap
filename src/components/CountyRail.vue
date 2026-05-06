@@ -283,8 +283,10 @@
               <span class="rail-rank-county">{{ row.name }}</span>
               <span class="rail-rank-state">{{ row.stateAbbr }}</span>
             </span>
+            <!-- Rankings view always shows Match Score /100 — by
+                 construction it only renders with an active query. -->
             <span class="rail-rank-score">
-              {{ row.scoreFmt }}<span class="rail-rank-score-unit">/{{ scoreScale }}</span>
+              {{ row.scoreFmt }}<span class="rail-rank-score-unit">/100</span>
             </span>
           </button>
         </li>
@@ -341,9 +343,16 @@ const props = defineProps<{
   /** Where this county sits among all scored counties for the current
    *  metric. Rendered as "rank N of M" under the score. */
   scoreRank?: { rank: number; total: number } | null
-  /** Full ranked list of counties for the rank-explorer view. Rendered
-   *  in the rail's 'rank' view (swap-in). */
+  /** Full ranked list of counties for the rank-explorer view (where
+   *  does THIS county fit in the global ranking). Rendered in the
+   *  rail's 'rank' view. Falls back to BLO default when no query
+   *  is active. */
   rankCounties?: RankRow[]
+  /** Phase 4h: dedicated list for the rankings view (top-N for the
+   *  active query). Distinct from rankCounties because this one
+   *  ALWAYS reflects the current query — no BLO fallback — and is
+   *  region-filtered upstream. Only populated when a query is active. */
+  rankingsCounties?: RankRow[]
   /** GEOID of the currently-inspected county — highlighted in the rank list. */
   currentGeoId?: string | null
   /** Phase 4h: rankings view (new 4th view). When the parent decides
@@ -434,11 +443,18 @@ const selectedState = computed({
   set: (v: string) => emit('update:selectedState', v),
 })
 
-/** Rankings view rows = filtered + sliced by limit. Region filter is
- *  applied by the parent (rankCounties is already region-filtered);
- *  this just applies the local single-state dropdown + limit. */
+/** Phase 4h: rankings view sources from a separate list than the rank-
+ *  explorer. railRankingsCounties (parent) reflects the active query
+ *  with region filter applied; the rank-explorer's BLO fallback
+ *  (rankCounties) is intentionally NOT used here so single-layer
+ *  queries don't fall back to the global BLO leaderboard. */
+const rankingsSourceRows = computed(() => props.rankingsCounties ?? [])
+
+/** Rankings view rows = filtered + sliced by limit. The rail's local
+ *  single-state dropdown is the only filter applied here; the parent
+ *  has already applied the chat-set regionStates filter. */
 const rankingsRows = computed(() => {
-  const all = rankCounties.value
+  const all = rankingsSourceRows.value
   const sFilter = selectedState.value.trim().toUpperCase()
   const filtered = sFilter
     ? all.filter(r => r.stateAbbr.toUpperCase() === sFilter)
@@ -447,11 +463,11 @@ const rankingsRows = computed(() => {
   return typeof lim === 'number' && lim > 0 ? filtered.slice(0, lim) : filtered
 })
 
-/** Unique state abbreviations available in the current ranked set,
+/** Unique state abbreviations available in the rankings source set,
  *  sorted alphabetically. Drives the dropdown. */
 const availableStateOptions = computed(() => {
   const seen = new Set<string>()
-  for (const r of rankCounties.value) {
+  for (const r of rankingsSourceRows.value) {
     if (r.stateAbbr) seen.add(r.stateAbbr.toUpperCase())
   }
   return Array.from(seen).sort()

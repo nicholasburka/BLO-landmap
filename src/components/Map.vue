@@ -144,6 +144,7 @@
       :score-rank="walkthroughRank"
       :stats="walkthroughStats"
       :rank-counties="rankExplorerCounties"
+      :rankings-counties="railRankingsCounties"
       :current-geo-id="currentCounty?.id || null"
       :initial-view="railInitialView"
       :query-descriptor="railQueryDescriptor"
@@ -777,9 +778,37 @@ const railLandSearchState = computed(() => {
   };
 });
 
+/** Phase 4h fix: dedicated source for the rail's `rankings` view.
+ *  ALWAYS reflects the active scoring query (any layer count), unlike
+ *  rankExplorerCounties which falls back to BLO default for 0-1
+ *  layers. Also applies the chat-set regionStates filter so what the
+ *  user sees in the mobile rail matches what desktop's RankingPanel
+ *  shows. Empty when no query is active (rail's rankings view is only
+ *  rendered with an active query, so this is safe). */
+const railRankingsCounties = computed(() => {
+  if (!hasActiveScoringQuery.value || allSelectedLayers.value.length === 0) return [];
+  const region = rankingRegionStates.value.length > 0
+    ? new Set(rankingRegionStates.value.map(s => s.toUpperCase()))
+    : null;
+  const ranked = rankedCounties.value.filter(c => c.score != null);
+  const filtered = region
+    ? ranked.filter(c => region.has(getStateAbbrFromGeo(c.geoId).toUpperCase()))
+    : ranked;
+  return filtered.map((c, i) => ({
+    geoId: c.geoId,
+    rank: i + 1,
+    name: getCountyName(c.geoId),
+    stateAbbr: getStateAbbrFromGeo(c.geoId),
+    scoreFmt: (c.score as number).toFixed(1),
+  }));
+});
+
 /** All counties sorted by the active scoring metric (BLO v2 by default,
  *  composite when ≥2 scoring layers). One pass over the data; filtered
- *  to entries that have BOTH a score and a name, so the list is clean. */
+ *  to entries that have BOTH a score and a name, so the list is clean.
+ *  This feeds the rank-explorer view ("where does THIS county rank in
+ *  the full list") and intentionally keeps the BLO fallback so the
+ *  view is meaningful even with no active query. */
 const rankExplorerCounties = computed(() => {
   if (allSelectedLayers.value.length >= 2) {
     return rankedCounties.value
