@@ -133,7 +133,7 @@
     />
 
     <CountyRail
-      :visible="walkthroughActive || (inspectActive && !showDetailedPopup)"
+      :visible="railVisible"
       :mode="walkthroughActive ? 'walk' : 'inspect'"
       :rank="walkthroughIndex + 1"
       :total="limitedRankedCounties.length"
@@ -145,6 +145,10 @@
       :stats="walkthroughStats"
       :rank-counties="rankExplorerCounties"
       :current-geo-id="currentCounty?.id || null"
+      :initial-view="railInitialView"
+      :query-descriptor="railQueryDescriptor"
+      v-model:selected-state="rankingStateFilter"
+      :rankings-limit="activeLimit"
       :land-search="railLandSearchState"
       @prev="walkthroughPrev"
       @next="walkthroughNext"
@@ -712,6 +716,49 @@ const walkthroughStats = computed(() => {
 // the detail view. Clicking any row switches inspect to that county
 // AND auto-returns to detail. Implemented as a view inside CountyRail
 // (not a separate panel) so we don't add another floating surface.
+
+/** Phase 4h: rail is visible whenever a walkthrough is active, an
+ *  inspect target is set, OR (mobile-only) a scoring query is active.
+ *  The query-active branch is what auto-opens the rail to its new
+ *  rankings view on mobile when the user submits a query without
+ *  having clicked a county first. */
+const railVisible = computed(() => {
+  if (walkthroughActive.value) return true;
+  if (inspectActive.value && !showDetailedPopup.value) return true;
+  if (hasActiveScoringQuery.value && isMobileViewport.value) return true;
+  return false;
+});
+
+/** Phase 4h: which view the rail should open in. inspect/walk → 'detail'
+ *  (CountyRail's default). Query-active-without-inspect → 'rankings'. */
+const railInitialView = computed<'detail' | 'rankings' | null>(() => {
+  if (walkthroughActive.value || inspectActive.value) return 'detail';
+  if (hasActiveScoringQuery.value && isMobileViewport.value) return 'rankings';
+  return null;
+});
+
+/** Phase 4h: short descriptor for the rankings header (mirrors
+ *  LensHeader.vue's queryDescriptor logic). Returns the first scoring
+ *  layer name with trailing "Rate"/"Index"/"Score" stripped, plus a
+ *  "+N" if more layers are active. */
+const railQueryDescriptor = computed(() => {
+  const layers = scoringQuery.value;
+  if (layers.length === 0) return '';
+  const first = LAYER_REGISTRY[layers[0].layerId];
+  if (!first) return '';
+  const short = first.name.replace(/\s+(Rate|Index|Score|Count|Population|Average)$/i, '').trim();
+  return layers.length === 1 ? short : `${short} +${layers.length - 1}`;
+});
+
+/** Cheap reactive viewport-width check; updates on resize. The 768px
+ *  threshold matches the existing rail/RankingPanel media-query
+ *  breakpoint. SSR-safe — returns false when window is undefined. */
+const isMobileViewport = ref(typeof window !== 'undefined' && window.innerWidth <= 768);
+if (typeof window !== 'undefined') {
+  window.addEventListener('resize', () => {
+    isMobileViewport.value = window.innerWidth <= 768;
+  });
+}
 
 /** Land-for-sale CTA state for the inspect rail. Returns null in walk
  *  mode — the walkthrough is about scanning multiple counties, not

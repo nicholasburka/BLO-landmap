@@ -535,10 +535,17 @@ const countLabel = computed(() => {
 }
 
 @media (max-width: 768px) {
-  /* Mobile: ranking panel anchors top-right under the header. Default
-     state is collapsed (just the toggle button) so it doesn't fight
-     the chat history; user expands to see the full list. */
+  /* Phase 4h: RankingPanel is hidden on mobile. Its functionality is
+     unified into CountyRail's new 'rankings' view, which shows up
+     automatically when a query is active and no county is inspected.
+     The desktop layout above is untouched. */
   .ranking-panel {
+    display: none !important;
+  }
+  /* Stale rules below kept for reference (and in case we ever toggle
+     back on tablet); they no longer apply since display:none above
+     wins. */
+  .ranking-panel.legacy-mobile-rules {
     position: fixed;
     top: 70px;
     right: 8px;

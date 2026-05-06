@@ -241,6 +241,56 @@
       </ul>
     </template>
 
+    <!-- =============== RANKINGS VIEW (Phase 4h — default for active query
+         on mobile; replaces the standalone RankingPanel). Rows + state
+         dropdown only. Walk-through, top-N, and filter pills are
+         intentionally not migrated. =============== -->
+    <template v-else-if="view === 'rankings'">
+      <div class="rail-rankings-head">
+        <span class="rail-rankings-eyebrow">Active query</span>
+        <h3 v-if="queryDescriptor" class="rail-rankings-title">{{ queryDescriptor }}</h3>
+        <h3 v-else class="rail-rankings-title">{{ scoreLabel }}</h3>
+        <p class="rail-rankings-sub">
+          {{ rankingsRows.length.toLocaleString() }}
+          {{ rankingsRows.length === 1 ? 'county' : 'counties' }}
+          · tap to inspect
+        </p>
+        <select
+          class="rail-rankings-state"
+          :value="selectedState"
+          @change="selectedState = ($event.target as HTMLSelectElement).value"
+          aria-label="Filter ranking by state"
+        >
+          <option value="">All states</option>
+          <option v-for="abbr in availableStateOptions" :key="abbr" :value="abbr">{{ abbr }}</option>
+        </select>
+      </div>
+      <ol class="rail-rank-list">
+        <li
+          v-for="row in rankingsRows"
+          :key="row.geoId"
+          class="rail-rank-row"
+          :class="{ 'rail-rank-row--current': row.geoId === currentGeoId }"
+        >
+          <button
+            type="button"
+            class="rail-rank-row-btn"
+            @click="onPickRow(row.geoId)"
+            :aria-current="row.geoId === currentGeoId ? 'true' : undefined"
+          >
+            <span class="rail-rank-num">{{ row.rank.toLocaleString() }}</span>
+            <span class="rail-rank-name">
+              <span class="rail-rank-county">{{ row.name }}</span>
+              <span class="rail-rank-state">{{ row.stateAbbr }}</span>
+            </span>
+            <span class="rail-rank-score">
+              {{ row.scoreFmt }}<span class="rail-rank-score-unit">/{{ scoreScale }}</span>
+            </span>
+          </button>
+        </li>
+      </ol>
+    </template>
+
     <footer v-if="view === 'detail' && mode === 'walk'" class="rail-nav">
       <button
         class="rail-nav-btn"
@@ -296,6 +346,21 @@ const props = defineProps<{
   rankCounties?: RankRow[]
   /** GEOID of the currently-inspected county — highlighted in the rank list. */
   currentGeoId?: string | null
+  /** Phase 4h: rankings view (new 4th view). When the parent decides
+   *  the rail's default view should be 'rankings' (mobile, query active,
+   *  no inspect target), it sets initialView to 'rankings' and the rail
+   *  auto-opens there. The rail still respects user navigation after. */
+  initialView?: 'detail' | 'rankings' | null
+  /** Active-query descriptor shown in the rankings view header
+   *  (e.g. "Black Homeownership"). Mirrors the LensHeader descriptor. */
+  queryDescriptor?: string
+  /** v-model:selected-state — single-state dropdown filter for the
+   *  rankings view. Empty string = no filter. */
+  selectedState?: string
+  /** Phase 4h: trimmed top-N count for the rankings view (the LLM
+   *  may have set a limit). When provided, only the first N rows of
+   *  rankCounties render. */
+  rankingsLimit?: number | null
   /** Optional land-for-sale CTA state. When omitted, no CTA renders.
    *  When present, the rail surfaces a "Find land for sale" button and
    *  reports its current loading/result/empty state back to the user.
@@ -330,6 +395,7 @@ const emit = defineEmits<{
   next: []
   exit: []
   'view-details': []
+  'update:selectedState': [value: string]
   'view-rank': []
   'select-county': [geoId: string]
   'search-land': []
@@ -347,9 +413,49 @@ const scoreLabel = computed(() =>
 
 const rankCounties = computed(() => props.rankCounties ?? [])
 
-// View mode: detail (default), rank (county-ranking list), or listings
-// (land-for-sale results). Each is a swap-in surface with a back arrow.
-const view = ref<'detail' | 'rank' | 'listings'>('detail')
+// View mode: detail (default), rank (county-ranking list), listings
+// (land-for-sale results), or rankings (Phase 4h — top-N for the
+// active query, the rail's default surface on mobile when a query is
+// active and no county is inspected).
+const view = ref<'detail' | 'rank' | 'listings' | 'rankings'>(
+  props.initialView === 'rankings' ? 'rankings' : 'detail'
+)
+// React to parent-driven initialView changes (e.g. user inspects then
+// closes; parent flips initialView back to 'rankings' so the rail
+// returns to the rankings surface instead of disappearing).
+watch(() => props.initialView, (next) => {
+  if (next === 'rankings' && view.value === 'detail') view.value = 'rankings'
+})
+
+/** Two-way binding for the state-dropdown filter, threaded through
+ *  v-model:selected-state on the parent. */
+const selectedState = computed({
+  get: () => props.selectedState ?? '',
+  set: (v: string) => emit('update:selectedState', v),
+})
+
+/** Rankings view rows = filtered + sliced by limit. Region filter is
+ *  applied by the parent (rankCounties is already region-filtered);
+ *  this just applies the local single-state dropdown + limit. */
+const rankingsRows = computed(() => {
+  const all = rankCounties.value
+  const sFilter = selectedState.value.trim().toUpperCase()
+  const filtered = sFilter
+    ? all.filter(r => r.stateAbbr.toUpperCase() === sFilter)
+    : all
+  const lim = props.rankingsLimit
+  return typeof lim === 'number' && lim > 0 ? filtered.slice(0, lim) : filtered
+})
+
+/** Unique state abbreviations available in the current ranked set,
+ *  sorted alphabetically. Drives the dropdown. */
+const availableStateOptions = computed(() => {
+  const seen = new Set<string>()
+  for (const r of rankCounties.value) {
+    if (r.stateAbbr) seen.add(r.stateAbbr.toUpperCase())
+  }
+  return Array.from(seen).sort()
+})
 
 // Stat row that's been tapped to expand its source-tooltip inline.
 // On desktop the title attribute handles hover; on touch there's no
@@ -1106,6 +1212,54 @@ function formatRank(n: number): string {
   font-size: 11px;
   color: var(--blo-stone, #6b6560);
   font-feature-settings: "tnum";
+}
+
+/* Phase 4h rankings view header. Mirrors the rank-titles structure
+   but adds a state-dropdown filter beneath. */
+.rail-rankings-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--blo-cream-divider, #e0d9ca);
+}
+.rail-rankings-eyebrow {
+  font-family: var(--blo-font-display, 'Fraunces', serif);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blo-stone, #6b6560);
+}
+.rail-rankings-title {
+  font-family: var(--blo-font-display, 'Fraunces', serif);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--blo-ink, #111);
+  margin: 0;
+  line-height: 1.2;
+}
+.rail-rankings-sub {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: var(--blo-stone, #6b6560);
+  font-feature-settings: "tnum";
+}
+.rail-rankings-state {
+  margin-top: 6px;
+  align-self: flex-start;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--blo-ink, #111);
+  background: white;
+  border: 1px solid var(--blo-cream-divider, #e0d9ca);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.rail-rankings-state:focus {
+  outline: 2px solid var(--blo-orange-ring, rgba(255, 107, 28, 0.35));
+  outline-offset: 1px;
 }
 
 .rail-rank-list {
