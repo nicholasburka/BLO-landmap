@@ -13,7 +13,7 @@
       :chat-error="chat.error.value"
       :active-turn-index="chat.activeTurnIndex.value"
       :send-message="chat.sendMessage"
-      :clear-conversation="chat.clearConversation"
+      :clear-conversation="clearActiveQuery"
       :rewind-to-turn="chat.rewindToTurn"
       @select-place="handlePlaceSelection"
     />
@@ -157,7 +157,7 @@
       @view-details="openWalkthroughDetails"
       @select-county="inspectCounty"
       @search-land="handleRailSearchLand"
-      @clear-land="clearSearch"
+      @clear-land="clearActiveQuery"
       @select-listing="handleRailSelectListing"
       @hover-listing="handleRailHoverListing"
       @download-listings="downloadCSV"
@@ -538,6 +538,13 @@ const clearActiveQuery = () => {
   chat.clearConversation();
   // Phase 4e: clear any open inspect rail; its context is gone too.
   if (inspectActive.value) closeInspect();
+  // Phase 4i (Round-3 feedback): nuclear reset includes the land
+  // search. The user reported that the 3 separate "Clear" buttons
+  // each scoped to a different concern (chat / query / listings) were
+  // confusing — all three now route here, so the user can press
+  // whichever one is in front of them and get back to a clean slate.
+  clearSearch();
+  landSearchAttempted.value = false;
   updateChoroplethVisibility();
   updateChoroplethColors();
 };

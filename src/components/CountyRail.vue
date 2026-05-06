@@ -135,7 +135,12 @@
             view {{ landSearch.resultCount }} {{ landSearch.resultCount === 1 ? 'listing' : 'listings' }}
             <span class="rail-land-open-arrow" aria-hidden="true">→</span>
           </button>
-          <button type="button" class="rail-land-clear" @click="$emit('clear-land')">clear</button>
+          <button
+            type="button"
+            class="rail-land-clear"
+            @click="$emit('clear-land')"
+            title="Reset everything (filters, conversation, listings) to default view"
+          >clear</button>
         </p>
         <p v-else-if="landSearch.attempted && !landSearch.loading" class="rail-land-empty">
           No listings nearby — try another county.
@@ -194,6 +199,11 @@
             title="Download all listings as CSV"
           >· download CSV</button>
         </p>
+        <p class="rail-listings-note">
+          Realtor links go to listing-agent websites, not the property page.
+          You may need to search the address on Zillow, Realtor.com, or the
+          MLS to find the property page.
+        </p>
       </div>
       <ul class="rail-listings-list" ref="listingsListEl">
         <li
@@ -222,11 +232,12 @@
           </button>
           <div class="rail-listing-links">
             <a
-              v-if="listing.listingOffice && listing.listingOffice.website"
-              :href="listing.listingOffice.website"
+              v-if="listing.listingOffice && normalizeRealtorUrl(listing.listingOffice.website)"
+              :href="normalizeRealtorUrl(listing.listingOffice.website)!"
               target="_blank"
               rel="noopener noreferrer"
               class="rail-listing-link"
+              title="Opens the realtor's website in a new tab. You may still need to search the property page yourself."
               @click.stop
             >Realtor ↗</a>
             <a
@@ -570,6 +581,24 @@ function onPickRow(geoId: string): void {
   // Auto-return to detail view on selection so the user immediately sees
   // the new county's stats. They can re-open rank to keep browsing.
   view.value = 'detail'
+}
+
+/** Normalize a realtor-website URL so it always opens externally. The
+ *  RentCast feed sometimes returns bare domains like "bkrealty.com"
+ *  with no protocol; the browser then resolves them as relative URLs
+ *  and lands the user at localhost:5173/bkrealty.com. Returns null
+ *  when the URL is missing/empty/javascript: so the template can hide
+ *  the link cleanly. */
+function normalizeRealtorUrl(raw: string | null | undefined): string | null {
+  if (!raw) return null
+  const trimmed = String(raw).trim()
+  if (!trimmed) return null
+  // Drop dangerous schemes outright.
+  if (/^javascript:/i.test(trimmed)) return null
+  // Already absolute? Pass through.
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  // Otherwise prepend https:// so the link opens externally.
+  return `https://${trimmed.replace(/^\/+/, '')}`
 }
 
 /** "1st", "2nd", "3rd", "1,234th" — small contextual ordinal label. */
@@ -1048,6 +1077,19 @@ function formatRank(n: number): string {
 }
 .rail-listings-csv:hover {
   color: #154e1e;
+}
+/* Pass-through note clarifying the Realtor link goes to the
+   broker's site, not the property page. Compact, low-weight, sits
+   between the count line and the listings list. */
+.rail-listings-note {
+  margin: 8px 0 0;
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--blo-stone, #6b6560);
+  background: var(--blo-cream, #f7f4ee);
+  border-left: 2px solid var(--blo-cream-divider, #e0d9ca);
+  border-radius: 4px;
 }
 .rail-listings-list {
   list-style: none;

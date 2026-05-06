@@ -31,8 +31,8 @@
           type="button"
           class="prompt-clear"
           @click="clearConversation"
-          aria-label="Clear conversation"
-          title="Clear conversation"
+          aria-label="Reset map and conversation"
+          title="Reset everything (filters, conversation, listings) to default view"
         >×</button>
       </form>
 

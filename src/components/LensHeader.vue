@@ -21,8 +21,8 @@
           type="button"
           class="lens-hd-clear"
           @click.stop="$emit('clear')"
-          aria-label="Clear current query"
-          title="Clear current query"
+          aria-label="Reset map and conversation"
+          title="Reset everything (filters, conversation, listings) to default view"
         >Clear ×</button>
       </div>
       <div v-if="queryDescriptor" class="lens-hd-descriptor" :title="queryDescriptorFull">
