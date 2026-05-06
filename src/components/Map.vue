@@ -2619,6 +2619,46 @@ const toolContext: ToolContext = {
 
 const chat = useChat(toolContext, {
   getActiveFilters: () => activeFilters.value,
+  /** Phase 4g: snapshot capture at turn end. Reads the live refs that
+   *  drive scoring/filtering/ranking so a future replay can recreate
+   *  the exact same map state. */
+  getSnapshot: () => ({
+    layers: scoringQuery.value.map(l => ({
+      layerId: l.layerId,
+      weight: l.weight,
+      direction: l.direction,
+    })),
+    filters: activeFilters.value.map(f => ({ ...f })),
+    limit: activeLimit.value,
+    regionStates: [...rankingRegionStates.value],
+    currentCountyId: currentCounty.value?.id ?? null,
+    currentCountyName: currentCounty.value?.name ?? null,
+    listingsCount: listings.value.length,
+  }),
+  /** Phase 4g: replay a snapshot. Same code path applyQueryState uses
+   *  for the LLM tool, plus optional inspect-rail restoration. */
+  applySnapshot: (snap) => {
+    toolContext.applyQueryState({
+      layers: snap.layers,
+      filters: snap.filters,
+      limit: snap.limit,
+      regionStates: snap.regionStates,
+      explanation: '',
+    });
+    if (snap.currentCountyId) {
+      // Restore inspect rail to the snapshot's county. Skip if county
+      // data hasn't loaded yet (early hydration before counties source);
+      // user can re-click later to recover.
+      if (countiesData.value) {
+        inspectCounty(snap.currentCountyId);
+      }
+    } else {
+      // Snapshot had no county selected — make sure the rail is closed.
+      if (inspectActive.value) closeInspect();
+    }
+    // Listings re-fetch is deferred (see spec); just leave the listings
+    // panel state alone — user can re-run Find Land if they care.
+  },
 });
 
 onMounted(async () => {

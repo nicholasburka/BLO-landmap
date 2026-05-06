@@ -45,6 +45,23 @@ export interface ChatMessage {
    *  bubble as a warning so the user knows their request didn't go
    *  through. */
   isError?: boolean
+  /** Phase 4g: live state captured at the *end* of the turn this user
+   *  message kicked off. Only populated on user-role messages. Drives
+   *  reload-persistence (most-recent snapshot rehydrates the map) and
+   *  click-to-rewind (clicking a user bubble re-applies its snapshot). */
+  snapshot?: TurnSnapshot
+}
+
+/** Phase 4g: the full reproducible map state at a turn boundary. Small
+ *  enough to JSON-stringify into localStorage (≈200 bytes typical). */
+export interface TurnSnapshot {
+  layers: { layerId: string; weight: number; direction: 'higher_better' | 'lower_better' }[]
+  filters: ScoringFilter[]
+  limit: number | null
+  regionStates: string[]
+  currentCountyId: string | null
+  currentCountyName: string | null
+  listingsCount: number
 }
 
 interface ChatResponse {
@@ -63,6 +80,23 @@ export interface ChatOptions {
   /** Return the currently-active threshold filters so the server can
    *  instruct the LLM to preserve them across turns. */
   getActiveFilters?: () => ScoringFilter[]
+  /** Phase 4g: capture the full live map state at a turn boundary.
+   *  Used both for snapshot persistence and click-to-rewind. */
+  getSnapshot?: () => TurnSnapshot
+  /** Phase 4g: replay a snapshot onto live map state. Same code path
+   *  the LLM tool dispatcher uses (no rewind-specific branch). */
+  applySnapshot?: (snap: TurnSnapshot) => void
+}
+
+const STORAGE_KEY = 'blo:conversation'
+const STORAGE_VERSION = 1
+/** 7 days in ms. Beyond this, persisted state is dropped on hydration. */
+const STORAGE_TTL_MS = 7 * 24 * 60 * 60 * 1000
+
+interface PersistedConversation {
+  v: number
+  savedAt: number
+  messages: ChatMessage[]
 }
 
 export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
@@ -238,12 +272,104 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
       }
     }
 
+    // Phase 4g: capture turn-end snapshot and attach it to the most
+    // recent user-role message. Persist the whole thread so a refresh
+    // restores the conversation + the map state from this turn.
+    captureSnapshotForLastUserTurn()
+    persist()
+
     isThinking.value = false
   }
+
+  /** Walk back from the end of messages to find the latest user message
+   *  and stamp the current snapshot onto it. Called at every turn end. */
+  function captureSnapshotForLastUserTurn(): void {
+    if (!options.getSnapshot) return
+    let snap: TurnSnapshot
+    try {
+      snap = options.getSnapshot()
+    } catch {
+      return // snapshot capture failures must not break chat
+    }
+    for (let i = messages.value.length - 1; i >= 0; i--) {
+      if (messages.value[i].role === 'user') {
+        messages.value[i].snapshot = snap
+        return
+      }
+    }
+  }
+
+  /** Serialize messages to localStorage. Failures (quota, private
+   *  mode) are caught silently — chat itself must not break. We still
+   *  warn once so a developer can spot it in the console. */
+  let persistFailureLogged = false
+  function persist(): void {
+    if (typeof window === 'undefined' || !window.localStorage) return
+    try {
+      const payload: PersistedConversation = {
+        v: STORAGE_VERSION,
+        savedAt: Date.now(),
+        messages: messages.value,
+      }
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
+    } catch (err) {
+      if (!persistFailureLogged) {
+        persistFailureLogged = true
+        // eslint-disable-next-line no-console
+        console.warn('[useChat] localStorage persist failed:', err)
+      }
+    }
+  }
+
+  /** Read prior conversation from localStorage if it's fresh and the
+   *  schema matches. Otherwise clears the key and returns null. */
+  function loadPersisted(): PersistedConversation | null {
+    if (typeof window === 'undefined' || !window.localStorage) return null
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY)
+      if (!raw) return null
+      const parsed = JSON.parse(raw) as PersistedConversation
+      const fresh = typeof parsed.savedAt === 'number'
+        && Date.now() - parsed.savedAt <= STORAGE_TTL_MS
+      const schemaOk = parsed.v === STORAGE_VERSION
+      if (!fresh || !schemaOk || !Array.isArray(parsed.messages)) {
+        window.localStorage.removeItem(STORAGE_KEY)
+        return null
+      }
+      return parsed
+    } catch {
+      try { window.localStorage.removeItem(STORAGE_KEY) } catch {}
+      return null
+    }
+  }
+
+  /** On mount, restore the thread and apply the most recent snapshot
+   *  so the map matches the resumed conversation. Idempotent — safe to
+   *  call on every useChat() instantiation. */
+  function hydrate(): void {
+    const persisted = loadPersisted()
+    if (!persisted) return
+    messages.value = persisted.messages
+    // Find the most recent user message with a snapshot and replay it.
+    if (options.applySnapshot) {
+      for (let i = messages.value.length - 1; i >= 0; i--) {
+        const m = messages.value[i]
+        if (m.role === 'user' && m.snapshot) {
+          try { options.applySnapshot(m.snapshot) } catch {}
+          return
+        }
+      }
+    }
+  }
+
+  hydrate()
 
   function clearConversation(): void {
     messages.value = []
     error.value = null
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try { window.localStorage.removeItem(STORAGE_KEY) } catch {}
+    }
   }
 
   return {
