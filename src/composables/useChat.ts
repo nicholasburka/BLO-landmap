@@ -124,10 +124,16 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
       clearTimeout(timeout)
 
       if (res.status === 401) {
+        // Auth has expired. Previous behavior cleared the entire
+        // messages array AND returned null silently — the user's
+        // typed message vanished from the thread with no signal,
+        // so they thought their query had succeeded into a void.
+        // Now: keep the user message visible, surface an inline error
+        // bubble attached to it, and trigger the auth-clear so the
+        // re-auth UI takes over. The user can re-send after signing
+        // back in (auto-retry is a future enhancement).
         clearAuth('Session expired. Please sign in again.')
-        error.value = null
-        // Clear conversation on auth loss so stale messages don't show
-        messages.value = []
+        pushError('Session expired — please sign in again.')
         return null
       }
       if (res.status === 429) {
@@ -223,7 +229,11 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
       })
 
       if (toolCallCount >= MAX_TOOL_CALLS_PER_TURN) {
-        pushError('Too many tool calls in one turn. Stopping.')
+        pushError(
+          "I started doing this in pieces and ran out of steps. " +
+            "Want me to try a different approach — like filtering by region " +
+            "instead of state-by-state, or focusing on one thing at a time?",
+        )
         break
       }
     }
