@@ -113,8 +113,14 @@ interface Props {
   rankedCounties: CountyScore[]
   /** Function to resolve county name from GEOID */
   getCountyName: (geoId: string) => string
-  /** v-model: currently selected state filter (name, abbr, or empty) */
+  /** v-model: currently selected state filter (name, abbr, or empty).
+   *  This is the dropdown's single-select axis — direct user picks. */
   selectedState?: string
+  /** Phase 4g: parallel multi-state filter axis driven by the chat
+   *  set_query_state tool. When non-empty, takes precedence over
+   *  selectedState so a regional chat query isn't ANDed with a stale
+   *  dropdown selection. */
+  regionStates?: string[]
   /** Active threshold filters from LLM (for pill display) */
   activeFilters?: ScoringFilter[]
   /** LLM-specified display limit (number of rows). null/undefined = show all */
@@ -123,6 +129,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   selectedState: '',
+  regionStates: () => [],
   activeFilters: () => [],
   displayLimit: null,
 })
@@ -199,10 +206,22 @@ const effectiveLimit = computed(() => {
   return 20
 })
 
-/** Ranked counties that pass the state filter (before slicing by limit) */
+/** Ranked counties that pass the state filter (before slicing by limit).
+ *  Two parallel axes:
+ *   - selectedState: dropdown single-select, direct user pick
+ *   - regionStates:  chat-driven multi-state region (Phase 4g)
+ *  When regionStates is non-empty it takes precedence; the chat already
+ *  cleared the dropdown when it set the region (see Map.vue
+ *  applyQueryState) so this branch should only fire from chat-set state. */
 const stateFilteredCounties = computed(() => {
   let filtered = props.rankedCounties.filter(c => c.score !== null)
-  if (selectedState.value) {
+  if (props.regionStates && props.regionStates.length > 0) {
+    const region = new Set(props.regionStates.map(s => s.toUpperCase()))
+    filtered = filtered.filter(c => {
+      const name = getStateName(c.geoId)
+      return region.has(getStateAbbr(name).toUpperCase())
+    })
+  } else if (selectedState.value) {
     const filter = selectedState.value.toUpperCase()
     filtered = filtered.filter(c => {
       const name = getStateName(c.geoId)
@@ -236,7 +255,7 @@ const displayedCounties = computed<CountyDisplay[]>(() => {
 const countLabel = computed(() => {
   const shown = displayedCounties.value.length
   const total = stateFilteredCounties.value.length
-  const hasFilters = filterPills.value.length > 0 || !!selectedState.value
+  const hasFilters = filterPills.value.length > 0 || !!selectedState.value || (props.regionStates?.length ?? 0) > 0
   const noun = hasFilters ? 'matching counties' : 'counties'
   if (shown === total) return `Showing ${shown} ${noun}`
   return `Showing ${shown} of ${total} ${noun}`

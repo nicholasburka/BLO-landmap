@@ -123,6 +123,7 @@
       :active-filters="activeFilters"
       :display-limit="activeLimit"
       v-model:selected-state="rankingStateFilter"
+      :region-states="rankingRegionStates"
       @toggle="toggleRankingPanel"
       @select-county="selectCountyFromRanking"
       @clear-filters="clearActiveFilters"
@@ -320,6 +321,11 @@ const handleOutsideClick = (event: MouseEvent) => {
 
 const rankingPanelExpanded = ref(false);
 const rankingStateFilter = ref('');
+/** Phase 4g: parallel multi-state filter axis driven by the chat
+ *  set_query_state tool. The dropdown writes to rankingStateFilter
+ *  (single-select); the chat writes here (multi-select region). When
+ *  this is non-empty it takes precedence over the dropdown filter. */
+const rankingRegionStates = ref<string[]>([]);
 
 const toggleRankingPanel = () => {
   rankingPanelExpanded.value = !rankingPanelExpanded.value;
@@ -518,6 +524,7 @@ const clearActiveQuery = () => {
   activeLimit.value = null;
   rankingPanelExpanded.value = false;
   rankingStateFilter.value = '';
+  rankingRegionStates.value = [];
   hasActiveScoringQuery.value = false;
   showDiversityChoropleth.value = true;
   // D3: chat narration goes stale once the query clears — drop it.
@@ -2555,13 +2562,25 @@ const resolvePlaceToCountyGeoId = (
 
 const toolContext: ToolContext = {
   get map() { return map.value; },
-  setLayerSelection: (layers, options) => {
+  /** Phase 4g atomic mutator. The full desired state lands in one call,
+   *  so the chat reply and the rankings panel can never disagree —
+   *  they read from the same refs we just wrote. */
+  applyQueryState: (input) => {
     handleQueryResult({
-      layers,
-      explanation: options?.explanation || '',
-      filters: options?.filters,
-      limit: options?.limit,
+      layers: input.layers,
+      explanation: input.explanation || '',
+      filters: input.filters,
+      limit: input.limit ?? undefined,
     });
+    rankingRegionStates.value = input.regionStates;
+    // The single-state dropdown is for direct user selection; the
+    // chat's multi-state filter is a parallel axis. Clear the dropdown
+    // when the chat sets a region (otherwise both would AND together
+    // and the user couldn't tell why their counties disappeared).
+    if (input.regionStates.length > 0) {
+      rankingStateFilter.value = '';
+      rankingPanelExpanded.value = true;
+    }
   },
   openCountyModal: (geoId) => {
     openCountyModalById(geoId);
@@ -2569,11 +2588,6 @@ const toolContext: ToolContext = {
   },
   toggleRankingPanel: (expanded) => {
     rankingPanelExpanded.value = expanded;
-  },
-  setRankingStateFilter: (stateName) => {
-    rankingStateFilter.value = stateName;
-    // Also expand the ranking panel so the user sees the filter take effect
-    if (stateName) rankingPanelExpanded.value = true;
   },
   triggerHousingSearch: (county) => {
     // Center map on the county first, then the user can click "Find land for sale"

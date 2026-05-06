@@ -39,14 +39,14 @@ export const TOOL_DEFINITIONS: Anthropic.Messages.Tool[] = [
     },
   },
   {
-    name: 'set_layer_selection',
-    description: "Apply a new scoring query to the map. This replaces any currently active layers, sets weights and directions, and recolors the choropleth based on a custom composite score. Optionally includes threshold filters (excludes counties below/above a value) and a result limit (top N). Use this when the user asks to find counties matching criteria like 'best for homeownership', 'top 5 affordable with more than 30% Black'.",
+    name: 'set_query_state',
+    description: "Atomically set the entire map query: scoring layers, threshold filters, top-N limit, and (optionally) region/state restriction. This is the SINGLE tool to use for any state mutation related to ranking and filtering. Replaces all prior layers/filters/limit/region — there is no merge. Use for queries like 'top 5 affordable counties in the Southeast with high Black population' (one call, regionStates=['VA','NC','SC','GA','FL','AL','MS','TN','KY','WV','AR','LA']) or 'just show me Mississippi' (regionStates=['MS']) or 'reset' (all empty). NEVER call this multiple times in a single turn for region expansions — pass the full state array on the first call.",
     input_schema: {
       type: 'object',
       properties: {
         layers: {
           type: 'array',
-          description: 'Array of 2-6 layer selections for ranking',
+          description: 'Scoring layers (1-6 entries). Empty array clears scoring and reverts to the default BLO Livability view.',
           items: {
             type: 'object',
             properties: {
@@ -59,7 +59,7 @@ export const TOOL_DEFINITIONS: Anthropic.Messages.Tool[] = [
         },
         filters: {
           type: 'array',
-          description: "Optional threshold filters that exclude counties not meeting the criteria. Use when the user specifies a cutoff (e.g., 'more than 50%', 'under $200k').",
+          description: "Threshold filters that exclude counties not meeting the criteria. Empty array clears all filters.",
           items: {
             type: 'object',
             properties: {
@@ -73,11 +73,16 @@ export const TOOL_DEFINITIONS: Anthropic.Messages.Tool[] = [
         },
         limit: {
           type: 'number',
-          description: "Optional: show only the top N counties in the ranking. Clamped to 1-50. Omit to show all passing counties. Use 10-20 as a reasonable default when the user says 'top counties' without a number.",
+          description: "Top N to surface in the ranking. Clamped to 1-50. Omit or null to show all passing counties.",
         },
-        explanation: { type: 'string', description: 'Brief explanation of why these layers were selected, shown to the user' },
+        regionStates: {
+          type: 'array',
+          description: "2-letter US state codes (e.g., ['NC','SC','GA']) restricting which counties appear in the ranking. Pass the full list in ONE call for regional queries — do NOT call this tool multiple times to expand a region. Empty/omitted means all 50 states.",
+          items: { type: 'string' },
+        },
+        explanation: { type: 'string', description: 'Brief explanation shown to the user describing what changed and why.' },
       },
-      required: ['layers'],
+      required: ['layers', 'explanation'],
     },
   },
   {
@@ -89,17 +94,6 @@ export const TOOL_DEFINITIONS: Anthropic.Messages.Tool[] = [
         expanded: { type: 'boolean', description: 'true to expand, false to collapse' },
       },
       required: ['expanded'],
-    },
-  },
-  {
-    name: 'filter_ranking_by_state',
-    description: "Filter the ranking panel to show only counties in a specific state. Use this when the user wants to narrow results to a region, e.g., 'focus on Texas' or 'show only North Carolina'.",
-    input_schema: {
-      type: 'object',
-      properties: {
-        state: { type: 'string', description: "State name (e.g., 'Texas') or abbreviation (e.g., 'TX'). Use empty string '' to clear the filter." },
-      },
-      required: ['state'],
     },
   },
   {

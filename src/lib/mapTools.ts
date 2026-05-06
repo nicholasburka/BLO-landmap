@@ -37,17 +37,25 @@ export interface RankedCountyInfo {
   score: number
 }
 
+/** Atomic query state — Phase 4g unified mutation shape. */
+export interface QueryStateInput {
+  layers: LayerSelection[]
+  filters: ScoringFilter[]
+  limit: number | null
+  regionStates: string[]
+  explanation?: string
+}
+
 /** Context injected by Map.vue — gives tools access to app state + mutators */
 export interface ToolContext {
   map: mapboxgl.Map | null
-  /** Apply a new layer selection (replaces current selection), with optional filters and display limit */
-  setLayerSelection: (layers: LayerSelection[], options?: LayerSelectionOptions) => void
+  /** Phase 4g: atomic state mutator. Replaces setLayerSelection +
+   *  setRankingStateFilter. Pass the entire desired state in one call. */
+  applyQueryState: (input: QueryStateInput) => void
   /** Open the county detail modal for a given GEOID */
   openCountyModal: (geoId: string) => void
   /** Expand or collapse the ranking panel */
   toggleRankingPanel: (expanded: boolean) => void
-  /** Filter the ranking panel to a specific state (by name or abbr) */
-  setRankingStateFilter: (stateName: string) => void
   /** Trigger property listing search for a county */
   triggerHousingSearch: (county: CountyLookup) => void
   /** Zoom to a GEOID using the counties GeoJSON (Map.vue owns this logic) */
@@ -89,49 +97,58 @@ export const TOOL_DEFINITIONS = [
     },
   },
   {
-    name: 'set_layer_selection',
-    description: "Apply a new scoring query to the map. This replaces any currently active layers, sets weights and directions, and recolors the choropleth based on a custom composite score. Use this when the user asks to find counties matching criteria like 'best for homeownership' or 'affordable with good schools'.",
+    name: 'set_query_state',
+    description: 'Atomically set the entire map query (layers, filters, limit, regionStates) in one call. Replaces all prior state — there is no merge. Use for region queries like "Southeast" by passing the full state array; never call this multiple times to expand a region.',
     input_schema: {
       type: 'object' as const,
       properties: {
         layers: {
           type: 'array' as const,
-          description: 'Array of 2-6 layer selections',
+          description: '0-6 weighted scoring layers. Empty array clears scoring.',
           items: {
             type: 'object' as const,
             properties: {
               layerId: { type: 'string' as const, description: 'Exact layer ID from the registry' },
-              weight: { type: 'number' as const, description: 'Relative weight from 1 (barely mentioned) to 10 (primary focus)' },
+              weight: { type: 'number' as const, description: 'Relative weight 1-10' },
               direction: { type: 'string' as const, enum: ['higher_better', 'lower_better'], description: 'Scoring direction' },
             },
             required: ['layerId', 'weight', 'direction'],
           },
         },
-        explanation: { type: 'string' as const, description: 'Brief explanation of why these layers were selected, shown to the user' },
+        filters: {
+          type: 'array' as const,
+          description: 'Threshold filters. Empty array clears filters.',
+          items: {
+            type: 'object' as const,
+            properties: {
+              layerId: { type: 'string' as const },
+              operator: { type: 'string' as const, enum: ['greater_than', 'less_than', 'between'] },
+              value: { type: 'number' as const },
+              max: { type: 'number' as const },
+            },
+            required: ['layerId', 'operator', 'value'],
+          },
+        },
+        limit: { type: 'number' as const, description: 'Top N (1-50). Omit/null for all.' },
+        regionStates: {
+          type: 'array' as const,
+          description: '2-letter US state codes restricting the ranking. Empty/omitted = nationwide.',
+          items: { type: 'string' as const },
+        },
+        explanation: { type: 'string' as const, description: 'Sentence shown to the user describing what changed.' },
       },
-      required: ['layers'],
+      required: ['layers', 'explanation'],
     },
   },
   {
     name: 'toggle_ranking_panel',
-    description: 'Expand or collapse the county ranking panel (shows top-N counties by the current composite score).',
+    description: 'Expand or collapse the county ranking panel.',
     input_schema: {
       type: 'object' as const,
       properties: {
         expanded: { type: 'boolean' as const, description: 'true to expand, false to collapse' },
       },
       required: ['expanded'],
-    },
-  },
-  {
-    name: 'filter_ranking_by_state',
-    description: "Filter the ranking panel to show only counties in a specific state. Use this when the user wants to narrow results to a region, e.g., 'focus on Texas' or 'show only North Carolina'.",
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        state: { type: 'string' as const, description: "State name (e.g., 'Texas') or abbreviation (e.g., 'TX'). Use empty string '' to clear the filter." },
-      },
-      required: ['state'],
     },
   },
   {
@@ -190,40 +207,53 @@ export async function executeTool(
         return `Triggered property search for ${resolved.match.name}, ${resolved.match.stateAbbr}.`
       }
 
-      case 'set_layer_selection': {
-        if (!Array.isArray(toolInput.layers) || toolInput.layers.length === 0) {
-          return 'Error: layers array is required and must be non-empty.'
+      case 'set_query_state': {
+        const rawLayers = Array.isArray(toolInput.layers) ? toolInput.layers : []
+        const rawFilters = Array.isArray(toolInput.filters) ? toolInput.filters : []
+        const limitIn = toolInput.limit
+        const rawRegions = Array.isArray(toolInput.regionStates) ? toolInput.regionStates : []
+        // Normalize region codes: uppercase, strip whitespace, drop anything
+        // that isn't a 2-letter US state code. Bad codes are silently dropped
+        // rather than rejecting the whole call — partial regions are still
+        // useful and the explanation will mention the active states anyway.
+        const regionStates: string[] = []
+        for (const r of rawRegions) {
+          if (typeof r !== 'string') continue
+          const code = r.trim().toUpperCase()
+          if (/^[A-Z]{2}$/.test(code)) regionStates.push(code)
         }
-        const options: LayerSelectionOptions = {
-          filters: Array.isArray(toolInput.filters) ? toolInput.filters : undefined,
-          limit: typeof toolInput.limit === 'number' ? toolInput.limit : undefined,
-          explanation: toolInput.explanation,
+        const queryState: QueryStateInput = {
+          layers: rawLayers as LayerSelection[],
+          filters: rawFilters as ScoringFilter[],
+          limit: typeof limitIn === 'number' && Number.isFinite(limitIn) ? limitIn : null,
+          regionStates,
+          explanation: typeof toolInput.explanation === 'string' ? toolInput.explanation : undefined,
         }
-        ctx.setLayerSelection(toolInput.layers, options)
-        const layerNames = toolInput.layers.map((l: LayerSelection) => l.layerId).join(', ')
-        // Wait for reactive scoring to complete, then include top N counties
-        const resultCount = options.limit ?? 10
-        const topCounties = await ctx.getTopRankedCounties(Math.max(resultCount, 10))
-        const filterSummary = options.filters && options.filters.length > 0
-          ? ` Filters applied: ${options.filters.map(f => `${f.layerId} ${f.operator} ${f.value}${f.max != null ? '-' + f.max : ''}`).join(', ')}.`
+        ctx.applyQueryState(queryState)
+
+        // Build the human-readable tool_result the LLM will see.
+        const layerNames = queryState.layers.length > 0
+          ? queryState.layers.map((l) => l.layerId).join(', ')
+          : '(cleared)'
+        const filterSummary = queryState.filters.length > 0
+          ? ` Filters: ${queryState.filters.map(f => `${f.layerId} ${f.operator} ${f.value}${f.max != null ? '-' + f.max : ''}`).join(', ')}.`
           : ''
+        const regionSummary = regionStates.length > 0
+          ? ` Region: ${regionStates.join(', ')}.`
+          : ''
+        const resultCount = queryState.limit ?? 10
+        const topCounties = await ctx.getTopRankedCounties(Math.max(resultCount, 10))
         const topList = topCounties
           .slice(0, resultCount)
           .map((c) => `${c.rank}. ${c.name}, ${c.state} (GEOID ${c.geoId}, score ${c.score.toFixed(1)})`)
           .join('\n')
         const emptyNote = topCounties.length === 0 ? '\n\nNo counties match the current criteria.' : ''
-        return `Applied scoring query with ${toolInput.layers.length} layers: ${layerNames}.${filterSummary} Map recolored.\n\nTop ${Math.min(resultCount, topCounties.length)} counties:\n${topList}${emptyNote}`
+        return `Applied query state. Layers: ${layerNames}.${filterSummary}${regionSummary} Map recolored.\n\nTop ${Math.min(resultCount, topCounties.length)} counties:\n${topList}${emptyNote}`
       }
 
       case 'toggle_ranking_panel': {
         ctx.toggleRankingPanel(!!toolInput.expanded)
         return `Ranking panel ${toolInput.expanded ? 'expanded' : 'collapsed'}.`
-      }
-
-      case 'filter_ranking_by_state': {
-        const state = typeof toolInput.state === 'string' ? toolInput.state : ''
-        ctx.setRankingStateFilter(state)
-        return state ? `Ranking filtered to ${state}.` : 'Ranking filter cleared (showing all states).'
       }
 
       case 'show_county_details': {
