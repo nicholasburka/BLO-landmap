@@ -11,8 +11,10 @@
       :messages="chat.messages.value"
       :is-thinking="chat.isThinking.value"
       :chat-error="chat.error.value"
+      :active-turn-index="chat.activeTurnIndex.value"
       :send-message="chat.sendMessage"
       :clear-conversation="chat.clearConversation"
+      :rewind-to-turn="chat.rewindToTurn"
       @select-place="handlePlaceSelection"
     />
 

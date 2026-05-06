@@ -97,12 +97,21 @@ interface PersistedConversation {
   v: number
   savedAt: number
   messages: ChatMessage[]
+  /** Phase 4g click-to-rewind: which user-message the map currently
+   *  reflects. Restored on hydration so refresh-while-rewound stays
+   *  rewound. Defaults to -1 (tail) if missing for backward compat. */
+  activeTurnIndex?: number
 }
 
 export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
   const messages: Ref<ChatMessage[]> = ref([])
   const isThinking = ref(false)
   const error: Ref<string | null> = ref(null)
+  /** Phase 4g: index of the user-message the map state currently
+   *  reflects. -1 means "tail / latest" — every new message advances
+   *  the active turn to the new latest user message. Click-to-rewind
+   *  sets this to an earlier index. */
+  const activeTurnIndex: Ref<number> = ref(-1)
   const { getToken, clearAuth } = useAuth()
 
   /** Build the message array to send to the server (last N, in Anthropic format) */
@@ -276,9 +285,35 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
     // recent user-role message. Persist the whole thread so a refresh
     // restores the conversation + the map state from this turn.
     captureSnapshotForLastUserTurn()
+    // A fresh send always advances the view-pointer to the new latest
+    // turn (any prior rewind is discarded — sending IS committing).
+    activeTurnIndex.value = lastUserMessageIndex()
     persist()
 
     isThinking.value = false
+  }
+
+  /** Index in messages.value of the most recent user-role message,
+   *  or -1 if none. */
+  function lastUserMessageIndex(): number {
+    for (let i = messages.value.length - 1; i >= 0; i--) {
+      if (messages.value[i].role === 'user') return i
+    }
+    return -1
+  }
+
+  /** Phase 4g: replay a prior turn's snapshot. Sets activeTurnIndex
+   *  so the UI can render messages ahead of the rewound turn as
+   *  "ahead-of-current". Sending a new message resets to tail. */
+  function rewindToTurn(messageIndex: number): void {
+    const m = messages.value[messageIndex]
+    if (!m || m.role !== 'user' || !m.snapshot) return
+    if (activeTurnIndex.value === messageIndex) return // already there
+    if (options.applySnapshot) {
+      try { options.applySnapshot(m.snapshot) } catch {}
+    }
+    activeTurnIndex.value = messageIndex
+    persist()
   }
 
   /** Walk back from the end of messages to find the latest user message
@@ -310,6 +345,7 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
         v: STORAGE_VERSION,
         savedAt: Date.now(),
         messages: messages.value,
+        activeTurnIndex: activeTurnIndex.value,
       }
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
     } catch (err) {
@@ -343,22 +379,34 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
     }
   }
 
-  /** On mount, restore the thread and apply the most recent snapshot
-   *  so the map matches the resumed conversation. Idempotent — safe to
-   *  call on every useChat() instantiation. */
+  /** On mount, restore the thread and apply the appropriate snapshot:
+   *  - If the persisted activeTurnIndex points to a valid user message
+   *    with a snapshot, replay that one (refresh-while-rewound stays
+   *    rewound).
+   *  - Otherwise replay the most recent snapshot.
+   *  Idempotent. */
   function hydrate(): void {
     const persisted = loadPersisted()
     if (!persisted) return
     messages.value = persisted.messages
-    // Find the most recent user message with a snapshot and replay it.
-    if (options.applySnapshot) {
+    const persistedIdx = typeof persisted.activeTurnIndex === 'number'
+      ? persisted.activeTurnIndex
+      : -1
+    let replayIdx = -1
+    if (persistedIdx >= 0 && persistedIdx < messages.value.length) {
+      const m = messages.value[persistedIdx]
+      if (m.role === 'user' && m.snapshot) replayIdx = persistedIdx
+    }
+    if (replayIdx === -1) {
       for (let i = messages.value.length - 1; i >= 0; i--) {
         const m = messages.value[i]
-        if (m.role === 'user' && m.snapshot) {
-          try { options.applySnapshot(m.snapshot) } catch {}
-          return
-        }
+        if (m.role === 'user' && m.snapshot) { replayIdx = i; break }
       }
+    }
+    if (replayIdx === -1) return
+    activeTurnIndex.value = replayIdx
+    if (options.applySnapshot) {
+      try { options.applySnapshot(messages.value[replayIdx].snapshot!) } catch {}
     }
   }
 
@@ -367,6 +415,7 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
   function clearConversation(): void {
     messages.value = []
     error.value = null
+    activeTurnIndex.value = -1
     if (typeof window !== 'undefined' && window.localStorage) {
       try { window.localStorage.removeItem(STORAGE_KEY) } catch {}
     }
@@ -376,7 +425,9 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
     messages,
     isThinking,
     error,
+    activeTurnIndex,
     sendMessage,
     clearConversation,
+    rewindToTurn,
   }
 }

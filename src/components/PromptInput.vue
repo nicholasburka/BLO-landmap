@@ -99,10 +99,20 @@
         </div>
         <div v-if="historyExpanded" ref="scrollRef" class="chat-messages">
           <div
-            v-for="(msg, idx) in visibleMessages"
-            :key="idx"
+            v-for="{ msg, originalIndex } in visibleMessages"
+            :key="originalIndex"
             class="chat-message"
-            :class="[msg.role, { 'chat-message--error': msg.isError }]"
+            :class="[
+              msg.role,
+              {
+                'chat-message--error': msg.isError,
+                'chat-message--clickable': msg.role === 'user' && !!msg.snapshot,
+                'chat-message--active': originalIndex === effectiveActiveTurn,
+                'chat-message--ahead': effectiveActiveTurn !== -1 && originalIndex > effectiveActiveTurn,
+              },
+            ]"
+            @click="msg.role === 'user' && msg.snapshot ? rewindToTurn(originalIndex) : null"
+            :title="msg.role === 'user' && msg.snapshot && originalIndex !== effectiveActiveTurn ? 'Click to rewind the map to this turn' : undefined"
           >
             <div v-if="msg.isError && msg.displayText" class="chat-error-bubble">
               <span class="chat-error-icon" aria-hidden="true">⚠</span>
@@ -189,8 +199,14 @@ const props = defineProps<{
   messages: ChatMessage[]
   isThinking: boolean
   chatError: string | null
+  /** Phase 4g: index of the user-message the map currently reflects.
+   *  -1 means tail/latest. Drives the active-turn highlight + the
+   *  ahead-of-current dimming on later messages. */
+  activeTurnIndex: number
   sendMessage: (text: string) => Promise<void>
   clearConversation: () => void
+  /** Phase 4g: replay a prior turn's snapshot. Bubble-click handler. */
+  rewindToTurn: (messageIndex: number) => void
 }>()
 
 const emit = defineEmits<{
@@ -321,10 +337,24 @@ const suggestedQueries = [
 ]
 
 /** Only show messages that have something to display (skip empty tool_result messages).
- *  Error bubbles count — they have displayText set by useChat.pushError. */
+ *  Error bubbles count. Pairs each message with its ORIGINAL index in
+ *  the messages array so click-to-rewind can target the right snapshot. */
 const visibleMessages = computed(() =>
-  props.messages.filter((m) => m.isError || m.displayText || (m.toolCalls && m.toolCalls.length > 0))
+  props.messages
+    .map((m, i) => ({ msg: m, originalIndex: i }))
+    .filter(({ msg }) => msg.isError || msg.displayText || (msg.toolCalls && msg.toolCalls.length > 0))
 )
+
+/** Effective active turn index. -1 (tail) means "latest user message
+ *  with a snapshot is current"; resolve to the actual index for
+ *  comparison in the template. */
+const effectiveActiveTurn = computed(() => {
+  if (props.activeTurnIndex >= 0) return props.activeTurnIndex
+  for (let i = props.messages.length - 1; i >= 0; i--) {
+    if (props.messages[i].role === 'user' && props.messages[i].snapshot) return i
+  }
+  return -1
+})
 
 function describeToolCall(name: string, input: any): string {
   switch (name) {
@@ -727,6 +757,40 @@ watch(() => props.messages.length, () => {
 .chat-message.user {
   display: flex;
   justify-content: flex-end;
+}
+
+/* Phase 4g click-to-rewind treatments. */
+
+/* User bubbles with a snapshot become tappable rewind handles. The
+   cursor + subtle hover scale make it discoverable; the title
+   tooltip reinforces. */
+.chat-message--clickable {
+  cursor: pointer;
+}
+.chat-message--clickable .chat-text {
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.chat-message--clickable:hover .chat-text {
+  box-shadow: 0 0 0 2px var(--blo-orange-ring, rgba(255, 107, 28, 0.35));
+}
+
+/* Active turn: the message whose snapshot the map currently reflects.
+   Soft orange ring on the bubble. The newest turn is also active so
+   this state is visible most of the time — it should read as
+   "current" not "selected." */
+.chat-message--active .chat-text {
+  box-shadow: 0 0 0 2px var(--blo-orange-ring, rgba(255, 107, 28, 0.35));
+}
+
+/* Ahead-of-current: rewinding to an earlier turn dims later messages
+   to communicate "these happened, but the map isn't showing them
+   right now." Click any to jump forward. */
+.chat-message--ahead {
+  opacity: 0.45;
+  filter: saturate(0.6);
+}
+.chat-message--ahead.chat-message--clickable:hover {
+  opacity: 0.85;
 }
 
 .chat-message.assistant .chat-text {
