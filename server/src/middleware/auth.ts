@@ -3,42 +3,70 @@ import type { Request, Response, NextFunction } from 'express'
 
 const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000 // 24 hours
 
+/** Auth tier baked into the signed token.
+ *   - normal:   subject to the daily token cap.
+ *   - staging:  exempt from the cap so PM testing on the staging
+ *               site doesn't burn the prod quota. Granted only when
+ *               the user authenticates with STAGING_PASSWORD. */
+export type AuthTier = 'normal' | 'staging'
+
 function getSecret(): string {
   return `blo-session-${process.env.BETA_PASSWORD || 'default'}`
 }
 
-/** Create a signed session token encoding the current timestamp */
-export function createToken(): string {
+/** Create a signed session token encoding timestamp + tier. The tier
+ *  is part of the signed payload so a normal user can't self-promote
+ *  to staging by tampering with their token. */
+export function createToken(tier: AuthTier = 'normal'): string {
   const timestamp = Date.now().toString()
-  const hmac = createHmac('sha256', getSecret()).update(timestamp).digest('hex')
-  const payload = Buffer.from(timestamp).toString('base64')
+  const body = `${timestamp}.${tier}`
+  const hmac = createHmac('sha256', getSecret()).update(body).digest('hex')
+  const payload = Buffer.from(body).toString('base64')
   return `${payload}.${hmac}`
 }
 
-/** Validate a session token: check signature and expiry */
-export function validateToken(token: string): boolean {
-  const parts = token.split('.')
-  if (parts.length !== 2) return false
-
-  const [payload, signature] = parts
-  let timestamp: number
-
-  try {
-    timestamp = parseInt(Buffer.from(payload, 'base64').toString(), 10)
-    if (isNaN(timestamp)) return false
-  } catch {
-    return false
-  }
-
-  // Check expiry
-  if (Date.now() - timestamp > TOKEN_EXPIRY_MS) return false
-
-  // Check signature
-  const expectedHmac = createHmac('sha256', getSecret()).update(timestamp.toString()).digest('hex')
-  return signature === expectedHmac
+/** Decoded validation result. Includes the tier so downstream
+ *  middleware (e.g. the budget gate) can branch on it. */
+export interface TokenValidation {
+  valid: boolean
+  tier: AuthTier
 }
 
-/** Express middleware: require valid auth token */
+/** Validate a session token: signature, expiry, and decode tier. */
+export function validateToken(token: string): TokenValidation {
+  const fail: TokenValidation = { valid: false, tier: 'normal' }
+  const parts = token.split('.')
+  if (parts.length !== 2) return fail
+
+  const [payload, signature] = parts
+  let body: string
+  try {
+    body = Buffer.from(payload, 'base64').toString()
+  } catch {
+    return fail
+  }
+
+  // Body is "timestamp.tier". Tokens issued before tier support had
+  // just "timestamp" — accept those as normal-tier so an in-flight
+  // session doesn't bounce across the rollout.
+  const bodyParts = body.split('.')
+  const timestamp = parseInt(bodyParts[0], 10)
+  if (isNaN(timestamp)) return fail
+  const tier: AuthTier = bodyParts[1] === 'staging' ? 'staging' : 'normal'
+
+  if (Date.now() - timestamp > TOKEN_EXPIRY_MS) return fail
+
+  // Recompute against the exact body sent — legacy tokens still verify
+  // because their signed body is the bare timestamp string.
+  const expectedHmac = createHmac('sha256', getSecret()).update(body).digest('hex')
+  if (signature !== expectedHmac) return fail
+
+  return { valid: true, tier }
+}
+
+/** Express middleware: require a valid auth token. Stashes the tier
+ *  on res.locals so downstream middleware (notably the budget gate)
+ *  can read it without re-parsing. */
 export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -47,10 +75,12 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   }
 
   const token = authHeader.slice(7)
-  if (!validateToken(token)) {
+  const result = validateToken(token)
+  if (!result.valid) {
     res.status(401).json({ error: 'Unauthorized' })
     return
   }
 
+  res.locals.authTier = result.tier
   next()
 }

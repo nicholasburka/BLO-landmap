@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import MapComponent from './components/Map.vue'
+import StagingGate from './components/StagingGate.vue'
 </script>
 
 <template>
@@ -21,6 +22,11 @@ import MapComponent from './components/Map.vue'
         <component :is="Component || MapComponent" />
       </RouterView>
     </main>
+
+    <!-- Staging gate: renders only when VITE_STAGING_GATE_ENABLED=true
+         on this build. On prod the flag is unset so the component is
+         entirely no-op. -->
+    <StagingGate />
   </div>
 </template>
 

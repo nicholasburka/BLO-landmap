@@ -105,7 +105,14 @@ export function getUsageSnapshot() {
 /** Express middleware: reject 503 when either cap has been reached.
  *  Also stashes the client IP on res.locals so the route handler /
  *  haiku service can attribute usage back to the right bucket.
- *  Honors BUDGET_BYPASS for local dev — see isBypassEnabled(). */
+ *
+ *  Two bypass paths:
+ *    1. BUDGET_BYPASS env (local dev) — global, no auth required.
+ *    2. authTier === 'staging' — per-request, set by authMiddleware
+ *       when the user authenticated with STAGING_PASSWORD. Lets PM
+ *       testing run uncapped on a shared staging site without
+ *       opening the global bypass to anonymous traffic.
+ *  Usage is still recorded in both cases for observability. */
 export function dailyBudgetMiddleware(req: Request, res: Response, next: NextFunction): void {
   rolloverIfNeeded()
 
@@ -114,6 +121,14 @@ export function dailyBudgetMiddleware(req: Request, res: Response, next: NextFun
 
   if (isBypassEnabled()) {
     logBypassOnce()
+    next()
+    return
+  }
+
+  // Staging-tier users (authenticated with STAGING_PASSWORD) bypass
+  // the cap. authMiddleware stamps res.locals.authTier upstream of
+  // this middleware on protected routes.
+  if (res.locals.authTier === 'staging') {
     next()
     return
   }
