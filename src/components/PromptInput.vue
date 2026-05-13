@@ -331,9 +331,8 @@ function onKeydown(e: KeyboardEvent): void {
 }
 
 const suggestedQueries = [
-  'Show me the top 5 counties for Black homeownership',
+  'Top 5 diverse counties with Black homeowners',
   'Affordable counties with low pollution',
-  'Zoom to Mecklenburg County, NC',
 ]
 
 /** Only show messages that have something to display (skip empty tool_result messages).
