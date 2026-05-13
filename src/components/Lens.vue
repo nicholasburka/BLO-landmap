@@ -28,14 +28,18 @@
       @click="onHeaderClick"
       @keydown="onHeaderKeydown"
     >
+      <!-- Mobile-only chevron, left-aligned. Big enough to read as an
+           obvious "tap to expand" affordance — earlier mobile users
+           reported the small right-side handle was easy to miss. -->
+      <span
+        v-if="isMobile"
+        class="lens-chevron"
+        :class="{ 'lens-chevron--expanded': mobileExpanded }"
+        aria-hidden="true"
+      ></span>
       <slot name="header">
         <span class="lens-header-fallback">Context</span>
       </slot>
-      <span
-        v-if="isMobile"
-        class="lens-handle"
-        aria-hidden="true"
-      >{{ mobileExpanded ? '▾' : '▴' }}</span>
     </header>
 
     <div
@@ -424,9 +428,32 @@ onBeforeUnmount(() => {
     outline-offset: -3px;
   }
 
-  .lens-handle {
-    display: inline-block;
+  /* Mobile chevron — CSS-drawn V using two borders. Sits left of the
+     header text. Points UP when collapsed (peek), rotates 180° to
+     point DOWN when expanded. Visible affordance for "tap me." */
+  .lens-chevron {
+    /* Don't let the `.lens-header > :first-child` flex:1 rule above
+       grab us — we want a fixed-size affordance, not a stretch box. */
+    flex: 0 0 auto;
     align-self: center;
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 4px;
+    /* Two borders form a chevron pointing up (^) */
+    border-top: 2.5px solid var(--blo-ink-soft, #2a2a2a);
+    border-right: 2.5px solid var(--blo-ink-soft, #2a2a2a);
+    transform: rotate(-45deg) translateY(2px);
+    transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  /* Expanded: rotate 180° so the chevron points down (v) */
+  .lens-chevron--expanded {
+    transform: rotate(135deg) translateY(-2px) translateX(-2px);
+  }
+  /* Hover/focus on the whole peek bar nudges the chevron up slightly
+     to reinforce the affordance. */
+  .lens-header--peek:hover .lens-chevron {
+    border-color: var(--blo-ink, #111);
   }
 
   /* Backdrop dims map slightly when expanded */
