@@ -430,29 +430,35 @@ onBeforeUnmount(() => {
 
   /* Mobile chevron — CSS-drawn V using two borders. Sits left of the
      header text. Points UP when collapsed (peek), rotates 180° to
-     point DOWN when expanded. Visible affordance for "tap me." */
-  .lens-chevron {
-    /* Don't let the `.lens-header > :first-child` flex:1 rule above
-       grab us — we want a fixed-size affordance, not a stretch box. */
+     point DOWN when expanded. Visible affordance for "tap me."
+     Selector specificity intentionally beats `.lens-header > :first-child`
+     above (which sets flex:1 — would stretch the chevron to full bar
+     width and produce a huge diagonal stripe after the 45° rotation). */
+  .lens-header > .lens-chevron {
     flex: 0 0 auto;
     align-self: center;
     display: inline-block;
-    width: 14px;
-    height: 14px;
-    margin-right: 4px;
+    box-sizing: border-box;
+    width: 10px;
+    height: 10px;
+    margin-right: 6px;
     /* Two borders form a chevron pointing up (^) */
-    border-top: 2.5px solid var(--blo-ink-soft, #2a2a2a);
-    border-right: 2.5px solid var(--blo-ink-soft, #2a2a2a);
+    border-top: 2px solid var(--blo-stone, #6b6560);
+    border-right: 2px solid var(--blo-stone, #6b6560);
+    border-left: 0;
+    border-bottom: 0;
+    background: transparent;
     transform: rotate(-45deg) translateY(2px);
-    transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform-origin: center center;
+    transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                border-color 120ms ease;
   }
-  /* Expanded: rotate 180° so the chevron points down (v) */
-  .lens-chevron--expanded {
-    transform: rotate(135deg) translateY(-2px) translateX(-2px);
+  /* Expanded: rotate so the chevron points DOWN (v) */
+  .lens-header > .lens-chevron--expanded {
+    transform: rotate(135deg) translateY(-2px);
   }
-  /* Hover/focus on the whole peek bar nudges the chevron up slightly
-     to reinforce the affordance. */
-  .lens-header--peek:hover .lens-chevron {
+  /* Hover on the peek bar darkens the chevron — reinforces tappability. */
+  .lens-header--peek:hover > .lens-chevron {
     border-color: var(--blo-ink, #111);
   }
 
