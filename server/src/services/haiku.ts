@@ -35,6 +35,8 @@ export interface QueryResult {
   response: QueryResponse
   /** input + output tokens for this call — routes settle the budget reservation with it */
   usedTokens: number
+  inputTokens: number
+  outputTokens: number
 }
 
 export async function queryHaiku(userPrompt: string): Promise<QueryResult> {
@@ -44,12 +46,14 @@ export async function queryHaiku(userPrompt: string): Promise<QueryResult> {
     system: systemPrompt,
     messages: [{ role: 'user', content: userPrompt }],
   })
-  const usedTokens = (message.usage?.input_tokens ?? 0) + (message.usage?.output_tokens ?? 0)
+  const inputTokens = message.usage?.input_tokens ?? 0
+  const outputTokens = message.usage?.output_tokens ?? 0
+  const usedTokens = inputTokens + outputTokens
 
   // Extract text content
   const textBlock = message.content.find(block => block.type === 'text')
   if (!textBlock || textBlock.type !== 'text') {
-    return { response: { layers: [], explanation: 'Unable to process query.' }, usedTokens }
+    return { response: { layers: [], explanation: 'Unable to process query.' }, usedTokens, inputTokens, outputTokens }
   }
 
   // Parse JSON from response
@@ -63,16 +67,16 @@ export async function queryHaiku(userPrompt: string): Promise<QueryResult> {
       try {
         parsed = JSON.parse(jsonMatch[1])
       } catch {
-        return { response: { layers: [], explanation: 'Unable to parse response. Please try rephrasing your query.' }, usedTokens }
+        return { response: { layers: [], explanation: 'Unable to parse response. Please try rephrasing your query.' }, usedTokens, inputTokens, outputTokens }
       }
     } else {
-      return { response: { layers: [], explanation: 'Unable to parse response. Please try rephrasing your query.' }, usedTokens }
+      return { response: { layers: [], explanation: 'Unable to parse response. Please try rephrasing your query.' }, usedTokens, inputTokens, outputTokens }
     }
   }
 
   // Validate structure
   if (!parsed.layers || !Array.isArray(parsed.layers)) {
-    return { response: { layers: [], explanation: parsed.explanation || 'Invalid response format.' }, usedTokens }
+    return { response: { layers: [], explanation: parsed.explanation || 'Invalid response format.' }, usedTokens, inputTokens, outputTokens }
   }
 
   // Filter to valid layer IDs and clamp weights
@@ -125,6 +129,8 @@ export async function queryHaiku(userPrompt: string): Promise<QueryResult> {
       explanation: parsed.explanation || 'Query processed.',
     },
     usedTokens,
+    inputTokens,
+    outputTokens,
   }
 }
 
@@ -137,6 +143,8 @@ export interface ChatResponse {
   stopReason: Anthropic.Messages.Message['stop_reason']
   /** input + output tokens for this call — routes settle the budget reservation with it */
   usedTokens: number
+  inputTokens: number
+  outputTokens: number
 }
 
 /** Context the client sends alongside the message history.
@@ -202,9 +210,13 @@ export async function chatHaiku(
     messages,
   })
 
+  const inputTokens = message.usage?.input_tokens ?? 0
+  const outputTokens = message.usage?.output_tokens ?? 0
   return {
     message,
     stopReason: message.stop_reason,
-    usedTokens: (message.usage?.input_tokens ?? 0) + (message.usage?.output_tokens ?? 0),
+    usedTokens: inputTokens + outputTokens,
+    inputTokens,
+    outputTokens,
   }
 }

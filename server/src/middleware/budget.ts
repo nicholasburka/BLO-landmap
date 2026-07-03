@@ -100,14 +100,6 @@ function getClientIp(req: Request): string {
   return req.ip || req.socket.remoteAddress || 'unknown'
 }
 
-/** Called by the haiku service after each successful Anthropic call. */
-export function recordUsage(clientIp: string, inputTokens: number, outputTokens: number): void {
-  rolloverIfNeeded()
-  const used = (inputTokens || 0) + (outputTokens || 0)
-  total.totalTokens += used
-  perIp.set(clientIp, (perIp.get(clientIp) || 0) + used)
-}
-
 /** Rough pre-request cost estimate: serialized request body at ~4 chars
  *  per token, plus the response's max_tokens ceiling. Deliberately
  *  pessimistic — settleReservation reconciles to actuals afterward. */

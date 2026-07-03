@@ -92,6 +92,7 @@ If you want to test the staging-gate flow locally:
 - **CORS errors in the browser console** — the staging Netlify origin isn't in `ALLOWED_ORIGINS` on the backend. Add it and restart.
 - **Cap still appears to apply** — verify in browser devtools that the auth token's payload (base64-decode the first segment) ends with `.staging`. If it ends with `.normal` or has no tier suffix, the password didn't take.
 - **Checking budget/usage state** — `GET /api/health` is deliberately bare (`{status: 'ok'}`). The full usage snapshot lives at `GET /api/health/usage` and requires a staging-tier bearer token (unlock via the staging password, then reuse the token from localStorage). `bypassEnabled: true` there is the global `BUDGET_BYPASS` flag, not the per-user staging tier — it's ignored when `NODE_ENV=production`.
+- **Usage dashboard** — visit `https://<backend-host>/dashboard` and log in with the `STAGING_PASSWORD` for a visual view of tokens/day, request volume, unique visitors, query themes, and recent requests. Set `DATABASE_URL` (any managed Postgres) for history that survives redeploys; without it the dashboard shows only data since the last restart. See DEPLOY.md → "Usage dashboard".
 
 ---
 

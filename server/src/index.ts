@@ -6,10 +6,12 @@ import authRouter from './routes/auth.js'
 import sessionRouter from './routes/session.js'
 import queryRouter from './routes/query.js'
 import chatRouter from './routes/chat.js'
+import usageRouter from './routes/usage.js'
 import { authMiddleware, requireAuthEnv } from './middleware/auth.js'
 import { queryRateLimit } from './middleware/rateLimit.js'
 import { requestLogger } from './middleware/requestLogger.js'
 import { dailyBudgetMiddleware, getUsageSnapshot } from './middleware/budget.js'
+import { initUsageStore } from './services/usageStore.js'
 
 // Refuse to boot without the secrets the security model depends on.
 requireAuthEnv()
@@ -33,15 +35,23 @@ app.set('trust proxy', Number.isFinite(trustProxyHops) && trustProxyHops >= 0 ? 
 // Security headers. This is a JSON API — no cross-origin embedding needed.
 app.use(helmet())
 
-// CORS
+// CORS. Allow: requests with no Origin (curl, server-to-server), configured
+// frontend origins, and same-origin requests (the /dashboard page calling
+// /api/* on this same host — its origin is never in ALLOWED_ORIGINS).
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean)
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true)
-    if (allowedOrigins.includes(origin)) return callback(null, true)
-    callback(new Error('Not allowed by CORS'))
-  },
-}))
+const corsDelegate: cors.CorsOptionsDelegate<express.Request> = (req, callback) => {
+  const origin = req.headers.origin
+  if (!origin) return callback(null, { origin: true })
+  let sameOrigin = false
+  try {
+    sameOrigin = new URL(origin).host === req.headers.host
+  } catch {
+    sameOrigin = false
+  }
+  if (sameOrigin || allowedOrigins.includes(origin)) return callback(null, { origin: true })
+  callback(new Error('Not allowed by CORS'))
+}
+app.use(cors(corsDelegate))
 
 // Body parsing. 64 KB comfortably fits the largest legitimate chat window
 // (route-level MAX_HISTORY_CHARS is the tighter cost gate) while keeping
@@ -70,6 +80,10 @@ app.get('/api/health/usage', authMiddleware, (_req, res) => {
 app.use(sessionRouter)
 app.use(authRouter)
 
+// Internal usage dashboard + /api/usage (gates itself: staging token for the
+// data, public same-origin assets for the page).
+app.use(usageRouter)
+
 // Query + chat routes (auth + rate limiting + daily budget)
 app.use(authMiddleware, queryRateLimit, dailyBudgetMiddleware, queryRouter)
 app.use(authMiddleware, queryRateLimit, dailyBudgetMiddleware, chatRouter)
@@ -87,8 +101,12 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   res.status(status).json({ error: status < 500 ? 'Bad request' : 'Internal server error' })
 })
 
-app.listen(port, () => {
-  console.log(`BLO API server listening on port ${port}`)
+// Initialize the usage store (Postgres if DATABASE_URL is set, else
+// in-memory) before accepting traffic, then listen.
+initUsageStore().finally(() => {
+  app.listen(port, () => {
+    console.log(`BLO API server listening on port ${port}`)
+  })
 })
 
 export default app

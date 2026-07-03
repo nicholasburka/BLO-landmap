@@ -41,8 +41,9 @@ The backend lives in the `server/` subdirectory. Point your host at that directo
 | `ALLOWED_ORIGINS` | `https://<prod-site>.netlify.app` (comma-add the staging origin if used) | CORS allowlist. Must include every browser origin that calls the API. |
 | `TRUST_PROXY_HOPS` | `1` (default) or `2` | Proxy hops between the client and the server. `1` = host proxies directly (Railway/Render). `2` = a CDN sits in front of the host. **Must match reality** or per-IP limits are spoofable. |
 | `PORT` | as your host requires | Railway/Render usually inject this automatically. |
+| `DATABASE_URL` | Postgres connection string *(optional but recommended)* | Powers the usage dashboard with durable history. Unset = dashboard works but only shows data since the last restart. See "Usage dashboard" below. |
 | `BETA_PASSWORD` | *(leave unset for pure prod)* | Optional normal-tier password. |
-| `STAGING_PASSWORD` | *(leave unset for pure prod)* | Optional cap-bypass password for PM testing — see STAGING.md. Also unlocks `/api/health/usage`. |
+| `STAGING_PASSWORD` | **set this if you want the usage dashboard** | Cap-bypass password for PM testing — see STAGING.md. Also the login for `/dashboard`, `/api/usage`, and `/api/health/usage`. |
 | `DAILY_BUDGET_TOKENS` / `DAILY_BUDGET_TOKENS_PER_IP` | *(unset = defaults 200k / 15k)* | Only override if you know what you're changing. |
 
 - [ ] **Do NOT set `BUDGET_BYPASS`.** (It's ignored in production anyway, but don't rely on that.)
@@ -60,6 +61,18 @@ curl https://blo-api.up.railway.app/api/health/usage
 # Anonymous session mint — expect {"token":"..."}
 curl -X POST https://blo-api.up.railway.app/api/session
 ```
+
+### Usage dashboard (optional, recommended)
+
+The backend serves a self-hosted usage dashboard at **`https://<backend-host>/dashboard`** — token/day chart, request counts, unique visitors, top query themes, and a recent-requests table with per-request token cost. It's the "our own dashboard" view of who's using the app and what it costs.
+
+- **Login:** the dashboard prompts for the **`STAGING_PASSWORD`**. Set that env (above) or the dashboard has no way in. The same password gates the `/api/usage` JSON and `/api/health/usage`.
+- **History across redeploys:** set **`DATABASE_URL`** to any managed Postgres. Free tiers that work out of the box: [Neon](https://neon.tech), Railway's own Postgres plugin, Render Postgres, Supabase. The table is created automatically on first boot — no migration step. The dashboard badge reads **"Postgres · history on"** when connected.
+- **Without `DATABASE_URL`:** the dashboard still works but shows only data since the last restart (badge: "In-memory · since restart"), and each redeploy resets it.
+- **Also in the logs:** every request emits a structured JSON line to stdout (`{"t":"usage",...,"total":<tokens>,...}`) with hashed IPs — greppable in the host log viewer even without the dashboard.
+- For authoritative **billed cost**, the Anthropic Console → Usage is still the source of truth; this dashboard tracks request volume and token counts.
+
+To provision Postgres on Railway: add a Postgres plugin to the project, then reference its connection string as `DATABASE_URL` on the API service. On Neon: create a project, copy the pooled connection string, paste it as `DATABASE_URL`, redeploy.
 
 ---
 

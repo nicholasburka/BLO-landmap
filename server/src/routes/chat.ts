@@ -2,6 +2,8 @@ import { Router } from 'express'
 import type Anthropic from '@anthropic-ai/sdk'
 import { chatHaiku, type ClientChatContext } from '../services/haiku.js'
 import { settleReservation } from '../middleware/budget.js'
+import { recordUsage, hashIp } from '../services/usageStore.js'
+import { themesFromMessages } from '../prompt/themes.js'
 
 const router = Router()
 
@@ -80,15 +82,40 @@ router.post('/api/chat', async (req, res) => {
 
   const clientIp = (res.locals.clientIp as string) || 'unknown'
   const reserved = (res.locals.budgetReservation as number) || 0
+  const tier = (res.locals.authTier as string) || 'normal'
+  const themes = themesFromMessages(messages)
+  const start = Date.now()
   try {
     const result = await chatHaiku(messages!, context)
     settleReservation(clientIp, reserved, result.usedTokens)
+    recordUsage({
+      ts: start,
+      path: '/api/chat',
+      status: 200,
+      durationMs: Date.now() - start,
+      inputTokens: result.inputTokens,
+      outputTokens: result.outputTokens,
+      tier,
+      themes,
+      ipHash: hashIp(clientIp),
+    })
     res.json({
       message: result.message,
       stopReason: result.stopReason,
     })
   } catch (err: any) {
     settleReservation(clientIp, reserved, 0)
+    recordUsage({
+      ts: start,
+      path: '/api/chat',
+      status: 502,
+      durationMs: Date.now() - start,
+      inputTokens: 0,
+      outputTokens: 0,
+      tier,
+      themes,
+      ipHash: hashIp(clientIp),
+    })
     console.error('Chat error:', err?.message || err)
     res.status(502).json({ error: 'Service temporarily unavailable' })
   }
