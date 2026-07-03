@@ -6,3 +6,24 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
+
+# Hashed build assets never change — cache forever.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# County datasets are large and change only on data refreshes; a day of
+# caching keeps repeat visits fast without pinning stale data for long.
+[[headers]]
+  for = "/datasets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"

@@ -7,7 +7,9 @@ export default mergeConfig(
   defineConfig({
     test: {
       environment: 'jsdom',
-      exclude: [...configDefaults.exclude, 'e2e/**'],
+      // server/ has its own vitest config (node environment) — run via
+      // `npm test` inside server/. Keeping it out of the jsdom run.
+      exclude: [...configDefaults.exclude, 'e2e/**', 'server/**'],
       root: fileURLToPath(new URL('./', import.meta.url))
     }
   })

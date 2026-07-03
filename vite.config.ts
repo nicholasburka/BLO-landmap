@@ -23,5 +23,16 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['mapbox-gl']
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        // Split the heavyweight third-party libs out of the app chunk so
+        // app-code changes don't invalidate the (large, stable) vendor cache.
+        manualChunks: {
+          'mapbox-gl': ['mapbox-gl']
+        }
+      }
+    }
   }
 })
