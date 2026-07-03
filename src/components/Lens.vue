@@ -22,7 +22,7 @@
       class="lens-header"
       :class="{ 'lens-header--peek': isMobile && !mobileExpanded }"
       :tabindex="isMobile && !mobileExpanded ? 0 : -1"
-      :role="isMobile && !mobileExpanded ? 'button' : null"
+      :role="isMobile && !mobileExpanded ? 'button' : undefined"
       :aria-expanded="isMobile ? mobileExpanded : undefined"
       :aria-controls="isMobile ? 'lens-tabs-and-body' : undefined"
       @click="onHeaderClick"

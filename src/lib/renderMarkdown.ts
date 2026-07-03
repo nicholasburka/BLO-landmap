@@ -16,6 +16,16 @@ marked.setOptions({
   breaks: true,
 })
 
+// Harden LLM-emitted links: force every anchor to open in a new tab
+// with the opener relationship severed, so a link can't navigate this
+// tab or tabnab it. Registered once at module level.
+DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+  if (node.tagName === 'A') {
+    node.setAttribute('target', '_blank')
+    node.setAttribute('rel', 'noopener noreferrer')
+  }
+})
+
 export function renderMarkdown(source: string): string {
   const raw = marked.parse(source, { async: false }) as string
   return DOMPurify.sanitize(raw, {

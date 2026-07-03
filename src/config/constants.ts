@@ -1,9 +1,9 @@
 // Application mode flags
 export const DEV_MODE_DEMOGRAPHICS_ONLY = false
-export const DEBUG = true // Set to false to disable console logs
+export const DEBUG = import.meta.env.DEV // console logs in dev builds only
 
 // API Configuration
-export const RENTCAST_API_KEY = import.meta.env.VITE_RENTCAST_API_KEY || '72f7ed2c628a40169dfa4bdaf2655fd8'
+export const RENTCAST_API_KEY = import.meta.env.VITE_RENTCAST_API_KEY || ''
 export const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
 
 // Data file paths

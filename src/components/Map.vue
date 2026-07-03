@@ -166,8 +166,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive, watch, computed } from "vue";
-import mapboxgl, { type Expression, type Map } from "mapbox-gl";
+import { ref, onMounted, reactive, watch, computed, nextTick, type Ref } from "vue";
+import mapboxgl, { type Expression } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
@@ -188,7 +188,7 @@ import {
   MAPBOX_ACCESS_TOKEN,
   MAP_CONFIG,
 } from "@/config/constants";
-import type { ColorBlend, ScoringQuery, ScoringFilter } from "@/types/mapTypes";
+import type { ColorBlend, ContaminationData, ScoringQuery, ScoringFilter } from "@/types/mapTypes";
 import { LAYER_REGISTRY } from "@/config/layerRegistry";
 import { NATIONAL_AVERAGES } from "@/config/nationalAverages";
 import { usePersonalizedScore, type DataMaps } from "@/composables/usePersonalizedScore";
@@ -211,7 +211,10 @@ import { initCountyLookup, findCounty } from "@/lib/countyLookup";
 import type { ToolContext } from "@/lib/mapTools";
 
 const mapContainer = ref<HTMLElement | null>(null);
-const map = ref<mapboxgl.Map | null>(null);
+// Cast instead of ref<mapboxgl.Map | null>(): letting Vue compute UnwrapRef
+// on the mapbox-gl v3 Map class blows TS's instantiation depth ("Map$1"
+// errors). Runtime behavior is identical — it's still a plain deep ref.
+const map = ref(null) as Ref<mapboxgl.Map | null>;
 let geocoder: MapboxGeocoder;
 const geocoderRef = { value: undefined as MapboxGeocoder | undefined };
 const detailedPopup = ref<HTMLElement | null>(null);
@@ -360,9 +363,12 @@ const zoomToGeoId = (geoId: string, opts?: { regional?: boolean }): boolean => {
   );
   if (!feature) return false;
   const bounds = new mapboxgl.LngLatBounds();
-  const coords = feature.geometry.type === 'MultiPolygon'
-    ? feature.geometry.coordinates.flat(2)
-    : feature.geometry.coordinates.flat(1);
+  // County features are always Polygon/MultiPolygon; the GeoJSON Geometry
+  // union includes GeometryCollection (no `coordinates`), hence the cast.
+  const geom = feature.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon;
+  const coords = geom.type === 'MultiPolygon'
+    ? geom.coordinates.flat(2)
+    : geom.coordinates.flat(1);
   coords.forEach((coord: number[]) => bounds.extend(coord as [number, number]));
   const padding = opts?.regional ? 160 : 50;
   const maxZoom = opts?.regional ? 7 : 10;
@@ -429,7 +435,10 @@ const closeDetailedPopup = () => {
 
 const toggleContaminationChoropleth = () => {
   if (!showContaminationChoropleth.value && isBLOPrecomputedMode()) {
-    expandBLOPreset();
+    // Was expandBLOPreset() — that function became clearBLO() in the
+    // "simplify BLO toggle" commit (5d2cb3f) and this call site was missed,
+    // leaving a runtime ReferenceError. Matches the other toggle handlers.
+    clearBLO();
   }
   showContaminationChoropleth.value = !showContaminationChoropleth.value;
   updateChoroplethVisibility();
@@ -509,11 +518,12 @@ const scoringChips = computed(() => {
   });
 });
 
-/** Clear-all for the status strip: revert selected layers, filters, and limit
- *  to the BLO Livability Index default state. The Lens header advertises
- *  "Showing BLO Livability Index" when no query is active, so the actual
- *  visible layer must match — Phase 4d cleanup restores BLO here. */
-const clearActiveQuery = () => {
+/** Reset the scoring query back to the BLO Livability Index default:
+ *  selected layers, weights, directions, filters, limit, and
+ *  ranking-panel state. Shared by clearActiveQuery (user-facing full
+ *  reset) and handleQueryResult (LLM sends `layers: []`, which the
+ *  set_query_state tool contract defines as an explicit scoring clear). */
+const resetQueryScoring = () => {
   selectedDemographicLayers.value = ['combined_scores_v2'];
   selectedEconomicLayers.value = [];
   selectedHousingLayers.value = [];
@@ -534,6 +544,14 @@ const clearActiveQuery = () => {
   rankingRegionStates.value = [];
   hasActiveScoringQuery.value = false;
   showDiversityChoropleth.value = true;
+};
+
+/** Clear-all for the status strip: revert selected layers, filters, and limit
+ *  to the BLO Livability Index default state. The Lens header advertises
+ *  "Showing BLO Livability Index" when no query is active, so the actual
+ *  visible layer must match — Phase 4d cleanup restores BLO here. */
+const clearActiveQuery = () => {
+  resetQueryScoring();
   // D3: chat narration goes stale once the query clears — drop it.
   chat.clearConversation();
   // Phase 4e: clear any open inspect rail; its context is gone too.
@@ -557,6 +575,11 @@ const walkthroughIndex = ref(0);
 // only one rail mode is active at a time. Inspect is the default response to
 // any "show me this county" intent (direct click, place pick, LLM tool).
 const inspectActive = ref(false);
+
+/** Snapshot-restored county that arrived before county data / the map
+ *  existed (chat hydration runs during setup). Replayed once the map's
+ *  `load` handler fires, so a refresh mid-inspection restores the rail. */
+const pendingInspectGeoId = ref<string | null>(null);
 
 // Initialize scoring engine
 const dataMaps: DataMaps = {
@@ -1044,8 +1067,6 @@ const handleModalClose = () => {
 
 /** Handle prompt query result: auto-select layers with weights and directions */
 const handleQueryResult = (result: QueryResponse) => {
-  if (!result.layers || result.layers.length === 0) return;
-
   // Phase 4c: any new query result invalidates a walkthrough in progress —
   // it would be referring to the old ranked set. Exit cleanly so overlays
   // and the rail don't show stale state, then let the user re-enter the
@@ -1054,6 +1075,23 @@ const handleQueryResult = (result: QueryResponse) => {
   // context, so close any active inspection card.
   if (walkthroughActive.value) exitWalkthrough();
   if (inspectActive.value) closeInspect();
+
+  // Empty layers = explicit clear of the scoring query (set_query_state
+  // tool contract: "Empty array clears scoring"). Reset to the BLO
+  // default, but still honor filters/limit from the same call — the
+  // caller (applyQueryState) writes regionStates right after we return,
+  // so region-only follow-ups compose correctly instead of silently
+  // no-oping while the tool_result claims the state was applied.
+  if (!result.layers || result.layers.length === 0) {
+    resetQueryScoring();
+    if (result.filters !== undefined) {
+      activeFilters.value = [...result.filters];
+    }
+    activeLimit.value = typeof result.limit === 'number' ? result.limit : null;
+    updateChoroplethVisibility();
+    updateChoroplethColors();
+    return;
+  }
 
   // Clear everything
   selectedDemographicLayers.value = [];
@@ -1073,7 +1111,11 @@ const handleQueryResult = (result: QueryResponse) => {
 
   for (const layer of result.layers) {
     newWeights[layer.layerId] = layer.weight;
-    newDirections[layer.layerId] = layer.direction;
+    // Cast: direction can be undefined (UI-selected layers in a snapshot
+    // replay). Storing undefined here is pre-existing behavior — every
+    // consumer reads with `?? registry default`, so it's indistinguishable
+    // from the key being absent.
+    newDirections[layer.layerId] = layer.direction as string;
 
     // Route to the correct category array
     const demoLayer = demographicLayers.find(l => l.id === layer.layerId);
@@ -1526,9 +1568,11 @@ const fitToTopN = (): boolean => {
       (f: any) => f.properties?.GEOID === c.geoId
     );
     if (!feature) continue;
-    const coords = feature.geometry.type === "MultiPolygon"
-      ? feature.geometry.coordinates.flat(2)
-      : feature.geometry.coordinates.flat(1);
+    // Same Polygon/MultiPolygon-only cast as zoomToGeoId above.
+    const geom = feature.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon;
+    const coords = geom.type === "MultiPolygon"
+      ? geom.coordinates.flat(2)
+      : geom.coordinates.flat(1);
     coords.forEach((coord: number[]) => bounds.extend(coord as [number, number]));
     hasAny = true;
   }
@@ -1990,7 +2034,7 @@ const getColorForEconomicLayer = (
 
     return [r, g, b, 0.85];
   } else if (layerId === "median_income_by_race") {
-    value = data.median_income_black;
+    value = data.median_income_black ?? null;
     // Treat 0 as missing data
     if (value == null || value === 0) return [0, 0, 0, 0];
     min = 0;
@@ -2031,7 +2075,7 @@ const getColorForHousingLayer = (
   let max = 1;
 
   if (layerId === "median_home_value") {
-    value = data.median_home_value;
+    value = data.median_home_value ?? null;
     // Treat 0 as missing data
     if (value == null || value === 0) return [0, 0, 0, 0];
     min = 0;
@@ -2043,7 +2087,7 @@ const getColorForHousingLayer = (
     const g = Math.round((1 - curved) * 200);
     return [r, g, 0, 0.85];
   } else if (layerId === "median_property_tax") {
-    value = data.median_property_tax;
+    value = data.median_property_tax ?? null;
     if (value == null) return [0, 0, 0, 0];
     min = 0;
     max = 10001;
@@ -2054,7 +2098,7 @@ const getColorForHousingLayer = (
     const g = Math.round((1 - curved) * 200);
     return [r, g, 0, 0.85];
   } else if (layerId === "homeownership_by_race") {
-    value = data.homeownership_rate_black;
+    value = data.homeownership_rate_black ?? null;
     // Treat 0 and null as missing data
     if (value == null || value === 0) return [0, 0, 0, 0];
     min = 0;
@@ -2083,7 +2127,7 @@ const getColorForEquityLayer = (
   let max = 1;
 
   if (layerId === "poverty_by_race") {
-    value = data.poverty_rate_black;
+    value = data.poverty_rate_black ?? null;
     // Treat 0 as missing data
     if (value == null || value === 0) return [0, 0, 0, 0];
     min = 0;
@@ -2095,7 +2139,7 @@ const getColorForEquityLayer = (
     const g = Math.round((1 - curved) * 200);
     return [r, g, 0, 0.85];
   } else if (layerId === "black_progress_index") {
-    value = data.black_progress_index;
+    value = data.black_progress_index ?? null;
     if (value == null) return [0, 0, 0, 0];
     min = 0;
     max = 100;
@@ -2300,8 +2344,10 @@ const addTooltip = () => {
     }
     if (e.features && e.features.length > 0) {
       const feature = e.features[0];
-      const countyId = feature.properties.GEOID;
-      const countyName = feature.properties.NAME;
+      // Rendered county features always carry properties; `!` matches the
+      // pre-existing runtime assumption (would have thrown on null before).
+      const countyId = feature.properties!.GEOID;
+      const countyName = feature.properties!.NAME;
 
       // Use FIPS for state name
       const stateFIPS = countyId.substring(0, 2);
@@ -2369,8 +2415,12 @@ const addTooltip = () => {
       });
 
       const countyDiversityData = diversityData.value[countyId];
+      // Entries can be a bare number (legacy shape); `.total` on a number is
+      // undefined at runtime and falls through to 0 — the cast keeps that
+      // exact behavior while satisfying the union type.
       const totalContamination =
-        countyContaminationCounts[countyId]?.total || 0;
+        (countyContaminationCounts[countyId] as ContaminationData | undefined)
+          ?.total || 0;
 
       const getColoredValue = (value: number, average: number) => {
         const color = value > average ? "green" : "red";
@@ -2487,7 +2537,7 @@ const addTooltip = () => {
         <p>Percent Black: ${pctBlackValue != null ? pctBlackValue.toFixed(2) + "%" : "?"}</p>
       `;
 
-      tooltip.setLngLat(e.lngLat).setHTML(tooltipContent).addTo(map.value);
+      tooltip.setLngLat(e.lngLat).setHTML(tooltipContent).addTo(map.value!);
     }
   });
 
@@ -2685,9 +2735,23 @@ const toolContext: ToolContext = {
     zoomToGeoId(geoId);
   },
   getTopRankedCounties: async (limit) => {
-    // Wait for reactive scoring engine to catch up (layer state change → scoringQuery → scores)
-    await new Promise(resolve => setTimeout(resolve, 100));
-    const ranked = rankedCounties.value.slice(0, limit);
+    // The scoring pipeline is a chain of synchronous lazy computeds
+    // (selected-layer refs → allSelectedLayers → scoringQuery → scores →
+    // rankedCounties), so a read here is already settled the moment
+    // applyQueryState's ref writes return. One nextTick drains any
+    // pending reactive effects deterministically — no arbitrary sleep.
+    await nextTick();
+    // Apply the chat-set region filter the same way railRankingsCounties /
+    // the RankingPanel do, so the tool_result the LLM narrates matches
+    // what the panel shows (a GA-restricted query must not report the
+    // nationwide top-10 — rankedCounties itself has no region concept).
+    const region = rankingRegionStates.value.length > 0
+      ? new Set(rankingRegionStates.value.map(s => s.toUpperCase()))
+      : null;
+    const eligible = region
+      ? rankedCounties.value.filter(c => region.has(getStateAbbrFromGeo(c.geoId).toUpperCase()))
+      : rankedCounties.value;
+    const ranked = eligible.slice(0, limit);
     return ranked.map((c, i) => {
       const name = getCountyName(c.geoId);
       const div = diversityData.value[c.geoId];
@@ -2731,14 +2795,19 @@ const chat = useChat(toolContext, {
       explanation: '',
     });
     if (snap.currentCountyId) {
-      // Restore inspect rail to the snapshot's county. Skip if county
-      // data hasn't loaded yet (early hydration before counties source);
-      // user can re-click later to recover.
-      if (countiesData.value) {
+      // Restore inspect rail to the snapshot's county. During early
+      // hydration (before the counties source / map exist) stash the
+      // GEOID; the map's `load` handler replays it once ready.
+      if (countiesData.value && map.value) {
+        pendingInspectGeoId.value = null;
         inspectCounty(snap.currentCountyId);
+      } else {
+        pendingInspectGeoId.value = snap.currentCountyId;
       }
     } else {
-      // Snapshot had no county selected — make sure the rail is closed.
+      // Snapshot had no county selected — make sure the rail is closed
+      // and any not-yet-replayed pending inspect is discarded.
+      pendingInspectGeoId.value = null;
       if (inspectActive.value) closeInspect();
     }
     // Listings re-fetch is deferred (see spec); just leave the listings
@@ -2794,7 +2863,9 @@ onMounted(async () => {
   });
   geocoderRef.value = geocoder;
 
-  map.value.on("load", async function () {
+  // map.value is assigned a few lines up; the `!`s below exist because the
+  // intervening calls make TS drop the non-null narrowing on the ref.
+  map.value!.on("load", async function () {
     debugLog("Map loaded");
     debugLog("Counties source:", map.value?.getSource("counties"));
 
@@ -2873,21 +2944,29 @@ onMounted(async () => {
         updateChoroplethColors();
       }
     }
+
+    // Replay a snapshot-restored inspect that arrived during chat
+    // hydration, before county data and the map existed.
+    if (pendingInspectGeoId.value) {
+      const geoId = pendingInspectGeoId.value;
+      pendingInspectGeoId.value = null;
+      inspectCounty(geoId);
+    }
   });
 
   // Check if the style is already loaded (it might be if we're using a local style)
-  if (map.value.isStyleLoaded()) {
+  if (map.value!.isStyleLoaded()) {
     debugLog("Style already loaded");
     addCountyChoroplethLayer();
   }
 
   // Add a listener for the 'styledata' event, which fires when the map's style is fully loaded
-  map.value.on("styledata", () => {
+  map.value!.on("styledata", () => {
     debugLog("Style data loaded");
     addCountyChoroplethLayer();
   });
 
-  map.value.on("click", (e) => {
+  map.value!.on("click", (e) => {
     // Phase 4e: county click is a no-op during walkthrough so the user
     // can't accidentally derail the tour. They have to Exit first to switch.
     if (walkthroughActive.value) return;
@@ -2917,7 +2996,10 @@ onMounted(async () => {
   const tooltipIcons = document.querySelectorAll(".tooltip-icon");
   tooltipIcons.forEach((icon) => {
     icon.addEventListener("mouseenter", (e) => {
-      const tooltip = icon.querySelector(".tooltip-text");
+      // Non-null + HTMLElement: every .tooltip-icon ships with a
+      // .tooltip-text child in the template; `!` preserves the original
+      // (would-throw-on-missing) runtime behavior.
+      const tooltip = icon.querySelector<HTMLElement>(".tooltip-text")!;
       const iconRect = icon.getBoundingClientRect();
 
       // Position the tooltip above the icon
@@ -2944,7 +3026,7 @@ onMounted(async () => {
   })*/
 
   // Add zoom and rotation controls to the map in the bottom-right corner
-  map.value.addControl(new mapboxgl.NavigationControl(), "bottom-right");
+  map.value!.addControl(new mapboxgl.NavigationControl(), "bottom-right");
 
   addTooltip();
 

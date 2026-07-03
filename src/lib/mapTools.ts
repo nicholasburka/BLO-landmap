@@ -8,11 +8,15 @@
 
 import type mapboxgl from 'mapbox-gl'
 import { findCounty, type CountyLookup } from './countyLookup'
+import { LAYER_REGISTRY } from '@/config/layerRegistry'
 
 export interface LayerSelection {
   layerId: string
   weight: number
-  direction: 'higher_better' | 'lower_better'
+  // Optional: the LLM tool path always supplies a direction (dispatch
+  // defaults it), but snapshot replay of UI-selected layers may not —
+  // scoring then falls back to the layer registry's default direction.
+  direction?: 'higher_better' | 'lower_better'
 }
 
 export interface ScoringFilter {
@@ -222,10 +226,61 @@ export async function executeTool(
           const code = r.trim().toUpperCase()
           if (/^[A-Z]{2}$/.test(code)) regionStates.push(code)
         }
+        // Validate layers against the registry the scoring engine uses
+        // (usePersonalizedScore resolves layerIds via LAYER_REGISTRY).
+        // Malformed/unknown entries are dropped and enumerated in the
+        // tool_result so the LLM can self-correct instead of narrating
+        // layers that were never applied.
+        const layers: LayerSelection[] = []
+        const ignoredLayerIds: string[] = []
+        for (const raw of rawLayers) {
+          if (raw == null || typeof raw !== 'object') {
+            ignoredLayerIds.push('(malformed entry)')
+            continue
+          }
+          const layerId = typeof raw.layerId === 'string' ? raw.layerId : ''
+          if (!layerId || !LAYER_REGISTRY[layerId]) {
+            ignoredLayerIds.push(layerId || '(missing layerId)')
+            continue
+          }
+          const weightIn = typeof raw.weight === 'number' && Number.isFinite(raw.weight) ? raw.weight : 5
+          layers.push({
+            layerId,
+            weight: Math.min(10, Math.max(1, weightIn)),
+            direction: raw.direction === 'lower_better' ? 'lower_better' : 'higher_better',
+          })
+        }
+
+        // Same treatment for filters: known layerId, known operator,
+        // finite numeric value (and max, when present).
+        const filters: ScoringFilter[] = []
+        const ignoredFilterIds: string[] = []
+        for (const raw of rawFilters) {
+          if (raw == null || typeof raw !== 'object') {
+            ignoredFilterIds.push('(malformed entry)')
+            continue
+          }
+          const layerId = typeof raw.layerId === 'string' ? raw.layerId : ''
+          const operatorOk = raw.operator === 'greater_than' || raw.operator === 'less_than' || raw.operator === 'between'
+          const valueOk = typeof raw.value === 'number' && Number.isFinite(raw.value)
+          const maxOk = raw.max == null || (typeof raw.max === 'number' && Number.isFinite(raw.max))
+          if (!layerId || !LAYER_REGISTRY[layerId] || !operatorOk || !valueOk || !maxOk) {
+            ignoredFilterIds.push(layerId || '(missing layerId)')
+            continue
+          }
+          const filter: ScoringFilter = { layerId, operator: raw.operator, value: raw.value }
+          if (typeof raw.max === 'number') filter.max = raw.max
+          filters.push(filter)
+        }
+
         const queryState: QueryStateInput = {
-          layers: rawLayers as LayerSelection[],
-          filters: rawFilters as ScoringFilter[],
-          limit: typeof limitIn === 'number' && Number.isFinite(limitIn) ? limitIn : null,
+          layers,
+          filters,
+          // Clamp to the documented 1-50 range — 0/negative would blank
+          // the ranking panel while the tool_result claims success.
+          limit: typeof limitIn === 'number' && Number.isFinite(limitIn)
+            ? Math.min(50, Math.max(1, Math.round(limitIn)))
+            : null,
           regionStates,
           explanation: typeof toolInput.explanation === 'string' ? toolInput.explanation : undefined,
         }
@@ -241,6 +296,11 @@ export async function executeTool(
         const regionSummary = regionStates.length > 0
           ? ` Region: ${regionStates.join(', ')}.`
           : ''
+        const ignoredNote = (ignoredLayerIds.length > 0 ? ` Ignored unknown layers: ${ignoredLayerIds.join(', ')}.` : '')
+          + (ignoredFilterIds.length > 0 ? ` Ignored invalid filters: ${ignoredFilterIds.join(', ')}.` : '')
+        if (queryState.layers.length === 0) {
+          return `Applied query state. Layers: (cleared).${filterSummary}${regionSummary}${ignoredNote} Scoring cleared — map shows the default BLO Livability Index.`
+        }
         const resultCount = queryState.limit ?? 10
         const topCounties = await ctx.getTopRankedCounties(Math.max(resultCount, 10))
         const topList = topCounties
@@ -248,7 +308,7 @@ export async function executeTool(
           .map((c) => `${c.rank}. ${c.name}, ${c.state} (GEOID ${c.geoId}, score ${c.score.toFixed(1)})`)
           .join('\n')
         const emptyNote = topCounties.length === 0 ? '\n\nNo counties match the current criteria.' : ''
-        return `Applied query state. Layers: ${layerNames}.${filterSummary}${regionSummary} Map recolored.\n\nTop ${Math.min(resultCount, topCounties.length)} counties:\n${topList}${emptyNote}`
+        return `Applied query state. Layers: ${layerNames}.${filterSummary}${regionSummary}${ignoredNote} Map recolored.\n\nTop ${Math.min(resultCount, topCounties.length)} counties:\n${topList}${emptyNote}`
       }
 
       case 'toggle_ranking_panel': {

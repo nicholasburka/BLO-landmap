@@ -10,6 +10,7 @@
 import { ref, type Ref } from 'vue'
 import { executeTool, type ToolContext } from '@/lib/mapTools'
 import { useAuth } from '@/composables/useAuth'
+import { API_URL } from '@/lib/apiBase'
 import type { ScoringFilter } from '@/types/mapTypes'
 
 // Anthropic content block types (minimal subset we need)
@@ -55,7 +56,10 @@ export interface ChatMessage {
 /** Phase 4g: the full reproducible map state at a turn boundary. Small
  *  enough to JSON-stringify into localStorage (≈200 bytes typical). */
 export interface TurnSnapshot {
-  layers: { layerId: string; weight: number; direction: 'higher_better' | 'lower_better' }[]
+  // direction is optional to mirror ScoringQueryLayer — layers selected via
+  // the UI (not the LLM) may carry no explicit direction, and the scoring
+  // pipeline falls back to the registry default in that case.
+  layers: { layerId: string; weight: number; direction?: 'higher_better' | 'lower_better' }[]
   filters: ScoringFilter[]
   limit: number | null
   regionStates: string[]
@@ -72,7 +76,6 @@ interface ChatResponse {
   stopReason: string
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 const MAX_MESSAGES_SENT = 20
 const MAX_TOOL_CALLS_PER_TURN = 10
 
@@ -112,11 +115,20 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
    *  the active turn to the new latest user message. Click-to-rewind
    *  sets this to an earlier index. */
   const activeTurnIndex: Ref<number> = ref(-1)
-  const { getToken, clearAuth } = useAuth()
+  const { getToken, clearAuth, ensureSession } = useAuth()
 
   /** Build the message array to send to the server (last N, in Anthropic format) */
   function buildRequestMessages(): any[] {
-    const recent = messages.value.slice(-MAX_MESSAGES_SENT)
+    let recent = messages.value.slice(-MAX_MESSAGES_SENT)
+    // The naive slice can start mid-tool-exchange (a tool_result user
+    // message, or an assistant message) — Anthropic rejects that with a
+    // 400 because tool_use/tool_result pairs must stay together. Walk
+    // forward to the first real user turn (plain string content) and
+    // send from there; the window stays bounded, just possibly shorter.
+    const firstUserTurn = recent.findIndex(
+      (m) => m.role === 'user' && typeof m.content === 'string'
+    )
+    if (firstUserTurn > 0) recent = recent.slice(firstUserTurn)
     return recent.map((m) => ({
       role: m.role,
       content: m.content,
@@ -140,9 +152,23 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
 
   /** POST to /api/chat and return the response */
   async function postChat(): Promise<ChatResponse | null> {
-    const token = getToken()
+    if (!API_URL) {
+      // Misconfigured prod build (no VITE_API_URL) — apiBase already
+      // logged the loud console error; don't fetch a dead localhost URL.
+      pushError("AI features aren't configured on this deployment.")
+      return null
+    }
+
+    let token = getToken()
     if (!token) {
-      pushError('Please sign in first.')
+      // Sessions are anonymous and minted silently — there is no
+      // sign-in UI. The module-load mint may have failed (server down,
+      // offline), so retry once here before giving up.
+      await ensureSession()
+      token = getToken()
+    }
+    if (!token) {
+      pushError("Couldn't start a session — check your connection and try again.")
       return null
     }
 
@@ -167,16 +193,14 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
       clearTimeout(timeout)
 
       if (res.status === 401) {
-        // Auth has expired. Previous behavior cleared the entire
-        // messages array AND returned null silently — the user's
-        // typed message vanished from the thread with no signal,
-        // so they thought their query had succeeded into a void.
-        // Now: keep the user message visible, surface an inline error
-        // bubble attached to it, and trigger the auth-clear so the
-        // re-auth UI takes over. The user can re-send after signing
-        // back in (auto-retry is a future enhancement).
-        clearAuth('Session expired. Please sign in again.')
-        pushError('Session expired — please sign in again.')
+        // Token was rejected. Sessions are anonymous and auto-minted,
+        // so "sign in again" is meaningless — clear the stale token,
+        // mint a fresh session right away, and keep the user's message
+        // visible with an inline bubble asking them to re-send
+        // (auto-retry is a future enhancement).
+        clearAuth()
+        await ensureSession()
+        pushError('Session refreshed — please send that again.')
         return null
       }
       if (res.status === 429) {
@@ -185,6 +209,16 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
       }
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
+        // Daily token cap: the server returns 503 with a code and a
+        // user-appropriate message ("We've hit today's usage cap…").
+        // Show it verbatim — retrying won't help until tomorrow.
+        if (
+          res.status === 503 &&
+          (data.code === 'daily_budget_exceeded' || data.code === 'daily_budget_exceeded_per_ip')
+        ) {
+          pushError(data.error || "We've hit today's usage cap. Please come back tomorrow.")
+          return null
+        }
         pushError(data.error || 'Something went wrong. Try again.')
         return null
       }
@@ -372,6 +406,14 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
         window.localStorage.removeItem(STORAGE_KEY)
         return null
       }
+      // Drop any entries that aren't well-formed messages (null, plain
+      // strings, wrong role) — a single corrupt entry would otherwise
+      // throw during component setup and white-screen the app on every
+      // load until site data is cleared.
+      parsed.messages = parsed.messages.filter(
+        (m): m is ChatMessage =>
+          !!m && typeof m === 'object' && (m.role === 'user' || m.role === 'assistant')
+      )
       return parsed
     } catch {
       try { window.localStorage.removeItem(STORAGE_KEY) } catch {}
@@ -386,27 +428,35 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
    *  - Otherwise replay the most recent snapshot.
    *  Idempotent. */
   function hydrate(): void {
-    const persisted = loadPersisted()
-    if (!persisted) return
-    messages.value = persisted.messages
-    const persistedIdx = typeof persisted.activeTurnIndex === 'number'
-      ? persisted.activeTurnIndex
-      : -1
-    let replayIdx = -1
-    if (persistedIdx >= 0 && persistedIdx < messages.value.length) {
-      const m = messages.value[persistedIdx]
-      if (m.role === 'user' && m.snapshot) replayIdx = persistedIdx
-    }
-    if (replayIdx === -1) {
-      for (let i = messages.value.length - 1; i >= 0; i--) {
-        const m = messages.value[i]
-        if (m.role === 'user' && m.snapshot) { replayIdx = i; break }
+    try {
+      const persisted = loadPersisted()
+      if (!persisted) return
+      messages.value = persisted.messages
+      const persistedIdx = typeof persisted.activeTurnIndex === 'number'
+        ? persisted.activeTurnIndex
+        : -1
+      let replayIdx = -1
+      if (persistedIdx >= 0 && persistedIdx < messages.value.length) {
+        const m = messages.value[persistedIdx]
+        if (m.role === 'user' && m.snapshot) replayIdx = persistedIdx
       }
-    }
-    if (replayIdx === -1) return
-    activeTurnIndex.value = replayIdx
-    if (options.applySnapshot) {
-      try { options.applySnapshot(messages.value[replayIdx].snapshot!) } catch {}
+      if (replayIdx === -1) {
+        for (let i = messages.value.length - 1; i >= 0; i--) {
+          const m = messages.value[i]
+          if (m.role === 'user' && m.snapshot) { replayIdx = i; break }
+        }
+      }
+      if (replayIdx === -1) return
+      activeTurnIndex.value = replayIdx
+      if (options.applySnapshot) {
+        try { options.applySnapshot(messages.value[replayIdx].snapshot!) } catch {}
+      }
+    } catch {
+      // Corrupt persisted state must never white-screen the app —
+      // clear it and start with a fresh thread.
+      messages.value = []
+      activeTurnIndex.value = -1
+      try { window.localStorage.removeItem(STORAGE_KEY) } catch {}
     }
   }
 

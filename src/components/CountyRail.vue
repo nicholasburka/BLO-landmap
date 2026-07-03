@@ -309,14 +309,14 @@
         class="rail-nav-btn"
         type="button"
         @click="$emit('prev')"
-        :disabled="rank <= 1"
+        :disabled="rank != null && rank <= 1"
         aria-label="Previous county"
       >← Prev</button>
       <button
         class="rail-nav-btn rail-nav-btn--primary"
         type="button"
         @click="$emit('next')"
-        :disabled="rank >= total"
+        :disabled="rank != null && total != null && rank >= total"
         aria-label="Next county"
       >Next →</button>
     </footer>

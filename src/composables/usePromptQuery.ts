@@ -14,7 +14,10 @@ import { useAuth } from '@/composables/useAuth'
 export interface LayerSelection {
   layerId: string
   weight: number
-  direction: 'higher_better' | 'lower_better'
+  // Optional to mirror mapTools.LayerSelection: the LLM path always supplies
+  // a direction, but snapshot replay of UI-selected layers may not — the
+  // scoring pipeline falls back to the layer registry's default.
+  direction?: 'higher_better' | 'lower_better'
 }
 
 export interface ScoringFilter {

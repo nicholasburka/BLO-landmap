@@ -12,10 +12,10 @@
  */
 
 import { ref } from 'vue'
+import { API_URL } from '@/lib/apiBase'
 
 const TOKEN_KEY = 'blo-session-token'
 const TIER_KEY = 'blo-session-tier'
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
 // Module-level shared state
 const isAuthenticated = ref(!!localStorage.getItem(TOKEN_KEY))
@@ -32,6 +32,12 @@ async function ensureSession(): Promise<boolean> {
   if (localStorage.getItem(TOKEN_KEY)) {
     isAuthenticated.value = true
     return true
+  }
+  if (!API_URL) {
+    // Misconfigured prod build (no VITE_API_URL) — apiBase already
+    // logged the loud console error; don't fetch a dead localhost URL.
+    authError.value = "AI features aren't configured on this deployment."
+    return false
   }
   try {
     const res = await fetch(`${API_URL}/api/session`, {
@@ -59,6 +65,9 @@ async function ensureSession(): Promise<boolean> {
  *  password to /api/auth. Returns true on success; on failure the
  *  existing anonymous session is left untouched. */
 async function upgradeWithPassword(password: string): Promise<{ ok: boolean; error?: string }> {
+  if (!API_URL) {
+    return { ok: false, error: "AI features aren't configured on this deployment." }
+  }
   try {
     const res = await fetch(`${API_URL}/api/auth`, {
       method: 'POST',

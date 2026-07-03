@@ -4,6 +4,7 @@ import type {
   ColorBlend,
   DiversityData,
   LifeExpectancyDataMap,
+  ContaminationData,
   ContaminationDataMap,
   CombinedScoresDataMap,
   RGBColor,
@@ -143,7 +144,8 @@ export function useColorCalculation(
       const contaminationValue =
         typeof countyContaminationCounts[geoID] === 'number'
           ? countyContaminationCounts[geoID]
-          : (countyContaminationCounts[geoID]?.total as number) || 0
+          : ((countyContaminationCounts[geoID] as ContaminationData | undefined)
+              ?.total as number) || 0
       const contaminationNormalized =
         maxContamination > 0 ? (contaminationValue as number) / maxContamination : 0
 

@@ -6,7 +6,10 @@ import { RENTCAST_API_KEY, PROPERTY_SEARCH, debugLog } from '@/config/constants'
 
 export function usePropertyListings(mapRef: Ref<mapboxgl.Map | null>, geocoderRef: { value?: MapboxGeocoder }) {
   const listings = ref<any[]>([])
-  const listingMarkers = ref<mapboxgl.Marker[]>([])
+  // Cast instead of ref<Marker[]>(): letting Vue compute UnwrapRef on the
+  // Marker class blows TS's instantiation depth (mapbox-gl v3's Map type).
+  // Runtime behavior is identical — it's still a plain deep ref.
+  const listingMarkers = ref([]) as Ref<mapboxgl.Marker[]>
   const listingsPanelExpanded = ref(true)
   const isSearchResultsLoading = ref(false)
   const currentGeocoderResult = ref<any>(null)
@@ -99,10 +102,10 @@ export function usePropertyListings(mapRef: Ref<mapboxgl.Map | null>, geocoderRe
 
         // History (most recent event)
         mostRecentHistoryEvent: listing.history
-          ? Object.entries(listing.history)[0]?.[1]?.event
+          ? Object.entries<any>(listing.history)[0]?.[1]?.event
           : null,
         mostRecentHistoryPrice: listing.history
-          ? Object.entries(listing.history)[0]?.[1]?.price
+          ? Object.entries<any>(listing.history)[0]?.[1]?.price
           : null,
         mostRecentHistoryDate: listing.history
           ? Object.entries(listing.history)[0]?.[0]

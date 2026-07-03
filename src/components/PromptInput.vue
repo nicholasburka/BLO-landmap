@@ -358,17 +358,24 @@ const effectiveActiveTurn = computed(() => {
 function describeToolCall(name: string, input: any): string {
   switch (name) {
     case 'zoom_to_county':
-      return `Zoom to ${input.county_name}${input.state ? ', ' + input.state : ''}`
+      return `Zoom to ${input?.county_name}${input?.state ? ', ' + input.state : ''}`
     case 'search_housing':
-      return `Search housing in ${input.county_name}${input.state ? ', ' + input.state : ''}`
-    case 'set_layer_selection':
-      return `Apply ${input.layers?.length || 0} scoring layers`
+      return `Search housing in ${input?.county_name}${input?.state ? ', ' + input.state : ''}`
+    case 'set_query_state': {
+      const layerCount = input?.layers?.length || 0
+      const region = input?.regionStates?.length ? ` in ${input.regionStates.join(', ')}` : ''
+      return `Apply ${layerCount} scoring layer${layerCount === 1 ? '' : 's'}${region}`
+    }
     case 'toggle_ranking_panel':
-      return input.expanded ? 'Open ranking panel' : 'Close ranking panel'
-    case 'filter_ranking_by_state':
-      return input.state ? `Filter ranking to ${input.state}` : 'Clear ranking filter'
+      return input?.expanded ? 'Open ranking panel' : 'Close ranking panel'
     case 'show_county_details':
-      return `Show details for ${input.county_name}${input.state ? ', ' + input.state : ''}`
+      return `Show details for ${input?.county_name}${input?.state ? ', ' + input.state : ''}`
+    // Retired tools — can still arrive from threads persisted before
+    // the set_query_state migration (localStorage, 7-day TTL).
+    case 'set_layer_selection':
+      return `Apply ${input?.layers?.length || 0} scoring layers`
+    case 'filter_ranking_by_state':
+      return input?.state ? `Filter ranking to ${input.state}` : 'Clear ranking filter'
     default:
       return name
   }
