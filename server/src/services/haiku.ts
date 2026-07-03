@@ -2,7 +2,6 @@ import Anthropic from '@anthropic-ai/sdk'
 import { buildSystemPrompt, VALID_LAYER_IDS } from '../prompt/systemPrompt.js'
 import { buildChatPrompt } from '../prompt/chatPrompt.js'
 import { TOOL_DEFINITIONS } from '../prompt/toolDefinitions.js'
-import { recordUsage } from '../middleware/budget.js'
 
 export interface LayerSelection {
   layerId: string
@@ -32,19 +31,25 @@ const chatSystemPrompt = buildChatPrompt()
 
 const MODEL = 'claude-haiku-4-5-20251001'
 
-export async function queryHaiku(userPrompt: string, clientIp: string): Promise<QueryResponse> {
+export interface QueryResult {
+  response: QueryResponse
+  /** input + output tokens for this call — routes settle the budget reservation with it */
+  usedTokens: number
+}
+
+export async function queryHaiku(userPrompt: string): Promise<QueryResult> {
   const message = await client.messages.create({
     model: MODEL,
     max_tokens: 1024,
     system: systemPrompt,
     messages: [{ role: 'user', content: userPrompt }],
   })
-  recordUsage(clientIp, message.usage?.input_tokens ?? 0, message.usage?.output_tokens ?? 0)
+  const usedTokens = (message.usage?.input_tokens ?? 0) + (message.usage?.output_tokens ?? 0)
 
   // Extract text content
   const textBlock = message.content.find(block => block.type === 'text')
   if (!textBlock || textBlock.type !== 'text') {
-    return { layers: [], explanation: 'Unable to process query.' }
+    return { response: { layers: [], explanation: 'Unable to process query.' }, usedTokens }
   }
 
   // Parse JSON from response
@@ -58,16 +63,16 @@ export async function queryHaiku(userPrompt: string, clientIp: string): Promise<
       try {
         parsed = JSON.parse(jsonMatch[1])
       } catch {
-        return { layers: [], explanation: 'Unable to parse response. Please try rephrasing your query.' }
+        return { response: { layers: [], explanation: 'Unable to parse response. Please try rephrasing your query.' }, usedTokens }
       }
     } else {
-      return { layers: [], explanation: 'Unable to parse response. Please try rephrasing your query.' }
+      return { response: { layers: [], explanation: 'Unable to parse response. Please try rephrasing your query.' }, usedTokens }
     }
   }
 
   // Validate structure
   if (!parsed.layers || !Array.isArray(parsed.layers)) {
-    return { layers: [], explanation: parsed.explanation || 'Invalid response format.' }
+    return { response: { layers: [], explanation: parsed.explanation || 'Invalid response format.' }, usedTokens }
   }
 
   // Filter to valid layer IDs and clamp weights
@@ -113,10 +118,13 @@ export async function queryHaiku(userPrompt: string, clientIp: string): Promise<
   }
 
   return {
-    layers: validLayers,
-    filters: validFilters,
-    limit: validLimit,
-    explanation: parsed.explanation || 'Query processed.',
+    response: {
+      layers: validLayers,
+      filters: validFilters,
+      limit: validLimit,
+      explanation: parsed.explanation || 'Query processed.',
+    },
+    usedTokens,
   }
 }
 
@@ -127,6 +135,8 @@ export interface ChatResponse {
   message: Anthropic.Messages.Message
   /** Whether Claude stopped to call tools (vs finished the turn) */
   stopReason: Anthropic.Messages.Message['stop_reason']
+  /** input + output tokens for this call — routes settle the budget reservation with it */
+  usedTokens: number
 }
 
 /** Context the client sends alongside the message history.
@@ -138,8 +148,24 @@ export interface ClientChatContext {
 }
 
 function renderActiveFiltersContext(ctx?: ClientChatContext): string {
-  const filters = ctx?.activeFilters
-  if (!filters || filters.length === 0) return ''
+  const raw = ctx?.activeFilters
+  if (!Array.isArray(raw) || raw.length === 0) return ''
+  // Everything rendered here lands in the SYSTEM prompt, so client-supplied
+  // strings must not pass through verbatim — an attacker-crafted layerId is
+  // a prompt injection. Only known layer ids, known operators, and finite
+  // numbers survive.
+  const filters = raw.filter(
+    (f): f is ScoringFilter =>
+      !!f &&
+      typeof f.layerId === 'string' &&
+      VALID_LAYER_IDS.has(f.layerId) &&
+      typeof f.operator === 'string' &&
+      VALID_OPERATORS.has(f.operator) &&
+      typeof f.value === 'number' &&
+      Number.isFinite(f.value) &&
+      (f.max === undefined || (typeof f.max === 'number' && Number.isFinite(f.max))),
+  )
+  if (filters.length === 0) return ''
   const rendered = filters.map(f => {
     const op = f.operator
     if (op === 'between') return `${f.layerId} between ${f.value} and ${f.max ?? '?'}`
@@ -165,7 +191,6 @@ function renderActiveFiltersContext(ctx?: ClientChatContext): string {
  */
 export async function chatHaiku(
   messages: Anthropic.Messages.MessageParam[],
-  clientIp: string,
   context?: ClientChatContext,
 ): Promise<ChatResponse> {
   const systemWithContext = chatSystemPrompt + renderActiveFiltersContext(context)
@@ -176,10 +201,10 @@ export async function chatHaiku(
     tools: TOOL_DEFINITIONS,
     messages,
   })
-  recordUsage(clientIp, message.usage?.input_tokens ?? 0, message.usage?.output_tokens ?? 0)
 
   return {
     message,
     stopReason: message.stop_reason,
+    usedTokens: (message.usage?.input_tokens ?? 0) + (message.usage?.output_tokens ?? 0),
   }
 }

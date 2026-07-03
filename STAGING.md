@@ -28,9 +28,12 @@ Set these envs on the backend service:
 | Env | Value |
 |---|---|
 | `ANTHROPIC_API_KEY` | your Anthropic key (same one prod uses) |
+| `SESSION_HMAC_SECRET` | **required** — random string ≥32 chars for token signing (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`). The server refuses to boot without it. Never reuse a password here. |
+| `NODE_ENV` | `production` — hardens error responses and force-disables `BUDGET_BYPASS` |
 | `BETA_PASSWORD` | leave unset unless you want a normal-tier password too |
 | `STAGING_PASSWORD` | a strong opaque string — this is the cap-bypass password |
 | `ALLOWED_ORIGINS` | comma-separated list including BOTH the prod and staging Netlify origins, e.g. `https://blo-livability.netlify.app,https://blo-staging.netlify.app` |
+| `TRUST_PROXY_HOPS` | proxy hops between client and server; default `1` (Railway/Render direct). Set `2` if a CDN fronts the host — must match reality or per-IP caps are spoofable |
 | `PORT` | as required by host |
 
 If you redeploy or add a new staging origin later, append to `ALLOWED_ORIGINS` and restart the server.
@@ -88,7 +91,7 @@ If you want to test the staging-gate flow locally:
 - **"Invalid password"** — `STAGING_PASSWORD` on the backend doesn't match what was typed, or the backend service was deployed without the env set.
 - **CORS errors in the browser console** — the staging Netlify origin isn't in `ALLOWED_ORIGINS` on the backend. Add it and restart.
 - **Cap still appears to apply** — verify in browser devtools that the auth token's payload (base64-decode the first segment) ends with `.staging`. If it ends with `.normal` or has no tier suffix, the password didn't take.
-- **`bypassEnabled: true` in `/api/health`** — that's the global `BUDGET_BYPASS` flag, not the per-user staging tier. Don't ship that to a production-facing host.
+- **Checking budget/usage state** — `GET /api/health` is deliberately bare (`{status: 'ok'}`). The full usage snapshot lives at `GET /api/health/usage` and requires a staging-tier bearer token (unlock via the staging password, then reuse the token from localStorage). `bypassEnabled: true` there is the global `BUDGET_BYPASS` flag, not the per-user staging tier — it's ignored when `NODE_ENV=production`.
 
 ---
 

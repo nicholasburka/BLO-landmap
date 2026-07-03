@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { createToken } from '../middleware/auth.js'
+import { sessionRateLimit } from '../middleware/rateLimit.js'
 
 const router = Router()
 
@@ -14,7 +15,7 @@ const router = Router()
  * The old /api/auth (password-gated) endpoint stays mounted for any clients
  * that still carry a previously-issued password-backed token.
  */
-router.post('/api/session', (_req, res) => {
+router.post('/api/session', sessionRateLimit, (_req, res) => {
   const token = createToken()
   res.json({ token })
 })

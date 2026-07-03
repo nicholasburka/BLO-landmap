@@ -1,4 +1,4 @@
-import { createHmac } from 'crypto'
+import { createHmac, timingSafeEqual } from 'crypto'
 import type { Request, Response, NextFunction } from 'express'
 
 const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000 // 24 hours
@@ -10,8 +10,29 @@ const TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000 // 24 hours
  *               the user authenticates with STAGING_PASSWORD. */
 export type AuthTier = 'normal' | 'staging'
 
+/** Signing key for session tokens. Must be a dedicated random secret —
+ *  deriving it from a human password (or any guessable default) would let
+ *  anyone who learns that password forge a staging-tier token and bypass
+ *  the daily budget cap. requireAuthEnv() enforces presence at boot. */
 function getSecret(): string {
-  return `blo-session-${process.env.BETA_PASSWORD || 'default'}`
+  const secret = process.env.SESSION_HMAC_SECRET
+  if (!secret) {
+    throw new Error('SESSION_HMAC_SECRET is not set — server should have refused to boot')
+  }
+  return secret
+}
+
+/** Boot-time guard, called from index.ts before listen(). Exits rather
+ *  than serving with a forgeable token scheme. */
+export function requireAuthEnv(): void {
+  const secret = process.env.SESSION_HMAC_SECRET || ''
+  if (secret.length < 32) {
+    console.error(
+      'FATAL: SESSION_HMAC_SECRET must be set to a random string of at least 32 characters.\n' +
+        "Generate one with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
+    )
+    process.exit(1)
+  }
 }
 
 /** Create a signed session token encoding timestamp + tier. The tier
@@ -59,7 +80,9 @@ export function validateToken(token: string): TokenValidation {
   // Recompute against the exact body sent — legacy tokens still verify
   // because their signed body is the bare timestamp string.
   const expectedHmac = createHmac('sha256', getSecret()).update(body).digest('hex')
-  if (signature !== expectedHmac) return fail
+  const sigBuf = Buffer.from(signature)
+  const expectedBuf = Buffer.from(expectedHmac)
+  if (sigBuf.length !== expectedBuf.length || !timingSafeEqual(sigBuf, expectedBuf)) return fail
 
   return { valid: true, tier }
 }

@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { createToken } from '../middleware/auth.js'
+import { authRateLimit } from '../middleware/rateLimit.js'
 
 const router = Router()
 
@@ -12,7 +13,7 @@ function timingSafeEq(a: string, b: string): boolean {
   return diff === 0
 }
 
-router.post('/api/auth', (req, res) => {
+router.post('/api/auth', authRateLimit, (req, res) => {
   const { password } = req.body
   if (typeof password !== 'string' || password.length === 0) {
     res.status(401).json({ error: 'Invalid password' })

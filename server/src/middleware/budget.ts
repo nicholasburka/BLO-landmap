@@ -17,6 +17,10 @@ import type { Request, Response, NextFunction } from 'express'
 const DEFAULT_DAILY_BUDGET_TOKENS = 200_000
 const DEFAULT_DAILY_BUDGET_TOKENS_PER_IP = 15_000
 
+/** Ceiling used when estimating a request's output cost before the call.
+ *  Matches the largest max_tokens any route passes to Anthropic (chat). */
+const MAX_OUTPUT_TOKENS_ESTIMATE = 2_048
+
 interface TotalSnapshot {
   /** YYYY-MM-DD in UTC */
   day: string
@@ -55,7 +59,22 @@ function getPerIpBudget(): number {
  *  that you're running uncapped. */
 function isBypassEnabled(): boolean {
   const v = (process.env.BUDGET_BYPASS || '').trim().toLowerCase()
-  return v === '1' || v === 'true' || v === 'yes' || v === 'on'
+  const requested = v === '1' || v === 'true' || v === 'yes' || v === 'on'
+  // Hard-disabled in production no matter what the env says — the global
+  // bypass is a local-dev tool only, and a copy-pasted .env must not be
+  // able to run a public deployment uncapped.
+  if (requested && process.env.NODE_ENV === 'production') {
+    logBypassIgnoredOnce()
+    return false
+  }
+  return requested
+}
+
+let bypassIgnoredWarned = false
+function logBypassIgnoredOnce(): void {
+  if (bypassIgnoredWarned) return
+  bypassIgnoredWarned = true
+  console.warn('[budget] BUDGET_BYPASS is set but NODE_ENV=production — ignoring it. Caps stay enforced.')
 }
 
 let bypassWarned = false
@@ -89,6 +108,38 @@ export function recordUsage(clientIp: string, inputTokens: number, outputTokens:
   perIp.set(clientIp, (perIp.get(clientIp) || 0) + used)
 }
 
+/** Rough pre-request cost estimate: serialized request body at ~4 chars
+ *  per token, plus the response's max_tokens ceiling. Deliberately
+ *  pessimistic — settleReservation reconciles to actuals afterward. */
+export function estimateRequestTokens(body: unknown, maxOutputTokens: number): number {
+  let inputChars = 0
+  try {
+    inputChars = JSON.stringify(body)?.length ?? 0
+  } catch {
+    inputChars = 0
+  }
+  return Math.ceil(inputChars / 4) + maxOutputTokens
+}
+
+/** Reserve estimated tokens against both counters before the Anthropic
+ *  call. Without this, a fresh IP always clears the gate no matter how
+ *  expensive its request is, and concurrent requests all pass before any
+ *  of them record — either way overshooting the caps. */
+export function reserveUsage(clientIp: string, tokens: number): void {
+  rolloverIfNeeded()
+  total.totalTokens += tokens
+  perIp.set(clientIp, (perIp.get(clientIp) || 0) + tokens)
+}
+
+/** Replace a reservation with actual usage once the call finishes (or
+ *  release it entirely on failure by passing actualTokens = 0). */
+export function settleReservation(clientIp: string, reservedTokens: number, actualTokens: number): void {
+  rolloverIfNeeded()
+  const delta = actualTokens - reservedTokens
+  total.totalTokens = Math.max(0, total.totalTokens + delta)
+  perIp.set(clientIp, Math.max(0, (perIp.get(clientIp) || 0) + delta))
+}
+
 /** Snapshot for observability / health endpoint. */
 export function getUsageSnapshot() {
   rolloverIfNeeded()
@@ -118,6 +169,7 @@ export function dailyBudgetMiddleware(req: Request, res: Response, next: NextFun
 
   const clientIp = getClientIp(req)
   res.locals.clientIp = clientIp
+  res.locals.budgetReservation = 0
 
   if (isBypassEnabled()) {
     logBypassOnce()
@@ -133,7 +185,12 @@ export function dailyBudgetMiddleware(req: Request, res: Response, next: NextFun
     return
   }
 
-  if (total.totalTokens >= getTotalBudget()) {
+  // Reserve the estimated cost up front so the gate accounts for this
+  // request's own size and for concurrent in-flight requests. The route
+  // settles the reservation to actual usage when the call completes.
+  const estimate = estimateRequestTokens(req.body, MAX_OUTPUT_TOKENS_ESTIMATE)
+
+  if (total.totalTokens + estimate > getTotalBudget()) {
     res.status(503).json({
       error: "We've hit today's usage cap. Please try again tomorrow.",
       code: 'daily_budget_exceeded',
@@ -141,7 +198,7 @@ export function dailyBudgetMiddleware(req: Request, res: Response, next: NextFun
     return
   }
 
-  if ((perIp.get(clientIp) || 0) >= getPerIpBudget()) {
+  if ((perIp.get(clientIp) || 0) + estimate > getPerIpBudget()) {
     res.status(503).json({
       error: "You've reached today's usage cap on this device. Please try again tomorrow.",
       code: 'daily_budget_exceeded_per_ip',
@@ -149,5 +206,7 @@ export function dailyBudgetMiddleware(req: Request, res: Response, next: NextFun
     return
   }
 
+  reserveUsage(clientIp, estimate)
+  res.locals.budgetReservation = estimate
   next()
 }

@@ -1,8 +1,59 @@
 import { Router } from 'express'
 import type Anthropic from '@anthropic-ai/sdk'
 import { chatHaiku, type ClientChatContext } from '../services/haiku.js'
+import { settleReservation } from '../middleware/budget.js'
 
 const router = Router()
+
+/** Ceiling on the serialized history sent to the model. ~12k tokens at
+ *  4 chars/token — comfortably under the per-IP daily cap so a single
+ *  request can never exhaust a whole day's allowance. */
+const MAX_HISTORY_CHARS = 48_000
+
+/** Only roles a client is allowed to submit. Anything else (or a
+ *  role field of the wrong type) is rejected outright. */
+const ALLOWED_ROLES = new Set(['user', 'assistant'])
+
+/** Content blocks the client legitimately produces: plain text, and the
+ *  tool_use/tool_result pairs from the map-tool loop. */
+const ALLOWED_BLOCK_TYPES = new Set(['text', 'tool_use', 'tool_result'])
+
+export function validateMessages(messages: unknown): string | null {
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return 'messages array is required and must be non-empty'
+  }
+  if (messages.length > 40) {
+    return 'Conversation too long. Please start a new chat.'
+  }
+  for (const m of messages) {
+    if (!m || typeof m !== 'object') return 'Each message must be an object'
+    const msg = m as { role?: unknown; content?: unknown }
+    if (typeof msg.role !== 'string' || !ALLOWED_ROLES.has(msg.role)) {
+      return 'Each message requires role "user" or "assistant"'
+    }
+    if (typeof msg.content === 'string') continue
+    if (Array.isArray(msg.content)) {
+      for (const block of msg.content) {
+        const type = (block as { type?: unknown })?.type
+        if (typeof type !== 'string' || !ALLOWED_BLOCK_TYPES.has(type)) {
+          return 'Unsupported message content block'
+        }
+      }
+      continue
+    }
+    return 'Each message requires role and content'
+  }
+  let serializedLength: number
+  try {
+    serializedLength = JSON.stringify(messages).length
+  } catch {
+    return 'Messages are not serializable'
+  }
+  if (serializedLength > MAX_HISTORY_CHARS) {
+    return 'Conversation too large. Please start a new chat.'
+  }
+  return null
+}
 
 /**
  * POST /api/chat
@@ -21,32 +72,23 @@ router.post('/api/chat', async (req, res) => {
     context?: ClientChatContext
   }
 
-  if (!Array.isArray(messages) || messages.length === 0) {
-    res.status(400).json({ error: 'messages array is required and must be non-empty' })
+  const validationError = validateMessages(messages)
+  if (validationError) {
+    res.status(400).json({ error: validationError })
     return
   }
 
-  if (messages.length > 40) {
-    res.status(400).json({ error: 'Conversation too long. Please start a new chat.' })
-    return
-  }
-
-  // Basic shape validation
-  for (const m of messages) {
-    if (!m.role || !('content' in m)) {
-      res.status(400).json({ error: 'Each message requires role and content' })
-      return
-    }
-  }
-
+  const clientIp = (res.locals.clientIp as string) || 'unknown'
+  const reserved = (res.locals.budgetReservation as number) || 0
   try {
-    const clientIp = (res.locals.clientIp as string) || 'unknown'
-    const result = await chatHaiku(messages, clientIp, context)
+    const result = await chatHaiku(messages!, context)
+    settleReservation(clientIp, reserved, result.usedTokens)
     res.json({
       message: result.message,
       stopReason: result.stopReason,
     })
   } catch (err: any) {
+    settleReservation(clientIp, reserved, 0)
     console.error('Chat error:', err?.message || err)
     res.status(502).json({ error: 'Service temporarily unavailable' })
   }
