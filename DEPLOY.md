@@ -41,7 +41,7 @@ The backend lives in the `server/` subdirectory. Point your host at that directo
 | `ANTHROPIC_API_KEY` | your Anthropic key | Required — server refuses to boot without it. |
 | `NODE_ENV` | `production` | Hardens error responses; force-disables `BUDGET_BYPASS`. |
 | `ALLOWED_ORIGINS` | `https://<prod-site>.netlify.app` (comma-add the staging origin if used) | CORS allowlist. Must include every browser origin that calls the API. |
-| `SESSION_COOKIE_SAMESITE` | `lax` or `none` *(optional)* | SameSite on the internal session cookie. Default `none` in production, which iOS Safari refuses as a third-party cookie when the API is on a different site from the frontend. Put the API on a subdomain of the site (Railway: `railway domain api.blacklandownership.com --service blo-map-api`, then a CNAME `api` → the target Railway prints, then `VITE_API_URL=https://api.blacklandownership.com` on the frontend and `OAUTH_ISSUER` to match) and set this to `lax`. |
+| `SESSION_COOKIE_SAMESITE` | `lax` — **required in practice, not optional** | SameSite on the internal session cookie. Defaults to `none` in production, which modern browsers drop as a third-party cookie whenever the API is on a different registrable domain from the site. **Symptom: login returns 200, the page flashes, you bounce straight back to `/login`, and every `/api/library/*` call answers 401.** See [Cookies and the API hostname](#cookies-and-the-api-hostname-read-before-the-first-login). |
 | `TRUST_PROXY_HOPS` | `1` (default) or `2` | Proxy hops between the client and the server. `1` = host proxies directly (Railway/Render). `2` = a CDN sits in front of the host. **Must match reality** or per-IP limits are spoofable. |
 | `PORT` | as your host requires | Railway/Render usually inject this automatically. |
 | `DATABASE_URL` | Postgres connection string *(optional but recommended)* | Powers the usage dashboard with durable history. Unset = dashboard works but only shows data since the last restart. See "Usage dashboard" below. |
@@ -210,6 +210,80 @@ npm run users -- list                                        # username, role, s
 
 ---
 
+### Cookies and the API hostname (read before the first login)
+
+The internal session is an **httpOnly cookie**, and a cookie is first-party only
+when the API and the site share a registrable domain. So this topology **cannot
+log anyone in**:
+
+```
+site:  https://map.blacklandownership.com
+API:   https://blo-map-api-production.up.railway.app    ← different domain
+```
+
+The cookie must then be `SameSite=None`, which Chrome's third-party cookie
+restrictions and Safari's ITP both drop. CORS is satisfied, so **login succeeds and
+sets the cookie — the browser just never sends it back.** You see a page flash, an
+immediate bounce to `/login`, and a wall of 401s. **Nothing in the server logs looks
+wrong**, because from the server's side these are ordinary unauthenticated requests.
+That is what makes this expensive to diagnose.
+
+**Fix: serve the API from a subdomain of the site.** Then both are
+`*.blacklandownership.com`, the cookie is first-party, and `lax` works everywhere.
+
+```bash
+railway domain api.blacklandownership.com --service blo-map-api   # prints a CNAME target
+# DNS: CNAME  api  →  <target Railway printed>
+railway variables --service blo-map-api \
+  --set SESSION_COOKIE_SAMESITE=lax \
+  --set OAUTH_ISSUER=https://api.blacklandownership.com
+# Netlify: VITE_API_URL=https://api.blacklandownership.com
+#   then Deploys → Trigger deploy → "Clear cache and deploy site"
+```
+
+**All five steps or none.** A live subdomain with the frontend still calling the
+`railway.app` host leaves the cookie third-party and login still broken.
+
+- **`VITE_API_URL` is inlined at BUILD time.** A plain redeploy will not pick it up —
+  you need "Clear cache and deploy site".
+- **`OAUTH_ISSUER` must match the hostname the API answers on**, or issued tokens
+  fail validation.
+- **`ALLOWED_ORIGINS` does not change.** It lists *browser* origins (the site), never
+  the API's own hostname.
+- **It does not have to be `api`.** Any subdomain of the site works — `kb.`,
+  `backend.`, anything. Pick whatever is free.
+
+#### "Domain is not available" from `railway domain`
+
+Railway refuses a hostname that already resolves to a conflicting target. Check DNS
+before assuming the name is taken:
+
+```bash
+dig +short CNAME api.blacklandownership.com
+```
+
+On 2026-10-06 this returned a **stale CNAME to `3s9ph0wg.up.railway.app`** — a dead
+Railway host that answered 404 and served only the generic `*.up.railway.app`
+wildcard cert, so `curl` failed with *"no alternative certificate subject name
+matches"*. Delete the stale record at the DNS provider (GoDaddy, `ns53/ns54
+.domaincontrol.com`), then retry.
+
+If it is still refused, the domain is claimed by **another Railway project** in the
+same account — `railway list` shows them. Release it there, or just use a different
+subdomain, which is faster and works identically.
+
+**There is no config-only workaround.** `SameSite=None` is already the default and is
+precisely what the browser refuses. Until the subdomain and rebuild are in place the
+only way in is allowing third-party cookies for the site in browser settings — fine
+for one developer, not a deployment.
+
+**Locally none of this applies:** the site and API are both on `localhost` (cookies
+ignore port, so they are same-site) and `NODE_ENV` is not `production`, so
+`sessionSameSite()` returns `lax`. **Local login working tells you nothing about
+whether production login works.**
+
+---
+
 ## 2. Frontend (Netlify)
 
 Build settings are already in `netlify.toml` (build `npm run build`, publish `dist`, SPA redirect, security + cache headers). Point the prod Netlify site at the **`main`** branch.
@@ -262,6 +336,11 @@ The per-IP rate limit and per-IP budget depend on the server seeing the **real c
 
 - [ ] With a `STAGING_PASSWORD` set (or temporarily), unlock a staging token and hit `GET /api/health/usage`; make a couple of chat requests and confirm `uniqueIps` increments by real distinct clients, not `1`.
 - [ ] If a CDN (Cloudflare, etc.) fronts the backend, set `TRUST_PROXY_HOPS=2` and redeploy.
+- [ ] **Log in as a real internal user and load `/kb`.** This is the only check that
+      catches the cross-site cookie problem — `/api/health`, CORS, the public map and
+      the usage dashboard all pass while internal login is completely broken. It was
+      missing from this list until 2026-10-06, which is why a cutover shipped with no
+      working login.
 
 ---
 

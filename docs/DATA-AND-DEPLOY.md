@@ -347,3 +347,163 @@ Adding a dataset:
 - [ ] `status` run and **"Changed" section read line by line**
 - [ ] `push`, then verify `status` is clean
 - [ ] Reindex
+
+---
+
+## 9. Working sets and saved views — two objects, not one
+
+A **working set** is the compound data object: datasets + layers + derived
+columns. A **saved view** is what *presents* it — framing and presentation.
+Nick's framing: *"working set can be the noun that a saved view presents."*
+
+**Creating a set is not enough to see anything.** `/views/<set-slug>` returns
+*"There is no saved view called …"*, because a set is not a view. A view has to
+point at the set through its optional `workingSet` field; `ViewRedirect` renders
+`WorkingSetWorkspace` only when `view.workingSet` is present.
+
+They also **share one slug namespace**, so a view named after its set gets `-2`.
+
+### Three steps
+
+```bash
+# 1. the set — datasets are catalog slugs, layers are `internal-<slug>`
+POST /api/working-sets
+{ "name": "...", "purpose": "...",
+  "datasets": ["redevelopment-sites","cejst-county-burden"],
+  "layers": ["internal-redevelopment-sites","internal-transmission-345kv"] }
+#    → { "slug": "redevelopment-dashboard" }
+
+# 2. the view that presents it
+POST /api/views
+{ "name": "...", "type": "map", "workingSet": "redevelopment-dashboard",
+  "results": [],
+  "state": { "layers": [], "filters": [], "limit": null, "regionStates": [],
+             "prompt": "", "viewport": { "center": [-90.05, 35.12], "zoom": 4.2 },
+             "pointLayers": [{ "id": "internal-power-plants", "name": "Power plants" }] } }
+#    → { "slug": "redevelopment-dashboard-2" }
+
+# 3. open the VIEW's slug, never the set's
+/views/redevelopment-dashboard-2
+```
+
+`state` is required and must be an object; `results` must be an array. `type` is
+one of `map | table | compare`.
+
+**The easier path is the other direction:** frame the map, save a view, then
+`POST /api/working-sets/from-view/<view-slug>` promotes it. The UI is built
+around this, and the framing already exists when you promote.
+
+Verify the round trip — the set should list the view back:
+
+```bash
+GET /api/working-sets/<set-slug>     # → views: [{ slug, name, type }]
+```
+
+### `status = 'published'` gates every layer
+
+```sql
+SELECT ... FROM library_catalog WHERE status = 'published'
+```
+
+A `needs-review` dataset **never becomes a layer**, and reading layer values
+404s on the same check. This is the review gate working: unreviewed data must
+not draw.
+
+So newly ingested data is invisible on the map until someone publishes it. For
+**local testing only**, flip it in the local database:
+
+```sql
+UPDATE library_catalog SET status='published' WHERE slug IN (...);
+```
+
+That touches nothing shared — but a reindex re-reads manifests from the bucket
+and reverts it. **Publishing for real means editing `status` in the manifests
+and pushing, which is a production change (§0).**
+
+### Routes take the bare slug, not the layer id
+
+The manifest id is `internal-transmission-345kv`; the route is
+`/api/layers/internal/transmission-345kv`. Passing the id gives a flat **404**
+that looks exactly like the status gate above. Check the URL before chasing
+permissions.
+
+Observed payloads, for a sense of scale:
+
+```
+transmission-345kv            13.1 MB   0.97s
+pipelines-natgas-interstate    6.8 MB   0.37s
+power-plants                   4.7 MB   0.66s
+coal-mines                   154 KB     0.02s
+cejst-county-burden           41 KB     0.07s
+redevelopment-sites          3.8 KB     0.005s
+```
+
+### Give the dev server headroom
+
+Creating a set over six layers framed ~23 MB of GeoJSON at once and the server
+child was **killed silently — no stack trace, no OOM line in the log.**
+
+`tsx watch` does not restart a killed child; it waits for a file change. So the
+process list shows something alive that is not serving, and the browser says
+"couldn't reach the server". Check for the child, not the watcher:
+
+```bash
+pgrep -P <watcher-pid>        # empty = the server is gone
+```
+
+Start the dev API with headroom when working with large layers:
+
+```bash
+NODE_OPTIONS=--max-old-space-size=4096 npm run dev
+```
+
+---
+
+## 10. Local development from scratch
+
+**Local login works where production login does not** — both halves are on
+`localhost` (cookies ignore port, so same-site) and `NODE_ENV` is unset, so the
+cookie is `SameSite=Lax`. **A working local login proves nothing about
+production** (§Cookies and the API hostname in `DEPLOY.md`).
+
+Out of the box there is **no database**, so the server logs *"library features
+disabled, public map unaffected"* and you get the public map only — no catalog,
+no layers, no working sets, no login. Setting it up:
+
+```bash
+createdb blo_library
+
+# server/.env — sslmode=disable is REQUIRED: the pool asks for TLS and a stock
+# local Postgres refuses, which surfaces as
+#   "init failed (The server does not support SSL connections)"
+DATABASE_URL=postgresql://<you>@localhost:5432/blo_library?sslmode=disable
+LIBRARY_REMEDIATE=0          # see §3 — do not let a restart spend money
+
+cd server && NODE_OPTIONS=--max-old-space-size=4096 npm run dev
+# boot applies the schema itself (CREATE TABLE IF NOT EXISTS) — 12 tables
+```
+
+`.env` is read at boot and `tsx watch` only watches `src/`, so **an `.env`
+change needs a manual restart.**
+
+Then an account and a catalog:
+
+```bash
+cd server
+npm run users -- create <name> --role admin     # prompts twice for a password
+# a weak password is fine HERE and only here — localhost, no exposure
+
+# the catalog starts empty; reindex reads the mirror's manifests
+# in the app: Library → Reindex, or POST /api/library/reindex
+```
+
+The frontend is a separate process — `npm run dev` from the **repo root** (Vite,
+port 5173). `npm run demo` runs both. Killing the API does not kill Vite and
+vice versa, so check both ports when something looks dead.
+
+### Do not kill someone else's dev server
+
+On 2026-10-06 I `pkill`ed a running `tsx watch` to make it pick up a new
+`DATABASE_URL`, and pointed the restarted server at an empty database. That
+broke a stack mid-demo. An `.env` change does need a restart — but it is the
+owner's process and the owner's call. Ask.
