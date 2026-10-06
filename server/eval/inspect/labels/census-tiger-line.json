@@ -1,0 +1,46 @@
+{
+  "url": "https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html",
+  "capturedAt": "2026-09-06",
+  "isDataset": true,
+  "keep": [
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/",
+      "role": "directory",
+      "note": "The FTP archive — the ONLY route to the shapefiles from this page"
+    },
+    {
+      "url": "https://www.census.gov/cgi-bin/geo/shapefiles/index.php",
+      "role": "viewer",
+      "note": "The 'Web Interface': a form you pick a year and a layer in. Called `api` by eye in the P5-61 check; it is a viewer"
+    },
+    {
+      "url": "https://www.census.gov/programs-surveys/geography/technical-documentation/user-note/tiger-geo-line.html",
+      "role": "docs",
+      "note": "TIGER/Line technical documentation"
+    }
+  ],
+  "drop": [
+    "https://www.census.gov/data.html",
+    "https://data.census.gov/advanced",
+    "https://www.census.gov/data/data-tools/data-cedsci.html",
+    "https://www.census.gov/about/what/admin-data.html",
+    "https://www.census.gov/data/data-tools.html",
+    "https://www.census.gov/data/experimental-data-products.html",
+    "https://data.census.gov/",
+    "https://www.census.gov/programs-surveys/geography/technical-documentation/user-note/puma-user-notes.html",
+    "https://www.census.gov/about/adrm/linkage.html",
+    "https://www.census.gov/about/policies/privacy.html"
+  ],
+  "prose": {
+    "provider": "U.S. Census Bureau",
+    "program": "TIGER/Line Shapefiles",
+    "updateCadence": "released annually",
+    "coverage": "1992 through 2025 vintages, nationwide",
+    "geography": "one row per boundary feature"
+  },
+  "topic": "land",
+  "tags": [
+    "boundaries"
+  ],
+  "notes": "Two links carry this whole page and neither one looks like data: 'FTP Archive' and 'Web Interface'. The PUMA user notes are in `drop` on purpose — the hand-eval saw them kept, and they are a different geography's errata. data.census.gov is the tempting sibling portal."
+}

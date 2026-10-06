@@ -1,0 +1,24 @@
+{
+  "url": "https://www.farmers.gov/working-with-us/heirs-property-eligibility",
+  "capturedAt": "2026-09-06",
+  "isDataset": false,
+  "keep": [],
+  "drop": [
+    "https://www.farmers.gov/data",
+    "https://www.farmers.gov/working-with-us/common-forms",
+    "https://www.farmers.gov/working-with-us/farm-bill",
+    "https://www.farmers.gov/your-business/urban-growers",
+    "https://www.farmers.gov/your-business/military-veterans",
+    "https://www.farmers.gov/your-business/livestock",
+    "https://www.farmers.gov/your-business/specialty-crops",
+    "https://www.farmers.gov/your-business/row-crops",
+    "https://www.farmers.gov/your-business/forests"
+  ],
+  "prose": {},
+  "topic": "land",
+  "tags": [
+    "heirs-property",
+    "ownership"
+  ],
+  "notes": "The 'what is heirs' property' explainer — squarely on this project's subject and containing no data at all. The candidates are farmers.gov programme navigation, harvested because the anchors say 'Browse...' and 'Data'. isDataset must be false."
+}

@@ -1,0 +1,33 @@
+{
+  "url": "https://data.cdc.gov/dataset/State-normed-Well-Water-Index-WWI-/snkv-n8f6",
+  "capturedAt": "2026-09-06",
+  "isDataset": true,
+  "keep": [
+    {
+      "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/export.csv",
+      "role": "data-file"
+    },
+    {
+      "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/query.xml",
+      "role": "data-file"
+    },
+    {
+      "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/export.xlsx",
+      "role": "data-file"
+    }
+  ],
+  "drop": [
+    "https://data.cdc.gov/",
+    "https://data.cdc.gov/browse"
+  ],
+  "prose": {
+    "provider": "Centers for Disease Control and Prevention",
+    "program": "State-normed Well Water Index (WWI)"
+  },
+  "topic": "water",
+  "tags": [
+    "wells",
+    "drinking-water"
+  ],
+  "notes": "The Socrata page's own description is drawn in the browser, so the readable text is CDC site navigation — health topics, outbreaks, a search box. Provider and programme are in the <title> and the structured data; NOTHING else is on the page. A pass that fills in cadence, licence or coverage here has invented them. The self-link (the 'Skip to main content' anchor resolves to the page itself) is the trap in `drop`. (P5-62 round two: the page's own address was in `drop` here; the harvester now refuses a self-link outright, so it is no longer a candidate and no longer a distractor.)"
+}

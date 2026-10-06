@@ -1,0 +1,142 @@
+{
+  "slug": "usda-nass-quickstats",
+  "url": "https://www.nass.usda.gov/Quick_Stats/",
+  "capturedAt": "2026-09-07T01:44:26.159Z",
+  "recordedAt": "2026-09-07T02:06:45.906Z",
+  "model": "claude-sonnet-5",
+  "answer": "{\n  \"isDataset\": true,\n  \"links\": [\n    {\"index\": 1, \"role\": \"directory\", \"reason\": \"Directory of downloadable Quick Stats data files.\"},\n    {\"index\": 2, \"role\": \"viewer\", \"reason\": \"Web-based query tool to access and download Census of Agriculture table-level data.\"},\n    {\"index\": 3, \"role\": \"viewer\", \"reason\": \"Data Visualization page for charts, maps, and pre-defined queries into NASS data.\"}\n  ],\n  \"provider\": \"USDA National Agricultural Statistics Service (NASS)\",\n  \"program\": \"Quick Stats\",\n  \"accessNotes\": [\n    {\"kind\": \"viewer\", \"text\": \"Quick Stats searchable database allows customized queries by commodity, location, or time period.\", \"url\": \"https://www.nass.usda.gov/Quick_Stats/\"},\n    {\"kind\": \"download\", \"text\": \"Download Quick Stats data files.\", \"url\": \"https://www.nass.usda.gov/datasets\"},\n    {\"kind\": \"viewer\", \"text\": \"Census Data Query Tool (CDQT) available to access and download table level data from the Census of Agriculture Volume 1 publication.\", \"url\": \"https://www.nass.usda.gov/Quick_Stats/CDQT/chapter/1/table/1\"}\n  ],\n  \"evidence\": {\n    \"program\": \"The Quick Stats Database is the most comprehensive tool for accessing agricultural data published by NASS.\"\n  }\n}",
+  "candidates": [
+    {
+      "url": "https://www.nass.usda.gov/Data_and_Statistics/index.php",
+      "label": "Data & Statistics",
+      "context": "a.gov\"> Home Publications Research, Science and Technology Newsroom (current) Surveys</",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.nass.usda.gov/datasets",
+      "label": "Download Quick Stats data files",
+      "context": "Quick Stats System Updates Access Quick Stats Lite Quick Stats Lite provides a more structured approach to get commonly requested statistics from our online database.",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.nass.usda.gov/Quick_Stats/CDQT/chapter/1/table/1",
+      "label": "Census Data Query Tool",
+      "context": "Access Census Data Query Tool The (CDQT) is a web based tool that is available to access and download table level data from the Census of Agriculture Volume 1 publication.",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.nass.usda.gov/Data_Visualization/index.php",
+      "label": "Data Visualization",
+      "context": "Environmental Livestock and Animals Research, Science, and Technology * = Currently unavailable --> Charts and Maps Pre-Defined Queries Special Tabulations and Restricted Microdata <div class=\"co",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.nass.usda.gov/Data_and_Statistics/County_Data_Files/Release_Schedule/index.php",
+      "label": "County Data Release Schedule",
+      "context": "n Pre-Defined Queries Special Tabulations and Restricted Microdata County Level Information County Maps --> County and District Geographic Boundaries County and District Codes <a href=\"/Data_and_Stati",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.nass.usda.gov/Research_and_Science/Cropland/SARS1a.php",
+      "label": "Cropland Data Layer",
+      "context": "iles/Frequently_Asked_Questions/commcodes.php\">Commodity Codes Livestock County Estimates Geospatial Data & Interactive Maps CroplandCROS VegScape Crop Condition and Soil Moisture Analytics Crop Seque",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.nass.usda.gov/AgCensus/archive/",
+      "label": "Archived Ag Census Reports",
+      "context": "s of Agriculture Surveys and Programs Methodology & Quality Measures Agricultural Statistics Board Corrections Research Reports Historical Publications (2002 and prior - published every 5 years) Annua",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.nass.usda.gov/Newsroom/2026/08-12-2026B.php",
+      "label": "USDA unlocks the power of producer insights in latest August Crop Production report Data is vital to ag industry’s decis",
+      "context": "lications/Subscribe_to_State_Reports/index.php\">State Reports NASS News Releases Newsroom News Releases 08/12/26 08/12/26 Producers Are Being Called to Help Build Their County Crop Estimates 07/24/26 ",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.nass.usda.gov/Newsroom/Notices/2025/10-31-2025.php",
+      "label": "USDA’s National Agricultural Statistics Service (NASS) will release key data in November",
+      "context": "6/index.php\">Read More News ASB Notices 06/22/26 NASS Adds Additional Counties to the 2025 Cotton County-level Estimates 12/22/25 USDA NASS reschedules reports due to December 24 & 26 government closu",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.nass.usda.gov/Newsroom/Notices/2025/08-28-2025.php",
+      "label": "NASS discontinues select data collection programs and reports",
+      "context": "bsp; NASS Adds Additional Counties to the 2025 Cotton County-level Estimates 12/22/25 USDA NASS reschedules reports due to December 24 & 26 government closure 11/19/25 USDA Reschedules Reports Affecte",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://youtu.be/VerxO14wiHI",
+      "label": "2022 Census of Agriculture Data Highlights",
+      "context": "in Federal Funding 10/31/25 USDA’s National Agricultural Statistics Service (NASS) will release key data in November 08/28/25 NASS discontinues select data collection programs and reports Read More No",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://youtu.be/FyjUJnIMSfc",
+      "label": "How to Find 2022 Census of Agriculture Data",
+      "context": "tistics Service (NASS) will release key data in November 08/28/25 NASS discontinues select data collection programs and reports Read More Notices Videos 02/13/24 2022 Census of Agriculture Data Highli",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.youtube.com/live/0EY87thoLuo?si=leRX_UTy2DKXJcvN",
+      "label": "2022 Census of Agriculture Data Release Event",
+      "context": "php\">NASS discontinues select data collection programs and reports Read More Notices Videos 02/13/24 2022 Census of Agriculture Data Highlights 02/13/24 How to Find 2022 Census of Agriculture Data 02/",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.nass.usda.gov/About_NASS/Keeping_Data_Safe/index.php",
+      "label": "Keeping Data Safe",
+      "context": "\"/About_NASS/pdf/NASS_TalkingAboutNASS_ExternalGuide_2022_V01.pdf\">Talking About NASS - A guide for partners and stakeholders NASS Strategic Plan for FY 2022-2026 USDA Strategic Goals Guiding Principl",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.usda.gov/nofear/agencies",
+      "label": "No FEAR Act - NASS Data",
+      "context": "il_Rights/antiharassment2021.pdf\">USDA and NASS Anti-Harassment Policy Statement --> Anti-Harassment Policy | USDA Civil Rights Accountability Policy and Procedures No FEAR Act Notice REE Reasonable A",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.nass.usda.gov/Education_and_Outreach/Meeting/index.php",
+      "label": "Data Users' Meetings",
+      "context": "href=\"https://www.access-board.gov/law/aba.html\">Architectural Barriers Act And Justice for All posters Work at NASS Career Opportunities Education and Outreach Understanding Ag Statistics Morris Hans",
+      "via": "anchor-text"
+    }
+  ],
+  "expected": {
+    "links": [
+      {
+        "url": "https://www.nass.usda.gov/datasets",
+        "label": "Download Quick Stats data files",
+        "role": "directory",
+        "reason": "Directory of downloadable Quick Stats data files. Download Quick Stats data files."
+      },
+      {
+        "url": "https://www.nass.usda.gov/Quick_Stats/CDQT/chapter/1/table/1",
+        "label": "Census Data Query Tool",
+        "role": "viewer",
+        "reason": "Web-based query tool to access and download Census of Agriculture table-level data. Census Data Query Tool (CDQT) available to access and download table level data from the Census of Agriculture Volum"
+      },
+      {
+        "url": "https://www.nass.usda.gov/Data_Visualization/index.php",
+        "label": "Data Visualization",
+        "role": "viewer",
+        "reason": "Data Visualization page for charts, maps, and pre-defined queries into NASS data."
+      }
+    ],
+    "prose": {
+      "provider": "USDA National Agricultural Statistics Service (NASS)",
+      "program": "Quick Stats",
+      "evidence": {
+        "program": "The Quick Stats Database is the most comprehensive tool for accessing agricultural data published by NASS."
+      },
+      "isDataset": true,
+      "accessNotes": [
+        {
+          "kind": "viewer",
+          "text": "Quick Stats searchable database allows customized queries by commodity, location, or time period."
+        }
+      ]
+    }
+  }
+}

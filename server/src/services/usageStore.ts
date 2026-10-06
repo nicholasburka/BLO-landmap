@@ -1,5 +1,6 @@
 import { createHash } from 'crypto'
 import type { Pool as PgPool } from 'pg'
+import { pgSslConfig } from './pgSsl.js'
 
 /**
  * Usage recording + querying for the internal dashboard.
@@ -84,8 +85,10 @@ export async function initUsageStore(): Promise<void> {
     const { Pool } = await import('pg')
     pool = new Pool({
       connectionString: url,
-      // Managed Postgres (Neon/Railway/Render/Supabase) requires TLS.
-      ssl: { rejectUnauthorized: false },
+      // Managed Postgres (Neon/Railway/Render/Supabase) requires TLS; the
+      // certificate is verified unless the operator opts out — see
+      // services/pgSsl.ts. Same DATABASE_URL as the library store.
+      ssl: pgSslConfig(url),
       max: 4,
     })
     pgReady = pool

@@ -1,0 +1,77 @@
+{
+  "slug": "usgs-press-release",
+  "url": "https://www.usgs.gov/news/national-news-release/usgs-cooperative-national-geologic-map-now-covers-50-states-us",
+  "capturedAt": "2026-09-07T01:44:30.030Z",
+  "recordedAt": "2026-09-07T02:08:38.988Z",
+  "model": "claude-sonnet-5",
+  "answer": "{\n  \"isDataset\": true,\n  \"links\": [],\n  \"provider\": \"U.S. Geological Survey\",\n  \"program\": \"Cooperative National Geologic Map\",\n  \"coverage\": \"All 50 states and most U.S. territories, including Alaska, Hawaii, and Pacific/Caribbean territories.\",\n  \"geography\": \"\",\n  \"accessNotes\": [\n    {\"kind\": \"viewer\", \"text\": \"Anyone can view and interact with the map data through the USGS National Geologic Map Database interface, accessible via the 'View the Map' link.\"}\n  ],\n  \"evidence\": {\n    \"provider\": \"The U.S. Geological Survey today released Version 2.0 of the Cooperative National Geologic Map, expanding coverage to include Alaska, Hawaii, and most U.S. territories.\",\n    \"coverage\": \"This version is the first digital map to provide standardized geologic data for all 50 states and most territories.\"\n  }\n}",
+  "candidates": [
+    {
+      "url": "https://www.usgs.gov/products/data",
+      "label": "Data",
+      "context": "em\"> Products Data Management <a href=\"/products/data/data-releases\" data-drupal-link",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.usgs.gov/products/data-and-tools/data-management",
+      "label": "Data Management",
+      "context": "top\" class=\"usa-nav__submenu usa-megamenu\" hidden=\"\"> Data Data Releases <a href=\"/products/data/real-time-data\" data-drupal-link-",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.usgs.gov/products/data/data-releases",
+      "label": "Data Releases",
+      "context": "products-col-1 nav\"> Data Data Management Real-time Data <a href=\"/products/data/all-data\" data-drupal-link-syst",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.usgs.gov/products/data/real-time-data",
+      "label": "Real-time Data",
+      "context": "system-path=\"node/229161\">Data Data Management Data Releases All Data <a",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.usgs.gov/products/data/all-data",
+      "label": "All Data",
+      "context": "ta-management\">Data Management Data Releases Real-time Data Maps",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.usgs.gov/products/web-tools/data-access-tools",
+      "label": "Data Access Tools",
+      "context": "=\"node/265942\">Web Tools Alert and Notification Services APIs Data Analysis Tools <a href=\"/products/web-tools/data-visual",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.usgs.gov/products/web-tools/data-analysis-tools",
+      "label": "Data Analysis Tools",
+      "context": ">Alert and Notification Services APIs Data Access Tools Data Visualizations <a href=\"/products/web-tools/interactive",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.usgs.gov/products/web-tools/data-visualizations",
+      "label": "Data Visualizations",
+      "context": "Is Data Access Tools Data Analysis Tools Interactive Maps <a href=\"/products/web-tools/all-web-tools\" da",
+      "via": "anchor-text"
+    }
+  ],
+  "expected": {
+    "links": [],
+    "prose": {
+      "provider": "U.S. Geological Survey",
+      "program": "Cooperative National Geologic Map",
+      "coverage": "All 50 states and most U.S. territories, including Alaska, Hawaii, and Pacific/Caribbean territories.",
+      "accessNotes": [
+        {
+          "kind": "viewer",
+          "text": "Anyone can view and interact with the map data through the USGS National Geologic Map Database interface, accessible via the 'View the Map' link."
+        }
+      ],
+      "evidence": {
+        "provider": "The U.S. Geological Survey today released Version 2.0 of the Cooperative National Geologic Map, expanding coverage to include Alaska, Hawaii, and most U.S. territories.",
+        "coverage": "This version is the first digital map to provide standardized geologic data for all 50 states and most territories."
+      },
+      "isDataset": true
+    }
+  }
+}

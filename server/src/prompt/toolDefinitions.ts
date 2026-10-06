@@ -108,4 +108,16 @@ export const TOOL_DEFINITIONS: Anthropic.Messages.Tool[] = [
       required: ['county_name'],
     },
   },
+  {
+    name: 'show_layer',
+    description: "Turn a map layer on (or off) and, for an overlay layer, fly to its extent. Use for the internal point, line and state layers listed under 'Internal data layers' (they cannot be scored, so this is the only way to show them), or to switch any single layer on by id without changing the ranked query. Do NOT use this for scoring — use set_query_state for that.",
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        layerId: { type: 'string', description: 'Exact layer id from the registry or the internal layers list' },
+        on: { type: 'boolean', description: 'true to show (default), false to hide' },
+      },
+      required: ['layerId'],
+    },
+  },
 ]

@@ -1,0 +1,71 @@
+{
+  "slug": "socrata-cdc-wwi",
+  "url": "https://data.cdc.gov/dataset/State-normed-Well-Water-Index-WWI-/snkv-n8f6",
+  "capturedAt": "2026-09-07T01:44:24.308Z",
+  "recordedAt": "2026-09-07T02:06:12.957Z",
+  "model": "claude-sonnet-5",
+  "answer": "{\"isDataset\": true, \"links\": [{\"index\": 0, \"role\": \"data-file\", \"reason\": \"CSV export of the dataset, listed as a distribution.\"}, {\"index\": 1, \"role\": \"api\", \"reason\": \"XML query endpoint returning the dataset's data.\"}, {\"index\": 2, \"role\": \"data-file\", \"reason\": \"XLSX export of the dataset, listed as a distribution.\"}], \"provider\": \"Centers for Disease Control and Prevention\", \"program\": \"State-normed Well Water Index (WWI)\"}",
+  "candidates": [
+    {
+      "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/export.csv",
+      "label": "text/csv",
+      "context": "Format: text/csv. Listed in the page’s structured data as a distribution of this dataset.",
+      "via": "json-ld",
+      "kind": "file"
+    },
+    {
+      "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/query.xml",
+      "label": "application/xml",
+      "context": "Format: application/xml. Listed in the page’s structured data as a distribution of this dataset.",
+      "via": "json-ld"
+    },
+    {
+      "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/export.xlsx",
+      "label": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "context": "Format: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet. Listed in the page’s structured data as a distribution of this dataset.",
+      "via": "json-ld",
+      "kind": "file"
+    },
+    {
+      "url": "https://data.cdc.gov/",
+      "label": "Data.CDC.gov",
+      "context": "gap: 28px; padding: 0 15px 0 15px; } .cdc-footer__left, .cdc-footer__right { flex: 1 1 auto; min-width: 0; } .cdc-footer__title { font-size: 30px; } .footer-content-tyler title-present { padding: 0px;",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://data.cdc.gov/browse",
+      "label": "Browse All Data Topics",
+      "context": "Centers for Disease Control and Prevention. Data Catalog Help and Resources",
+      "via": "directory"
+    }
+  ],
+  "expected": {
+    "links": [
+      {
+        "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/export.csv",
+        "label": "text/csv",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "CSV export of the dataset, listed as a distribution."
+      },
+      {
+        "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/query.xml",
+        "label": "application/xml",
+        "role": "api",
+        "reason": "XML query endpoint returning the dataset's data."
+      },
+      {
+        "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/export.xlsx",
+        "label": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "XLSX export of the dataset, listed as a distribution."
+      }
+    ],
+    "prose": {
+      "provider": "Centers for Disease Control and Prevention",
+      "program": "State-normed Well Water Index (WWI)",
+      "isDataset": true
+    }
+  }
+}

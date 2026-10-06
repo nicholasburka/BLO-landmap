@@ -1,0 +1,119 @@
+{
+  "slug": "census-tiger-line",
+  "url": "https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html",
+  "capturedAt": "2026-09-07T01:44:22.671Z",
+  "recordedAt": "2026-09-07T02:03:55.276Z",
+  "model": "claude-sonnet-5",
+  "answer": "{\n  \"isDataset\": true,\n  \"links\": [\n    {\"index\": 8, \"role\": \"viewer\", \"reason\": \"Web interface to select and download TIGER/Line Shapefiles by geography and year.\"},\n    {\"index\": 9, \"role\": \"directory\", \"reason\": \"FTP archive listing containing the 2025 TIGER/Line Shapefile downloads.\"},\n    {\"index\": 10, \"role\": \"docs\", \"reason\": \"Technical documentation describing the TIGER/Line Shapefiles and Files.\"}\n  ],\n  \"provider\": \"U.S. Census Bureau\",\n  \"program\": \"TIGER/Line Shapefiles\",\n  \"updateCadence\": \"Released annually, e.g. the 2025 files were released September 23, 2025.\",\n  \"coverage\": \"All legal boundaries and names are as of January 1, 2025.\",\n  \"accessNotes\": [\n    {\"kind\": \"viewer\", \"text\": \"Web Interface for selecting and downloading shapefiles.\", \"url\": \"https://www.census.gov/cgi-bin/geo/shapefiles/index.php\"},\n    {\"kind\": \"download\", \"text\": \"FTP Archive of the 2025 TIGER/Line Shapefiles.\", \"url\": \"https://www2.census.gov/geo/tiger/TIGER2025/\"}\n  ],\n  \"evidence\": {\n    \"updateCadence\": \"The 2025 TIGER/Line Shapefiles were released on September 23, 2025.\",\n    \"coverage\": \"All legal boundaries and names are as of January 1, 2025.\"\n  }\n}",
+  "candidates": [
+    {
+      "url": "https://www.census.gov/data.html",
+      "label": "Data & Maps",
+      "context": "scb-layout-column\" onkeydown=\"CensusUniversalHeader.keypress( event, 0 )\" onmouseenter=\"CensusUniversalHeader.toggleOverlay( true, 0 )\"> Topics <a href=\"https://www.census.gov/programs-surveys.html\" c",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://data.census.gov/advanced",
+      "label": "Advanced Data Search",
+      "context": "eahead uscb-grid-12 uscb-grid-tbl-10 uscb-grid-mbl-4\"> Helpful Links Get Survey Help Census Bureau Data and Maps <a class=\"uscb-header-links-helpful-link\" href=\"h",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.census.gov/data/data-tools/data-cedsci.html",
+      "label": "Explore data on data.census.gov",
+      "context": "Explore census data with visualizations and view tutorials. View all data resources",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.census.gov/about/what/admin-data.html",
+      "label": "Combining Data",
+      "context": "rid-tbl-3 uscb-header-overlay-item-spacer\"> Census Academy Data Tools and Apps",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.census.gov/data/data-tools.html",
+      "label": "Data Tools and Apps",
+      "context": "iv class=\"uscb-header-overlay-item-links-container uscb-grid-3 uscb-grid-tbl-3 uscb-layout-column\"> Census Academy Combining Data Datasets",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.census.gov/data/experimental-data-products.html",
+      "label": "Experimental Data Products",
+      "context": "> Data Tools and Apps Datasets Developers Interactive Maps",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://data.census.gov/",
+      "label": "data.census.gov",
+      "context": "d--default--7 aem-Grid--phone--12 \"> Format: Shapefile - 2007 to Present TIGER/Line ASCII format - 2006 and earlier Census 2000 available in both formats The core TIGER/Line Files and Shapefiles do no",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.census.gov/programs-surveys/geography/technical-documentation/user-note/puma-user-notes.html",
+      "label": "2020 Census Public Use Microdata Area User Notes",
+      "context": "graphic entity codes that can be linked to the Census Bureau’s demographic data, available on data.census.gov . <li class=\" uscb-tab uscb-layout-row uscb-layout-align-c",
+      "via": "anchor"
+    },
+    {
+      "url": "https://www.census.gov/cgi-bin/geo/shapefiles/index.php",
+      "label": "Web Interface",
+      "context": "exPagination: false indexFiltering: false indexSorting: false --> <img class=\"uscb-list-attachment__icon",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/",
+      "label": "FTP Archive",
+      "context": "ist-attachment__file-size\"> <div class=\"uscb-overflow-aut",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.census.gov/programs-surveys/geography/technical-documentation/user-note/tiger-geo-line.html",
+      "context": "class=\"uscb-sub-heading-2 uscb-color-secondary-1 uscb-uppercase uscb-margin-TB-02\"> TIGER/Line Shapefiles and TIGER/Line Files Technical Documentation <a class=\"uscb-sub-heading-2 relatedInfoList tile",
+      "via": "anchor"
+    },
+    {
+      "url": "https://www.census.gov/about/adrm/linkage.html",
+      "label": "Data Linkage Infrastructure",
+      "context": "n it become available --> Information Quality | | Data Protection and Privacy Policy <span class=\"usc",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.census.gov/about/policies/privacy.html",
+      "label": "Data Protection and Privacy Policy",
+      "context": "iversal Footer Component' );\" class=\"uscb-footer-link\"> Information Quality | Data Linkage Infrastructure | | Accessibility <span class=\"uscb-footer-link-sep",
+      "via": "anchor-text"
+    }
+  ],
+  "expected": {
+    "links": [
+      {
+        "url": "https://www.census.gov/cgi-bin/geo/shapefiles/index.php",
+        "label": "Web Interface",
+        "role": "viewer",
+        "reason": "Web interface to select and download TIGER/Line Shapefiles by geography and year. Web Interface for selecting and downloading shapefiles."
+      },
+      {
+        "url": "https://www2.census.gov/geo/tiger/TIGER2025/",
+        "label": "FTP Archive",
+        "role": "directory",
+        "reason": "FTP archive listing containing the 2025 TIGER/Line Shapefile downloads. FTP Archive of the 2025 TIGER/Line Shapefiles."
+      },
+      {
+        "url": "https://www.census.gov/programs-surveys/geography/technical-documentation/user-note/tiger-geo-line.html",
+        "role": "docs",
+        "reason": "Technical documentation describing the TIGER/Line Shapefiles and Files."
+      }
+    ],
+    "prose": {
+      "provider": "U.S. Census Bureau",
+      "program": "TIGER/Line Shapefiles",
+      "updateCadence": "Released annually, e.g. the 2025 files were released September 23, 2025.",
+      "coverage": "All legal boundaries and names are as of January 1, 2025.",
+      "evidence": {
+        "updateCadence": "The 2025 TIGER/Line Shapefiles were released on September 23, 2025.",
+        "coverage": "All legal boundaries and names are as of January 1, 2025."
+      },
+      "isDataset": true
+    }
+  }
+}

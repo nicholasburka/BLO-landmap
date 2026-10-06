@@ -2,6 +2,8 @@ import Anthropic from '@anthropic-ai/sdk'
 import { buildSystemPrompt, VALID_LAYER_IDS } from '../prompt/systemPrompt.js'
 import { buildChatPrompt } from '../prompt/chatPrompt.js'
 import { TOOL_DEFINITIONS } from '../prompt/toolDefinitions.js'
+import { renderInternalLayersContext, internalCountyIds } from '../prompt/internalLayersContext.js'
+import type { InternalLayerManifestEntry } from './internalLayers.js'
 
 export interface LayerSelection {
   layerId: string
@@ -39,11 +41,18 @@ export interface QueryResult {
   outputTokens: number
 }
 
-export async function queryHaiku(userPrompt: string): Promise<QueryResult> {
+/** Layer ids the model may use: the public registry plus, for internal
+ *  sessions, the internal county layers (P5-26). */
+export function validLayerIdsFor(internal: InternalLayerManifestEntry[]): Set<string> {
+  return new Set([...VALID_LAYER_IDS, ...internalCountyIds(internal)])
+}
+
+export async function queryHaiku(userPrompt: string, internal: InternalLayerManifestEntry[] = []): Promise<QueryResult> {
+  const validIds = validLayerIdsFor(internal)
   const message = await client.messages.create({
     model: MODEL,
     max_tokens: 1024,
-    system: systemPrompt,
+    system: systemPrompt + renderInternalLayersContext(internal),
     messages: [{ role: 'user', content: userPrompt }],
   })
   const inputTokens = message.usage?.input_tokens ?? 0
@@ -74,14 +83,19 @@ export async function queryHaiku(userPrompt: string): Promise<QueryResult> {
     }
   }
 
+  return { response: sanitizeQueryResponse(parsed, validIds), usedTokens, inputTokens, outputTokens }
+}
+
+/** Keep only layer ids the session may use, clamp weights/limits, clean filters. */
+export function sanitizeQueryResponse(parsed: QueryResponse, validIds: Set<string> = VALID_LAYER_IDS): QueryResponse {
   // Validate structure
   if (!parsed.layers || !Array.isArray(parsed.layers)) {
-    return { response: { layers: [], explanation: parsed.explanation || 'Invalid response format.' }, usedTokens, inputTokens, outputTokens }
+    return { layers: [], explanation: parsed.explanation || 'Invalid response format.' }
   }
 
   // Filter to valid layer IDs and clamp weights
   const validLayers = parsed.layers
-    .filter((l: any) => VALID_LAYER_IDS.has(l.layerId))
+    .filter((l: any) => l && typeof l.layerId === 'string' && validIds.has(l.layerId))
     .map((l: any) => ({
       layerId: l.layerId,
       weight: Math.max(1, Math.min(10, Math.round(l.weight))),
@@ -95,7 +109,7 @@ export async function queryHaiku(userPrompt: string): Promise<QueryResult> {
       .filter((f: any) =>
         f &&
         typeof f.layerId === 'string' &&
-        VALID_LAYER_IDS.has(f.layerId) &&
+        validIds.has(f.layerId) &&
         typeof f.operator === 'string' &&
         VALID_OPERATORS.has(f.operator) &&
         typeof f.value === 'number' &&
@@ -122,15 +136,10 @@ export async function queryHaiku(userPrompt: string): Promise<QueryResult> {
   }
 
   return {
-    response: {
-      layers: validLayers,
-      filters: validFilters,
-      limit: validLimit,
-      explanation: parsed.explanation || 'Query processed.',
-    },
-    usedTokens,
-    inputTokens,
-    outputTokens,
+    layers: validLayers,
+    filters: validFilters,
+    limit: validLimit,
+    explanation: parsed.explanation || 'Query processed.',
   }
 }
 
@@ -155,7 +164,7 @@ export interface ClientChatContext {
   activeFilters?: ScoringFilter[]
 }
 
-function renderActiveFiltersContext(ctx?: ClientChatContext): string {
+function renderActiveFiltersContext(ctx?: ClientChatContext, validIds: Set<string> = VALID_LAYER_IDS): string {
   const raw = ctx?.activeFilters
   if (!Array.isArray(raw) || raw.length === 0) return ''
   // Everything rendered here lands in the SYSTEM prompt, so client-supplied
@@ -166,7 +175,7 @@ function renderActiveFiltersContext(ctx?: ClientChatContext): string {
     (f): f is ScoringFilter =>
       !!f &&
       typeof f.layerId === 'string' &&
-      VALID_LAYER_IDS.has(f.layerId) &&
+      validIds.has(f.layerId) &&
       typeof f.operator === 'string' &&
       VALID_OPERATORS.has(f.operator) &&
       typeof f.value === 'number' &&
@@ -200,8 +209,9 @@ function renderActiveFiltersContext(ctx?: ClientChatContext): string {
 export async function chatHaiku(
   messages: Anthropic.Messages.MessageParam[],
   context?: ClientChatContext,
+  internal: InternalLayerManifestEntry[] = [],
 ): Promise<ChatResponse> {
-  const systemWithContext = chatSystemPrompt + renderActiveFiltersContext(context)
+  const systemWithContext = chatSystemPrompt + renderInternalLayersContext(internal) + renderActiveFiltersContext(context, validLayerIdsFor(internal))
   const message = await client.messages.create({
     model: MODEL,
     max_tokens: 2048,

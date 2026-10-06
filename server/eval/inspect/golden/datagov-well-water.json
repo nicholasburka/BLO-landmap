@@ -1,0 +1,109 @@
+{
+  "slug": "datagov-well-water",
+  "url": "https://catalog.data.gov/dataset/state-normed-well-water-index-wwi",
+  "capturedAt": "2026-09-07T01:44:23.225Z",
+  "recordedAt": "2026-09-07T02:04:22.885Z",
+  "model": "claude-sonnet-5",
+  "answer": "{\"isDataset\": true, \"links\": [{\"index\": 0, \"role\": \"data-file\", \"reason\": \"CSV distribution of the WWI dataset.\"}, {\"index\": 1, \"role\": \"data-file\", \"reason\": \"JSON distribution of the WWI dataset.\"}, {\"index\": 2, \"role\": \"data-file\", \"reason\": \"XML distribution of the WWI dataset.\"}, {\"index\": 4, \"role\": \"landing\", \"reason\": \"Socrata dataset page (data.cdc.gov) hosting this WWI resource.\"}], \"provider\": \"Centers for Disease Control and Prevention (CDC), U.S. Department of Health & Human Services\", \"program\": \"State-normed Well Water Index (WWI)\", \"geography\": \"one row per census tract\", \"coverage\": \"continental US census tracts\", \"accessNotes\": [{\"kind\": \"download\", \"text\": \"CSV download available via distribution URL.\", \"url\": \"https://data.cdc.gov/api/v3/views/snkv-n8f6/export.csv?accessType=DOWNLOAD\"}, {\"kind\": \"download\", \"text\": \"JSON download available via distribution URL.\", \"url\": \"https://data.cdc.gov/api/v3/views/snkv-n8f6/query.json?accessType=DOWNLOAD\"}, {\"kind\": \"download\", \"text\": \"XML download available via distribution URL.\", \"url\": \"https://data.cdc.gov/api/v3/views/snkv-n8f6/query.xml?accessType=DOWNLOAD\"}, {\"kind\": \"viewer\", \"text\": \"To visualize these data, please visit the Tracking Network.\", \"url\": \"https://ephtracking.cdc.gov/DataExplorer/\"}], \"evidence\": {\"geography\": \"This dataset contains continental US census tracts for which there are state-normed WWI assigned.\", \"coverage\": \"This dataset contains continental US census tracts for which there are state-normed WWI assigned.\"}}",
+  "candidates": [
+    {
+      "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/export.csv?accessType=DOWNLOAD",
+      "label": "text/csv",
+      "context": "Format: text/csv. Listed in the page’s structured data as a distribution of this dataset.",
+      "via": "json-ld",
+      "kind": "file"
+    },
+    {
+      "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/query.json?accessType=DOWNLOAD",
+      "label": "application/json",
+      "context": "Format: application/json. Listed in the page’s structured data as a distribution of this dataset.",
+      "via": "json-ld",
+      "kind": "file"
+    },
+    {
+      "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/query.xml?accessType=DOWNLOAD",
+      "label": "application/xml",
+      "context": "Format: application/xml. Listed in the page’s structured data as a distribution of this dataset.",
+      "via": "json-ld"
+    },
+    {
+      "url": "https://catalog.data.gov/",
+      "label": "Data",
+      "context": "lass=\"usa-nav-container usa-nav-container--widescreen\"> Menu Metrics Organizations",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://data.cdc.gov/d/snkv-n8f6",
+      "label": "https://data.cdc.gov/d/snkv-n8f6",
+      "context": "[ \"untagged\" ] landingPage license",
+      "via": "anchor",
+      "kind": "socrata"
+    },
+    {
+      "url": "https://catalog.data.gov/harvest_record/af93f497-f0a3-4ae4-a21c-7212db1d9f0f/raw",
+      "label": "View Raw Data",
+      "context": "Catalog Last Checked August 13, 2026 at 01:04 AM Harvest Record",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://github.com/GSA/data.gov",
+      "label": "Data.gov on Github",
+      "context": "src=\"/assets/img/logo.167edfb.svg\" alt=\"Data.gov logo\"> About Open Government Website Policies Sitemap --> PERFORMANCE.GOV Follow @GSA <section class=\"usa-identifier__section usa-iden",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.gsa.gov/reference/civil-rights-programs/notification-and-federal-employee-antidiscrimination-and-retaliation-act-of-2002",
+      "label": "No FEAR Act data",
+      "context": "=\"true\" role=\"img\"> FOIA requests Office of the Inspector General <li class=\"u",
+      "via": "anchor-text"
+    }
+  ],
+  "expected": {
+    "links": [
+      {
+        "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/export.csv?accessType=DOWNLOAD",
+        "label": "text/csv",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "CSV distribution of the WWI dataset. CSV download available via distribution URL."
+      },
+      {
+        "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/query.json?accessType=DOWNLOAD",
+        "label": "application/json",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "JSON distribution of the WWI dataset. JSON download available via distribution URL."
+      },
+      {
+        "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/query.xml?accessType=DOWNLOAD",
+        "label": "application/xml",
+        "role": "data-file",
+        "reason": "XML distribution of the WWI dataset. XML download available via distribution URL."
+      },
+      {
+        "url": "https://data.cdc.gov/d/snkv-n8f6",
+        "label": "https://data.cdc.gov/d/snkv-n8f6",
+        "kind": "socrata",
+        "role": "landing",
+        "reason": "Socrata dataset page (data.cdc.gov) hosting this WWI resource."
+      }
+    ],
+    "prose": {
+      "provider": "Centers for Disease Control and Prevention (CDC), U.S. Department of Health & Human Services",
+      "program": "State-normed Well Water Index (WWI)",
+      "coverage": "continental US census tracts",
+      "geography": "one row per census tract",
+      "evidence": {
+        "geography": "This dataset contains continental US census tracts for which there are state-normed WWI assigned.",
+        "coverage": "This dataset contains continental US census tracts for which there are state-normed WWI assigned."
+      },
+      "isDataset": true,
+      "accessNotes": [
+        {
+          "kind": "viewer",
+          "text": "To visualize these data, please visit the Tracking Network."
+        }
+      ]
+    }
+  }
+}

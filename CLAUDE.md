@@ -16,9 +16,17 @@ This is a Vue 3 + TypeScript + Mapbox GL application for the Black Livability Ob
 ### Data Flow
 1. Raw data in `source-data/` is preprocessed by scripts
 2. Processed data goes to `public/datasets/` as CSV/JSON
-3. `useMapData.ts` composable loads data on app mount
-4. Data is indexed by 5-digit FIPS GEOID codes
-5. `Map.vue` renders choropleth layers based on selected layers
+3. `scripts/build-datasets.mjs` (run by `npm run build` / `npm run dev` via
+   `prebuild`/`predev`) folds those files into **one** content-hashed
+   `public/datasets/build/county-data.<hash>.json`, copies the county geometry
+   beside it, and writes `src/config/datasetsManifest.generated.json`
+4. `useMapData.ts` fetches those two files — in parallel, after `Map.vue` has
+   already constructed the Mapbox map — and assigns each section to a ref
+5. Data is indexed by 5-digit FIPS GEOID codes
+6. `Map.vue` renders choropleth layers based on selected layers
+
+The browser never parses a CSV: the per-category CSVs under `public/datasets/`
+are build inputs only.
 
 ---
 
@@ -35,14 +43,18 @@ When adding a new data layer category (e.g., Transportation, Climate, etc.), fol
 Update these files in order:
 1. `src/config/layerConfig.ts` - Add layer interface and `{CATEGORY}_LAYERS` array
 2. `src/types/mapTypes.ts` - Add data interface and layer ID type
-3. `src/config/constants.ts` - Add file path to `DATA_PATHS`
+3. `scripts/build-datasets.mjs` - Add the file to `SOURCE_FILES` and fold its
+   columns into a `{category}` section inside `buildCountyData()`
 
 ### 3. Data Loading
 In `src/composables/useMapData.ts`:
 - Add `{category}Data` ref with proper type
-- Add `load{Category}Data()` async function
-- Add to `loadAllCountyData()` call sequence
-- Export ref and function
+- Add the section to `CountyDataBundle` and assign it in `loadCountyData()`
+- Export the ref (and, if a layer page loads this category on its own, a
+  `load{Category}Data` entry point for `LAYER_DATA_SOURCES`)
+
+There is no per-category fetch any more: one prebuilt file carries every
+county number the map reads.
 
 ### 4. Map Component Integration
 In `src/components/Map.vue`:

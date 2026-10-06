@@ -5,6 +5,7 @@
  * Consolidates data previously scattered across layerConfig.ts, datasetMetadata.ts,
  * ColorLegend.vue, Map.vue color functions, and constants.ts.
  */
+import type { DataDates } from '@/lib/dataDates'
 
 // ============= Types =============
 
@@ -17,6 +18,8 @@ export type LayerCategory =
   | 'transportation'
   | 'environment'
   | 'health'
+  /** Runtime-registered internal library layers (P5-18) — never in the public bundle. */
+  | 'internal'
 
 export type DataType = 'percentage' | 'currency' | 'count' | 'index' | 'years' | 'ordinal'
 
@@ -44,10 +47,31 @@ export interface LayerDefinition {
   source: string
   sourceUrl?: string
   year: number | string
+  /**
+   * P7-10: WHEN this layer's data is from, when the layer carries a block of
+   * its own — the period it covers, when the publisher put it out, when we
+   * pulled it. The LEGEND reads it, because a choropleth that gives no
+   * indication of its vintage is a correctness problem for a dashboard that
+   * argues from a map.
+   *
+   * Absent on every entry in this file, and deliberately: `year` above has
+   * been the declared vintage of each of these layers since long before the
+   * ticket, and **a declared vintage IS the period the data describes** — so
+   * `layerDatesOf` falls back to it, nothing here is edited, and all 26 public
+   * layers announce a date with no data entry at all. Internal library layers
+   * carry the block, folded off their entry's own manifest.
+   */
+  dates?: DataDates
   /** Path to dataset file in public/datasets/ */
   dataPath: string
   /** Field name in the loaded data map (used by scoring engine to look up raw values) */
   dataKey: string
+  /** Column name in the file at `dataPath`, when it differs from `dataKey`.
+   *  `dataKey` names the field AFTER the client's loader has reshaped a row
+   *  (camel-cased, renamed, or picked from several columns), so a server
+   *  reading the raw file — the MCP `county_values` tool, P5-50 — needs the
+   *  file's own spelling. Omitted wherever the two already agree. */
+  valueColumn?: string
   gradient: LayerGradient
   /** Display formatter for tooltip/modal values */
   formatValue: (value: number | string | null | undefined) => string
@@ -140,6 +164,7 @@ export const LAYER_REGISTRY: Record<string, LayerDefinition> = {
     year: 2023,
     dataPath: '/datasets/demographics/county_pctBlack_diversity_index_with_stats.csv',
     dataKey: 'diversityIndex',
+    valueColumn: 'diversity_index',
     gradient: {
       css: 'linear-gradient(to right, rgb(200, 0, 200), rgb(100, 0, 150))',
       lowLabel: 'Less Diverse',
@@ -187,6 +212,7 @@ export const LAYER_REGISTRY: Record<string, LayerDefinition> = {
     year: 2014,
     dataPath: '/datasets/demographics/lifeexpectancy-USA-county.csv',
     dataKey: 'lifeExpectancy',
+    valueColumn: 'e(0)',
     gradient: {
       css: 'linear-gradient(to right, rgb(255, 100, 100), rgb(100, 200, 100))',
       lowLabel: 'Lower',
@@ -257,6 +283,7 @@ export const LAYER_REGISTRY: Record<string, LayerDefinition> = {
     year: 2022,
     dataPath: '/datasets/housing/median_home_value.csv',
     dataKey: 'median_home_value',
+    valueColumn: 'median_home_value_with_mortgage',
     gradient: {
       css: 'linear-gradient(to right, rgb(0, 180, 0), rgb(220, 0, 0))',
       lowLabel: 'More Affordable',
@@ -280,6 +307,7 @@ export const LAYER_REGISTRY: Record<string, LayerDefinition> = {
     year: 2022,
     dataPath: '/datasets/housing/median_property_tax.csv',
     dataKey: 'median_property_tax',
+    valueColumn: 'median_property_tax_with_mortgage',
     gradient: {
       css: 'linear-gradient(to right, rgb(100, 200, 100), rgb(255, 100, 100))',
       lowLabel: 'Lower',

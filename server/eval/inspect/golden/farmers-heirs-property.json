@@ -1,0 +1,70 @@
+{
+  "slug": "farmers-heirs-property",
+  "url": "https://www.farmers.gov/working-with-us/heirs-property-eligibility",
+  "capturedAt": "2026-09-07T01:44:31.697Z",
+  "recordedAt": "2026-09-07T02:05:26.721Z",
+  "model": "claude-sonnet-5",
+  "answer": "{\"isDataset\": false, \"links\": []}",
+  "candidates": [
+    {
+      "url": "https://www.farmers.gov/data",
+      "label": "Data",
+      "context": "tbm-item.level-2:nth-child(5) { .mega-dropdown-inner { position: relative; top: 12px; } } } --> Local Dashboard Blog USDA.gov LOG IN |",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.farmers.gov/working-with-us/common-forms",
+      "label": "Common Forms Browse common forms you may need to complete to work with USDA.",
+      "context": "class=\"block-inner\"> National Program Deadlines <div class=\"field field--name-field-mm-text",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.farmers.gov/working-with-us/farm-bill",
+      "label": "Farm Bill Learn about the Farm Bill and get information on key changes and resources.",
+      "context": "ing-with-us/heirs-property-eligibility\" tabindex=\"0\" aria-label=\"Heirs' Property Eligibility - Establish a farm number on inherited land to become eligible for USDA programs.\"> Heirs' Property Eligibi",
+      "via": "anchor"
+    },
+    {
+      "url": "https://www.farmers.gov/your-business/urban-growers",
+      "label": "Urban Growers Browse USDA programs and services provided for urban farmers and gardeners.",
+      "context": "Organic Farmers Explore USDA programs, services, and resources available for organic farmers. Partnerships",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.farmers.gov/your-business/military-veterans",
+      "label": "Resources for Military Veteran Farmers Browse USDA programs and services provided for military veteran producers.",
+      "context": "Nations - USDA collaborates and partners with Tribal Nations to help them meet their land stewardship, production, and food sovereignty goals.\"> Partnerships With Tribal Nations USDA collaborates and ",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.farmers.gov/your-business/livestock",
+      "label": "Livestock Browse programs and services that USDA offers to support your livestock operation.",
+      "context": "Specialty Crops <div class=\"field field--name-field-mm-text fie",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.farmers.gov/your-business/specialty-crops",
+      "label": "Specialty Crops Browse USDA programs and services for specialty crops like fruits and vegetables.",
+      "context": "Livestock Browse programs and services that USDA offers to support your livestock operation. Row Crops <div class=\"field field--name-field-mm-text field--type-string",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.farmers.gov/your-business/row-crops",
+      "label": "Row Crops Browse USDA programs and services to assist your row crop operation.",
+      "context": "m\"> Specialty Crops Browse USDA programs and services for specialty crops like fruits and vegetables. Forests <div class=\"field field--name-field-mm-text field--type-string-long field--label-hidd",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.farmers.gov/your-business/forests",
+      "label": "Forests Browse USDA programs and services that could help your forest land.",
+      "context": "Row Crops Browse USDA programs and services to assist your row crop operation. Featured <div class=\"field fie",
+      "via": "directory"
+    }
+  ],
+  "expected": {
+    "links": [],
+    "prose": {
+      "isDataset": false
+    }
+  }
+}

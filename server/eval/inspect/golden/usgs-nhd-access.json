@@ -1,0 +1,240 @@
+{
+  "slug": "usgs-nhd-access",
+  "url": "https://www.usgs.gov/national-hydrography/access-national-hydrography-products",
+  "capturedAt": "2026-09-07T01:44:28.113Z",
+  "recordedAt": "2026-09-07T02:16:45.546Z",
+  "model": "claude-sonnet-5",
+  "answer": "{\n  \"isDataset\": true,\n  \"links\": [\n    {\"index\": 8, \"role\": \"viewer\", \"reason\": \"Map viewer for downloading NHDPlus HR, NHD and WBD by Hydrologic Unit, state, or nationally.\"},\n    {\"index\": 9, \"role\": \"directory\", \"reason\": \"S3 directory listing NHDPlus HR files by HU4 (CONUS) or HU8 (Alaska).\"},\n    {\"index\": 10, \"role\": \"directory\", \"reason\": \"S3 directory containing the NHDPlus HR National Release 1 dataset.\"},\n    {\"index\": 11, \"role\": \"landing\", \"reason\": \"ScienceBase catalog item for the NHDPlus HR National Release 2 dataset.\"},\n    {\"index\": 12, \"role\": \"directory\", \"reason\": \"S3 directory listing NHD files by 4-digit Hydrologic Unit (HU4).\"},\n    {\"index\": 13, \"role\": \"directory\", \"reason\": \"S3 directory listing NHD files by 8-digit Hydrologic Unit (HU8).\"},\n    {\"index\": 14, \"role\": \"directory\", \"reason\": \"S3 directory listing NHD files by state.\"},\n    {\"index\": 15, \"role\": \"directory\", \"reason\": \"S3 directory containing the entire-nation NHD dataset.\"},\n    {\"index\": 16, \"role\": \"directory\", \"reason\": \"S3 directory listing WBD files by 2-digit Hydrologic Unit (HU2).\"},\n    {\"index\": 17, \"role\": \"directory\", \"reason\": \"S3 directory containing the entire-nation WBD dataset.\"},\n    {\"index\": 20, \"role\": \"service-layer\", \"reason\": \"ArcGIS MapServer providing the NHD as a web map service.\"}\n  ],\n  \"provider\": \"U.S. Geological Survey\",\n  \"program\": \"National Hydrography Products (NHDPlus HR, NHD, WBD)\",\n  \"coverage\": \"CONUS, Hawaii, U.S. Territories, and portions of Alaska.\",\n  \"accessNotes\": [\n    {\"kind\": \"viewer\", \"text\": \"Online map viewer for downloading NHDPlus HR, NHD and WBD as shapefile or file geodatabase.\", \"url\": \"https://apps.nationalmap.gov/downloader/\"},\n    {\"kind\": \"download\", \"text\": \"Bulk downloads of NHDPlus HR, NHD, and WBD files organized by Hydrologic Unit, state, or nation via S3 directories.\"},\n    {\"kind\": \"api\", \"text\": \"Web-based map services (ArcGIS MapServer) for NHD, WBD, and NHDPlus HR layers.\"}\n  ],\n  \"evidence\": {\n    \"coverage\": \"The NHDPlus HR is currently available for CONUS, Hawaii, and U.S. Territories, and portions of Alaska.\"\n  }\n}",
+  "candidates": [
+    {
+      "url": "https://www.usgs.gov/products/data",
+      "label": "Data",
+      "context": "em\"> Products Data Management <a href=\"/products/data/data-releases\" data-drupal-link",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.usgs.gov/products/data-and-tools/data-management",
+      "label": "Data Management",
+      "context": "top\" class=\"usa-nav__submenu usa-megamenu\" hidden=\"\"> Data Data Releases <a href=\"/products/data/real-time-data\" data-drupal-link-",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.usgs.gov/products/data/data-releases",
+      "label": "Data Releases",
+      "context": "products-col-1 nav\"> Data Data Management Real-time Data <a href=\"/products/data/all-data\" data-drupal-link-syst",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.usgs.gov/products/data/real-time-data",
+      "label": "Real-time Data",
+      "context": "system-path=\"node/229161\">Data Data Management Data Releases All Data <a",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.usgs.gov/products/data/all-data",
+      "label": "All Data",
+      "context": "ta-management\">Data Management Data Releases Real-time Data Maps",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.usgs.gov/products/web-tools/data-access-tools",
+      "label": "Data Access Tools",
+      "context": "=\"node/265942\">Web Tools Alert and Notification Services APIs Data Analysis Tools <a href=\"/products/web-tools/data-visual",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.usgs.gov/products/web-tools/data-analysis-tools",
+      "label": "Data Analysis Tools",
+      "context": ">Alert and Notification Services APIs Data Access Tools Data Visualizations <a href=\"/products/web-tools/interactive",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.usgs.gov/products/web-tools/data-visualizations",
+      "label": "Data Visualizations",
+      "context": "Is Data Access Tools Data Analysis Tools Interactive Maps <a href=\"/products/web-tools/all-web-tools\" da",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://apps.nationalmap.gov/downloader/",
+      "context": "lass=\"usgs-button\">Access 3DHP Products The National Map Downloader The National Map Download viewer provides an online mapping tool for downloading the NHDPlus HR, NHD and WBD as a shapefile or file ",
+      "via": "anchor"
+    },
+    {
+      "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHDPlusHR/",
+      "label": "Download the NHDPlus HR by 4-digit Hydrologic Unit (HU4) for CONUS or by 8-digit Hydrologic Unit (HU8) for Alaska",
+      "context": "The most recent data is in the /VPU/current folder. The NHDPlus HR is currently available for CONUS, Hawaii, and U.S.",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHDPlusHR/National/",
+      "label": "Download the NHDPlus HR National Release 1",
+      "context": "The NHDPlus HR National Release 2, published in February 2025, includes updated data in Hydrologic Regions 01, 02, 13, 14, 15, and several HU8s in Alaska. ( Digital Object Identifier ) Download the NH",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.sciencebase.gov/catalog/item/679d39cbd34eb38981c9c7a5",
+      "label": "Download the NHDPlus HR National Release 2",
+      "context": "Download the NHDPlus HR National Release 1 ( Digital Object Identifier ) (Digital Object Identifier) <a href=\"https://gcc02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fprd-tnm.s3.amazonaws.com",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHD/HU4/",
+      "label": "Download the NHD by 4-digit Hydrologic Unit (HU4)",
+      "context": "Also, an extract containing only streamgages and dams is available. - dataset generated only when edits are performed Download the NHD by 8-digit Hydrologic Unit (HU8) - dataset generated only when ed",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHD/HU8/",
+      "label": "Download the NHD by 8-digit Hydrologic Unit (HU8)",
+      "context": "Download the NHD by 4-digit Hydrologic Unit (HU4) - dataset generated only when edits are performed - dataset generated only when edits are performed Download the NHD by State - dataset generated only",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHD/State/",
+      "label": "Download the NHD by State",
+      "context": "Download the NHD by 4-digit Hydrologic Unit (HU4) - dataset generated only when edits are performed Download the NHD by 8-digit Hydrologic Unit (HU8) - dataset generated only when edits are performed ",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHD/National/",
+      "label": "Download the NHD by the Entire Nation",
+      "context": "mazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHD/HU4/\"> Download the NHD by 4-digit Hydrologic Unit (HU4) - dataset generated only when edits are performed Download the NHD by 8-digit Hyd",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/WBD/HU2/",
+      "label": "Download the WBD by 2-digit Hydrologic Unit (HU2)",
+      "context": "ted only when edits are performed Download the NHD by State - dataset generated only when edits are performed Download the NHD by the Entire Nation - monthly Watershed Boundary Dataset (WBD) The Water",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/WBD/National/",
+      "label": "Download the WBD by the Entire Nation",
+      "context": "e performed Download the NHD by the Entire Nation - monthly Watershed Boundary Dataset (WBD) The Watershed Boundary Dataset (WBD) is available in shapefile and file geodatabase formats Download the WB",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://apps.nationalmap.gov/downloader",
+      "label": "National Map Download viewer",
+      "context": "; The Watershed Boundary Dataset (WBD) is available in shapefile and file geodatabase formats Download the WBD by 2-digit Hydrologic Unit (HU2) - dataset generated only when edits are performed Downlo",
+      "via": "anchor"
+    },
+    {
+      "url": "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer",
+      "label": "USGSHydroCached",
+      "context": "Title Service Name Category Type Data Scale Hydrography - Cached Base Maps and/or Overlay Raster Tile Cache NHD Down to 9K (Level 17 in Google map tiles) National Hydrography Dataset NHD Theme Overlay",
+      "via": "anchor",
+      "kind": "arcgis-service"
+    },
+    {
+      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer",
+      "label": "NHD",
+      "context": "Title Service Name Category Type Data Scale Hydrography - Cached USGSHydroCached Base Maps and/or Overlay Raster Tile Cache NHD Down to 9K (Level 17 in Google map tiles) National Hydrography Dataset T",
+      "via": "anchor",
+      "kind": "arcgis-service"
+    },
+    {
+      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer",
+      "label": "WBD",
+      "context": "m> Scale Hydrography - Cached USGSHydroCached Base Maps and/or Overlay Raster Tile Cache NHD Down to 9K (Level 17 in Google map tiles) National Hydrography Dataset NHD Theme Overlays Dynamic NHD 1:288",
+      "via": "anchor",
+      "kind": "arcgis-service"
+    },
+    {
+      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer",
+      "label": "NHDPlus_HR",
+      "context": "Base Maps and/or Overlay Raster Tile Cache NHD Down to 9K (Level 17 in Google map tiles) National Hydrography Dataset NHD Theme Overlays Dynamic NHD 1:288K and larger Watershed Boundary Dataset WBD Th",
+      "via": "anchor",
+      "kind": "arcgis-service"
+    }
+  ],
+  "expected": {
+    "links": [
+      {
+        "url": "https://apps.nationalmap.gov/downloader/",
+        "role": "viewer",
+        "reason": "Map viewer for downloading NHDPlus HR, NHD and WBD by Hydrologic Unit, state, or nationally. Online map viewer for downloading NHDPlus HR, NHD and WBD as shapefile or file geodatabase."
+      },
+      {
+        "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHDPlusHR/",
+        "label": "Download the NHDPlus HR by 4-digit Hydrologic Unit (HU4) for CONUS or by 8-digit Hydrologic Unit (HU8) for Alaska",
+        "role": "directory",
+        "reason": "S3 directory listing NHDPlus HR files by HU4 (CONUS) or HU8 (Alaska)."
+      },
+      {
+        "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHDPlusHR/National/",
+        "label": "Download the NHDPlus HR National Release 1",
+        "role": "directory",
+        "reason": "S3 directory containing the NHDPlus HR National Release 1 dataset."
+      },
+      {
+        "url": "https://www.sciencebase.gov/catalog/item/679d39cbd34eb38981c9c7a5",
+        "label": "Download the NHDPlus HR National Release 2",
+        "role": "landing",
+        "reason": "ScienceBase catalog item for the NHDPlus HR National Release 2 dataset."
+      },
+      {
+        "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHD/HU4/",
+        "label": "Download the NHD by 4-digit Hydrologic Unit (HU4)",
+        "role": "directory",
+        "reason": "S3 directory listing NHD files by 4-digit Hydrologic Unit (HU4)."
+      },
+      {
+        "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHD/HU8/",
+        "label": "Download the NHD by 8-digit Hydrologic Unit (HU8)",
+        "role": "directory",
+        "reason": "S3 directory listing NHD files by 8-digit Hydrologic Unit (HU8)."
+      },
+      {
+        "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHD/State/",
+        "label": "Download the NHD by State",
+        "role": "directory",
+        "reason": "S3 directory listing NHD files by state."
+      },
+      {
+        "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHD/National/",
+        "label": "Download the NHD by the Entire Nation",
+        "role": "directory",
+        "reason": "S3 directory containing the entire-nation NHD dataset."
+      },
+      {
+        "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/WBD/HU2/",
+        "label": "Download the WBD by 2-digit Hydrologic Unit (HU2)",
+        "role": "directory",
+        "reason": "S3 directory listing WBD files by 2-digit Hydrologic Unit (HU2)."
+      },
+      {
+        "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/WBD/National/",
+        "label": "Download the WBD by the Entire Nation",
+        "role": "directory",
+        "reason": "S3 directory containing the entire-nation WBD dataset."
+      },
+      {
+        "url": "https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer",
+        "label": "NHD",
+        "kind": "arcgis-service",
+        "role": "service-layer",
+        "reason": "ArcGIS MapServer providing the NHD as a web map service."
+      }
+    ],
+    "prose": {
+      "provider": "U.S. Geological Survey",
+      "program": "National Hydrography Products (NHDPlus HR, NHD, WBD)",
+      "coverage": "CONUS, Hawaii, U.S. Territories, and portions of Alaska.",
+      "evidence": {
+        "coverage": "The NHDPlus HR is currently available for CONUS, Hawaii, and U.S. Territories, and portions of Alaska."
+      },
+      "isDataset": true,
+      "accessNotes": [
+        {
+          "kind": "download",
+          "text": "Bulk downloads of NHDPlus HR, NHD, and WBD files organized by Hydrologic Unit, state, or nation via S3 directories."
+        },
+        {
+          "kind": "api",
+          "text": "Web-based map services (ArcGIS MapServer) for NHD, WBD, and NHDPlus HR layers."
+        }
+      ]
+    }
+  }
+}

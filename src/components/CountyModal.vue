@@ -45,6 +45,30 @@
     <div class="detailed-popup-content">
       <h2 :id="'modal-title-' + countyId">{{ countyName }}, {{ stateName }}</h2>
 
+      <!-- P5-55: the map is where a candidate county gets noticed, so this is
+           where a shortlist starts. Internal users only — for everyone else
+           this row does not exist and the public modal is unchanged. -->
+      <div v-if="canShortlist" class="shortlist-row">
+        <button
+          type="button"
+          class="shortlist-add"
+          :class="{ added: shortlistState === 'added' }"
+          :disabled="shortlistState !== 'open'"
+          :title="shortlistState === 'full' ? `A comparison holds at most ${MAX_COMPARE_COUNTIES} counties` : undefined"
+          data-testid="modal-shortlist"
+          @click="addCounty"
+        >
+          {{ shortlistLabel }}
+        </button>
+        <!-- P5-58: the same county, checked against every data source. -->
+        <RouterLink class="shortlist-link" :to="placeReportLink" data-testid="modal-place-report">
+          Place report →
+        </RouterLink>
+        <RouterLink v-if="shortlistCount > 0" class="shortlist-link" to="/compare" data-testid="modal-compare-link">
+          Compare {{ shortlistCount }} {{ shortlistCount === 1 ? 'county' : 'counties' }} →
+        </RouterLink>
+      </div>
+
       <!-- BLO Livability Index Section -->
       <div v-if="hasBLOV2Data" class="blo-v2-section">
         <div class="score-header">
@@ -149,7 +173,10 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
+import { RouterLink } from 'vue-router'
 import { getStateNameFromFips } from '@/config/stateFips'
+import { MAX_COMPARE_COUNTIES, addToShortlist, isShortlisted, shortlist } from '@/lib/compare'
+import { useAuth } from '@/composables/useAuth'
 import type {
   CountyDiversityData,
   ContaminationData,
@@ -236,6 +263,35 @@ onMounted(async () => {
     console.error('Failed to load national averages:', error)
   }
 })
+
+// P5-55: the pending comparison shortlist. Nothing here renders for a
+// logged-out visitor, so the public map stays exactly as it was.
+const { internalUser } = useAuth()
+const canShortlist = computed(() => !!internalUser.value)
+const shortlistCount = computed(() => shortlist.value.length)
+const shortlistState = computed<'added' | 'full' | 'open'>(() => {
+  if (isShortlisted(props.countyId)) return 'added'
+  return shortlist.value.length >= MAX_COMPARE_COUNTIES ? 'full' : 'open'
+})
+const shortlistLabel = computed(() =>
+  shortlistState.value === 'added'
+    ? 'On shortlist'
+    : shortlistState.value === 'full'
+      ? 'Shortlist full'
+      : 'Add to shortlist',
+)
+const addCounty = () => {
+  addToShortlist(props.countyId)
+}
+
+/**
+ * P5-58: this county, run against every data source that covers it. Written
+ * out rather than imported from `@/lib/placeReport` on purpose — that module
+ * pulls the knowledge base's API clients in, and this component is part of
+ * the PUBLIC map's bundle. It only ever renders behind `canShortlist`, so a
+ * logged-out visitor never sees it.
+ */
+const placeReportLink = computed(() => `/place?geoid=${encodeURIComponent(props.countyId)}`)
 
 const isDesktopView = computed(() => window.innerWidth > 768)
 
@@ -499,6 +555,51 @@ const getBlackProgressIndexDiff = computed(() => {
 </script>
 
 <style scoped>
+/* P5-55 shortlist row — same visual language as the knowledge base's
+   pill buttons, so it reads as part of the same product. */
+.shortlist-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: -4px 0 10px;
+}
+
+.shortlist-add {
+  padding: 5px 12px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blo-green-deep, #1f7a2e);
+  background: #fff;
+  border: 1px solid var(--blo-cream-divider, #e0d9ca);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.shortlist-add:hover:not(:disabled) {
+  border-color: var(--blo-green-deep, #1f7a2e);
+}
+
+.shortlist-add:disabled {
+  cursor: default;
+}
+
+.shortlist-add.added {
+  color: var(--blo-stone, #6b6560);
+}
+
+.shortlist-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blo-green-deep, #1f7a2e);
+  text-decoration: none;
+}
+
+.shortlist-link:hover {
+  text-decoration: underline;
+}
+
 #detailed-popup {
   position: fixed;
   top: 50%;

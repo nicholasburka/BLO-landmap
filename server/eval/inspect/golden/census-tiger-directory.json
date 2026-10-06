@@ -1,0 +1,435 @@
+{
+  "slug": "census-tiger-directory",
+  "url": "https://www2.census.gov/geo/tiger/TIGER2025/",
+  "capturedAt": "2026-09-07T01:44:24.601Z",
+  "recordedAt": "2026-09-07T02:03:30.072Z",
+  "model": "claude-sonnet-5",
+  "answer": "{\n  \"isDataset\": true,\n  \"links\": [\n    {\"index\": 18, \"role\": \"directory\", \"reason\": \"COUNTY/ directory holds county boundary shapefiles for the 2025 TIGER/Line release.\"},\n    {\"index\": 44, \"role\": \"directory\", \"reason\": \"STATE/ directory holds state boundary shapefiles for the 2025 TIGER/Line release.\"},\n    {\"index\": 49, \"role\": \"directory\", \"reason\": \"TRACT/ directory holds census tract boundary shapefiles.\"},\n    {\"index\": 33, \"role\": \"directory\", \"reason\": \"PLACE/ directory holds incorporated place boundary shapefiles.\"},\n    {\"index\": 39, \"role\": \"directory\", \"reason\": \"ROADS/ directory holds all-roads line shapefiles.\"},\n    {\"index\": 13, \"role\": \"directory\", \"reason\": \"BG/ directory holds block group boundary shapefiles.\"},\n    {\"index\": 46, \"role\": \"directory\", \"reason\": \"TABBLOCK20/ directory holds 2020 census block boundary shapefiles.\"},\n    {\"index\": 21, \"role\": \"directory\", \"reason\": \"EDGES/ directory holds topological edge feature shapefiles.\"},\n    {\"index\": 14, \"role\": \"directory\", \"reason\": \"CBSA/ directory holds core-based statistical area boundary shapefiles.\"},\n    {\"index\": 15, \"role\": \"directory\", \"reason\": \"CD/ directory holds congressional district boundary shapefiles.\"},\n    {\"index\": 53, \"role\": \"directory\", \"reason\": \"ZCTA520/ directory holds ZIP Code Tabulation Area boundary shapefiles.\"},\n    {\"index\": 42, \"role\": \"directory\", \"reason\": \"SLDL/ directory holds state legislative district (lower) boundary shapefiles.\"}\n  ],\n  \"provider\": \"U.S. Census Bureau\",\n  \"program\": \"TIGER/Line Shapefiles\",\n  \"coverage\": \"2025 TIGER/Line shapefile release, covering the United States and its territories\",\n  \"geography\": \"Each subdirectory holds shapefiles for one geographic feature type (e.g., counties, tracts, roads, blocks)\",\n  \"accessNotes\": [\n    {\"kind\": \"download\", \"text\": \"Index of directories, each containing bulk-downloadable shapefile archives for a feature type.\", \"url\": \"https://www2.census.gov/geo/tiger/TIGER2025/\"}\n  ]\n}",
+  "candidates": [
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/?C=N;O=D",
+      "label": "Name",
+      "context": "ript src=\"/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js\" data-cf-settings=\"d751c1dcc724cde118155b65-|49\" defer> Last modified Size Description Parent Directory - <img src=\"/icons/la",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/?C=M;O=A",
+      "label": "Last modified",
+      "context": "cloudflare-static/rocket-loader.min.js\" data-cf-settings=\"d751c1dcc724cde118155b65-|49\" defer> Name Size Description Parent Directory - <a href=\"2025_TL",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/?C=S;O=A",
+      "label": "Size",
+      "context": "cf-settings=\"d751c1dcc724cde118155b65-|49\" defer> Name Last modified Description Parent Directory - <a href=\"2025_TL_Shapefiles_File_Name_Definitions.pd",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/?C=D;O=A",
+      "label": "Description",
+      "context": "5-|49\" defer> Name Last modified Size Parent Directory - 2025_TL_Shapefiles_File_Name_Definitions",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/",
+      "label": "Parent Directory",
+      "context": "=\"sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==\" data-cf-beacon='{\"version\":\"2024.11.0\",\"token\":\"7e4353b0de94489d8c328f144e852cc3\",\"spa\":2}' crossorig",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/ADDR/",
+      "label": "ADDR/",
+      "context": "=\"?C=D;O=A\">Description Parent Directory - 2025_TL_Shapefiles_File_Name_Definitions.pdf 2026-05-12 15:30 115K 2025-09-22 19:45 - ADDRFEAT/ 2025-09-22 19:45 - ADDRFN/ <td",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/ADDRFEAT/",
+      "label": "ADDRFEAT/",
+      "context": "/a> - 2025_TL_Shapefiles_File_Name_Definitions.pdf 2026-05-12 15:30 115K ADDR/ 2025-09-22 19:45 - 2025-09-22 19:45 - ADDRFN/ 2025-09-22 19:45 - AIANNH/ <td ali",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/ADDRFN/",
+      "label": "ADDRFN/",
+      "context": "025_TL_Shapefiles_File_Name_Definitions.pdf 2026-05-12 15:30 115K ADDR/ 2025-09-22 19:45 - ADDRFEAT/ 2025-09-22 19:45 - 2025-09-22 19:45 - AIANNH/ 2025-09-22 22:15 - AITSN/ <td align",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/AIANNH/",
+      "label": "AIANNH/",
+      "context": "=\"[DIR]\"> ADDR/ 2025-09-22 19:45 - ADDRFEAT/ 2025-09-22 19:45 - ADDRFN/ 2025-09-22 19:45 - 2025-09-22 22:15 - AITSN/ 2025-09-22 22:15 - ANRC/ <td align=\"ri",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/AITSN/",
+      "label": "AITSN/",
+      "context": "IR]\"> ADDRFEAT/ 2025-09-22 19:45 - ADDRFN/ 2025-09-22 19:45 - AIANNH/ 2025-09-22 22:15 - 2025-09-22 22:15 - ANRC/ 2025-09-22 19:45 - AREALM/ <td align=\"",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/ANRC/",
+      "label": "ANRC/",
+      "context": "lt=\"[DIR]\"> ADDRFN/ 2025-09-22 19:45 - AIANNH/ 2025-09-22 22:15 - AITSN/ 2025-09-22 22:15 - 2025-09-22 19:45 - AREALM/ 2025-09-22 19:51 - AREAWATER/ <",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/AREALM/",
+      "label": "AREALM/",
+      "context": "f\" alt=\"[DIR]\"> AIANNH/ 2025-09-22 22:15 - AITSN/ 2025-09-22 22:15 - ANRC/ 2025-09-22 19:45 - 2025-09-22 19:51 - AREAWATER/ 2025-09-22 19:46 - BG/ <td align",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/AREAWATER/",
+      "label": "AREAWATER/",
+      "context": "f\" alt=\"[DIR]\"> AITSN/ 2025-09-22 22:15 - ANRC/ 2025-09-22 19:45 - AREALM/ 2025-09-22 19:51 - 2025-09-22 19:46 - BG/ 2025-09-22 19:51 - CBSA/ 2",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/BG/",
+      "label": "BG/",
+      "context": "[DIR]\"> ANRC/ 2025-09-22 19:45 - AREALM/ 2025-09-22 19:51 - AREAWATER/ 2025-09-22 19:46 - 2025-09-22 19:51 - CBSA/ 2025-09-22 22:15 - CD/ 2",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/CBSA/",
+      "label": "CBSA/",
+      "context": "lt=\"[DIR]\"> AREALM/ 2025-09-22 19:51 - AREAWATER/ 2025-09-22 19:46 - BG/ 2025-09-22 19:51 - 2025-09-22 22:15 - CD/ 2025-09-22 19:51 - COASTLINE/ <td align",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/CD/",
+      "label": "CD/",
+      "context": "f\" alt=\"[DIR]\"> AREAWATER/ 2025-09-22 19:46 - BG/ 2025-09-22 19:51 - CBSA/ 2025-09-22 22:15 - 2025-09-22 19:51 - COASTLINE/ 2025-09-22 22:15 - CONCITY/ </td",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/COASTLINE/",
+      "label": "COASTLINE/",
+      "context": "cons/folder.gif\" alt=\"[DIR]\"> BG/ 2025-09-22 19:51 - CBSA/ 2025-09-22 22:15 - CD/ 2025-09-22 19:51 - 2025-09-22 22:15 - CONCITY/ 2025-09-22 19:46 - COUNTY/ <td a",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/CONCITY/",
+      "label": "CONCITY/",
+      "context": "f\" alt=\"[DIR]\"> CBSA/ 2025-09-22 22:15 - CD/ 2025-09-22 19:51 - COASTLINE/ 2025-09-22 22:15 - 2025-09-22 19:46 - COUNTY/ 2025-09-22 22:15 - COUSUB/ <td ali",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/COUNTY/",
+      "label": "COUNTY/",
+      "context": "=\"[DIR]\"> CD/ 2025-09-22 19:51 - COASTLINE/ 2025-09-22 22:15 - CONCITY/ 2025-09-22 19:46 - 2025-09-22 22:15 - COUSUB/ 2025-09-22 19:51 - CSA/ <td align=\"ri",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/COUSUB/",
+      "label": "COUSUB/",
+      "context": "> COASTLINE/ 2025-09-22 22:15 - CONCITY/ 2025-09-22 19:46 - COUNTY/ 2025-09-22 22:15 - 2025-09-22 19:51 - CSA/ 2025-09-22 22:15 - EDGES/ <td align=\"righ",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/CSA/",
+      "label": "CSA/",
+      "context": "[DIR]\"> CONCITY/ 2025-09-22 19:46 - COUNTY/ 2025-09-22 22:15 - COUSUB/ 2025-09-22 19:51 - 2025-09-22 22:15 - EDGES/ 2025-09-22 19:47 - ELSD/ <td align=\"ri",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/EDGES/",
+      "label": "EDGES/",
+      "context": "f\" alt=\"[DIR]\"> COUNTY/ 2025-09-22 22:15 - COUSUB/ 2025-09-22 19:51 - CSA/ 2025-09-22 22:15 - 2025-09-22 19:47 - ELSD/ 2025-09-22 19:47 - ESTATE/ <td align=\"",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/ELSD/",
+      "label": "ELSD/",
+      "context": "gif\" alt=\"[DIR]\"> COUSUB/ 2025-09-22 19:51 - CSA/ 2025-09-22 22:15 - EDGES/ 2025-09-22 19:47 - 2025-09-22 19:47 - ESTATE/ 2025-09-22 19:47 - FACES/ <td align",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/ESTATE/",
+      "label": "ESTATE/",
+      "context": "der.gif\" alt=\"[DIR]\"> CSA/ 2025-09-22 22:15 - EDGES/ 2025-09-22 19:47 - ELSD/ 2025-09-22 19:47 - 2025-09-22 19:47 - FACES/ 2025-09-22 19:48 - FACESAH/ <td ali",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/FACES/",
+      "label": "FACES/",
+      "context": "f\" alt=\"[DIR]\"> EDGES/ 2025-09-22 19:47 - ELSD/ 2025-09-22 19:47 - ESTATE/ 2025-09-22 19:47 - 2025-09-22 19:48 - FACESAH/ 2025-09-22 19:48 - FACESAL/ <td",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/FACESAH/",
+      "label": "FACESAH/",
+      "context": "f\" alt=\"[DIR]\"> ELSD/ 2025-09-22 19:47 - ESTATE/ 2025-09-22 19:47 - FACES/ 2025-09-22 19:48 - 2025-09-22 19:48 - FACESAL/ 2025-09-22 19:48 - FACESMIL/ <",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/FACESAL/",
+      "label": "FACESAL/",
+      "context": "=\"[DIR]\"> ESTATE/ 2025-09-22 19:47 - FACES/ 2025-09-22 19:48 - FACESAH/ 2025-09-22 19:48 - 2025-09-22 19:48 - FACESMIL/ 2025-09-22 22:15 - FEATNAMES/ </",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/FACESMIL/",
+      "label": "FACESMIL/",
+      "context": "[DIR]\"> FACES/ 2025-09-22 19:48 - FACESAH/ 2025-09-22 19:48 - FACESAL/ 2025-09-22 19:48 - 2025-09-22 22:15 - FEATNAMES/ 2025-09-22 19:48 - IN",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/FEATNAMES/",
+      "label": "FEATNAMES/",
+      "context": "> FACESAH/ 2025-09-22 19:48 - FACESAL/ 2025-09-22 19:48 - FACESMIL/ 2025-09-22 22:15 - 2025-09-22 19:48 - INTERNATIONALBOUNDARY/ 2025-09-22 22:15 - <a href=\"LI",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/INTERNATIONALBOUNDARY/",
+      "label": "INTERNATIONALBOUNDARY/",
+      "context": "d> FACESAL/ 2025-09-22 19:48 - FACESMIL/ 2025-09-22 22:15 - FEATNAMES/ 2025-09-22 19:48 - 2025-09-22 22:15 - LINEARWATER/ 2025-09-22 19:49 - METDIV/ </",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/LINEARWATER/",
+      "label": "LINEARWATER/",
+      "context": "CESMIL/ 2025-09-22 22:15 - FEATNAMES/ 2025-09-22 19:48 - INTERNATIONALBOUNDARY/ 2025-09-22 22:15 - 2025-09-22 19:49 - METDIV/ 2025-09-22 22:15 - MIL/ <td align=\"ri",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/METDIV/",
+      "label": "METDIV/",
+      "context": "ES/ 2025-09-22 19:48 - INTERNATIONALBOUNDARY/ 2025-09-22 22:15 - LINEARWATER/ 2025-09-22 19:49 - 2025-09-22 22:15 - MIL/ 2025-09-22 22:15 - PLACE/ <td align=\"righ",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/MIL/",
+      "label": "MIL/",
+      "context": "BOUNDARY/\">INTERNATIONALBOUNDARY/ 2025-09-22 22:15 - LINEARWATER/ 2025-09-22 19:49 - METDIV/ 2025-09-22 22:15 - 2025-09-22 22:15 - PLACE/ 2025-09-22 19:49 - POINTLM/ <td ali",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/PLACE/",
+      "label": "PLACE/",
+      "context": "IR]\"> LINEARWATER/ 2025-09-22 19:49 - METDIV/ 2025-09-22 22:15 - MIL/ 2025-09-22 22:15 - 2025-09-22 19:49 - POINTLM/ 2025-09-22 19:49 - PRIMARYROADS/</",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/POINTLM/",
+      "label": "POINTLM/",
+      "context": "gif\" alt=\"[DIR]\"> METDIV/ 2025-09-22 22:15 - MIL/ 2025-09-22 22:15 - PLACE/ 2025-09-22 19:49 - 2025-09-22 19:49 - PRIMARYROADS/ 2025-09-22 22:15 - PRISEC",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/PRIMARYROADS/",
+      "label": "PRIMARYROADS/",
+      "context": "f\" alt=\"[DIR]\"> MIL/ 2025-09-22 22:15 - PLACE/ 2025-09-22 19:49 - POINTLM/ 2025-09-22 19:49 - 2025-09-22 22:15 - PRISECROADS/ 2025-09-22 19:49 - PUMA20/ </",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/PRISECROADS/",
+      "label": "PRISECROADS/",
+      "context": "d> PLACE/ 2025-09-22 19:49 - POINTLM/ 2025-09-22 19:49 - PRIMARYROADS/ 2025-09-22 22:15 - 2025-09-22 19:49 - PUMA20/ 2025-09-22 19:49 - RAILS/ <td align",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/PUMA20/",
+      "label": "PUMA20/",
+      "context": "f=\"POINTLM/\">POINTLM/ 2025-09-22 19:49 - PRIMARYROADS/ 2025-09-22 22:15 - PRISECROADS/ 2025-09-22 19:49 - 2025-09-22 19:49 - RAILS/ 2025-09-22 22:15 - ROADS/ <td align=\"",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/RAILS/",
+      "label": "RAILS/",
+      "context": "ref=\"PRIMARYROADS/\">PRIMARYROADS/ 2025-09-22 22:15 - PRISECROADS/ 2025-09-22 19:49 - PUMA20/ 2025-09-22 19:49 - 2025-09-22 22:15 - ROADS/ 2025-09-22 19:49 - SCSD/ <td align=\"ri",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/ROADS/",
+      "label": "ROADS/",
+      "context": "> PRISECROADS/ 2025-09-22 19:49 - PUMA20/ 2025-09-22 19:49 - RAILS/ 2025-09-22 22:15 - 2025-09-22 19:49 - SCSD/ 2025-09-22 19:49 - SDADM/ <td align=\"ri",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/SCSD/",
+      "label": "SCSD/",
+      "context": "alt=\"[DIR]\"> PUMA20/ 2025-09-22 19:49 - RAILS/ 2025-09-22 22:15 - ROADS/ 2025-09-22 19:49 - 2025-09-22 19:49 - SDADM/ 2025-09-22 19:49 - SLDL/ <td align=\"ri",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/SDADM/",
+      "label": "SDADM/",
+      "context": "gif\" alt=\"[DIR]\"> RAILS/ 2025-09-22 22:15 - ROADS/ 2025-09-22 19:49 - SCSD/ 2025-09-22 19:49 - 2025-09-22 19:49 - SLDL/ 2025-09-22 19:49 - SLDU/ <td align=\"righ",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/SLDL/",
+      "label": "SLDL/",
+      "context": "gif\" alt=\"[DIR]\"> ROADS/ 2025-09-22 19:49 - SCSD/ 2025-09-22 19:49 - SDADM/ 2025-09-22 19:49 - 2025-09-22 19:49 - SLDU/ 2025-09-22 19:49 - STATE/ <td align=\"ri",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/SLDU/",
+      "label": "SLDU/",
+      "context": "r.gif\" alt=\"[DIR]\"> SCSD/ 2025-09-22 19:49 - SDADM/ 2025-09-22 19:49 - SLDL/ 2025-09-22 19:49 - 2025-09-22 19:49 - STATE/ 2025-09-22 22:15 - SUBBARRIO/ <td",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/STATE/",
+      "label": "STATE/",
+      "context": "r.gif\" alt=\"[DIR]\"> SDADM/ 2025-09-22 19:49 - SLDL/ 2025-09-22 19:49 - SLDU/ 2025-09-22 19:49 - 2025-09-22 22:15 - SUBBARRIO/ 2025-09-22 19:49 - TABBLOCK20/</",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/SUBBARRIO/",
+      "label": "SUBBARRIO/",
+      "context": "r.gif\" alt=\"[DIR]\"> SLDL/ 2025-09-22 19:49 - SLDU/ 2025-09-22 19:49 - STATE/ 2025-09-22 22:15 - 2025-09-22 19:49 - TABBLOCK20/ 2025-09-22 19:50 - TABBLOCKS",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/TABBLOCK20/",
+      "label": "TABBLOCK20/",
+      "context": "=\"[DIR]\"> SLDU/ 2025-09-22 19:49 - STATE/ 2025-09-22 22:15 - SUBBARRIO/ 2025-09-22 19:49 - 2025-09-22 19:50 - TABBLOCKSUFX/ 2025-09-22 19:51 - TBG/ <",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/TABBLOCKSUFX/",
+      "label": "TABBLOCKSUFX/",
+      "context": "d> STATE/ 2025-09-22 22:15 - SUBBARRIO/ 2025-09-22 19:49 - TABBLOCK20/ 2025-09-22 19:50 - 2025-09-22 19:51 - TBG/ 2025-09-22 22:15 - TRACT/ <td align=\"righ",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/TBG/",
+      "label": "TBG/",
+      "context": "\"SUBBARRIO/\">SUBBARRIO/ 2025-09-22 19:49 - TABBLOCK20/ 2025-09-22 19:50 - TABBLOCKSUFX/ 2025-09-22 19:51 - 2025-09-22 22:15 - TRACT/ 2025-09-22 19:51 - TTRACT/ <td align",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/TRACT/",
+      "label": "TRACT/",
+      "context": "TABBLOCK20/ 2025-09-22 19:50 - TABBLOCKSUFX/ 2025-09-22 19:51 - TBG/ 2025-09-22 22:15 - 2025-09-22 19:51 - TTRACT/ 2025-09-22 22:15 - UAC20/ <td align",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/TTRACT/",
+      "label": "TTRACT/",
+      "context": "IR]\"> TABBLOCKSUFX/ 2025-09-22 19:51 - TBG/ 2025-09-22 22:15 - TRACT/ 2025-09-22 19:51 - 2025-09-22 22:15 - UAC20/ 2025-09-22 22:15 - UNSD/ <td align=\"ri",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/UAC20/",
+      "label": "UAC20/",
+      "context": "gif\" alt=\"[DIR]\"> TBG/ 2025-09-22 22:15 - TRACT/ 2025-09-22 19:51 - TTRACT/ 2025-09-22 22:15 - 2025-09-22 22:15 - UNSD/ 2025-09-22 19:51 - ZCTA520/ <td align",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/UNSD/",
+      "label": "UNSD/",
+      "context": "alt=\"[DIR]\"> TRACT/ 2025-09-22 19:51 - TTRACT/ 2025-09-22 22:15 - UAC20/ 2025-09-22 22:15 - 2025-09-22 19:51 - ZCTA520/ 2025-09-22 22:16 - <!-- Respo",
+      "via": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/ZCTA520/",
+      "label": "ZCTA520/",
+      "context": "f\" alt=\"[DIR]\"> TTRACT/ 2025-09-22 22:15 - UAC20/ 2025-09-22 22:15 - UNSD/ 2025-09-22 19:51 - 2025-09-22 22:16 - <!-- <link rel=\"stylesheet\" type=\"text/css\" href=\"/main/css/bootstrap-4.3.1.m",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.census.gov/datalinkage/",
+      "label": "Data Linkage Infrastructure",
+      "context": "e\"> --> Information Quality Data Protection and Privacy Policy Accessibility FOIA <a href=\"https://www.oig.doc.gov/Pag",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.census.gov/privacy/",
+      "label": "Data Protection and Privacy Policy",
+      "context": "class=\"fa-brands fa-instagram\"> --> Information Quality Data Linkage Infrastructure Accessibility FOIA Inspector General <a href=\"https://www.commerce.gov/cr/repor",
+      "via": "anchor-text"
+    }
+  ],
+  "expected": {
+    "links": [
+      {
+        "url": "https://www2.census.gov/geo/tiger/TIGER2025/COUNTY/",
+        "label": "COUNTY/",
+        "role": "directory",
+        "reason": "COUNTY/ directory holds county boundary shapefiles for the 2025 TIGER/Line release."
+      },
+      {
+        "url": "https://www2.census.gov/geo/tiger/TIGER2025/STATE/",
+        "label": "STATE/",
+        "role": "directory",
+        "reason": "STATE/ directory holds state boundary shapefiles for the 2025 TIGER/Line release."
+      },
+      {
+        "url": "https://www2.census.gov/geo/tiger/TIGER2025/TRACT/",
+        "label": "TRACT/",
+        "role": "directory",
+        "reason": "TRACT/ directory holds census tract boundary shapefiles."
+      },
+      {
+        "url": "https://www2.census.gov/geo/tiger/TIGER2025/PLACE/",
+        "label": "PLACE/",
+        "role": "directory",
+        "reason": "PLACE/ directory holds incorporated place boundary shapefiles."
+      },
+      {
+        "url": "https://www2.census.gov/geo/tiger/TIGER2025/ROADS/",
+        "label": "ROADS/",
+        "role": "directory",
+        "reason": "ROADS/ directory holds all-roads line shapefiles."
+      },
+      {
+        "url": "https://www2.census.gov/geo/tiger/TIGER2025/BG/",
+        "label": "BG/",
+        "role": "directory",
+        "reason": "BG/ directory holds block group boundary shapefiles."
+      },
+      {
+        "url": "https://www2.census.gov/geo/tiger/TIGER2025/TABBLOCK20/",
+        "label": "TABBLOCK20/",
+        "role": "directory",
+        "reason": "TABBLOCK20/ directory holds 2020 census block boundary shapefiles."
+      },
+      {
+        "url": "https://www2.census.gov/geo/tiger/TIGER2025/EDGES/",
+        "label": "EDGES/",
+        "role": "directory",
+        "reason": "EDGES/ directory holds topological edge feature shapefiles."
+      },
+      {
+        "url": "https://www2.census.gov/geo/tiger/TIGER2025/CBSA/",
+        "label": "CBSA/",
+        "role": "directory",
+        "reason": "CBSA/ directory holds core-based statistical area boundary shapefiles."
+      },
+      {
+        "url": "https://www2.census.gov/geo/tiger/TIGER2025/CD/",
+        "label": "CD/",
+        "role": "directory",
+        "reason": "CD/ directory holds congressional district boundary shapefiles."
+      },
+      {
+        "url": "https://www2.census.gov/geo/tiger/TIGER2025/ZCTA520/",
+        "label": "ZCTA520/",
+        "role": "directory",
+        "reason": "ZCTA520/ directory holds ZIP Code Tabulation Area boundary shapefiles."
+      },
+      {
+        "url": "https://www2.census.gov/geo/tiger/TIGER2025/SLDL/",
+        "label": "SLDL/",
+        "role": "directory",
+        "reason": "SLDL/ directory holds state legislative district (lower) boundary shapefiles."
+      }
+    ],
+    "prose": {
+      "provider": "U.S. Census Bureau",
+      "program": "TIGER/Line Shapefiles",
+      "coverage": "2025 TIGER/Line shapefile release, covering the United States and its territories",
+      "geography": "Each subdirectory holds shapefiles for one geographic feature type (e.g., counties, tracts, roads, blocks)",
+      "accessNotes": [
+        {
+          "kind": "download",
+          "text": "Index of directories, each containing bulk-downloadable shapefile archives for a feature type."
+        }
+      ],
+      "isDataset": true
+    }
+  }
+}

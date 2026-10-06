@@ -1,5 +1,22 @@
 <template>
-  <div id="map" ref="mapContainer" class="map-root">
+  <div id="map" class="map-root">
+    <!-- P6-10: the map itself. First in the DOM, absolutely positioned and
+         filling `.map-root`, so every panel below paints over it exactly as
+         it did when this element *was* the Mapbox container. Everything the
+         chrome does to the map goes through `canvas` — the chat page mounts
+         the same component on its own, with no chrome at all. -->
+    <MapCanvas
+      ref="canvas"
+      :layers="layerState"
+      :query="queryState"
+      :data="data"
+      :hover-tooltip="!inspectActive && !walkthroughActive"
+      expose-handle
+      @ready="onCanvasReady"
+      @counties-ready="onCountiesReady"
+      @county-click="onCountyClick"
+    />
+
     <!-- Phase 4c: the dedicated geocoder input is gone. Place lookup now
          lives inline inside the Ask input via `PromptInput`'s suggestion
          strip — one visible input, two intents auto-detected.
@@ -24,8 +41,9 @@
          markers (blue pins) remain as the spatial visualization. -->
 
     <!-- Phase 4d L4: standalone LayerControls pill removed.
-         Layer picking now lives inside the Lens "Layers" tab. -->
-    <LoadingIndicator :loaded="layersLoaded" :progress="loadingProgress" />
+         Layer picking now lives inside the Lens "Layers" tab.
+         P6-10: the loading overlay moved into MapCanvas — it reports the
+         canvas's own two county files, wherever that canvas is. -->
 
     <CountyModal
       :show="showDetailedPopup"
@@ -54,7 +72,47 @@
     <!-- Phase 4d: the Lens — single primary surface for "what does this
          map mean right now?" Replaces ColorLegend, AveragesPanel, and
          the standalone Data Layers pill. -->
-    <Lens>
+    <Lens :actions="!!internalUser">
+      <!-- P5-16 / P5-74: save the current map+query state as a named library
+           view. Internal users only, and now a row of the panel rather than a
+           floating control that sat on top of it. -->
+      <template #actions>
+        <div class="save-view-row">
+          <button v-if="!saveViewOpen" class="save-view-toggle" data-testid="save-view" @click="openSaveView">
+            Save view
+          </button>
+          <form v-else class="save-view-form" @submit.prevent="submitSaveView">
+            <input
+              v-model="saveViewName"
+              class="save-view-name"
+              type="text"
+              placeholder="Name this view"
+              maxlength="80"
+              :disabled="saveViewSaving"
+            />
+            <button
+              type="submit"
+              class="save-view-save"
+              :disabled="saveViewSaving || !saveViewName.trim()"
+            >
+              {{ saveViewSaving ? "Saving…" : "Save" }}
+            </button>
+            <button
+              type="button"
+              class="save-view-cancel"
+              :disabled="saveViewSaving"
+              @click="closeSaveView"
+            >
+              ✕
+            </button>
+          </form>
+          <span v-if="saveViewNote" class="save-view-note">
+            <RouterLink v-if="savedViewSlug" :to="`/views/${savedViewSlug}`" class="save-view-link">{{ saveViewNote }}</RouterLink>
+            <template v-else>{{ saveViewNote }}</template>
+          </span>
+          <span v-if="saveViewError" class="save-view-note save-view-error">{{ saveViewError }}</span>
+        </div>
+      </template>
       <template #header>
         <LensHeader
           :scoring-chips="scoringChips"
@@ -73,6 +131,7 @@
           :selected-housing-layers="selectedHousingLayers"
           :selected-equity-layers="selectedEquityLayers"
           :selected-transportation-layers="selectedTransportationLayers"
+          :selected-internal-layers="selectedInternalLayers"
           :show-contamination-choropleth="showContaminationChoropleth"
           :layer-directions="layerDirections"
           :layer-weights="layerWeights"
@@ -92,6 +151,10 @@
           :selected-housing-layers="selectedHousingLayers"
           :selected-equity-layers="selectedEquityLayers"
           :selected-transportation-layers="selectedTransportationLayers"
+          :internal-layers="internalLayers"
+          :internal-point-layers="internalPointLayers"
+          :selected-internal-layers="selectedInternalLayers"
+          :selected-internal-feature-layers="selectedInternalFeatureLayers"
           :show-contamination-layers="showContaminationLayers"
           :show-contamination-choropleth="showContaminationChoropleth"
           :dev-mode-only="DEV_MODE_DEMOGRAPHICS_ONLY"
@@ -104,7 +167,10 @@
           @toggle-housing="toggleHousingLayer"
           @toggle-equity="toggleEquityLayer"
           @toggle-transportation="toggleTransportationLayer"
+          @toggle-internal="toggleInternalLayer"
+          @toggle-internal-point="toggleInternalFeatureLayer"
           @toggle-contamination="toggleContaminationLayer"
+          @retry-contamination="retryContaminationLayer"
           @toggle-contamination-layers="toggleContaminationLayers"
           @toggle-contamination-choropleth="toggleContaminationChoropleth"
           @update-weight="updateLayerWeight"
@@ -132,6 +198,14 @@
       @start-walkthrough="startWalkthrough"
     />
 
+    <EntityRail
+      :visible="entityRailVisible"
+      :layers="entityRailLayers"
+      :active="activeEntity"
+      :loading="entityRailLoading"
+      @select="canvas?.focusEntity"
+      @dismiss="entityRailDismissed = true"
+    />
     <CountyRail
       :visible="railVisible"
       :mode="walkthroughActive ? 'walk' : 'inspect'"
@@ -166,38 +240,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive, watch, computed, nextTick, type Ref } from "vue";
-import mapboxgl, { type Expression } from "mapbox-gl";
+import { ref, onMounted, onBeforeUnmount, watch, computed, nextTick, type Ref } from "vue";
+import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import { usePropertyListings } from "@/composables/usePropertyListings";
-import { useMapData } from "@/composables/useMapData";
-import { useColorCalculation } from "@/composables/useColorCalculation";
+import MapCanvas from "@/components/MapCanvas.vue";
+import { useMapState } from "@/composables/useMapState";
 import {
-  DEMOGRAPHIC_LAYERS,
-  CONTAMINATION_LAYERS,
-  ECONOMIC_LAYERS,
-  HOUSING_LAYERS,
-  EQUITY_LAYERS,
-  TRANSPORTATION_LAYERS,
-} from "@/config/layerConfig";
+  SET_OUTLINE_LAYER,
+  ACTIVE_OUTLINE_LAYER,
+  INSPECT_HALO_LAYER,
+  INSPECT_OUTLINE_LAYER,
+} from "@/lib/countyOverlays";
 import {
   DEV_MODE_DEMOGRAPHICS_ONLY,
   debugLog,
   MAPBOX_ACCESS_TOKEN,
   MAP_CONFIG,
 } from "@/config/constants";
-import type { ColorBlend, ContaminationData, ScoringQuery, ScoringFilter } from "@/types/mapTypes";
 import { LAYER_REGISTRY } from "@/config/layerRegistry";
 import { NATIONAL_AVERAGES } from "@/config/nationalAverages";
-import { usePersonalizedScore, type DataMaps } from "@/composables/usePersonalizedScore";
 // BLO_PRESET available in @/config/presets for future "load preset" feature
 import CountyModal from "@/components/CountyModal.vue";
 import LayerControls from "@/components/LayerControls.vue";
-import LoadingIndicator from "@/components/LoadingIndicator.vue";
 import RankingPanel from "@/components/RankingPanel.vue";
 import CountyRail from "@/components/CountyRail.vue";
+import EntityRail from "@/components/EntityRail.vue";
+import type { EntityRailLayer } from "@/lib/entityRail";
+import { parseMapDeepLink } from "@/lib/mapDeepLinks";
+import { completeFirstRunStep } from "@/lib/firstRun";
 import Lens from "@/components/Lens.vue";
 import LensHeader from "@/components/LensHeader.vue";
 import LensLegend from "@/components/LensLegend.vue";
@@ -207,19 +280,65 @@ import WelcomeCard from "@/components/WelcomeCard.vue";
 import PromptInput from "@/components/PromptInput.vue";
 import type { QueryResponse } from "@/composables/usePromptQuery";
 import { useChat } from "@/composables/useChat";
-import { initCountyLookup, findCounty } from "@/lib/countyLookup";
+import { initCountyLookup } from "@/lib/countyLookup";
 import type { ToolContext } from "@/lib/mapTools";
+import { useRoute, useRouter } from "vue-router";
+import { useAuth } from "@/composables/useAuth";
+import { saveView, fetchView, mapStateOf, siteLayerRestore, VIEW_RESULTS_MAX, type SavedViewResult } from "@/lib/views";
+import { isInternalLayerId } from "@/lib/internalLayers";
+import { boundsForFeatures } from "@/lib/internalFeatureLayers";
 
-const mapContainer = ref<HTMLElement | null>(null);
 // Cast instead of ref<mapboxgl.Map | null>(): letting Vue compute UnwrapRef
 // on the mapbox-gl v3 Map class blows TS's instantiation depth ("Map$1"
 // errors). Runtime behavior is identical — it's still a plain deep ref.
+// Filled from the canvas's `ready` event — this component no longer builds
+// the map, it wraps the component that does.
 const map = ref(null) as Ref<mapboxgl.Map | null>;
 let geocoder: MapboxGeocoder;
 const geocoderRef = { value: undefined as MapboxGeocoder | undefined };
-const detailedPopup = ref<HTMLElement | null>(null);
 
-// Initialize map data composable
+/** The canvas: the map, the counties, the choropleth and the overlays this
+ *  page's chrome drives (P6-10). */
+const canvas = ref<InstanceType<typeof MapCanvas> | null>(null);
+
+/** P5-28: the entity rail is dismissable, which is a rail concern. */
+const entityRailDismissed = ref(false);
+/** Resolves when the manifest for the current login has been applied —
+ *  a saved view carrying internal ids must wait for it. */
+let internalManifestLoaded: Promise<void> | null = null;
+
+/**
+ * This map's state — which layers are on, what is ranked and filtered.
+ * Per instance since P6-10: the chat page has a map of its own, and the two
+ * must not share one answer about what is loaded.
+ */
+const state = useMapState();
+const {
+  data,
+  layers: layerState,
+  query: queryState,
+  getCountyName,
+  getStateName,
+  getRawLayerValueFor,
+  stateAbbrFromGeo: getStateAbbrFromGeo,
+  filteredOutCountyIds,
+  repaint,
+  updateLayerWeight,
+  updateLayerDirection,
+  updateLayerFilter,
+  clearActiveFilters,
+  toggleDemographicLayer,
+  toggleEconomicLayer,
+  toggleHousingLayer,
+  toggleEquityLayer,
+  toggleTransportationLayer,
+  toggleContaminationChoropleth,
+  toggleInternalLayer,
+  toggleInternalFeatureLayer,
+  setInternalFeatureLayers,
+  loadInternalLayers,
+  teardownInternalLayers,
+} = state;
 const {
   countiesData,
   diversityData,
@@ -231,21 +350,46 @@ const {
   housingData,
   equityData,
   transportationData,
-  loadAllCountyData,
-} = useMapData();
-
-// Initialize color calculation composable
+} = data;
 const {
-  preCalculatedColors,
-  colorCalculationComplete,
-  preCalculateColors,
-  getColorForLayer,
-} = useColorCalculation(
-  diversityData,
-  lifeExpectancyData,
-  countyContaminationCounts,
-  combinedScoresData
-);
+  demographic: selectedDemographicLayers,
+  economic: selectedEconomicLayers,
+  housing: selectedHousingLayers,
+  equity: selectedEquityLayers,
+  transportation: selectedTransportationLayers,
+  internal: selectedInternalLayers,
+  points: selectedInternalFeatureLayers,
+  contaminationChoropleth: showContaminationChoropleth,
+  allContaminationSites: showContaminationLayers,
+  internalDefinitions: internalLayers,
+  pointDefinitions: internalPointLayers,
+  pointData: internalPointData,
+  activeEntity,
+  all: allSelectedLayers,
+  activeName: defaultLensLayerName,
+} = layerState;
+const {
+  demographic: demographicLayers,
+  economic: economicLayers,
+  housing: housingLayers,
+  equity: equityLayers,
+  transportation: transportationLayers,
+  contamination: contaminationLayers,
+} = layerState.definitions;
+const {
+  weights: layerWeights,
+  directions: layerDirections,
+  filters: activeFilters,
+  limit: activeLimit,
+  regionStates: rankingRegionStates,
+  scores: personalizedScores,
+  ranked: rankedCounties,
+  limitedRanked: limitedRankedCounties,
+  topNGeoIds,
+  scoring: scoringQuery,
+} = queryState;
+
+
 
 // Initialize property listings composable. listingsPanelExpanded /
 // toggleListings are intentionally not destructured — the floating
@@ -303,9 +447,6 @@ const handleRailHoverListing = (listingId: string | null) => {
 
 // Phase 4d: Data Layers panel + its expanded state are gone — layer
 // picking now lives inside the Lens "Layers" tab which is always visible.
-const showContaminationLayers = ref(false);
-const showContaminationChoropleth = ref(false);
-const showDiversityChoropleth = ref(true); // Start with true since BLO layer is pre-selected
 const showDetailedPopup = ref(false);
 
 // County modal state
@@ -329,14 +470,24 @@ const handleOutsideClick = (event: MouseEvent) => {
   }
 };
 
+/**
+ * Moving the map is the canvas's job (P6-10); these are the chrome's names
+ * for it, so every call site below reads as it always did. Each is a no-op
+ * until the canvas has mounted — exactly as they were no-ops while `map`
+ * was still null.
+ */
+const zoomToGeoId = (geoId: string, opts?: { regional?: boolean }): boolean =>
+  canvas.value?.zoomToGeoId(geoId, opts) ?? false;
+const fitToGeoIds = (
+  geoIds: string[],
+  opts: { padding?: number; maxZoom?: number; duration?: number } = {},
+): boolean => canvas.value?.fitToGeoIds(geoIds, opts) ?? false;
+
+/** Two or more layers means the weights and directions are worth showing. */
+const showScoringControls = computed(() => allSelectedLayers.value.length >= 2);
+
 const rankingPanelExpanded = ref(false);
 const rankingStateFilter = ref('');
-/** Phase 4g: parallel multi-state filter axis driven by the chat
- *  set_query_state tool. The dropdown writes to rankingStateFilter
- *  (single-select); the chat writes here (multi-select region). When
- *  this is non-empty it takes precedence over the dropdown filter. */
-const rankingRegionStates = ref<string[]>([]);
-
 const toggleRankingPanel = () => {
   rankingPanelExpanded.value = !rankingPanelExpanded.value;
 };
@@ -352,49 +503,7 @@ const showRankingPanel = computed(() =>
   activeFilters.value.length > 0
 );
 
-/** Zoom the map to a county's bounds by GEOID.
- *  `regional: true` caps zoom at 7 and adds extra padding so neighboring counties
- *  remain visible — the right framing for walkthrough mode where county-tight
- *  zoom would just show a single polygon with no comparative context. */
-const zoomToGeoId = (geoId: string, opts?: { regional?: boolean }): boolean => {
-  if (!countiesData.value?.features || !map.value) return false;
-  const feature = countiesData.value.features.find(
-    (f: any) => f.properties?.GEOID === geoId
-  );
-  if (!feature) return false;
-  const bounds = new mapboxgl.LngLatBounds();
-  // County features are always Polygon/MultiPolygon; the GeoJSON Geometry
-  // union includes GeometryCollection (no `coordinates`), hence the cast.
-  const geom = feature.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon;
-  const coords = geom.type === 'MultiPolygon'
-    ? geom.coordinates.flat(2)
-    : geom.coordinates.flat(1);
-  coords.forEach((coord: number[]) => bounds.extend(coord as [number, number]));
-  const padding = opts?.regional ? 160 : 50;
-  const maxZoom = opts?.regional ? 7 : 10;
-  map.value.fitBounds(bounds, { padding, maxZoom, duration: 700 });
-  return true;
-};
 
-/** Resolve county name from GEOID. Tries the data maps first, then falls
- *  back to the polygon GeoJSON's NAME property — which covers ~3220 features
- *  including territories that aren't in diversityData. Last resort is the
- *  raw GEOID string, but we should rarely hit that now. */
-const getCountyName = (geoId: string): string => {
-  const div = diversityData.value[geoId];
-  if (div?.countyName) return div.countyName;
-  const econ = economicData.value[geoId];
-  if (econ?.county_name) return econ.county_name;
-  const housing = housingData.value[geoId];
-  if (housing?.county_name) return housing.county_name;
-  // GeoJSON fallback: polygon features include NAME for every county we draw
-  const feature = countiesData.value?.features.find(
-    (f: any) => f.properties?.GEOID === geoId
-  );
-  const geoName = feature?.properties?.NAME;
-  if (geoName && typeof geoName === 'string') return geoName;
-  return geoId;
-};
 
 /** Handle county selection from ranking panel — opens the inspect rail
  *  (Phase 4e). The map zooms regionally so the user sees the county in
@@ -409,100 +518,14 @@ const openCountyModalById = (geoId: string) => {
 };
 
 // Dynamic scoring state
-const layerWeights = ref<Record<string, number>>({})
-const layerDirections = ref<Record<string, string>>({})
-
-const showScoringControls = computed(() => allSelectedLayers.value.length >= 2)
-
-const updateLayerWeight = (layerId: string, weight: number) => {
-  layerWeights.value = { ...layerWeights.value, [layerId]: weight }
-}
-
-const updateLayerDirection = (layerId: string, direction: string) => {
-  layerDirections.value = { ...layerDirections.value, [layerId]: direction }
-}
-
-/** Phase 4b: manual threshold filter edit from LayerControls.
- *  Replaces any existing filter for this layer; null removes it. */
-const updateLayerFilter = (layerId: string, filter: ScoringFilter | null) => {
-  const others = activeFilters.value.filter(f => f.layerId !== layerId)
-  activeFilters.value = filter ? [...others, filter] : others
-}
 
 const closeDetailedPopup = () => {
   showDetailedPopup.value = false;
 };
 
-const toggleContaminationChoropleth = () => {
-  if (!showContaminationChoropleth.value && isBLOPrecomputedMode()) {
-    // Was expandBLOPreset() — that function became clearBLO() in the
-    // "simplify BLO toggle" commit (5d2cb3f) and this call site was missed,
-    // leaving a runtime ReferenceError. Matches the other toggle handlers.
-    clearBLO();
-  }
-  showContaminationChoropleth.value = !showContaminationChoropleth.value;
-  updateChoroplethVisibility();
-};
 
-const selectedDemographicLayers = ref<string[]>(['combined_scores_v2']);
-const selectedEconomicLayers = ref<string[]>([]);
-const selectedHousingLayers = ref<string[]>([]);
-const selectedEquityLayers = ref<string[]>([]);
-const selectedTransportationLayers = ref<string[]>([]);
 
-// Computed property to track ALL selected layers across categories
-const allSelectedLayers = computed(() => {
-  const layers = [
-    ...selectedDemographicLayers.value,
-    ...selectedEconomicLayers.value,
-    ...selectedHousingLayers.value,
-    ...selectedEquityLayers.value,
-    ...selectedTransportationLayers.value,
-  ].filter(layerId =>
-    // Exclude BLO combined scores from multi-layer computation
-    layerId !== 'combined_scores' && layerId !== 'combined_scores_v2'
-  );
 
-  // Add contamination if the choropleth is showing
-  if (showContaminationChoropleth.value) {
-    layers.push('contamination');
-  }
-
-  return layers;
-});
-
-// Build reactive scoring query from selected layers + weights + directions
-const scoringQuery = computed<ScoringQuery>(() => {
-  return allSelectedLayers.value.map(layerId => {
-    const reg = LAYER_REGISTRY[layerId];
-    return {
-      layerId,
-      weight: layerWeights.value[layerId] ?? 5,
-      direction: (layerDirections.value[layerId] as 'higher_better' | 'lower_better') ?? reg?.direction ?? 'higher_better',
-    };
-  });
-});
-
-// Phase 4a: reactive filters and display limit (set by LLM, cleared manually)
-const activeFilters = ref<ScoringFilter[]>([]);
-const activeLimit = ref<number | null>(null);
-
-/** Clear threshold filters without changing the scoring query or selected layers */
-const clearActiveFilters = () => {
-  activeFilters.value = [];
-};
-
-/** Phase 4d: name shown in the Lens header when no query is active.
- *  Reflects whatever single layer is rendering by default. */
-const defaultLensLayerName = computed(() => {
-  if (allSelectedLayers.value.length === 0) {
-    return showContaminationChoropleth.value ? 'Contamination' : 'BLO Livability Index'
-  }
-  if (allSelectedLayers.value.length === 1) {
-    return LAYER_REGISTRY[allSelectedLayers.value[0]]?.name ?? allSelectedLayers.value[0]
-  }
-  return 'BLO Livability Index'
-})
 
 /** Chips describing the active scoring query, shown in the status strip above the map */
 const scoringChips = computed(() => {
@@ -518,38 +541,19 @@ const scoringChips = computed(() => {
   });
 });
 
-/** Reset the scoring query back to the BLO Livability Index default:
- *  selected layers, weights, directions, filters, limit, and
- *  ranking-panel state. Shared by clearActiveQuery (user-facing full
- *  reset) and handleQueryResult (LLM sends `layers: []`, which the
- *  set_query_state tool contract defines as an explicit scoring clear). */
-const resetQueryScoring = () => {
-  selectedDemographicLayers.value = ['combined_scores_v2'];
-  selectedEconomicLayers.value = [];
-  selectedHousingLayers.value = [];
-  selectedEquityLayers.value = [];
-  selectedTransportationLayers.value = [];
-  showContaminationChoropleth.value = false;
-  demographicLayers.forEach(l => { l.visible = l.id === 'combined_scores_v2'; });
-  economicLayers.forEach(l => { l.visible = false; });
-  housingLayers.forEach(l => { l.visible = false; });
-  equityLayers.forEach(l => { l.visible = false; });
-  transportationLayers.forEach(l => { l.visible = false; });
-  layerWeights.value = {};
-  layerDirections.value = {};
-  activeFilters.value = [];
-  activeLimit.value = null;
-  rankingPanelExpanded.value = false;
-  rankingStateFilter.value = '';
-  rankingRegionStates.value = [];
-  hasActiveScoringQuery.value = false;
-  showDiversityChoropleth.value = true;
-};
 
 /** Clear-all for the status strip: revert selected layers, filters, and limit
  *  to the BLO Livability Index default state. The Lens header advertises
  *  "Showing BLO Livability Index" when no query is active, so the actual
  *  visible layer must match — Phase 4d cleanup restores BLO here. */
+/** The chrome's half of a reset: the panels follow the query. */
+const resetQueryScoring = () => {
+  state.resetQueryScoring();
+  rankingPanelExpanded.value = false;
+  rankingStateFilter.value = '';
+  hasActiveScoringQuery.value = false;
+};
+
 const clearActiveQuery = () => {
   resetQueryScoring();
   // D3: chat narration goes stale once the query clears — drop it.
@@ -563,9 +567,16 @@ const clearActiveQuery = () => {
   // whichever one is in front of them and get back to a clean slate.
   clearSearch();
   landSearchAttempted.value = false;
-  updateChoroplethVisibility();
-  updateChoroplethColors();
+  repaint();
 };
+
+/** Phase 4d cleanup: walkthrough is reachable from the Lens header when
+ *  there's at least one ranked county to tour. Discoverable on mobile
+ *  (RankingPanel is display:none there) and when the RankingPanel is
+ *  collapsed on desktop. */
+const canWalkThrough = computed(() =>
+  hasActiveScoringQuery.value && limitedRankedCounties.value.length > 0,
+);
 
 // Phase 4a: walkthrough state
 const walkthroughActive = ref(false);
@@ -581,92 +592,7 @@ const inspectActive = ref(false);
  *  `load` handler fires, so a refresh mid-inspection restores the rail. */
 const pendingInspectGeoId = ref<string | null>(null);
 
-// Initialize scoring engine
-const dataMaps: DataMaps = {
-  diversityData,
-  lifeExpectancyData,
-  countyContaminationCounts,
-  economicData,
-  housingData,
-  equityData,
-  transportationData,
-};
 
-const {
-  scores: personalizedScores,
-  rankedCounties,
-  filteredOutCountyIds,
-} = usePersonalizedScore(scoringQuery, dataMaps, activeFilters);
-
-/** Ranked counties after applying display limit */
-const limitedRankedCounties = computed(() => {
-  const limit = activeLimit.value;
-  if (limit == null) return rankedCounties.value;
-  return rankedCounties.value.slice(0, limit);
-});
-
-/** Phase 4d cleanup: walkthrough is reachable from the Lens header when
- *  there's at least one ranked county to tour. Discoverable on mobile
- *  (RankingPanel is display:none there) and when the RankingPanel is
- *  collapsed on desktop. */
-const canWalkThrough = computed(() =>
-  hasActiveScoringQuery.value && limitedRankedCounties.value.length > 0,
-)
-
-/** Phase 4c: GEOIDs of the top-N counties when a limit is active. Drives
- *  choropleth dim logic (non-top-N counties render at reduced alpha) and
- *  walkthrough overlays (set outline + numbered markers).
- *  Empty when no limit is set — choropleth renders normally. */
-const topNGeoIds = computed<Set<string>>(() => {
-  if (activeLimit.value == null) return new Set();
-  if (allSelectedLayers.value.length < 1) return new Set();
-  return new Set(limitedRankedCounties.value.map(c => c.geoId));
-});
-
-/** Look up the raw value for a layer in the appropriate data map.
- *  Mirrors `getRawLayerValue` from the tooltip closure but takes geoId
- *  as a parameter so it can be used outside that closure (e.g. by
- *  WalkthroughRail). Returns undefined when the layer or county is missing. */
-const getRawLayerValueFor = (layerId: string, geoId: string): any => {
-  const reg = LAYER_REGISTRY[layerId];
-  if (!reg) return undefined;
-  const key = reg.dataKey;
-  switch (layerId) {
-    case 'combined_scores_v2':
-      return combinedScoresV2Data.value[geoId]?.blo_score_v2;
-    case 'diversity_index':
-      return diversityData.value[geoId]?.diversityIndex;
-    case 'pct_Black':
-      return diversityData.value[geoId]?.pct_Black;
-    case 'life_expectancy':
-      return lifeExpectancyData.value[geoId]?.lifeExpectancy;
-    case 'contamination': {
-      const c = countyContaminationCounts[geoId] as any;
-      return typeof c === 'number' ? c : c?.total;
-    }
-    case 'avg_weekly_wage':
-    case 'median_income_by_race':
-      return (economicData.value[geoId] as any)?.[key];
-    case 'median_home_value':
-    case 'median_property_tax':
-    case 'homeownership_by_race':
-      return (housingData.value[geoId] as any)?.[key];
-    case 'poverty_by_race':
-    case 'black_progress_index':
-      return (equityData.value[geoId] as any)?.[key];
-    case 'commute_time':
-    case 'drove_alone':
-    case 'public_transit':
-      return (transportationData.value[geoId] as any)?.[key];
-    default:
-      return undefined;
-  }
-};
-
-/** Resolve a state name from diversityData (which carries STNAME). */
-const getStateName = (geoId: string): string => {
-  return diversityData.value[geoId]?.stateName || '';
-};
 
 /** Default snapshot layers used by inspect mode when no scoring query is
  *  active — gives the rail something useful to show on a casual click. */
@@ -873,27 +799,6 @@ const rankExplorerCounties = computed(() => {
 /** State postal abbreviation from the first 2 digits of GEOID. Mirrors
  *  the lookup in RankingPanel + the FIPS map; small inline copy avoids
  *  extracting a shared helper just for this. */
-const STATE_ABBR_BY_NAME: Record<string, string> = {
-  Alabama: 'AL', Alaska: 'AK', Arizona: 'AZ', Arkansas: 'AR',
-  California: 'CA', Colorado: 'CO', Connecticut: 'CT', Delaware: 'DE',
-  'District of Columbia': 'DC', Florida: 'FL', Georgia: 'GA', Hawaii: 'HI',
-  Idaho: 'ID', Illinois: 'IL', Indiana: 'IN', Iowa: 'IA',
-  Kansas: 'KS', Kentucky: 'KY', Louisiana: 'LA', Maine: 'ME',
-  Maryland: 'MD', Massachusetts: 'MA', Michigan: 'MI', Minnesota: 'MN',
-  Mississippi: 'MS', Missouri: 'MO', Montana: 'MT', Nebraska: 'NE',
-  Nevada: 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ', 'New Mexico': 'NM',
-  'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', Ohio: 'OH',
-  Oklahoma: 'OK', Oregon: 'OR', Pennsylvania: 'PA', 'Rhode Island': 'RI',
-  'South Carolina': 'SC', 'South Dakota': 'SD', Tennessee: 'TN', Texas: 'TX',
-  Utah: 'UT', Vermont: 'VT', Virginia: 'VA', Washington: 'WA',
-  'West Virginia': 'WV', Wisconsin: 'WI', Wyoming: 'WY',
-  'American Samoa': 'AS', Guam: 'GU', 'Northern Mariana Islands': 'MP',
-  'Puerto Rico': 'PR', 'U.S. Virgin Islands': 'VI',
-};
-function getStateAbbrFromGeo(geoId: string): string {
-  const name = getStateName(geoId);
-  return STATE_ABBR_BY_NAME[name] || name.substring(0, 2).toUpperCase();
-}
 
 /** Rank context shown under the score in the rail header. Computed from
  *  the BLO Livability score (default) or the active composite (≥2 layers).
@@ -1065,8 +970,26 @@ const handleModalClose = () => {
   showDetailedPopup.value = false;
 };
 
-/** Handle prompt query result: auto-select layers with weights and directions */
+/**
+ * A prompt or a tool result: the state applies it, and the chrome reacts
+ * through `onQueryApplied` below — so a query that arrives from the chat's
+ * `set_query_state` and one typed into the prompt do exactly the same thing.
+ */
 const handleQueryResult = (result: QueryResponse) => {
+  state.applyQueryState({
+    layers: result.layers ?? [],
+    filters: result.filters,
+    limit: result.limit ?? null,
+    explanation: result.explanation,
+  });
+};
+
+/**
+ * Everything the public map does about a new query that a bare canvas does
+ * not: leave a walkthrough or an inspection that is now about the wrong
+ * counties, and open the ranking panel on the answer.
+ */
+state.onQueryApplied((input) => {
   // Phase 4c: any new query result invalidates a walkthrough in progress —
   // it would be referring to the old ranked set. Exit cleanly so overlays
   // and the rail don't show stale state, then let the user re-enter the
@@ -1076,240 +999,27 @@ const handleQueryResult = (result: QueryResponse) => {
   if (walkthroughActive.value) exitWalkthrough();
   if (inspectActive.value) closeInspect();
 
-  // Empty layers = explicit clear of the scoring query (set_query_state
-  // tool contract: "Empty array clears scoring"). Reset to the BLO
-  // default, but still honor filters/limit from the same call — the
-  // caller (applyQueryState) writes regionStates right after we return,
-  // so region-only follow-ups compose correctly instead of silently
-  // no-oping while the tool_result claims the state was applied.
-  if (!result.layers || result.layers.length === 0) {
-    resetQueryScoring();
-    if (result.filters !== undefined) {
-      activeFilters.value = [...result.filters];
-    }
-    activeLimit.value = typeof result.limit === 'number' ? result.limit : null;
-    updateChoroplethVisibility();
-    updateChoroplethColors();
-    return;
-  }
-
-  // Clear everything
-  selectedDemographicLayers.value = [];
-  selectedEconomicLayers.value = [];
-  selectedHousingLayers.value = [];
-  selectedEquityLayers.value = [];
-  selectedTransportationLayers.value = [];
-  showContaminationChoropleth.value = false;
-  demographicLayers.forEach(l => { l.visible = false; });
-  economicLayers.forEach(l => { l.visible = false; });
-  housingLayers.forEach(l => { l.visible = false; });
-  equityLayers.forEach(l => { l.visible = false; });
-  transportationLayers.forEach(l => { l.visible = false; });
-
-  const newWeights: Record<string, number> = {};
-  const newDirections: Record<string, string> = {};
-
-  for (const layer of result.layers) {
-    newWeights[layer.layerId] = layer.weight;
-    // Cast: direction can be undefined (UI-selected layers in a snapshot
-    // replay). Storing undefined here is pre-existing behavior — every
-    // consumer reads with `?? registry default`, so it's indistinguishable
-    // from the key being absent.
-    newDirections[layer.layerId] = layer.direction as string;
-
-    // Route to the correct category array
-    const demoLayer = demographicLayers.find(l => l.id === layer.layerId);
-    if (demoLayer) {
-      selectedDemographicLayers.value.push(layer.layerId);
-      demoLayer.visible = true;
-      continue;
-    }
-    const econLayer = economicLayers.find(l => l.id === layer.layerId);
-    if (econLayer) {
-      selectedEconomicLayers.value.push(layer.layerId);
-      econLayer.visible = true;
-      continue;
-    }
-    const housLayer = housingLayers.find(l => l.id === layer.layerId);
-    if (housLayer) {
-      selectedHousingLayers.value.push(layer.layerId);
-      housLayer.visible = true;
-      continue;
-    }
-    const eqLayer = equityLayers.find(l => l.id === layer.layerId);
-    if (eqLayer) {
-      selectedEquityLayers.value.push(layer.layerId);
-      eqLayer.visible = true;
-      continue;
-    }
-    const transLayer = transportationLayers.find(l => l.id === layer.layerId);
-    if (transLayer) {
-      selectedTransportationLayers.value.push(layer.layerId);
-      transLayer.visible = true;
-      continue;
-    }
-    if (layer.layerId === 'contamination') {
-      showContaminationChoropleth.value = true;
-    }
-  }
-
-  layerWeights.value = newWeights;
-  layerDirections.value = newDirections;
-
-  // Phase 4a: apply filters and limit from the response.
-  // Phase 4b: distinguish "LLM didn't touch filters" (undefined → preserve)
-  // from "LLM explicitly cleared filters" (empty array → clear).
-  if (result.filters !== undefined) {
-    activeFilters.value = [...result.filters];
-  }
-  activeLimit.value = typeof result.limit === 'number' ? result.limit : null;
-
-  showDiversityChoropleth.value = true;
-  updateChoroplethVisibility();
-  updateChoroplethColors();
-
-  hasActiveScoringQuery.value = result.layers.length > 0;
-
-  // UX-01: auto-open the ranking panel so the answer is visible without hunting for it
-  if (result.layers.length >= 1) {
+  if ((input.layers?.length ?? 0) === 0) {
+    rankingPanelExpanded.value = false;
+    rankingStateFilter.value = '';
+    hasActiveScoringQuery.value = false;
+  } else {
+    hasActiveScoringQuery.value = true;
+    // UX-01: auto-open the ranking panel so the answer is visible without
+    // hunting for it.
     rankingPanelExpanded.value = true;
   }
-};
 
-/** Clear BLO precomputed layer when user selects a different layer */
-const clearBLO = () => {
-  const bloIdx = selectedDemographicLayers.value.indexOf('combined_scores_v2');
-  if (bloIdx !== -1) selectedDemographicLayers.value.splice(bloIdx, 1);
-  const bloLayer = demographicLayers.find(l => l.id === 'combined_scores_v2');
-  if (bloLayer) bloLayer.visible = false;
-};
-
-/** Check if BLO composite is the only selected layer (precomputed mode) */
-const isBLOPrecomputedMode = () => {
-  return selectedDemographicLayers.value.length === 1 &&
-    selectedDemographicLayers.value[0] === 'combined_scores_v2' &&
-    selectedEconomicLayers.value.length === 0 &&
-    selectedHousingLayers.value.length === 0 &&
-    selectedEquityLayers.value.length === 0 &&
-    selectedTransportationLayers.value.length === 0 &&
-    !showContaminationChoropleth.value;
-};
-
-const toggleDemographicLayer = (layerId: string) => {
-  debugLog("TOGGLING " + layerId);
-  const layer = demographicLayers.find((l) => l.id === layerId);
-  if (!layer) return;
-
-  if (layerId === "combined_scores" || layerId === "combined_scores_v2") {
-    // BLO toggle: simple on/off for precomputed view
-    if (selectedDemographicLayers.value.includes(layerId)) {
-      selectedDemographicLayers.value = selectedDemographicLayers.value.filter(id => id !== layerId);
-      layer.visible = false;
-    } else {
-      selectedDemographicLayers.value.push(layerId);
-      layer.visible = true;
-    }
-  } else {
-    const currentIndex = selectedDemographicLayers.value.indexOf(layerId);
-
-    if (currentIndex === -1) {
-      if (isBLOPrecomputedMode()) clearBLO();
-      selectedDemographicLayers.value.push(layerId);
-      layer.visible = true;
-    } else {
-      selectedDemographicLayers.value.splice(currentIndex, 1);
-      layer.visible = false;
-    }
+  // The single-state dropdown is for direct user selection; the chat's
+  // multi-state filter is a parallel axis. Clear the dropdown when a region
+  // is set (otherwise both would AND together and the user couldn't tell why
+  // their counties disappeared).
+  if ((input.regionStates?.length ?? 0) > 0) {
+    rankingStateFilter.value = '';
+    rankingPanelExpanded.value = true;
   }
+});
 
-  showDiversityChoropleth.value = selectedDemographicLayers.value.length > 0;
-  updateChoroplethVisibility();
-  updateChoroplethColors();
-};
-
-const toggleEconomicLayer = (layerId: string) => {
-  debugLog("TOGGLING ECONOMIC " + layerId);
-  const layer = economicLayers.find((l) => l.id === layerId);
-  if (!layer) return;
-
-  const currentIndex = selectedEconomicLayers.value.indexOf(layerId);
-
-  if (currentIndex === -1) {
-    if (isBLOPrecomputedMode()) clearBLO();
-    selectedEconomicLayers.value.push(layerId);
-    layer.visible = true;
-  } else {
-    selectedEconomicLayers.value.splice(currentIndex, 1);
-    layer.visible = false;
-  }
-
-  showDiversityChoropleth.value = selectedEconomicLayers.value.length > 0 || selectedDemographicLayers.value.length > 0;
-  updateChoroplethVisibility();
-  updateChoroplethColors();
-};
-
-const toggleHousingLayer = (layerId: string) => {
-  debugLog("TOGGLING HOUSING " + layerId);
-  const layer = housingLayers.find((l) => l.id === layerId);
-  if (!layer) return;
-
-  const currentIndex = selectedHousingLayers.value.indexOf(layerId);
-
-  if (currentIndex === -1) {
-    if (isBLOPrecomputedMode()) clearBLO();
-    selectedHousingLayers.value.push(layerId);
-    layer.visible = true;
-  } else {
-    selectedHousingLayers.value.splice(currentIndex, 1);
-    layer.visible = false;
-  }
-
-  showDiversityChoropleth.value = selectedHousingLayers.value.length > 0 || selectedDemographicLayers.value.length > 0;
-  updateChoroplethVisibility();
-  updateChoroplethColors();
-};
-
-const toggleEquityLayer = (layerId: string) => {
-  debugLog("TOGGLING EQUITY " + layerId);
-  const layer = equityLayers.find((l) => l.id === layerId);
-  if (!layer) return;
-
-  const currentIndex = selectedEquityLayers.value.indexOf(layerId);
-
-  if (currentIndex === -1) {
-    if (isBLOPrecomputedMode()) clearBLO();
-    selectedEquityLayers.value.push(layerId);
-    layer.visible = true;
-  } else {
-    selectedEquityLayers.value.splice(currentIndex, 1);
-    layer.visible = false;
-  }
-
-  showDiversityChoropleth.value = selectedEquityLayers.value.length > 0 || selectedDemographicLayers.value.length > 0;
-  updateChoroplethVisibility();
-  updateChoroplethColors();
-};
-
-const toggleTransportationLayer = (layerId: string) => {
-  debugLog("TOGGLING TRANSPORTATION " + layerId);
-  const layer = transportationLayers.find((l) => l.id === layerId);
-  if (!layer) return;
-
-  const currentIndex = selectedTransportationLayers.value.indexOf(layerId);
-
-  if (currentIndex === -1) {
-    if (isBLOPrecomputedMode()) clearBLO();
-    selectedTransportationLayers.value.push(layerId);
-    layer.visible = true;
-  } else {
-    selectedTransportationLayers.value.splice(currentIndex, 1);
-    layer.visible = false;
-  }
-
-  showDiversityChoropleth.value = selectedTransportationLayers.value.length > 0 || selectedDemographicLayers.value.length > 0;
-  updateChoroplethVisibility();
-  updateChoroplethColors();
-};
 
 // ============= Phase 4c: Walkthrough overlays =============
 //
@@ -1318,94 +1028,6 @@ const toggleTransportationLayer = (layerId: string) => {
 // markers (numbered chips) anchored at county centroids via mapboxgl.Marker.
 // All overlays clear when walkthrough exits or the query clears.
 
-const SET_OUTLINE_LAYER = "walkthrough-set-outline";
-const ACTIVE_OUTLINE_LAYER = "walkthrough-active-outline";
-const HOVER_OUTLINE_LAYER = "county-hover-outline";
-// Inspect mode (single county selected via click): a soft halo, a crisp
-// green outline, and a fill-opacity drop inside the polygon so the
-// underlying Mapbox basemap detail (roads, towns, water) shows through.
-const INSPECT_HALO_LAYER = "inspect-halo";
-const INSPECT_OUTLINE_LAYER = "inspect-outline";
-
-/** Created once on map load. Filters update reactively via watchers. */
-const addWalkthroughOverlayLayers = () => {
-  if (!map.value) return;
-  if (map.value.getLayer(SET_OUTLINE_LAYER)) return;
-
-  // Set outline — all top-N counties get a medium ink-soft border.
-  map.value.addLayer({
-    id: SET_OUTLINE_LAYER,
-    type: "line",
-    source: "counties",
-    paint: {
-      "line-color": "#2a2a2a",
-      "line-width": 1.2,
-      "line-opacity": 0.85,
-    },
-    filter: ["==", ["get", "GEOID"], "__none__"],
-    layout: { visibility: "none" },
-  });
-
-  // Active outline — single current county gets a heavy ink border on top.
-  map.value.addLayer({
-    id: ACTIVE_OUTLINE_LAYER,
-    type: "line",
-    source: "counties",
-    paint: {
-      "line-color": "#111111",
-      "line-width": 2.8,
-      "line-opacity": 1.0,
-    },
-    filter: ["==", ["get", "GEOID"], "__none__"],
-    layout: { visibility: "none" },
-  });
-
-  // Phase 4f: hover outline — thin ink line on the county under the cursor.
-  // Sits on top of fill but below the heavier active/set outlines.
-  map.value.addLayer({
-    id: HOVER_OUTLINE_LAYER,
-    type: "line",
-    source: "counties",
-    paint: {
-      "line-color": "#111111",
-      "line-width": 1.5,
-      "line-opacity": 0.6,
-    },
-    filter: ["==", ["get", "GEOID"], "__none__"],
-    layout: { visibility: "none" },
-  });
-
-  // Inspect halo — wide, soft green glow that gives the selected county
-  // presence even when the user has zoomed out or is scanning the map.
-  map.value.addLayer({
-    id: INSPECT_HALO_LAYER,
-    type: "line",
-    source: "counties",
-    paint: {
-      "line-color": "#1f7a2e",
-      "line-width": 10,
-      "line-opacity": 0.22,
-      "line-blur": 4,
-    },
-    filter: ["==", ["get", "GEOID"], "__none__"],
-    layout: { visibility: "none" },
-  });
-
-  // Inspect outline — crisp BLO-green border on the selected county.
-  // Sits on top of every other line layer so it's never occluded.
-  map.value.addLayer({
-    id: INSPECT_OUTLINE_LAYER,
-    type: "line",
-    source: "counties",
-    paint: {
-      "line-color": "#1f7a2e",
-      "line-width": 3,
-      "line-opacity": 1,
-    },
-    filter: ["==", ["get", "GEOID"], "__none__"],
-    layout: { visibility: "none" },
-  });
-};
 
 /** Update the set-outline filter to match all top-N geoIds. */
 const updateSetOutline = () => {
@@ -1557,29 +1179,7 @@ const updateWalkthroughMarkers = () => {
 
 /** Fit map bounds to the union of all top-N counties — gives the user the
  *  geographic distribution of the answer before stepping into county 1. */
-const fitToTopN = (): boolean => {
-  if (!map.value || !countiesData.value) return false;
-  const counties = limitedRankedCounties.value;
-  if (counties.length === 0) return false;
-  const bounds = new mapboxgl.LngLatBounds();
-  let hasAny = false;
-  for (const c of counties) {
-    const feature = countiesData.value.features.find(
-      (f: any) => f.properties?.GEOID === c.geoId
-    );
-    if (!feature) continue;
-    // Same Polygon/MultiPolygon-only cast as zoomToGeoId above.
-    const geom = feature.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon;
-    const coords = geom.type === "MultiPolygon"
-      ? geom.coordinates.flat(2)
-      : geom.coordinates.flat(1);
-    coords.forEach((coord: number[]) => bounds.extend(coord as [number, number]));
-    hasAny = true;
-  }
-  if (!hasAny) return false;
-  map.value.fitBounds(bounds, { padding: 100, maxZoom: 9, duration: 1000 });
-  return true;
-};
+const fitToTopN = (): boolean => fitToGeoIds(limitedRankedCounties.value.map(c => c.geoId));
 
 // ----- Watchers wiring overlays to state -----
 
@@ -1597,969 +1197,12 @@ watch([inspectActive, currentCounty], () => {
   updateInspectOutline();
 }, { deep: true });
 
-const updateChoroplethVisibility = () => {
-  if (!map.value) return;
 
-  debugLog("Updating choropleth visibility:", {
-    showContaminationChoropleth: showContaminationChoropleth.value,
-    showDiversityChoropleth: showDiversityChoropleth.value,
-  });
 
-  const visibility =
-    showContaminationChoropleth.value ||
-    showDiversityChoropleth.value ||
-    selectedDemographicLayers.value.includes("combined_scores") ||
-    selectedDemographicLayers.value.includes("combined_scores_v2") ||
-    selectedEconomicLayers.value.length > 0 ||
-    selectedHousingLayers.value.length > 0 ||
-    selectedEquityLayers.value.length > 0 ||
-    selectedTransportationLayers.value.length > 0
-      ? "visible"
-      : "none";
 
-  map.value.setLayoutProperty("county-choropleth", "visibility", visibility);
 
-  if (visibility === "visible") {
-    updateChoroplethColors();
-  }
-};
 
-const contaminationLayers = DEV_MODE_DEMOGRAPHICS_ONLY
-  ? []
-  : reactive(CONTAMINATION_LAYERS);
 
-const demographicLayers = reactive(DEMOGRAPHIC_LAYERS);
-const economicLayers = reactive(ECONOMIC_LAYERS);
-const housingLayers = reactive(HOUSING_LAYERS);
-const equityLayers = reactive(EQUITY_LAYERS);
-const transportationLayers = reactive(TRANSPORTATION_LAYERS);
-
-const showLifeExpectancyChoropleth = ref(false);
-
-const layersLoaded = ref(false);
-const loadedLayersCount = ref(0);
-// Update the totalLayers computed property
-const totalLayers = computed(() => {
-  const contaminationLayerCount = DEV_MODE_DEMOGRAPHICS_ONLY
-    ? 0
-    : contaminationLayers.length;
-  return contaminationLayerCount + 1; // +1 for choropleth layer
-});
-
-const loadingProgress = computed(() => {
-  return Math.round((loadedLayersCount.value / totalLayers.value) * 100);
-});
-
-const loadCountiesData = async () => {
-  try {
-    await loadAllCountyData();
-    // Pre-calculate colors after all data is loaded
-    preCalculateColors();
-    loadedLayersCount.value++; // Increment the loaded layers count
-  } catch (error) {
-    console.error("Error loading counties data:", error);
-  }
-};
-
-const addContaminationLayer = async (map: mapboxgl.Map, layer: any) => {
-  try {
-    const response = await fetch(layer.file);
-    const data = await response.json();
-
-    debugLog(`Loaded data for ${layer.id}:`, data.features.length, "features");
-
-    const sourceId = `contamination-source-${layer.id}`;
-    const layerId = `contamination-layer-${layer.id}`;
-
-    map.addSource(sourceId, {
-      type: "geojson",
-      data: data,
-      attribution:
-        'Data source: <a href="https://www.epa.gov/frs" target="_blank" rel="noopener">U.S. EPA Facility Registry Service</a>',
-    });
-
-    map.addLayer({
-      id: layerId,
-      type: "circle",
-      source: sourceId,
-      paint: {
-        "circle-radius": 6,
-        "circle-color": layer.color,
-        "circle-opacity": 0.7,
-      },
-      layout: {
-        visibility: "none",
-      },
-    });
-
-    debugLog(`Added contamination layer: ${layerId}`);
-    loadedLayersCount.value++;
-  } catch (error) {
-    console.error(`Error adding layer ${layer.id}:`, error);
-  }
-};
-
-const addDiversityLayer = async (map: mapboxgl.Map) => {
-  try {
-    // Data already loaded by loadCountiesData()
-    if (!map.getSource("counties")) {
-      console.warn(
-        "Counties source not found. Make sure it's added before calling this function."
-      );
-      return;
-    }
-
-    map.addLayer({
-      id: "diversity-layer",
-      type: "fill",
-      source: "counties",
-      paint: {
-        "fill-color": ["rgba", 0, 0, 0, 0],
-        "fill-opacity": 0.7,
-      },
-      layout: {
-        visibility: "none",
-      },
-    });
-
-    debugLog("Added diversity layer");
-    loadedLayersCount.value++;
-  } catch (error) {
-    console.error("Error adding diversity layer:", error);
-  }
-};
-
-const addCountyChoroplethLayer = () => {
-  debugLog("Adding county choropleth layer...");
-  if (!map.value || !map.value.isStyleLoaded() || !countiesData.value) {
-    debugLog("Map style not yet loaded or counties data not ready, waiting...");
-    return;
-  }
-
-  if (!map.value.getSource("counties")) {
-    debugLog("Adding counties source...");
-    debugLog(
-      "Sample counties:",
-      countiesData.value.features
-        .slice(0, 5)
-        .map((f) => ({ id: f.properties.GEOID, properties: f.properties }))
-    );
-    map.value.addSource("counties", {
-      type: "geojson",
-      data: countiesData.value,
-    });
-  }
-
-  if (!map.value.getLayer("county-choropleth")) {
-    debugLog("Adding county choropleth layer...");
-    map.value.addLayer({
-      id: "county-choropleth",
-      type: "fill",
-      source: "counties",
-      paint: {
-        "fill-color": ["rgba", 0, 0, 0, 0],
-        "fill-opacity": 0.7,
-      },
-      layout: {
-        visibility: "none", // Set initial visibility to none
-      },
-    });
-  }
-
-  debugLog(
-    "County choropleth layer added/updated:",
-    map.value.getLayer("county-choropleth")
-  );
-};
-
-const toggleContaminationLayer = (layerId: string) => {
-  if (!layersLoaded.value || !map.value) {
-    debugLog(`Layers not loaded yet, skipping toggle for ${layerId}`);
-    return;
-  }
-
-  const layer = contaminationLayers.find((l) => l.id === layerId);
-  if (layer) {
-    layer.visible = !layer.visible;
-    const visibility = layer.visible ? "visible" : "none";
-    const mapLayerId = `contamination-layer-${layerId}`;
-    if (map.value.getLayer(mapLayerId)) {
-      map.value.setLayoutProperty(mapLayerId, "visibility", visibility);
-    }
-
-    debugLog(`Set ${layerId} visibility to ${visibility}`);
-
-    // Update the "Show All" checkbox state
-    updateShowAllCheckbox();
-
-    // Update choropleth if it's visible
-    if (showContaminationChoropleth.value) {
-      updateChoroplethColors();
-    }
-  } else {
-    console.warn(`Layer ${layerId} not found`);
-  }
-};
-
-const toggleContaminationLayers = () => {
-  showContaminationLayers.value = !showContaminationLayers.value;
-  debugLog(
-    `Toggling all layers to ${showContaminationLayers.value ? "visible" : "none"}`
-  );
-  contaminationLayers.forEach((layer) => {
-    layer.visible = showContaminationLayers.value;
-    const visibility = layer.visible ? "visible" : "none";
-    if (map.value && map.value.getLayer(`contamination-layer-${layer.id}`)) {
-      map.value.setLayoutProperty(
-        `contamination-layer-${layer.id}`,
-        "visibility",
-        visibility
-      );
-    }
-  });
-
-  // Update choropleth if it's visible
-  if (showContaminationChoropleth.value) {
-    updateChoroplethColors();
-  }
-};
-
-// Add this new function to synchronize the "Show All" checkbox state
-const updateShowAllCheckbox = () => {
-  showContaminationLayers.value = contaminationLayers.every((l) => l.visible);
-};
-
-const updateChoroplethColors = () => {
-  debugLog("Updating choropleth colors:", {
-    selectedLayers: selectedDemographicLayers.value,
-    colorCalculationComplete: colorCalculationComplete.value,
-    preCalculatedColorsCount: Object.keys(preCalculatedColors.value).length,
-  });
-
-  if (
-    !map.value ||
-    !map.value.getLayer("county-choropleth") ||
-    !colorCalculationComplete.value
-  ) {
-    debugLog("Early return due to:", {
-      mapExists: !!map.value,
-      layerExists: map.value?.getLayer("county-choropleth"),
-      colorCalculationComplete: colorCalculationComplete.value,
-    });
-    return;
-  }
-
-  let expression: Expression = ["rgba", 0, 0, 0, 0]; // Default transparent
-
-  if (
-    selectedDemographicLayers.value.length > 0 ||
-    selectedEconomicLayers.value.length > 0 ||
-    selectedHousingLayers.value.length > 0 ||
-    selectedEquityLayers.value.length > 0 ||
-    selectedTransportationLayers.value.length > 0 ||
-    showContaminationChoropleth.value
-  ) {
-    // Check if we should use multi-layer combined scoring
-    const useMultiLayerScoring = allSelectedLayers.value.length >= 2;
-
-    // Phase 4c: dim non-top-N counties when a limit is active. Top-N stays
-    // fully saturated; everyone else's alpha is reduced so the answer the
-    // user asked for ("top 5") is visually prominent on the map.
-    const topN = topNGeoIds.value;
-    const dimActive = topN.size > 0;
-    const DIM_ALPHA = 0.35;
-
-    expression = [
-      "match",
-      ["get", "GEOID"],
-      ...Object.entries(preCalculatedColors.value).flatMap(
-        ([geoID, colors]) => {
-          let finalColor: [number, number, number, number];
-
-          if (useMultiLayerScoring) {
-            // Multi-layer: use dynamic scoring engine
-            const countyScore = personalizedScores.value.get(geoID);
-            if (countyScore?.filteredOut) {
-              // Filtered out by threshold: muted grey, keeps geographic context
-              finalColor = [200, 200, 200, 0.4];
-            } else {
-              finalColor = getColorForDynamicScore(countyScore?.score ?? null);
-            }
-          } else if (selectedDemographicLayers.value.length === 1) {
-            // Single demographic layer selected
-            const layer = selectedDemographicLayers.value[0];
-            switch (layer) {
-              case "diversity_index":
-                finalColor = colors.diversityColor;
-                break;
-              case "pct_Black":
-                finalColor = colors.blackPctColor;
-                break;
-              case "life_expectancy":
-                finalColor = colors.lifeExpectancyColor;
-                break;
-              case "combined_scores":
-                finalColor = colors.combinedScoreColor;
-                break;
-              case "combined_scores_v2":
-                // Get BLO v2.0 score and convert to color
-                finalColor = getColorForBLOV2(geoID);
-                break;
-              default:
-                finalColor = [0, 0, 0, 0];
-            }
-          } else if (selectedEconomicLayers.value.length === 1) {
-            finalColor = getColorForEconomicLayer(geoID, selectedEconomicLayers.value[0]);
-          } else if (selectedHousingLayers.value.length === 1) {
-            finalColor = getColorForHousingLayer(geoID, selectedHousingLayers.value[0]);
-          } else if (selectedEquityLayers.value.length === 1) {
-            finalColor = getColorForEquityLayer(geoID, selectedEquityLayers.value[0]);
-          } else if (selectedTransportationLayers.value.length === 1) {
-            finalColor = getColorForTransportationLayer(geoID, selectedTransportationLayers.value[0]);
-          } else if (showContaminationChoropleth.value && allSelectedLayers.value.length === 1) {
-            // Single contamination layer selected
-            finalColor = colors.contaminationColor;
-          } else {
-            finalColor = [0, 0, 0, 0];
-          }
-
-          // Phase 4c: dim non-top-N counties (preserves filtered-out greying).
-          // Filtered-out counties keep their muted-grey 0.4 alpha; passing-but-not-top-N
-          // gets multiplied down to DIM_ALPHA.
-          if (dimActive && !topN.has(geoID)) {
-            const isFilteredOut = useMultiLayerScoring &&
-              personalizedScores.value.get(geoID)?.filteredOut;
-            if (!isFilteredOut) {
-              finalColor = [finalColor[0], finalColor[1], finalColor[2], finalColor[3] * DIM_ALPHA];
-            }
-          }
-
-          return [geoID, ["rgba", ...finalColor]];
-        }
-      ),
-      ["rgba", 0, 0, 0, 0],
-    ];
-  }
-
-  map.value.setPaintProperty("county-choropleth", "fill-color", expression);
-};
-
-// Helper function to get color for a specific layer
-const getLayerColor = (
-  colors: ColorBlend,
-  layerId: string
-): [number, number, number, number] => {
-  switch (layerId) {
-    case "diversity_index":
-      return colors.diversityColor;
-    case "pct_Black":
-      return colors.blackPctColor;
-    case "life_expectancy":
-      return colors.lifeExpectancyColor;
-    case "combined_scores":
-      return colors.combinedScoreColor;
-    default:
-      return [0, 0, 0, 0];
-  }
-};
-
-// Color calculation for BLO Livability Index
-const getColorForBLOV2 = (geoID: string): [number, number, number, number] => {
-  const score = combinedScoresV2Data.value[geoID];
-  if (!score || score.blo_score_v2 == null) return [0, 0, 0, 0];
-
-  // Actual data range: 1.15 - 3.28 (out of 5)
-  // Normalize to actual min/max for better visual contrast
-  const MIN_SCORE = 1.15;
-  const MAX_SCORE = 3.28;
-
-  const normalized = Math.max(0, Math.min(1, (score.blo_score_v2 - MIN_SCORE) / (MAX_SCORE - MIN_SCORE)));
-
-  // Apply slight curve to emphasize extremes
-  const curved = Math.pow(normalized, 0.9);
-
-  // Dramatic color gradient: Bright yellow -> Deep emerald green
-  // Low scores: Bright yellow (255, 245, 100)
-  // High scores: Deep emerald green (0, 100, 0)
-  const r = Math.round(255 - (255 - 0) * curved);
-  const g = Math.round(245 - (245 - 100) * curved);
-  const b = Math.round(100 - (100 - 0) * curved);
-
-  return [r, g, b, 0.9];
-};
-
-// Color calculation for dynamic personalized scores (0-100 range)
-const getColorForDynamicScore = (score: number | null): [number, number, number, number] => {
-  if (score === null || score === 0) return [0, 0, 0, 0];
-
-  // Score is 0-100, normalize to 0-1
-  const normalized = Math.max(0, Math.min(1, score / 100));
-  const curved = Math.pow(normalized, 0.9);
-
-  // BLO gradient: Bright yellow (255, 245, 100) -> Deep emerald green (0, 100, 0)
-  const r = Math.round(255 - (255 - 0) * curved);
-  const g = Math.round(245 - (245 - 100) * curved);
-  const b = Math.round(100 - (100 - 0) * curved);
-
-  return [r, g, b, 0.9];
-};
-
-// Color calculation for economic layers
-const getColorForEconomicLayer = (
-  geoID: string,
-  layerId: string
-): [number, number, number, number] => {
-  const data = economicData.value[geoID];
-  if (!data) return [0, 0, 0, 0];
-
-  let value: number | null = null;
-  let min = 0;
-  let max = 1;
-
-  if (layerId === "avg_weekly_wage") {
-    value = data.avg_weekly_wage;
-    if (value == null) {
-      return [0, 0, 0, 0];
-    }
-    min = 601;
-    max = 4514;
-    // Light yellow/green (low) to Deep emerald green (high) - similar to BLO gradient
-    const normalized = Math.max(0, Math.min(1, (value - min) / (max - min)));
-    const curved = Math.pow(normalized, 0.9);
-
-    // Gradient: Light yellow-green (200, 220, 100) -> Deep emerald green (0, 100, 0)
-    const r = Math.round(200 - (200 - 0) * curved);
-    const g = Math.round(220 - (220 - 100) * curved);
-    const b = Math.round(100 - (100 - 0) * curved);
-
-    return [r, g, b, 0.85];
-  } else if (layerId === "median_income_by_race") {
-    value = data.median_income_black ?? null;
-    // Treat 0 as missing data
-    if (value == null || value === 0) return [0, 0, 0, 0];
-    min = 0;
-    max = 250001;
-
-    // Dramatic gradient with varying opacity
-    const normalized = Math.max(0, Math.min(1, (value - min) / (max - min)));
-
-    // Apply power curve to emphasize differences
-    const curved = Math.pow(normalized, 0.8);
-
-    // Color gradient: Light cyan (low) -> Deep royal blue (high)
-    // Low income: Light cyan (100, 200, 255)
-    // High income: Deep royal blue (0, 50, 150)
-    const r = Math.round(100 - (100 - 0) * curved);
-    const g = Math.round(200 - (200 - 50) * curved);
-    const b = Math.round(255 - (255 - 150) * curved);
-
-    // Opacity increases with income (0.3 to 0.95)
-    const alpha = 0.3 + (curved * 0.65);
-
-    return [r, g, b, alpha];
-  }
-
-  return [0, 0, 0, 0];
-};
-
-// Color calculation for housing layers
-const getColorForHousingLayer = (
-  geoID: string,
-  layerId: string
-): [number, number, number, number] => {
-  const data = housingData.value[geoID];
-  if (!data) return [0, 0, 0, 0];
-
-  let value: number | null = null;
-  let min = 0;
-  let max = 1;
-
-  if (layerId === "median_home_value") {
-    value = data.median_home_value ?? null;
-    // Treat 0 as missing data
-    if (value == null || value === 0) return [0, 0, 0, 0];
-    min = 0;
-    max = 1535200;
-    // Green (low/affordable) to Red (high/expensive)
-    const normalized = (value - min) / (max - min);
-    const curved = Math.pow(normalized, 0.8);
-    const r = Math.round(curved * 220);
-    const g = Math.round((1 - curved) * 200);
-    return [r, g, 0, 0.85];
-  } else if (layerId === "median_property_tax") {
-    value = data.median_property_tax ?? null;
-    if (value == null) return [0, 0, 0, 0];
-    min = 0;
-    max = 10001;
-    // Green (low/affordable) to Red (high/expensive)
-    const normalized = (value - min) / (max - min);
-    const curved = Math.pow(normalized, 0.8);
-    const r = Math.round(curved * 220);
-    const g = Math.round((1 - curved) * 200);
-    return [r, g, 0, 0.85];
-  } else if (layerId === "homeownership_by_race") {
-    value = data.homeownership_rate_black ?? null;
-    // Treat 0 and null as missing data
-    if (value == null || value === 0) return [0, 0, 0, 0];
-    min = 0;
-    max = 100;
-    // Green (high/good) to Red (low/bad) - higher homeownership is better
-    const normalized = (value - min) / (max - min);
-    const curved = Math.pow(normalized, 0.8);
-    const r = Math.round((1 - curved) * 220);
-    const g = Math.round(curved * 200);
-    return [r, g, 0, 0.85];
-  }
-
-  return [0, 0, 0, 0];
-};
-
-// Color calculation for equity layers
-const getColorForEquityLayer = (
-  geoID: string,
-  layerId: string
-): [number, number, number, number] => {
-  const data = equityData.value[geoID];
-  if (!data) return [0, 0, 0, 0];
-
-  let value: number | null = null;
-  let min = 0;
-  let max = 1;
-
-  if (layerId === "poverty_by_race") {
-    value = data.poverty_rate_black ?? null;
-    // Treat 0 as missing data
-    if (value == null || value === 0) return [0, 0, 0, 0];
-    min = 0;
-    max = 100;
-    // Green (low/good) to Red (high/bad)
-    const normalized = (value - min) / (max - min);
-    const curved = Math.pow(normalized, 0.8);
-    const r = Math.round(curved * 220);
-    const g = Math.round((1 - curved) * 200);
-    return [r, g, 0, 0.85];
-  } else if (layerId === "black_progress_index") {
-    value = data.black_progress_index ?? null;
-    if (value == null) return [0, 0, 0, 0];
-    min = 0;
-    max = 100;
-    // Green (high/good) to Red (low/bad) - inverted from poverty
-    const normalized = (value - min) / (max - min);
-    const curved = Math.pow(normalized, 0.8);
-    const r = Math.round((1 - curved) * 220);
-    const g = Math.round(curved * 200);
-    return [r, g, 0, 0.85];
-  }
-
-  return [0, 0, 0, 0];
-};
-
-// Color calculation for transportation layers
-const getColorForTransportationLayer = (
-  geoID: string,
-  layerId: string
-): [number, number, number, number] => {
-  const data = transportationData.value[geoID];
-  if (!data) return [0, 0, 0, 0];
-
-  if (layerId === "commute_time") {
-    const value = data.commute_time_ordinal;
-    if (value == null || value === 0) return [0, 0, 0, 0];
-
-    // Ordinal scale 1-12 (1 = shortest, 12 = longest)
-    const min = 1;
-    const max = 12;
-    const normalized = (value - min) / (max - min);
-    const curved = Math.pow(normalized, 0.8);
-
-    // Green (short commute) -> Yellow (medium) -> Red (long commute)
-    let r: number, g: number, b: number;
-    if (curved < 0.5) {
-      // Green to Yellow
-      const t = curved * 2;
-      r = Math.round(t * 255);
-      g = Math.round(180 + t * 75);
-      b = 0;
-    } else {
-      // Yellow to Red
-      const t = (curved - 0.5) * 2;
-      r = 255;
-      g = Math.round(255 - t * 255);
-      b = 0;
-    }
-
-    return [r, g, b, 0.85];
-  } else if (layerId === "drove_alone") {
-    const value = data.pct_drove_alone;
-    if (value == null) return [0, 0, 0, 0];
-
-    // Percentage 0-100
-    const normalized = Math.max(0, Math.min(1, value / 100));
-    const curved = Math.pow(normalized, 0.8);
-
-    // Light teal to dark teal
-    const r = Math.round(78 - curved * 50);
-    const g = Math.round(205 - curved * 80);
-    const b = Math.round(196 - curved * 50);
-
-    return [r, g, b, 0.85];
-  } else if (layerId === "public_transit") {
-    const value = data.pct_public_transit;
-    if (value == null) return [0, 0, 0, 0];
-
-    // Percentage 0-100 (often low values)
-    const normalized = Math.max(0, Math.min(1, value / 50)); // Cap at 50% for better contrast
-    const curved = Math.pow(normalized, 0.7);
-
-    // Light purple to dark purple
-    const r = Math.round(200 - curved * 45);
-    const g = Math.round(150 - curved * 61);
-    const b = Math.round(230 - curved * 48);
-
-    return [r, g, b, 0.85];
-  }
-
-  return [0, 0, 0, 0];
-};
-
-const updateDiversityColors = () => {
-  if (!map.value || !map.value.getLayer("diversity-layer")) return;
-
-  const maxDiversityIndex = Math.max(
-    ...Object.values(diversityData.value).map((d) => d.diversityIndex)
-  );
-
-  const expression: mapboxgl.Expression = [
-    "interpolate",
-    ["linear"],
-    ["get", ["get", "GEOID"]],
-    0,
-    ["rgba", 128, 0, 128, 0],
-    maxDiversityIndex,
-    ["rgba", 128, 0, 128, 1],
-  ];
-
-  map.value.setPaintProperty("diversity-layer", "fill-color", expression);
-};
-
-// Call updateChoroplethColors whenever contamination data changes
-watch(
-  () =>
-    [...contaminationLayers, ...demographicLayers].map(
-      (layer) => layer.visible
-    ),
-  () => {
-    /*if (showChoroplethLayer.value) {
-      updateChoroplethColors()
-    }*/
-  },
-  { deep: true }
-);
-
-// Recolor choropleth when scoring query or filters change
-let recolorTimeout: ReturnType<typeof setTimeout> | null = null;
-watch([scoringQuery, activeFilters], () => {
-  // Debounce at 100ms to avoid jank during rapid slider movement
-  if (recolorTimeout) clearTimeout(recolorTimeout);
-  recolorTimeout = setTimeout(() => {
-    updateChoroplethColors();
-  }, 100);
-}, { deep: true });
-
-// Phase 4c: re-render choropleth when the top-N set changes (limit toggled,
-// limit value changed, or scoring query changed in a way that reorders ranks).
-watch(topNGeoIds, () => {
-  updateChoroplethColors();
-});
-
-const popup = ref<mapboxgl.Popup | null>(null);
-
-/*const updatePopup = (
-  e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] | undefined }
-) => {
-  if (e.features && e.features.length > 0) {
-    const feature = e.features[0]
-    const countyName = feature.properties?.NAME
-    const countyState = feature.properties?.STATE_NAME
-    const contaminationCount = countyContaminationCounts[feature.properties?.GEOID] || 0
-
-    if (countyName) {
-      if (!popup.value) {
-        popup.value = new mapboxgl.Popup({ closeButton: false, closeOnClick: false })
-      }
-      popup.value
-        .setLngLat(e.lngLat)
-        .setHTML(
-          `
-          <div style="color: black;">
-            <strong>${countyName}</strong><br>
-            EPA Sites of Land Toxicity: ${contaminationCount}
-          </div>
-        `
-        )
-        .addTo(map.value!)
-    }
-  } else {
-    if (popup.value) {
-      popup.value.remove()
-    }
-  }
-}*/
-
-const addTooltip = () => {
-  if (!map.value) return;
-
-  const tooltip = new mapboxgl.Popup({
-    closeButton: false,
-    closeOnClick: false,
-  });
-
-  const averages = {
-    contamination: 8.767526188557614,
-    blackPct: 9.052875828856244,
-    diversityIndex: 0.32891281038322207,
-    lifeExpectancy: 77.73516731016737,
-  };
-
-  map.value.on("mousemove", "county-choropleth", (e) => {
-    // Phase 4f: hover outline + cursor cue. Skip when a rail is open
-    // — the active county already has a heavier outline and clicks are
-    // routed to the rail anyway, so the hover signal would compete.
-    if (!inspectActive.value && !walkthroughActive.value) {
-      const hoverGeo = e.features?.[0]?.properties?.GEOID;
-      if (typeof hoverGeo === 'string' && map.value?.getLayer(HOVER_OUTLINE_LAYER)) {
-        map.value.setFilter(HOVER_OUTLINE_LAYER, ["==", ["get", "GEOID"], hoverGeo]);
-        map.value.setLayoutProperty(HOVER_OUTLINE_LAYER, "visibility", "visible");
-      }
-      if (map.value) map.value.getCanvas().style.cursor = 'pointer';
-    }
-
-    // Phase 4e cleanup: when the inspect rail or walkthrough rail is open,
-    // the rail already shows the active county's stats — the hover popup
-    // duplicates that content right next to the cursor. Suppress it so
-    // the rail is the single source of "what is this county."
-    if (inspectActive.value || walkthroughActive.value) {
-      tooltip.remove();
-      return;
-    }
-    if (e.features && e.features.length > 0) {
-      const feature = e.features[0];
-      // Rendered county features always carry properties; `!` matches the
-      // pre-existing runtime assumption (would have thrown on null before).
-      const countyId = feature.properties!.GEOID;
-      const countyName = feature.properties!.NAME;
-
-      // Use FIPS for state name
-      const stateFIPS = countyId.substring(0, 2);
-      const fipsToState: { [key: string]: string } = {
-        "01": "Alabama",
-        "02": "Alaska",
-        "04": "Arizona",
-        "05": "Arkansas",
-        "06": "California",
-        "08": "Colorado",
-        "09": "Connecticut",
-        "10": "Delaware",
-        "11": "District of Columbia",
-        "12": "Florida",
-        "13": "Georgia",
-        "15": "Hawaii",
-        "16": "Idaho",
-        "17": "Illinois",
-        "18": "Indiana",
-        "19": "Iowa",
-        "20": "Kansas",
-        "21": "Kentucky",
-        "22": "Louisiana",
-        "23": "Maine",
-        "24": "Maryland",
-        "25": "Massachusetts",
-        "26": "Michigan",
-        "27": "Minnesota",
-        "28": "Mississippi",
-        "29": "Missouri",
-        "30": "Montana",
-        "31": "Nebraska",
-        "32": "Nevada",
-        "33": "New Hampshire",
-        "34": "New Jersey",
-        "35": "New Mexico",
-        "36": "New York",
-        "37": "North Carolina",
-        "38": "North Dakota",
-        "39": "Ohio",
-        "40": "Oklahoma",
-        "41": "Oregon",
-        "42": "Pennsylvania",
-        "44": "Rhode Island",
-        "45": "South Carolina",
-        "46": "South Dakota",
-        "47": "Tennessee",
-        "48": "Texas",
-        "49": "Utah",
-        "50": "Vermont",
-        "51": "Virginia",
-        "53": "Washington",
-        "54": "West Virginia",
-        "55": "Wisconsin",
-        "56": "Wyoming",
-      };
-      const stateName = fipsToState[stateFIPS] || "Unknown State";
-
-      // Add debugging for demographic data linking
-      debugLog("County data lookup:", {
-        countyId,
-        hasData: !!diversityData.value[countyId],
-        sampleDiversityKeys: Object.keys(diversityData.value).slice(0, 5),
-        diversityDataFormat: diversityData.value[countyId],
-      });
-
-      const countyDiversityData = diversityData.value[countyId];
-      // Entries can be a bare number (legacy shape); `.total` on a number is
-      // undefined at runtime and falls through to 0 — the cast keeps that
-      // exact behavior while satisfying the union type.
-      const totalContamination =
-        (countyContaminationCounts[countyId] as ContaminationData | undefined)
-          ?.total || 0;
-
-      const getColoredValue = (value: number, average: number) => {
-        const color = value > average ? "green" : "red";
-        return `<span style="color: ${color}">${value.toFixed(2)}</span>`;
-      };
-      const getColoredValueContam = (value: number, average: number) => {
-        const color = value > average ? "red" : "green";
-        return `<span style="color: ${color}">${Math.round(value)}</span>`;
-      };
-
-      const lifeExpValue = lifeExpectancyData.value[countyId]?.lifeExpectancy;
-      const pctBlackValue = countyDiversityData?.pct_Black;
-      const diversityValue = countyDiversityData?.diversityIndex;
-
-      // Build active layers section
-      let activeLayersHTML = '';
-
-      // Helper to get layer name from registry
-      const getLayerName = (layerId: string) => {
-        return LAYER_REGISTRY[layerId]?.name || layerId;
-      };
-
-      // Helper to get raw value for a layer from the correct data map
-      const getRawLayerValue = (layerId: string): any => {
-        const reg = LAYER_REGISTRY[layerId];
-        if (!reg) return undefined;
-        const key = reg.dataKey;
-        switch (layerId) {
-          case 'combined_scores_v2':
-            return combinedScoresV2Data.value[countyId]?.blo_score_v2;
-          case 'diversity_index':
-            return diversityValue;
-          case 'pct_Black':
-            return pctBlackValue;
-          case 'life_expectancy':
-            return lifeExpValue;
-          case 'contamination':
-            return totalContamination;
-          case 'avg_weekly_wage':
-          case 'median_income_by_race':
-            return (economicData.value[countyId] as any)?.[key];
-          case 'median_home_value':
-          case 'median_property_tax':
-          case 'homeownership_by_race':
-            return (housingData.value[countyId] as any)?.[key];
-          case 'poverty_by_race':
-          case 'black_progress_index':
-            return (equityData.value[countyId] as any)?.[key];
-          case 'commute_time':
-          case 'drove_alone':
-          case 'public_transit':
-            return (transportationData.value[countyId] as any)?.[key];
-          default:
-            return undefined;
-        }
-      };
-
-      // Helper to get formatted value for a layer using registry formatValue
-      const getLayerValue = (layerId: string) => {
-        const reg = LAYER_REGISTRY[layerId];
-        if (!reg) return '?';
-        const raw = getRawLayerValue(layerId);
-        return reg.formatValue(raw);
-      };
-
-      // Collect all active layers
-      const activeLayers = [
-        ...selectedDemographicLayers.value,
-        ...selectedEconomicLayers.value,
-        ...selectedHousingLayers.value,
-        ...selectedEquityLayers.value,
-        ...selectedTransportationLayers.value,
-      ];
-
-      // Add contamination if choropleth is showing
-      if (showContaminationChoropleth.value) {
-        activeLayers.push('contamination');
-      }
-
-      // Show custom score if multiple layers are selected
-      let combinedScoreHTML = '';
-      if (allSelectedLayers.value.length >= 2) {
-        const countyScore = personalizedScores.value.get(countyId);
-        const scoreDisplay = countyScore?.score != null ? countyScore.score.toFixed(1) : '?';
-        const missingCount = countyScore?.missingLayers?.length || 0;
-        const missingNote = missingCount > 0 ? ` (${missingCount} layer${missingCount > 1 ? 's' : ''} unavailable)` : '';
-        combinedScoreHTML = `
-          <div style="background-color: #f0f8ff; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
-            <p style="margin: 0; font-size: 14px; font-weight: bold; color: #2c5f2d;">
-              Custom Score: ${scoreDisplay} / 100
-            </p>
-            <p style="margin: 4px 0 0 0; font-size: 11px; color: #555;">
-              ${allSelectedLayers.value.length} layers weighted${missingNote}
-            </p>
-          </div>
-        `;
-      }
-
-      if (activeLayers.length > 0) {
-        activeLayersHTML = '<div style="border-bottom: 2px solid #ddd; padding-bottom: 8px; margin-bottom: 8px;">';
-        activeLayers.forEach(layerId => {
-          const name = getLayerName(layerId);
-          const value = getLayerValue(layerId);
-          activeLayersHTML += `<p style="margin: 4px 0;"><strong>${name}:</strong> ${value}</p>`;
-        });
-        activeLayersHTML += '</div>';
-      }
-
-      const tooltipContent = `
-        <h3>${countyName}, ${stateName}</h3>
-        ${combinedScoreHTML}
-        ${activeLayersHTML}
-        <p>Total Population: ${countyDiversityData?.totalPopulation ? countyDiversityData.totalPopulation.toLocaleString() : "?"}</p>
-        <p>Percent Black: ${pctBlackValue != null ? pctBlackValue.toFixed(2) + "%" : "?"}</p>
-      `;
-
-      tooltip.setLngLat(e.lngLat).setHTML(tooltipContent).addTo(map.value!);
-    }
-  });
-
-  map.value.on("mouseleave", "county-choropleth", () => {
-    tooltip.remove();
-    // Phase 4f: clear the hover outline + restore default cursor.
-    if (map.value?.getLayer(HOVER_OUTLINE_LAYER)) {
-      map.value.setLayoutProperty(HOVER_OUTLINE_LAYER, "visibility", "none");
-    }
-    if (map.value) map.value.getCanvas().style.cursor = '';
-  });
-};
-
-/** Phase 4f: hide the hover outline immediately when a rail opens — the
- *  active-county outline is heavier and would compete visually. */
-watch([inspectActive, walkthroughActive], () => {
-  if (!map.value || !map.value.getLayer(HOVER_OUTLINE_LAYER)) return;
-  if (inspectActive.value || walkthroughActive.value) {
-    map.value.setLayoutProperty(HOVER_OUTLINE_LAYER, "visibility", "none");
-    map.value.getCanvas().style.cursor = '';
-  }
-});
 
 // Phase 4e: showDetailedPopupForFeature removed — county clicks route
 // through `inspectCounty(geoId)` which opens the rail, not the modal.
@@ -2695,27 +1338,18 @@ const resolvePlaceToCountyGeoId = (
 
 // ============= Phase 3: LLM chat with tool use =============
 
+/**
+ * What the public map's chat drives. The canvas builds one of these too — a
+ * bare canvas is a complete map — and this is that, plus the two tools only
+ * the public chrome can answer for: the ranking panel and the land search.
+ */
 const toolContext: ToolContext = {
   get map() { return map.value; },
-  /** Phase 4g atomic mutator. The full desired state lands in one call,
-   *  so the chat reply and the rankings panel can never disagree —
-   *  they read from the same refs we just wrote. */
+  /** Phase 4g atomic mutator. The full desired state lands in one call, so
+   *  the chat reply and the rankings panel can never disagree — they read
+   *  from the same refs we just wrote. */
   applyQueryState: (input) => {
-    handleQueryResult({
-      layers: input.layers,
-      explanation: input.explanation || '',
-      filters: input.filters,
-      limit: input.limit ?? undefined,
-    });
-    rankingRegionStates.value = input.regionStates;
-    // The single-state dropdown is for direct user selection; the
-    // chat's multi-state filter is a parallel axis. Clear the dropdown
-    // when the chat sets a region (otherwise both would AND together
-    // and the user couldn't tell why their counties disappeared).
-    if (input.regionStates.length > 0) {
-      rankingStateFilter.value = '';
-      rankingPanelExpanded.value = true;
-    }
+    state.applyQueryState(input);
   },
   openCountyModal: (geoId) => {
     openCountyModalById(geoId);
@@ -2734,35 +1368,18 @@ const toolContext: ToolContext = {
   zoomToGeoId: (geoId) => {
     zoomToGeoId(geoId);
   },
+  // P5-26's show_layer lives on the canvas: turning a layer on is as much
+  // about this map's style as it is about the selection.
+  showLayer: (layerId, on) =>
+    canvas.value?.showLayer(layerId, on) ?? Promise.resolve(null),
   getTopRankedCounties: async (limit) => {
     // The scoring pipeline is a chain of synchronous lazy computeds
-    // (selected-layer refs → allSelectedLayers → scoringQuery → scores →
-    // rankedCounties), so a read here is already settled the moment
-    // applyQueryState's ref writes return. One nextTick drains any
-    // pending reactive effects deterministically — no arbitrary sleep.
+    // (selected-layer refs → all → scoringQuery → scores → ranked), so a
+    // read here is already settled the moment applyQueryState's ref writes
+    // return. One nextTick drains any pending reactive effects
+    // deterministically — no arbitrary sleep.
     await nextTick();
-    // Apply the chat-set region filter the same way railRankingsCounties /
-    // the RankingPanel do, so the tool_result the LLM narrates matches
-    // what the panel shows (a GA-restricted query must not report the
-    // nationwide top-10 — rankedCounties itself has no region concept).
-    const region = rankingRegionStates.value.length > 0
-      ? new Set(rankingRegionStates.value.map(s => s.toUpperCase()))
-      : null;
-    const eligible = region
-      ? rankedCounties.value.filter(c => region.has(getStateAbbrFromGeo(c.geoId).toUpperCase()))
-      : rankedCounties.value;
-    const ranked = eligible.slice(0, limit);
-    return ranked.map((c, i) => {
-      const name = getCountyName(c.geoId);
-      const div = diversityData.value[c.geoId];
-      return {
-        rank: i + 1,
-        geoId: c.geoId,
-        name,
-        state: div?.stateName || '',
-        score: c.score ?? 0,
-      };
-    });
+    return state.topRankedCounties(limit);
   },
 };
 
@@ -2815,47 +1432,341 @@ const chat = useChat(toolContext, {
   },
 });
 
-onMounted(async () => {
-  mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
-  debugLog("Component mounted");
-  try {
-    await loadCountiesData();
-    debugLog("Counties data loaded successfully");
-  } catch (error) {
-    console.error("Error loading counties data:", error);
+// ============= P5-16: saved data views =============
+// A saved view = TurnSnapshot + viewport + prompt + a bounded results
+// snapshot, stored server-side (library/views/<slug>.json) so it can be
+// embedded in wiki pages and restored by any internal user via ?view=<slug>.
+
+const route = useRoute();
+const router = useRouter();
+const { internalUser } = useAuth();
+
+/**
+ * P5-71 / P5-74: "Show a layer on the map" ticks off the first-run checklist
+ * the moment a layer actually goes on — a checkbox, a `?layers=` deep link, a
+ * saved view, the chat's show_layer tool, all of them. Watching the count
+ * rather than each toggle means there is one rule and no site to forget; the
+ * BLO layer the map opens with is already selected before this watcher runs,
+ * so merely loading the map ticks nothing. Progress is internal-only, exactly
+ * as App.vue's route recorder is.
+ */
+const activeLayerCount = computed(
+  () =>
+    allSelectedLayers.value.length +
+    selectedInternalFeatureLayers.value.length +
+    contaminationLayers.filter(l => l.visible).length
+);
+watch(activeLayerCount, (now, before) => {
+  if (now > before && internalUser.value) completeFirstRunStep("map");
+});
+
+
+
+// ============= P5-28: entity rail =============
+const entityRailLayers = computed<EntityRailLayer[]>(() =>
+  selectedInternalFeatureLayers.value
+    .map(id => {
+      const layer = internalPointLayers.value.find(l => l.id === id);
+      if (!layer) return null;
+      return { id, slug: layer.slug, geometry: layer.geometry, name: layer.name, color: layer.color, popupFields: layer.popupFields, features: internalPointData.value[id]?.features ?? [] };
+    })
+    .filter((l): l is EntityRailLayer => l !== null),
+);
+
+/** The entity rail shares the county rail's slot: it shows whenever an
+ *  overlay layer is on and nothing county-shaped is open. */
+const entityRailLoading = computed(() => selectedInternalFeatureLayers.value.some(id => !internalPointData.value[id]));
+
+const entityRailVisible = computed(
+  () => entityRailLayers.value.length > 0 && !entityRailDismissed.value && !railVisible.value,
+);
+
+
+// ============= P5-36: map deep links (?layers=…&focus=…) =============
+const pendingDeepLink = ref(false);
+let deepLinkApplied = "";
+
+
+const applyMapDeepLink = async (): Promise<void> => {
+  const key = JSON.stringify([route.query.layers ?? null, route.query.focus ?? null, route.query.fit ?? null]);
+  const { layers, focus, fit, bounds } = parseMapDeepLink(route.query as Record<string, string | string[] | null | undefined>);
+  if ((layers.length === 0 && fit.length === 0 && !bounds) || key === deepLinkApplied) return;
+  if (!map.value || !countiesData.value) {
+    pendingDeepLink.value = true;
     return;
   }
+  deepLinkApplied = key;
+  // Internal ids exist only after login + manifest; logged out they are simply dropped.
+  if (layers.some(isInternalLayerId) && internalManifestLoaded) await internalManifestLoaded;
+  const pointLayerIds: string[] = [];
+  for (const id of layers) {
+    if (!isInternalLayerId(id)) {
+      await canvas.value?.ensurePublicLayerOn(id);
+    } else if (internalLayers.value.some(l => l.id === id)) {
+      if (!selectedInternalLayers.value.includes(id)) toggleInternalLayer(id);
+    } else if (internalPointLayers.value.some(l => l.id === id)) {
+      pointLayerIds.push(id);
+      if (!selectedInternalFeatureLayers.value.includes(id)) toggleInternalFeatureLayer(id);
+    }
+  }
+  if (bounds) {
+    // P5-74: `?fit=bbox:…` — the frame a "Show on map" link computed from the
+    // layer's own points, so a Memphis layer opens on Memphis.
+    map.value.fitBounds([[bounds[0], bounds[1]], [bounds[2], bounds[3]]], { padding: 60, maxZoom: 10, duration: 900 });
+  } else if (fit.length > 0) {
+    // P5-55: `?fit=` frames the counties being compared, so "Show on map" from
+    // /compare lands on them rather than on the whole country. Wider padding
+    // and a lower max zoom than a single-county zoom: the point is seeing them
+    // together, with their neighbours for context.
+    fitToGeoIds(fit, { padding: 80, maxZoom: 8, duration: 900 });
+  } else if (pointLayerIds.length > 0 && !focus) {
+    // P5-74: a link that names a point layer but carries no frame of its own
+    // still moves the map — to the extent of the points once they land. County
+    // layers fall through and keep the national view, and a `?focus=` link is
+    // left alone: it is about to fly to one point, not to the whole extent.
+    const collection = await canvas.value?.waitForPointData(pointLayerIds[0]);
+    const box = collection ? boundsForFeatures(collection.features) : null;
+    if (box && map.value) {
+      map.value.fitBounds([[box[0], box[1]], [box[2], box[3]]], { padding: 60, maxZoom: 10, duration: 900 });
+    }
+  }
+  if (focus && internalPointLayers.value.some(l => l.id === focus.layerId)) {
+    const collection = await canvas.value?.waitForPointData(focus.layerId);
+    const index = (collection?.features ?? []).findIndex(f => f.properties._label === focus.label);
+    if (index >= 0) canvas.value?.focusEntity({ layerId: focus.layerId, index });
+  }
+};
 
-  // Initialize the county name lookup for LLM tools
+watch(
+  () => [route.query.layers, route.query.focus, route.query.fit],
+  () => {
+    void applyMapDeepLink();
+  },
+  { immediate: true },
+);
+
+
+
+
+watch(
+  internalUser,
+  (user, previous) => {
+    if (user) {
+      internalManifestLoaded = loadInternalLayers();
+      return;
+    }
+    entityRailDismissed.value = false;
+    teardownInternalLayers();
+    // Only on an actual logout (not the immediate first run for a public
+    // visitor): the thread may name internal layers and counts (P5-19).
+    if (previous) chat.clearConversation();
+  },
+  { immediate: true },
+);
+
+const saveViewOpen = ref(false);
+const saveViewName = ref("");
+const saveViewSaving = ref(false);
+const saveViewNote = ref("");
+/** P5-69: the slug just saved, so the note can link to the view like the table and compare do. */
+const savedViewSlug = ref("");
+const saveViewError = ref("");
+/** Restore requested before the map/counties existed — replayed once in
+ *  the map's `load` handler, same deferral pattern as pendingInspectGeoId. */
+const pendingViewSlug = ref<string | null>(null);
+
+const openSaveView = () => {
+  saveViewOpen.value = true;
+  saveViewNote.value = "";
+  saveViewError.value = "";
+};
+
+const closeSaveView = () => {
+  saveViewOpen.value = false;
+  saveViewError.value = "";
+};
+
+/** The most recent user chat message — stored with the view so a wiki
+ *  reader can see the question that produced the ranking. */
+const lastUserPrompt = (): string => {
+  const msgs = chat.messages.value;
+  for (let i = msgs.length - 1; i >= 0; i--) {
+    const m = msgs[i];
+    if (m.role !== "user" || m.isError) continue;
+    if (typeof m.displayText === "string" && m.displayText) return m.displayText;
+    if (typeof m.content === "string") return m.content;
+    return "";
+  }
+  return "";
+};
+
+/** The Lens's contamination rows, through the canvas: switching one on is a
+ *  fetch and a style change, which is the canvas's business (P5-74). */
+const toggleContaminationLayer = (layerId: string): void => {
+  void canvas.value?.toggleContaminationLayer(layerId);
+};
+const retryContaminationLayer = (layerId: string): void => {
+  void canvas.value?.retryContaminationLayer(layerId);
+};
+const toggleContaminationLayers = (): void => {
+  void canvas.value?.toggleContaminationLayers();
+};
+
+/** The contamination site layers that are on right now — what a saved view
+ *  remembers, and what a restore is compared against (P5-78). */
+const visibleSiteLayerIds = (): string[] =>
+  contaminationLayers.filter(l => l.visible).map(l => l.id);
+
+/** Put the contamination layers back the way the view had them (P5-78).
+ *  Every layer switched on goes through the on-demand path, so its GeoJSON is
+ *  fetched here and not at startup. */
+const restoreSiteLayers = async (saved: unknown): Promise<void> => {
+  const { on, off } = siteLayerRestore(saved, visibleSiteLayerIds());
+  if (on.length === 0 && off.length === 0) return;
+  for (const id of off) await canvas.value?.setContaminationLayer(id, false);
+  await Promise.all(on.map(id => canvas.value?.setContaminationLayer(id, true)));
+};
+
+/** Snapshot the visible ranking (region-filtered, display-limited — the
+ *  same rows the RankingPanel shows) into embed-ready result rows. */
+const snapshotResults = (): SavedViewResult[] => {
+  const region = rankingRegionStates.value.length > 0
+    ? new Set(rankingRegionStates.value.map(s => s.toUpperCase()))
+    : null;
+  const eligible = region
+    ? rankedCounties.value.filter(c => region.has(getStateAbbrFromGeo(c.geoId).toUpperCase()))
+    : rankedCounties.value;
+  const limit = Math.min(activeLimit.value ?? 20, VIEW_RESULTS_MAX);
+  return eligible
+    .filter(c => c.score != null)
+    .slice(0, limit)
+    .map((c, i) => ({
+      rank: i + 1,
+      geoId: c.geoId,
+      name: getCountyName(c.geoId),
+      state: getStateName(c.geoId),
+      score: c.score ?? 0,
+    }));
+};
+
+const submitSaveView = async () => {
+  const name = saveViewName.value.trim();
+  if (!name || saveViewSaving.value) return;
+  saveViewSaving.value = true;
+  saveViewError.value = "";
+  // P5-78: the contamination site layers that are on. Omitted when none are,
+  // so a view of the plain map is the document it always was.
+  const siteLayers = visibleSiteLayerIds();
   try {
-    await initCountyLookup();
+    const saved = await saveView({
+      name,
+      state: {
+        layers: scoringQuery.value.map(l => ({
+          layerId: l.layerId,
+          weight: l.weight,
+          direction: l.direction,
+        })),
+        filters: activeFilters.value.map(f => ({ ...f })),
+        limit: activeLimit.value,
+        regionStates: [...rankingRegionStates.value],
+        prompt: lastUserPrompt(),
+        pointLayers: selectedInternalFeatureLayers.value.map(id => ({
+          id,
+          name: internalPointLayers.value.find(l => l.id === id)?.name ?? id,
+        })),
+        ...(siteLayers.length > 0 ? { siteLayers } : {}),
+        viewport: map.value
+          ? {
+              center: [map.value.getCenter().lng, map.value.getCenter().lat] as [number, number],
+              zoom: map.value.getZoom(),
+            }
+          : null,
+      },
+      results: snapshotResults(),
+    });
+    saveViewOpen.value = false;
+    saveViewName.value = "";
+    savedViewSlug.value = saved.slug;
+    saveViewNote.value = `Saved — open “${saved.name ?? saved.slug}” · embed it in a page with view:${saved.slug}`;
   } catch (err) {
-    console.warn("County lookup failed to initialize:", err);
+    saveViewError.value = err instanceof Error ? err.message : "Couldn't save the view.";
+  } finally {
+    saveViewSaving.value = false;
   }
+};
 
-  debugLog("Initializing map");
-  // Guard against the case where async work above (initCountyLookup,
-  // useMapData) finishes after the component has been torn down or
-  // before the template ref is bound. The error is benign — Vite HMR
-  // can disconnect the container — but the stack trace is noisy.
-  if (!mapContainer.value) {
-    console.warn("Map container not ready; skipping map init.");
+/** Restore a saved view (?view=<slug>): re-apply its layers/filters/limit/
+ *  region through the same atomic mutator the LLM tools use, then jump the
+ *  viewport. Field checks are defensive — the state payload is opaque to
+ *  the server, so a hand-edited document must degrade, not throw. */
+const applySavedView = async (slug: string) => {
+  if (!map.value || !countiesData.value) {
+    pendingViewSlug.value = slug;
     return;
   }
-  map.value = new mapboxgl.Map({
-    container: mapContainer.value,
-    style: "mapbox://styles/mapbox/light-v10",
-    center: MAP_CONFIG.DEFAULT_CENTER,
-    zoom: MAP_CONFIG.DEFAULT_ZOOM,
+  try {
+    // A view may reference internal layers — they have to be registered
+    // before applyQueryState routes ids, or they would be dropped (P5-18).
+    if (internalManifestLoaded) await internalManifestLoaded;
+    const view = await fetchView(slug);
+    if (!view) {
+      console.warn(`[views] no such view: ${slug}`);
+      return;
+    }
+    // P7-4: one reader of a saved map view's state, shared with the map block
+    // a page can embed (`mapStateOf`). It was inline here until a second
+    // surface needed the same answer.
+    const saved = mapStateOf(view);
+    if (!saved) {
+      console.warn(`[views] ${slug} is a ${view.type} view — nothing here can draw it`);
+      return;
+    }
+    toolContext.applyQueryState({
+      layers: saved.layers,
+      filters: saved.filters,
+      limit: saved.limit,
+      regionStates: saved.regionStates,
+      explanation: "",
+    });
+    // P5-24: point layers are overlays outside the scoring query.
+    setInternalFeatureLayers(saved.pointLayers);
+    if (saved.viewport) map.value?.jumpTo(saved.viewport);
+    // P5-78: last, because switching a site layer on downloads its GeoJSON
+    // (P5-74) — the query, the point layers and the viewport must not wait
+    // for it.
+    await restoreSiteLayers(saved.siteLayers);
+  } catch (err) {
+    // A logged-out visitor's fetch 401s here — the guarded /views/:slug
+    // shim is the shareable entry point, so just log and show the map.
+    console.warn("[views] restore failed:", err instanceof Error ? err.message : err);
+  }
+};
+
+watch(
+  () => route.query.view,
+  (slug) => {
+    if (typeof slug === "string" && slug) void applySavedView(slug);
+  },
+  { immediate: true },
+);
+
+onMounted(() => {
+  debugLog("Component mounted");
+
+  // The county-name lookup feeds the chat tools and the layer tables, not the
+  // first paint. It loads alongside the canvas's own county files; nothing
+  // waits on it.
+  void initCountyLookup().catch((err) => {
+    console.warn("County lookup failed to initialize:", err);
   });
 
-  // Phase 4c: Geocoder instance is kept for `usePropertyListings`
+  // Phase 4c: the geocoder instance is kept for `usePropertyListings`
   // (it consumes `geocoderRef.value.clear()` to reset the search bar) but
   // its DOM is no longer rendered. Place lookup happens via direct fetch
   // calls inside PromptInput; selection routes here through
   // `handlePlaceSelection` which sets `currentGeocoderResult` and flies the map.
   geocoder = new MapboxGeocoder({
-    accessToken: mapboxgl.accessToken,
+    accessToken: MAPBOX_ACCESS_TOKEN,
     mapboxgl: mapboxgl,
     countries: MAP_CONFIG.GEOCODER_COUNTRIES,
     types: "country,region,postcode,district,place",
@@ -2863,139 +1774,9 @@ onMounted(async () => {
   });
   geocoderRef.value = geocoder;
 
-  // map.value is assigned a few lines up; the `!`s below exist because the
-  // intervening calls make TS drop the non-null narrowing on the ref.
-  map.value!.on("load", async function () {
-    debugLog("Map loaded");
-    debugLog("Counties source:", map.value?.getSource("counties"));
-
-    // Wait for style to be fully loaded
-    if (!map.value?.isStyleLoaded()) {
-      await new Promise((resolve) => map.value?.once("style.load", resolve));
-    }
-
-    // Add counties source first
-    if (!map.value?.getSource("counties")) {
-      debugLog("Adding counties source...");
-      map.value?.addSource("counties", {
-        type: "geojson",
-        data: countiesData.value!,
-      });
-    }
-
-    // Then add choropleth layer
-    if (!map.value?.getLayer("county-choropleth")) {
-      debugLog("Adding choropleth layer...");
-      map.value?.addLayer({
-        id: "county-choropleth",
-        type: "fill",
-        source: "counties",
-        paint: {
-          "fill-color": ["rgba", 0, 0, 0, 0],
-          "fill-opacity": 0.7,
-        },
-        layout: {
-          visibility: "none",
-        },
-      });
-    }
-
-    addCountyChoroplethLayer();
-    addWalkthroughOverlayLayers();
-
-    // Add contamination layers
-    if (!DEV_MODE_DEMOGRAPHICS_ONLY) {
-      for (const layer of contaminationLayers) {
-        await addContaminationLayer(map.value!, layer);
-      }
-    }
-
-    // Add diversity layer
-    await addDiversityLayer(map.value!);
-
-    layersLoaded.value = true;
-    addTooltip();
-
-    if (!DEV_MODE_DEMOGRAPHICS_ONLY) {
-      // Set initial visibility based on checkbox state
-      contaminationLayers.forEach((layer) => {
-        if (layer.visible) {
-          if (
-            map.value &&
-            map.value.getLayer(`contamination-layer-${layer.id}`)
-          ) {
-            map.value.setLayoutProperty(
-              `contamination-layer-${layer.id}`,
-              "visibility",
-              "visible"
-            );
-          }
-        }
-      });
-    }
-
-    // Set initial choropleth visibility based on pre-selected layers
-    if (map.value && map.value.getLayer("county-choropleth")) {
-      const initialVisibility = showDiversityChoropleth.value ? "visible" : "none";
-      map.value.setLayoutProperty("county-choropleth", "visibility", initialVisibility);
-
-      // Update colors if layer is visible
-      if (showDiversityChoropleth.value) {
-        updateChoroplethColors();
-      }
-    }
-
-    // Replay a snapshot-restored inspect that arrived during chat
-    // hydration, before county data and the map existed.
-    if (pendingInspectGeoId.value) {
-      const geoId = pendingInspectGeoId.value;
-      pendingInspectGeoId.value = null;
-      inspectCounty(geoId);
-    }
-  });
-
-  // Check if the style is already loaded (it might be if we're using a local style)
-  if (map.value!.isStyleLoaded()) {
-    debugLog("Style already loaded");
-    addCountyChoroplethLayer();
-  }
-
-  // Add a listener for the 'styledata' event, which fires when the map's style is fully loaded
-  map.value!.on("styledata", () => {
-    debugLog("Style data loaded");
-    addCountyChoroplethLayer();
-  });
-
-  map.value!.on("click", (e) => {
-    // Phase 4e: county click is a no-op during walkthrough so the user
-    // can't accidentally derail the tour. They have to Exit first to switch.
-    if (walkthroughActive.value) return;
-    // Marker clicks bubble to the map's click event in mapbox-gl. Without
-    // this guard, clicking a property pin would also fire the county
-    // click handler — which calls inspectCounty, which (when the underlying
-    // county differs from the current one) wipes the active land search.
-    // Bail when the original DOM click target is inside a marker.
-    const target = (e.originalEvent?.target as HTMLElement | null);
-    if (target && target.closest(".mapboxgl-marker")) {
-      debugLog("Click landed on a marker — skipping county inspect");
-      return;
-    }
-    const features = map.value?.queryRenderedFeatures(e.point, {
-      layers: ["county-choropleth"],
-    });
-    if (features && features.length > 0) {
-      const feature = features[0];
-      const countyId = feature.properties?.GEOID;
-      debugLog("Clicked feature:", countyId);
-      if (countyId) inspectCounty(countyId);
-    } else {
-      debugLog("No feature found at click point");
-    }
-  });
-
   const tooltipIcons = document.querySelectorAll(".tooltip-icon");
   tooltipIcons.forEach((icon) => {
-    icon.addEventListener("mouseenter", (e) => {
+    icon.addEventListener("mouseenter", () => {
       // Non-null + HTMLElement: every .tooltip-icon ships with a
       // .tooltip-text child in the template; `!` preserves the original
       // (would-throw-on-missing) runtime behavior.
@@ -3017,21 +1798,54 @@ onMounted(async () => {
       }
     });
   });
-
-  /*map.value.on('mousemove', 'county-choropleth', updatePopup)
-  map.value.on('mouseleave', 'county-choropleth', () => {
-    if (popup.value) {
-      popup.value.remove()
-    }
-  })*/
-
-  // Add zoom and rotation controls to the map in the bottom-right corner
-  map.value!.addControl(new mapboxgl.NavigationControl(), "bottom-right");
-
-  addTooltip();
-
-  debugLog("Map initialization complete");
 });
+
+onBeforeUnmount(() => {
+  cancelEntryHandoff();
+  clearAllWalkthroughMarkers();
+  // The registry entries this instance holds go with it; the shared manifest
+  // and values caches stay, because another map may be reading them (P6-10).
+  teardownInternalLayers(false);
+});
+
+/** The canvas has a map. Everything the chrome does to it starts here. */
+const onCanvasReady = (ctx: ToolContext) => {
+  map.value = ctx.map;
+};
+
+/** The counties source and the choropleth are up: the overlays exist, so the
+ *  deferred replays that needed polygons can run. */
+const onCountiesReady = () => {
+  // Replay a snapshot-restored inspect that arrived during chat hydration,
+  // before county data and the map existed.
+  if (pendingInspectGeoId.value) {
+    const geoId = pendingInspectGeoId.value;
+    pendingInspectGeoId.value = null;
+    inspectCounty(geoId);
+  }
+
+  // Replay a saved-view restore (?view=<slug>) that arrived before the map
+  // existed (P5-16). Applied after pendingInspectGeoId so the view's query
+  // state wins if both are somehow queued.
+  if (pendingViewSlug.value) {
+    const slug = pendingViewSlug.value;
+    pendingViewSlug.value = null;
+    void applySavedView(slug);
+  }
+  // Same deferral for ?layers= deep links (P5-36).
+  if (pendingDeepLink.value) {
+    pendingDeepLink.value = false;
+    void applyMapDeepLink();
+  }
+};
+
+/** A county was clicked on the canvas. Phase 4e: that opens the inspect rail
+ *  — except during a walkthrough, where a stray click must not derail the
+ *  tour; the user has to Exit first. */
+const onCountyClick = (geoId: string) => {
+  if (walkthroughActive.value) return;
+  inspectCounty(geoId);
+};
 
 </script>
 
@@ -3251,64 +2065,7 @@ onMounted(async () => {
   margin-right: 5px;
 }
 
-.loading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
 
-.loading-content {
-  text-align: center;
-}
-
-.progress-bar {
-  width: 200px;
-  height: 20px;
-  background-color: #f0f0f0;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.progress {
-  height: 100%;
-  background-color: #4caf50;
-  transition: width 0.3s ease-in-out;
-}
-
-.loading-text {
-  color: black;
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-/* Mapbox GL JS popup styles */
-:global(.mapboxgl-popup) {
-  max-width: 400px;
-  font:
-    12px/20px "Helvetica Neue",
-    Arial,
-    Helvetica,
-    sans-serif;
-}
-
-:global(.mapboxgl-popup-content) {
-  padding: 10px;
-  max-width: 300px;
-  font-size: 12px;
-  border-radius: 3px;
-  color: black;
-}
-
-:global(.mapboxgl-popup-content strong) {
-  color: black;
-}
 .mapboxgl-popup-content h3 {
   margin: 0 0 10px 0;
   font-size: 16px;
@@ -3419,6 +2176,76 @@ onMounted(async () => {
     width: 100%;
     max-height: 50vh;
   }
+}
+
+/* P5-16 / P5-74: Save view, now a row inside the Lens panel (internal users
+   only) instead of a control floating on top of it. */
+.save-view-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+}
+
+.save-view-toggle {
+  background-color: white;
+  border: none;
+  padding: 5px 10px;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.save-view-form {
+  display: flex;
+  gap: 4px;
+  background-color: white;
+  padding: 5px;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.save-view-name {
+  font-size: 13px;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  min-width: 0;
+  flex: 1 1 120px;
+}
+
+.save-view-save,
+.save-view-cancel {
+  border: none;
+  padding: 4px 8px;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 3px;
+  background-color: #1f7a2e;
+  color: white;
+}
+
+.save-view-save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.save-view-cancel {
+  background-color: #eee;
+  color: #333;
+}
+
+.save-view-note {
+  font-size: 12px;
+  color: #1f7a2e;
+  flex: 1 1 100%;
+  overflow-wrap: anywhere;
+}
+
+.save-view-error {
+  color: #b91c1c;
 }
 </style>
 

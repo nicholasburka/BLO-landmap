@@ -1,0 +1,58 @@
+{
+  "slug": "ers-rural-classifications",
+  "url": "https://www.ers.usda.gov/topics/rural-economy-population/rural-classifications",
+  "capturedAt": "2026-09-07T01:44:31.854Z",
+  "recordedAt": "2026-09-07T02:05:22.851Z",
+  "model": "claude-sonnet-5",
+  "answer": "{\"isDataset\": false, \"links\": []}",
+  "candidates": [
+    {
+      "url": "https://www.ers.usda.gov/data-products",
+      "label": "Browse All Data",
+      "context": "n>Data Access the Data Access and analyze data sets, maps, charts and graphs. Data by Type <p class=\"hide-mobi",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.ers.usda.gov/data-products?type=downloadable-data-files",
+      "label": "Downloadable Data Files",
+      "context": "usa-nav__submenu-list block block-block-content block-block-contenta6258f45-9115-46d5-8c89-26b57c9843bd\"> Data by Type Access the Data Charts Queryable Data Applications Maps <ul id=\"block-navdatacolu",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.ers.usda.gov/data-products?type=queryable-data-applications",
+      "label": "Queryable Data Applications",
+      "context": "em desktop:border-bottom\"> Data by Type Access the Data Charts Downloadable Data Files Maps <li class=\"usa-nav__submenu-ite",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.ers.usda.gov/publications",
+      "label": "Browse All Analysis",
+      "context": "Understand the Research Get insights and objective analysis from experts in the field. <li class=\"usa-nav__submenu-item desktop:border-left-05 desktop:bord",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.ers.usda.gov/topics/rural-economy-population/rural-classifications/data-for-rural-analysis",
+      "label": "Data for Rural Analysis",
+      "context": "sa-accordion__content padding-x-1\"> Overview What is Rural? USDA, Economic Research Service (ERS) researche",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/28551/108692-chart-image-file.png?v=40714",
+      "label": "Download chart image",
+      "context": "b6b\">rural towns (places with fewer than 5,000 people and 2,000 housing units), and urban areas with populations ranging up to 50,000 people that are not part of larger labor market areas (metropolita",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.ers.usda.gov/publications/109610",
+      "label": "The Poverty Area Measures Data Product",
+      "context": "ne-clamp-4\"> Access to WIC-Authorized Vendors and High-speed Internet Services in Urban and Rural Areas 7/7/2026 7/23/2024 <div class=\"grid-col-aut",
+      "via": "anchor-text"
+    }
+  ],
+  "expected": {
+    "links": [],
+    "prose": {
+      "isDataset": false
+    }
+  }
+}

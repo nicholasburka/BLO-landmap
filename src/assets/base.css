@@ -1,3 +1,20 @@
+/* P5-91: Fraunces, self-hosted. One variable woff2 (opsz 9..144, wght 400..700
+   is the range we use; the file carries 100..900), subset to Google Fonts' own
+   `latin` + `latin-ext` unicode ranges from the upstream
+   Fraunces[SOFT,WONK,opsz,wght].ttf with SOFT and WONK pinned to their
+   defaults. Licensed SIL OFL 1.1 — see ./fonts/OFL.txt.
+
+   This replaces the render-blocking Google Fonts stylesheet and its two
+   preconnects: the face is declared here and the file is preloaded from
+   index.html, so the first paint costs no third-party round trip. */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('./fonts/fraunces-variable.woff2') format('woff2');
+}
+
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
   --vt-c-white: #ffffff;

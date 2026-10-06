@@ -23,6 +23,88 @@
         </span>
       </div>
 
+      <!-- P5-18: internal library layers — the prop is only ever non-empty
+           for a logged-in internal user, so the section never renders on
+           the public map. -->
+      <template v-if="(internalLayers && internalLayers.length > 0) || (internalPointLayers && internalPointLayers.length > 0)">
+        <h3 class="category-header" data-testid="internal-layers-header" @click="toggleCategory('internal')">
+          <span class="arrow" :class="{ expanded: expandedCategories.internal }">▶</span>
+          Internal
+        </h3>
+        <div v-show="expandedCategories.internal" data-testid="internal-layers">
+          <div v-for="layer in internalLayers" :key="layer.id" class="layer-item">
+            <input
+              type="checkbox"
+              :id="layer.id"
+              :checked="selectedInternalLayers?.includes(layer.id)"
+              @change="$emit('toggle-internal', layer.id)"
+            />
+            <label :for="layer.id">{{ layer.name }}</label>
+            <span class="layer-links" data-testid="internal-layer-links">
+              <RouterLink :to="`/library/${layer.dataKey}`">About</RouterLink>
+              ·
+              <RouterLink :to="`/library/${layer.dataKey}?tab=data`">Data</RouterLink>
+            </span>
+            <span class="tooltip-wrapper" v-if="layer.description">
+              <button
+                type="button"
+                class="tooltip-icon"
+                :aria-label="'Info about ' + layer.name"
+                :aria-describedby="'tooltip-' + layer.id"
+              >ⓘ</button>
+              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.description }}<template v-if="layer.source"> ({{ layer.source }})</template></span>
+            </span>
+            <LayerScoringControls
+              v-if="showScoringControls && isLayerSelected(layer.id)"
+              :layer-id="layer.id"
+              :layer-name="getLayerName(layer.id)"
+              :weight="getWeight(layer.id)"
+              :direction="getDirection(layer.id)"
+              :filter="getFilter(layer.id)"
+              :range="getRange(layer.id)"
+              :unit="getUnit(layer.id)"
+              @update-weight="(id, w) => $emit('update-weight', id, w)"
+              @update-direction="(id, d) => $emit('update-direction', id, d)"
+              @update-filter="(id, f) => $emit('update-filter', id, f)"
+            />
+          </div>
+          <!-- P5-24 points, P7-3 lines, P7-9 states: overlays, not scoring
+               layers (no weight controls). The swatch is drawn as the shape
+               the layer draws, so the legend reads as the map does. -->
+          <div v-for="layer in internalPointLayers ?? []" :key="layer.id" class="layer-item" data-testid="internal-point-layer">
+            <input
+              type="checkbox"
+              :id="layer.id"
+              :checked="selectedInternalFeatureLayers?.includes(layer.id)"
+              @change="$emit('toggle-internal-point', layer.id)"
+            />
+            <label :for="layer.id">
+              <span
+                class="point-swatch"
+                :class="{ 'line-swatch': layer.geometry === 'line', 'state-swatch': layer.geometry === 'state' }"
+                :style="{ background: layer.color || '#ff6b1c' }"
+                aria-hidden="true"
+              ></span>
+              {{ layer.name }}
+            </label>
+            <span class="layer-links" data-testid="internal-layer-links">
+              <RouterLink :to="`/library/${layer.slug}`">About</RouterLink>
+              ·
+              <RouterLink :to="`/library/${layer.slug}?tab=data`">Data</RouterLink>
+            </span>
+            <span class="tooltip-wrapper" v-if="layer.description">
+              <button
+                type="button"
+                class="tooltip-icon"
+                :aria-label="'Info about ' + layer.name"
+                :aria-describedby="'tooltip-' + layer.id"
+              >ⓘ</button>
+              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip">{{ layer.description }}<template v-if="layer.source"> ({{ layer.source }})</template></span>
+            </span>
+          </div>
+        </div>
+      </template>
+
       <!-- Demographics Category -->
       <template v-if="demographicLayers.filter(l => l.category === 'Demographics').length > 0">
         <h3 class="category-header" @click="toggleCategory('demographics')">
@@ -250,16 +332,33 @@
             </span>
           </div>
 
-          <!-- Individual contamination layer checkboxes -->
+          <!-- Individual contamination layer checkboxes. P5-74: each one's
+               GeoJSON is fetched the first time it is switched on, so the row
+               carries the load's state — "Loading…" while it is on the way,
+               and a retry button (the checkbox goes back off) when it fails. -->
           <div v-if="contaminationLayers && contaminationLayers.length > 0" style="margin-left: 20px;">
             <div v-for="layer in contaminationLayers" :key="layer.id" class="layer-item">
               <input
                 type="checkbox"
                 :id="layer.id"
                 :checked="layer.visible"
+                :disabled="layer.status === 'loading'"
                 @change="$emit('toggle-contamination', layer.id)"
               />
               <label :for="layer.id">{{ layer.name }}</label>
+              <span
+                v-if="layer.status === 'loading'"
+                class="layer-state"
+                role="status"
+                data-testid="contamination-loading"
+              >Loading…</span>
+              <button
+                v-else-if="layer.status === 'error'"
+                type="button"
+                class="layer-state layer-state--error"
+                data-testid="contamination-error"
+                @click="$emit('retry-contamination', layer.id)"
+              >Could not load — try again</button>
               <span class="tooltip-wrapper" v-if="layer.tooltip">
                 <button
                   type="button"
@@ -349,6 +448,8 @@ import type {
   ContaminationLayer,
 } from '@/config/layerConfig'
 import type { ScoringFilter } from '@/types/mapTypes'
+import type { LayerDefinition } from '@/config/layerRegistry'
+import type { InternalFeatureLayer } from '@/lib/internalLayers'
 import LayerScoringControls from '@/components/LayerScoringControls.vue'
 
 interface Props {
@@ -358,11 +459,17 @@ interface Props {
   equityLayers?: EquityLayer[]
   transportationLayers?: TransportationLayer[]
   contaminationLayers?: ContaminationLayer[]
+  /** P5-18: runtime-registered internal layers (logged-in only). */
+  internalLayers?: LayerDefinition[]
+  /** P5-24: internal point layers (logged-in only). */
+  internalPointLayers?: InternalFeatureLayer[]
   selectedDemographicLayers: string[]
   selectedEconomicLayers?: string[]
   selectedHousingLayers?: string[]
   selectedEquityLayers?: string[]
   selectedTransportationLayers?: string[]
+  selectedInternalLayers?: string[]
+  selectedInternalFeatureLayers?: string[]
   showContaminationLayers: boolean
   showContaminationChoropleth: boolean
   devModeOnly?: boolean
@@ -382,7 +489,11 @@ defineEmits<{
   'toggle-housing': [layerId: string]
   'toggle-equity': [layerId: string]
   'toggle-transportation': [layerId: string]
+  'toggle-internal': [layerId: string]
+  'toggle-internal-point': [layerId: string]
   'toggle-contamination': [layerId: string]
+  /** P5-74: "try again" after a contamination GeoJSON failed to load. */
+  'retry-contamination': [layerId: string]
   'toggle-contamination-layers': []
   'toggle-contamination-choropleth': []
   'update-weight': [layerId: string, weight: number]
@@ -398,7 +509,8 @@ const isLayerSelected = (layerId: string): boolean => {
     (props.selectedEconomicLayers?.includes(layerId) ?? false) ||
     (props.selectedHousingLayers?.includes(layerId) ?? false) ||
     (props.selectedEquityLayers?.includes(layerId) ?? false) ||
-    (props.selectedTransportationLayers?.includes(layerId) ?? false)
+    (props.selectedTransportationLayers?.includes(layerId) ?? false) ||
+    (props.selectedInternalLayers?.includes(layerId) ?? false)
   )
 }
 
@@ -448,6 +560,7 @@ const expandedCategories = ref({
   housing: false,
   equity: false,
   transportation: false,
+  internal: true,
   epa: false,
   health: false,
 })
@@ -578,6 +691,29 @@ onMounted(() => {
   color: black;
 }
 
+/* P5-74: the on-demand load's state, inline on the row. Quiet while it
+   loads; the error is a button because it is the way back in. */
+.layer-state {
+  margin-left: 6px;
+  font-size: 11px;
+  color: #6b6560;
+  font-style: italic;
+}
+
+button.layer-state {
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+.layer-state--error {
+  color: #b91c1c;
+  cursor: pointer;
+  text-decoration: underline;
+  font-style: normal;
+}
+
 .tooltip-wrapper {
   position: relative;
   display: inline-block;
@@ -651,4 +787,53 @@ button.tooltip-icon:focus {
 
 /* Scoring controls (weight / direction / filter) moved into
    <LayerScoringControls> — styles live in that component. */
+.layer-links {
+  margin-left: 6px;
+  font-size: 11px;
+  color: var(--blo-stone, #6b6560);
+  white-space: nowrap;
+}
+
+.layer-links a {
+  color: var(--blo-green-deep, #1f7a2e);
+  text-decoration: none;
+}
+
+.layer-links a:hover {
+  text-decoration: underline;
+}
+
+.point-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* P7-3: a line layer's swatch is a stroke, not a dot — the one visual cue
+   that says which of two overlays will draw as a corridor. */
+.point-swatch.line-swatch {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+  border: none;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+/* P7-9: a state layer's swatch is an AREA — a filled rectangle at the wash's
+   own opacity, inside a solid border, which is exactly the two paint layers
+   the map draws. The three swatches are the only thing in the panel that says
+   whether an overlay will arrive as dots, a corridor, or a region. */
+.point-swatch.state-swatch {
+  width: 14px;
+  height: 10px;
+  border-radius: 2px;
+  border: none;
+  opacity: 0.55;
+  box-shadow: 0 0 0 1.5px currentColor;
+}
 </style>

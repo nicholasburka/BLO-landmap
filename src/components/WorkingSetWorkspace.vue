@@ -1,0 +1,818 @@
+<script setup lang="ts">
+/**
+ * Two interfaces over one working set (P7-2, spec §F.1).
+ *
+ * Nick (2026-10-03): a working set *"can be mapped or explored in terms of data
+ * (two interfaces to the same compound data object)"*. P7-1 built the object;
+ * this is the surface, and the whole design is in which half owns what:
+ *
+ *  - **The working set is the data** — its members, its anchor, and the derived
+ *    columns P7-5 computes onto it. Loaded ONCE, here.
+ *  - **The view is the framing** — which is why this component takes a
+ *    `SavedView` and reads the set off it, rather than the other way round. A
+ *    set holds no viewport, no sort and no palette, so there is nothing to show
+ *    it *with* until a view supplies one; a set may carry several views, and
+ *    each of them lands here over the same rows.
+ *  - **The interface is neither.** It is a query key, so switching is a
+ *    `router.replace` on the path you are already on: nothing navigates,
+ *    nothing unmounts that holds data, and nothing is fetched twice. A deep
+ *    link to either interface opens there.
+ *
+ * **The data half is kept mounted behind `v-show`, deliberately.** The map
+ * draws the subset the table is showing (`query.only`, P6-10), so the rows have
+ * to survive a switch — tear the table down and the map would have to ask the
+ * server for the same rows again to know what it is drawing, which is exactly
+ * the duplication this ticket exists to remove. The map pane is the other way
+ * round (`v-if`, as `useMapPane` requires): a reader who never opens it never
+ * downloads a county file, and a hidden WebGL context is never left running.
+ *
+ * **Neither interface computes anything.** `fetchWorkingSetColumns` is called
+ * once; the table sorts those values and the map reports them over the counties
+ * it is drawing, from the same `Map`s. That is what makes a number in a story
+ * citable: there is one of it.
+ *
+ * Reuses rather than rebuilds, as the ticket asks. The data half is
+ * `DatasetView` — the explorer, with its search, filters, sort, summaries and
+ * CSV — pointed at the set's anchor by a prop. The map half is P6-14's
+ * `useShowOnMap` + `MapPane`, which is six lines. `MapCanvas` is untouched.
+ */
+import { computed, onMounted, ref, watch } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import DatasetView from '@/views/DatasetView.vue'
+import MapPane from '@/components/MapPane.vue'
+import { useShowOnMap } from '@/composables/useShowOnMap'
+import { contextCell } from '@/lib/countyJoin'
+import { friendlyError } from '@/lib/errors'
+import {
+  SET_INTERFACE_KEY,
+  interfaceForViewType,
+  parseSetInterface,
+  tableStateOf,
+  tableViewQuery,
+  type SavedView,
+  type SetInterface,
+} from '@/lib/views'
+import {
+  derivedFreshnessBadge,
+  derivedFreshnessLine,
+  derivedRange,
+  derivedRangeLine,
+  derivedTableColumns,
+  fetchWorkingSet,
+  fetchWorkingSetColumns,
+  rerunDerivedColumn,
+  workingSetDatasetsHref,
+  workingSetHref,
+  workingSetPlaceHref,
+  type DerivedColumn,
+  type WorkingSetDetail,
+} from '@/lib/workingSets'
+
+const props = defineProps<{
+  /** The view whose framing this is. Its `workingSet` is what gets loaded. */
+  view: SavedView
+}>()
+
+const route = useRoute()
+const router = useRouter()
+
+const set = ref<WorkingSetDetail | null>(null)
+const columns = ref<DerivedColumn[]>([])
+/** Columns the set names that could not be opened — said out loud rather than
+ *  folded away, because it is a thing to go and fix (P6-23). */
+const unreadable = ref<string[]>([])
+const loading = ref(true)
+const error = ref('')
+const setGone = ref(false)
+
+// --- Which interface -------------------------------------------------------
+
+/** The interface the view's own type opens in — the view IS the framing, so a
+ *  view saved off the map opens on the map and one saved off a table on the
+ *  table. The set is the same either way, which is the point. */
+const defaultInterface = computed(() => interfaceForViewType(props.view.type))
+
+const iface = computed<SetInterface>(() =>
+  parseSetInterface(route.query[SET_INTERFACE_KEY], defaultInterface.value),
+)
+
+/**
+ * Switch interface. `replace`, same path, every other query key untouched — so
+ * the table's filters survive a look at the map and come back with it, and Back
+ * does not walk a trail of interface switches.
+ */
+function show(next: SetInterface): void {
+  if (next === iface.value) return
+  const query: Record<string, string | string[] | null> = { ...route.query } as Record<
+    string,
+    string | string[] | null
+  >
+  if (next === defaultInterface.value) delete query[SET_INTERFACE_KEY]
+  else query[SET_INTERFACE_KEY] = next
+  void router.replace({ query })
+}
+
+// --- The data half ---------------------------------------------------------
+
+/**
+ * Which table the data interface shows.
+ *
+ * The view's own dataset first, when it has one: a saved table view is about
+ * that table and has to keep opening on it. Then the set's anchor — the held
+ * dataset the set is *about* — then its first held member, so a map view over a
+ * set still gets a table to explore. In practice these agree: the promote
+ * action puts a table view's dataset into the set it makes.
+ */
+const anchor = computed(() => {
+  const saved = tableStateOf(props.view)?.dataset
+  if (saved) return saved
+  if (set.value?.sites) return set.value.sites
+  return set.value?.members.find(member => member.kind === 'dataset')?.slug ?? ''
+})
+
+/** The set's derived columns as joined table columns. ONE conversion, shared:
+ *  the table's prop and the map's readout below read these same `Map`s. */
+const joined = computed(() => derivedTableColumns(columns.value))
+
+/** What the table is showing, lifted out of it (P7-2's `shown` emit) so the
+ *  map can draw this subset without asking for the rows again. */
+const shown = ref<{ geoIds: string[]; rows: number; total: number; loading: boolean }>({
+  geoIds: [],
+  rows: 0,
+  total: 0,
+  loading: true,
+})
+
+/**
+ * Whether the table has settled at least once.
+ *
+ * A ONE-WAY latch, and both halves of that matter. It has to be set before the
+ * map opens, because an empty `only` means "the whole layer" — opening sooner
+ * would paint all 3,142 counties and snap to the subset a moment later, and
+ * the repaint lands in the middle of the Mapbox style load. And it must never
+ * go back, or every filter would tear the canvas down and build it again.
+ */
+const subsetSettled = ref(false)
+
+function onShown(payload: { geoIds: string[]; rows: number; total: number; loading: boolean }): void {
+  shown.value = payload
+  if (!payload.loading) subsetSettled.value = true
+}
+
+// --- The map half (P6-14, six lines of it) ---------------------------------
+
+/**
+ * P7-8: the derived index the map is drawing instead of the set's own layers,
+ * or `''` for the set's layers.
+ *
+ * It has to be *instead of*, not *as well as*. The pane hands every layer it
+ * names to the Lens at equal weight, so a set with three layers is already
+ * painting a three-way composite of them — adding a saved index as a fourth
+ * term would dilute the very thing somebody asked to look at, and the
+ * choropleth would no longer be the number the column says it is. So drawing
+ * an index is a switch, and the control says which state it is in.
+ */
+const drawnIndex = ref('')
+
+/** The layers the SET names: it is the data, and what to draw is a question
+ *  about the data. The view contributes the framing around them. */
+const drawsLayers = computed(() => (set.value?.layers.length ?? 0) > 0 || !!drawnIndex.value)
+
+const map = useShowOnMap({
+  layers: () => (drawnIndex.value ? [drawnIndex.value] : (set.value?.layers ?? [])),
+  only: () => shown.value.geoIds,
+})
+
+/**
+ * Draw one index on its own, or go back to the set's layers.
+ *
+ * Nothing is fetched here: the id came back on the column, the layer is in the
+ * internal manifest, and `useShowOnMap` resolves it through exactly the path
+ * every other internal county layer takes — which is why an index drawing
+ * needed no new drawing code at all.
+ */
+function drawIndex(layerId: string): void {
+  drawnIndex.value = drawnIndex.value === layerId ? '' : layerId
+}
+
+/** A column dropping out from under the switch — a re-run that renamed it, a
+ *  set edited elsewhere — must not leave the map drawing a layer that is no
+ *  longer there. */
+watch(columns, list => {
+  if (drawnIndex.value && !list.some(column => column.layerId === drawnIndex.value)) drawnIndex.value = ''
+})
+
+/**
+ * The pane follows the interface. Opening it is what loads the county files,
+ * so a reader who stays on the table never pays for them; closing it on the
+ * way out is what stops a hidden map holding a WebGL context.
+ *
+ * It waits for the table's first answer (or for a set with no table at all),
+ * so the pane's first paint is already the right subset rather than the whole
+ * layer — which is what `useShowOnMap` promises and what the data half being
+ * mounted all along makes possible.
+ */
+const readyToDraw = computed(() => drawsLayers.value && (subsetSettled.value || !anchor.value))
+
+watch(
+  [iface, readyToDraw],
+  () => {
+    if (iface.value === 'map' && readyToDraw.value) map.open()
+    else map.close()
+  },
+  { immediate: true },
+)
+
+/** A county pressed on the map, so the readout can say what this column says
+ *  about that one. Reset when the subset moves under it. */
+const clickedGeoId = ref<string | null>(null)
+watch(
+  () => shown.value.geoIds.join(','),
+  () => {
+    clickedGeoId.value = null
+  },
+)
+
+/**
+ * The fidelity claim, said out loud.
+ *
+ * A filtered table hands the map its own rows, which is the one thing a URL
+ * cannot say (P6-10). What it hands over is the page you are looking at, as
+ * every "show on map" in this codebase does, so the note says which number is
+ * which rather than letting the reader assume the map is drawing all 1,900
+ * matches.
+ */
+const paneNote = computed(() => {
+  const { geoIds, rows, total } = shown.value
+  if (!geoIds.length) return 'Every county in these layers'
+  const counties = `${geoIds.length.toLocaleString()} ${geoIds.length === 1 ? 'county' : 'counties'}`
+  const from = `${rows.toLocaleString()} ${rows === 1 ? 'row' : 'rows'}`
+  const matched = total > rows ? ` of ${total.toLocaleString()} matching` : ''
+  return `${counties} from ${from}${matched}`
+})
+
+/**
+ * The MAP's reading of a derived column.
+ *
+ * The canvas draws registry layers, so a derived column is not something it can
+ * paint without the layer pipeline. What the map can say honestly — and from
+ * the same values the table is sorting — is the column's spread across the
+ * counties it is actually drawing, and what it says about the one you pressed.
+ */
+const mapColumns = computed(() =>
+  columns.value.map((column, index) => {
+    const range = derivedRange(column, shown.value.geoIds)
+    const values = joined.value[index]?.values
+    return {
+      id: column.id,
+      label: column.label,
+      line: range ? derivedRangeLine(column, range) : 'No numbers for the counties on the map',
+      here: clickedGeoId.value ? contextCell(values, clickedGeoId.value) : '',
+      method: column.method,
+      stored: column.storedAt,
+      // P7-6: what this number's standing is, and whether it can be fixed from
+      // here. A stale column keeps every value above and gains these.
+      freshness: column.freshness,
+      badge: derivedFreshnessBadge(column),
+      provenance: derivedFreshnessLine(column),
+      canRerun: !!column.rerun,
+      // P7-8: a composite index IS a county layer, so it can be put on the
+      // map. A measurement is not one — nothing in a proximity record says
+      // which end of "miles away" is good — and `layerId` is `''` for it, so
+      // no control is offered that cannot do what it says.
+      layerId: column.layerId,
+      drawing: !!column.layerId && drawnIndex.value === column.layerId,
+      column,
+    }
+  }),
+)
+
+/**
+ * The columns whose inputs have moved, or cannot be checked (P7-6).
+ *
+ * Counted into one line in the HEADER, which sits outside both interface
+ * panes — so the caveat reaches a reader on the data interface too, where the
+ * derived values are indistinguishable from county-context columns once they
+ * are inside the explorer's table. "Stale must be visible, never silent"
+ * cannot be half a feature that only holds on the map.
+ */
+const unsound = computed(() => columns.value.filter(c => c.freshness !== 'fresh'))
+
+const unsoundLine = computed(() => {
+  const stale = unsound.value.filter(c => c.freshness === 'stale')
+  const unchecked = unsound.value.filter(c => c.freshness === 'unknown')
+  const parts: string[] = []
+  if (stale.length) {
+    parts.push(
+      `${stale.length === 1 ? 'A derived column is' : `${stale.length} derived columns are`} out of date: ` +
+        `${stale.map(c => c.label).join(', ')}.`,
+    )
+  }
+  if (unchecked.length) {
+    parts.push(
+      `${unchecked.length === 1 ? 'One column does' : `${unchecked.length} columns do`} not record what ` +
+        `${unchecked.length === 1 ? 'it was' : 'they were'} measured from, so ` +
+        `${unchecked.length === 1 ? 'it cannot' : 'they cannot'} be checked.`,
+    )
+  }
+  // Named on the map interface, where each one also carries its own sentence
+  // and its own re-run.
+  if (stale.length) parts.push('The numbers still show, with what changed, on the Map interface.')
+  return parts.join(' ')
+})
+
+// --- Re-running one (P7-6) -------------------------------------------------
+
+const rerunning = ref('')
+const rerunError = ref('')
+
+/**
+ * Measure a stale column again, from where it is read.
+ *
+ * The arguments come from the column's own stored record, so nothing is
+ * retyped and nothing is guessed. On success the whole column set is read
+ * again rather than patched in place: the run may have written two columns
+ * (a distance and a count), and one source of truth re-read is simpler than
+ * two patched by hand.
+ */
+async function rerun(column: DerivedColumn): Promise<void> {
+  if (rerunning.value || !set.value) return
+  rerunning.value = column.id
+  rerunError.value = ''
+  try {
+    await rerunDerivedColumn(set.value.slug, column)
+    const stored = await fetchWorkingSetColumns(set.value.slug)
+    columns.value = stored.columns
+    unreadable.value = stored.unreadable
+  } catch (err) {
+    // A 413 from the ceiling is the interesting case and its sentence names
+    // the local batch pass, so it is shown rather than reworded.
+    rerunError.value = friendlyError(err, 'That column could not be measured again.')
+  } finally {
+    rerunning.value = ''
+  }
+}
+
+/** What the set holds, in counts — the same sentence shape its catalog row
+ *  uses, so the two cannot disagree. */
+const holds = computed(() => {
+  const s = set.value
+  if (!s) return ''
+  const parts = [`${s.datasets.length} ${s.datasets.length === 1 ? 'dataset' : 'datasets'}`]
+  if (s.layers.length) parts.push(`${s.layers.length} ${s.layers.length === 1 ? 'layer' : 'layers'}`)
+  if (columns.value.length) {
+    parts.push(`${columns.value.length} derived ${columns.value.length === 1 ? 'column' : 'columns'}`)
+  }
+  return parts.join(' · ')
+})
+
+/** Every other view of this set. Several is the normal case, not an edge, and
+ *  this is the one place a reader can see that they are all over one object. */
+const siblingViews = computed(() => (set.value?.views ?? []).filter(view => view.slug !== props.view.slug))
+
+// --- Load, once ------------------------------------------------------------
+
+/**
+ * A saved table view's query, put on the URL it is already on.
+ *
+ * The explorer reads its state from the URL, so restoring a table view is the
+ * same job here as on the entry hub — the keys, not the destination
+ * (`tableViewQuery`). Only when the URL carries none of them: a link somebody
+ * shared with its own filters must win over the ones the document was saved
+ * with.
+ */
+function seedTableState(): void {
+  const saved = tableStateOf(props.view)
+  if (!saved) return
+  const query = tableViewQuery(saved, props.view.slug)
+  const owned = ['file', 'q', 'sort', 'dir', 'filter', 'page', 'limit', 'view']
+  if (owned.some(key => route.query[key] !== undefined)) return
+  void router.replace({ query: { ...route.query, ...query } })
+}
+
+onMounted(async () => {
+  const slug = props.view.workingSet ?? ''
+  try {
+    // Both at once: the set's members and its stored columns are two reads of
+    // one object and neither waits on the other.
+    const [detail, stored] = await Promise.all([fetchWorkingSet(slug), fetchWorkingSetColumns(slug)])
+    if (!detail) {
+      setGone.value = true
+      return
+    }
+    set.value = detail
+    columns.value = stored.columns
+    unreadable.value = stored.unreadable
+    seedTableState()
+  } catch (err) {
+    error.value = friendlyError(err, 'That working set could not be loaded.')
+  } finally {
+    loading.value = false
+  }
+})
+</script>
+
+<template>
+  <div class="set-workspace" data-testid="set-workspace">
+    <RouterLink to="/analysis" class="back-link">← Analysis</RouterLink>
+
+    <p v-if="loading" class="state-note" data-testid="workspace-loading">Opening the working set…</p>
+    <p v-else-if="error" class="state-note error" data-testid="workspace-error">{{ error }}</p>
+
+    <!-- A set can be archived or renamed out from under an open view. Say what
+         happened and offer the map, which is where this view used to go. -->
+    <div v-else-if="setGone" class="state-note" data-testid="workspace-set-gone">
+      <p>
+        The view “{{ view.name }}” presents a working set called “{{ view.workingSet }}”, and the library does not have
+        one by that name any more.
+      </p>
+      <p class="gone-links">
+        <RouterLink :to="`/?view=${view.slug}`">Open it on the map</RouterLink>
+        ·
+        <RouterLink to="/analysis">Working sets</RouterLink>
+      </p>
+    </div>
+
+    <template v-else-if="set">
+      <header class="workspace-head">
+        <h1 data-testid="workspace-title">{{ view.name }}</h1>
+        <p class="set-line" data-testid="workspace-set">
+          Over
+          <RouterLink :to="workingSetHref(set.slug)" data-testid="workspace-set-link">{{ set.name }}</RouterLink>
+          <span class="set-holds" data-testid="workspace-holds"> · {{ holds }}</span>
+        </p>
+        <p v-if="set.purpose" class="set-purpose" data-testid="workspace-purpose">{{ set.purpose }}</p>
+        <!-- P7-6: in the HEADER, which is outside both interface panes, so a
+             reader on the data interface is told too. Inside the explorer a
+             derived column is indistinguishable from a county-context one, and
+             a caveat that only holds on the map is not a caveat. -->
+        <p v-if="unsoundLine" class="set-unsound" data-testid="workspace-unsound">{{ unsoundLine }}</p>
+        <!-- A set may carry several views, and all of them read these rows.
+             Worth saying here, because it is the reason the set and the view
+             are two objects at all. -->
+        <p v-if="siblingViews.length" class="set-siblings" data-testid="workspace-siblings">
+          Also presented by
+          <RouterLink
+            v-for="other in siblingViews"
+            :key="other.slug"
+            :to="`/views/${other.slug}`"
+            class="sibling-link"
+            data-testid="workspace-sibling"
+          >{{ other.name }}</RouterLink>
+        </p>
+      </header>
+
+      <!-- Two interfaces, one object, one URL. `replace` on the same path, so
+           this is not a navigation. -->
+      <nav class="tab-bar strip" role="tablist" aria-label="Interfaces" data-testid="interface-switch">
+        <button
+          type="button"
+          role="tab"
+          class="tab-btn"
+          :class="{ active: iface === 'map' }"
+          :aria-selected="iface === 'map'"
+          data-interface="map"
+          @click="show('map')"
+        >Map</button>
+        <button
+          type="button"
+          role="tab"
+          class="tab-btn"
+          :class="{ active: iface === 'data' }"
+          :aria-selected="iface === 'data'"
+          data-interface="data"
+          @click="show('data')"
+        >Data</button>
+      </nav>
+
+      <p v-if="set.missing.length" class="state-note warn" data-testid="workspace-missing">
+        This set names {{ set.missing.length }}
+        {{ set.missing.length === 1 ? 'thing' : 'things' }} the library no longer has:
+        {{ set.missing.join(', ') }}.
+      </p>
+
+      <!-- MAP. `v-if` on the pane, never `v-show`: a reader who stays on the
+           table must not download a county file, and a hidden canvas must not
+           hold a WebGL context. -->
+      <section v-show="iface === 'map'" class="interface" data-testid="interface-map">
+        <template v-if="readyToDraw">
+          <MapPane
+            v-if="map.isOpen.value"
+            class="workspace-pane"
+            testid="set-map-pane"
+            :layers="map.state.layers"
+            :query="map.state.query"
+            :data="map.state.data"
+            :fit="map.fit.value"
+            :title="set.name"
+            :note="paneNote"
+            label="This working set on the map"
+            @close="show('data')"
+            @county-click="clickedGeoId = $event"
+          />
+          <!-- A map beside a page wants a desktop (P6-14). On a phone the deep
+               link is still how this view is shared, and still works. -->
+          <p v-else class="state-note" data-testid="map-too-narrow">
+            There is not room for a map here.
+            <RouterLink :to="`/?view=${view.slug}`">Open it on the full map</RouterLink>.
+          </p>
+        </template>
+        <p v-else-if="!drawsLayers" class="state-note" data-testid="map-no-layers">
+          This set names no map layers yet, so there is nothing to draw.
+          <RouterLink :to="workingSetDatasetsHref(set.slug)">Its datasets</RouterLink>
+          ·
+          <RouterLink :to="workingSetPlaceHref(set.slug)">Check a place in it</RouterLink>
+        </p>
+
+        <!-- The map's reading of the set's derived columns: the same values the
+             table is sorting, over the counties this map is drawing. -->
+        <section v-if="mapColumns.length" class="derived" data-testid="derived-columns">
+          <h2 class="derived-heading">Derived columns</h2>
+          <ul class="derived-list">
+            <li
+              v-for="column in mapColumns"
+              :key="column.id"
+              class="derived-row"
+              :data-freshness="column.freshness"
+              data-testid="derived-row"
+            >
+              <strong class="derived-label">{{ column.label }}</strong>
+              <!-- P7-6: the state word last, beside the thing it is about, and
+                   never the only thing said — the sentence below names which
+                   input moved. -->
+              <span v-if="column.badge" class="derived-badge" data-testid="derived-stale">{{ column.badge }}</span>
+              <span class="derived-line" data-testid="derived-range">{{ column.line }}</span>
+              <span v-if="column.here" class="derived-here" data-testid="derived-here">
+                Here: {{ column.here }}
+              </span>
+              <!-- The re-run, offered where the number is READ rather than on a
+                   form elsewhere: the arguments are in the stored record, so
+                   there is nothing for a reader to retype. -->
+              <button
+                v-if="column.freshness === 'stale' && column.canRerun"
+                type="button"
+                class="derived-rerun"
+                :disabled="!!rerunning"
+                data-testid="derived-rerun"
+                @click="rerun(column.column)"
+              >
+                {{ rerunning === column.id ? 'Measuring…' : 'Run again' }}
+              </button>
+              <button
+                v-if="column.layerId"
+                type="button"
+                class="derived-rerun"
+                data-testid="derived-draw"
+                :aria-pressed="column.drawing"
+                @click="drawIndex(column.layerId)"
+              >
+                {{ column.drawing ? 'Show the set’s layers' : 'Draw on the map' }}
+              </button>
+              <span class="derived-provenance" data-testid="derived-provenance">{{ column.provenance }}</span>
+              <span v-if="column.method" class="derived-method" data-testid="derived-method">{{ column.method }}</span>
+            </li>
+          </ul>
+          <p v-if="rerunError" class="state-note error" data-testid="derived-rerun-error">{{ rerunError }}</p>
+          <p class="derived-note">
+            Stored on the set, not recomputed to draw this. The table sorts these same numbers.
+          </p>
+        </section>
+        <p v-if="unreadable.length" class="state-note warn" data-testid="derived-unreadable">
+          {{ unreadable.length === 1 ? 'One derived column' : `${unreadable.length} derived columns` }} could not be
+          read: {{ unreadable.join(', ') }}.
+        </p>
+      </section>
+
+      <!-- DATA. Kept mounted: the map draws the rows this is showing, so they
+           have to survive a switch. -->
+      <section v-show="iface === 'data'" class="interface" data-testid="interface-data">
+        <DatasetView
+          v-if="anchor"
+          embedded
+          host-map
+          :slug="anchor"
+          :extra-columns="joined"
+          @shown="onShown"
+        />
+        <p v-else class="state-note" data-testid="data-no-anchor">
+          This set is not anchored on a table we hold, so there are no rows to explore yet.
+          <RouterLink :to="workingSetDatasetsHref(set.slug)">Its datasets, and what is still missing</RouterLink>
+        </p>
+      </section>
+    </template>
+  </div>
+</template>
+
+<style scoped>
+.set-workspace {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  min-width: 0;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--blo-stone);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--blo-ink, #111);
+}
+
+.workspace-head h1 {
+  margin: 0;
+  font-size: 22px;
+  color: var(--blo-ink, #111);
+}
+
+.set-line,
+.set-purpose,
+.set-siblings {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--blo-stone);
+}
+
+.set-line a {
+  color: inherit;
+  font-weight: 600;
+}
+
+.sibling-link {
+  color: inherit;
+}
+
+.sibling-link + .sibling-link::before {
+  content: ' · ';
+}
+
+/* Same tab bar as the entry hub: this is the same gesture over the same kind
+   of object, and it should not look like a different one. */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  margin: 18px 0 8px;
+  border-bottom: 1px solid var(--blo-cream-divider, #e0d9ca);
+}
+
+.tab-btn {
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blo-stone);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  color: var(--blo-ink, #111);
+  border-bottom-color: var(--blo-green-deep, #1f4332);
+}
+
+.interface {
+  min-width: 0;
+}
+
+/* The pane is the whole interface here, not a column beside something else,
+   so it takes a readable amount of height rather than the table's share. */
+.workspace-pane {
+  height: min(70vh, 640px);
+}
+
+.state-note {
+  margin: 12px 0;
+  font-size: 13px;
+  color: var(--blo-stone);
+}
+
+.state-note.error {
+  color: var(--blo-clay, #a8422c);
+}
+
+.state-note.warn {
+  color: var(--blo-ink-soft, #5c564e);
+}
+
+.state-note a {
+  color: inherit;
+}
+
+.gone-links {
+  margin: 8px 0 0;
+}
+
+.derived {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--blo-cream-divider, #e0d9ca);
+  border-radius: 8px;
+}
+
+.derived-heading {
+  margin: 0 0 8px;
+  font-size: 13px
+}
+
+.derived-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.derived-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.derived-label {
+  color: var(--blo-ink, #111);
+}
+
+.derived-line,
+.derived-here {
+  color: var(--blo-ink-soft, #5c564e);
+}
+
+.derived-here {
+  font-weight: 600;
+}
+
+.derived-method {
+  flex: 1 1 100%;
+  font-size: 12px;
+  color: var(--blo-stone);
+}
+
+.derived-note {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--blo-stone);
+}
+
+/* P7-6: a column whose inputs have moved must never look like one whose have
+   not — the same orange P6-34 uses for an unverified value, because the state
+   is the same state: a value waiting on a person. Quiet grey would make the
+   label decorative. */
+.derived-badge {
+  padding: 1px 5px;
+  border: 1px solid var(--blo-orange-deep, #e65100);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--blo-orange-deep, #e65100);
+}
+
+/* Full width, so the sentence naming what changed drops to its own line under
+   the row rather than being truncated into a chip. */
+.derived-provenance {
+  flex: 1 1 100%;
+  font-size: 12px;
+  color: var(--blo-stone);
+}
+
+.derived-row[data-freshness='stale'] .derived-provenance {
+  color: var(--blo-orange-deep, #e65100);
+}
+
+/* `.act`'s geometry from NeedsALookNote, which is this codebase's small
+   inline action beside a value that needs attention. */
+.derived-rerun {
+  padding: 1px 6px;
+  font-size: 12px;
+  color: var(--blo-green-deep, #1f7a2e);
+  background: none;
+  border: 1px solid var(--blo-cream-divider, #e0d9ca);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.derived-rerun:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* The header line — the half a reader on the DATA interface sees, where a
+   derived column is indistinguishable from a county-context one. The row-level
+   gap line's own styling (DatasetsView, DocsView). */
+.set-unsound {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--blo-orange-deep, #e65100);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+</style>

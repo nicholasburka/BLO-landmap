@@ -87,3 +87,38 @@ describe('requireAuthEnv', () => {
     exit.mockRestore()
   })
 })
+
+describe('requireAuthEnv NODE_ENV guard', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.restoreAllMocks()
+  })
+
+  it('warns loudly (but does not exit) when NODE_ENV is unset', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const exit = vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never)
+    vi.stubEnv('NODE_ENV', '')
+    requireAuthEnv()
+    expect(exit).not.toHaveBeenCalled()
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(String(warn.mock.calls[0][0])).toContain('NODE_ENV is unset')
+    expect(String(warn.mock.calls[0][0])).toContain('NODE_ENV=production')
+  })
+
+  it('also warns for an unrecognised value', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    vi.stubEnv('NODE_ENV', 'prod')
+    requireAuthEnv()
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(String(warn.mock.calls[0][0])).toContain('"prod"')
+  })
+
+  it('stays quiet for production, development and test', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    for (const env of ['production', 'development', 'test']) {
+      vi.stubEnv('NODE_ENV', env)
+      requireAuthEnv()
+    }
+    expect(warn).not.toHaveBeenCalled()
+  })
+})

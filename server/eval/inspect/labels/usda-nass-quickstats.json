@@ -1,0 +1,49 @@
+{
+  "url": "https://www.nass.usda.gov/Quick_Stats/",
+  "capturedAt": "2026-09-06",
+  "isDataset": true,
+  "keep": [
+    {
+      "url": "https://www.nass.usda.gov/datasets",
+      "role": "directory",
+      "note": "'Download Quick Stats data files' — the bulk files behind the query tool"
+    },
+    {
+      "url": "https://www.nass.usda.gov/Quick_Stats/CDQT/chapter/1/table/1",
+      "role": "viewer",
+      "note": "The Census Data Query Tool: a web form over the Census of Agriculture tables"
+    }
+  ],
+  "keepUnharvested": [
+    {
+      "url": "https://quickstats.nass.usda.gov/",
+      "role": "viewer",
+      "why": "The page's headline tool. Its anchor reads only 'Quick Stats' and the URL is a bare subdomain — no data word, no data shape — so the harvester cannot see it. The clearest harvester gap the eval found."
+    }
+  ],
+  "drop": [
+    "https://www.nass.usda.gov/Data_and_Statistics/index.php",
+    "https://www.nass.usda.gov/Data_Visualization/index.php",
+    "https://www.nass.usda.gov/Research_and_Science/Cropland/SARS1a.php",
+    "https://www.nass.usda.gov/AgCensus/archive/",
+    "https://www.nass.usda.gov/Newsroom/2026/08-12-2026B.php",
+    "https://www.nass.usda.gov/Newsroom/Notices/2025/10-31-2025.php",
+    "https://www.nass.usda.gov/Newsroom/Notices/2025/08-28-2025.php",
+    "https://youtu.be/VerxO14wiHI",
+    "https://youtu.be/FyjUJnIMSfc",
+    "https://www.youtube.com/live/0EY87thoLuo?si=leRX_UTy2DKXJcvN",
+    "https://www.nass.usda.gov/About_NASS/Keeping_Data_Safe/index.php",
+    "https://www.usda.gov/nofear/agencies"
+  ],
+  "prose": {
+    "provider": "USDA National Agricultural Statistics Service",
+    "program": "Quick Stats",
+    "geography": "national, state, county and district"
+  },
+  "topic": "agriculture",
+  "tags": [
+    "farms",
+    "crops"
+  ],
+  "notes": "A landing page that is mostly a site map: press releases, YouTube videos and a hundred programme links around one query tool and one bulk-download link. The Cropland Data Layer is a genuinely different dataset and is in `drop` as the sibling trap."
+}

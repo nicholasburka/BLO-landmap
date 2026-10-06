@@ -1,17 +1,11 @@
 import 'dotenv/config'
-import express from 'express'
-import cors from 'cors'
-import helmet from 'helmet'
-import authRouter from './routes/auth.js'
-import sessionRouter from './routes/session.js'
-import queryRouter from './routes/query.js'
-import chatRouter from './routes/chat.js'
-import usageRouter from './routes/usage.js'
-import { authMiddleware, requireAuthEnv } from './middleware/auth.js'
-import { queryRateLimit } from './middleware/rateLimit.js'
-import { requestLogger } from './middleware/requestLogger.js'
-import { dailyBudgetMiddleware, getUsageSnapshot } from './middleware/budget.js'
+import { createApp } from './app.js'
+import { requireAuthEnv } from './middleware/auth.js'
 import { initUsageStore } from './services/usageStore.js'
+import { isLibraryEnabled, initLibraryDb } from './services/libraryDb.js'
+import { pruneExpiredSessions } from './services/internalSessions.js'
+import { pruneOAuth } from './services/oauthStore.js'
+import { isBucketEnabled, initLibraryBucket, syncMirror } from './services/libraryBucket.js'
 
 // Refuse to boot without the secrets the security model depends on.
 requireAuthEnv()
@@ -20,90 +14,84 @@ if (!process.env.ANTHROPIC_API_KEY) {
   process.exit(1)
 }
 
-const app = express()
+// App construction lives in app.ts so the auth-sweep test (P5-5) can walk
+// the real router table; this file owns env validation and boot only.
+const app = createApp()
 const port = process.env.PORT || 3001
 
-// Honor X-Forwarded-For from Railway / proxies so req.ip is the real client.
-// Without this, all per-IP rate-limit + budget checks collapse onto the
-// proxy's IP. The hop count MUST match the real topology: 1 for a single
-// proxy (Railway/Render direct), 2 if a CDN sits in front of that. Too
-// high a value lets clients spoof X-Forwarded-For and dodge per-IP caps.
-// Never use `true`. Override via TRUST_PROXY_HOPS when the topology changes.
-const trustProxyHops = parseInt(process.env.TRUST_PROXY_HOPS || '1', 10)
-app.set('trust proxy', Number.isFinite(trustProxyHops) && trustProxyHops >= 0 ? trustProxyHops : 1)
-
-// Security headers. This is a JSON API — no cross-origin embedding needed.
-app.use(helmet())
-
-// CORS. Allow: requests with no Origin (curl, server-to-server), configured
-// frontend origins, and same-origin requests (the /dashboard page calling
-// /api/* on this same host — its origin is never in ALLOWED_ORIGINS).
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean)
-const corsDelegate: cors.CorsOptionsDelegate<express.Request> = (req, callback) => {
-  const origin = req.headers.origin
-  if (!origin) return callback(null, { origin: true })
-  let sameOrigin = false
-  try {
-    sameOrigin = new URL(origin).host === req.headers.host
-  } catch {
-    sameOrigin = false
-  }
-  if (sameOrigin || allowedOrigins.includes(origin)) return callback(null, { origin: true })
-  callback(new Error('Not allowed by CORS'))
+// With the in-memory dev store (LIBRARY_DEV_PGMEM=1), the CLI can't reach
+// this process's database — seed a known dev account instead so login can
+// be exercised locally. Guarded twice (flag + non-production).
+async function seedDevUser(): Promise<void> {
+  if (process.env.LIBRARY_DEV_PGMEM !== '1' || process.env.NODE_ENV === 'production') return
+  const { createUser } = await import('./cli/users.js')
+  await createUser('dev-admin', 'admin', 'dev-password-123')
+  console.warn('[library] dev store seeded: user "dev-admin" / password "dev-password-123"')
 }
-app.use(cors(corsDelegate))
 
-// Body parsing. 64 KB comfortably fits the largest legitimate chat window
-// (route-level MAX_HISTORY_CHARS is the tighter cost gate) while keeping
-// megabyte-scale junk out of the JSON parser.
-app.use(express.json({ limit: '64kb' }))
-
-// Request logging
-app.use(requestLogger)
-
-// Health check (no auth). Deliberately bare — budget state, caps, and IP
-// counts are operational intel and live behind auth below.
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok' })
-})
-
-// Usage snapshot for operators: requires a staging-tier token.
-app.get('/api/health/usage', authMiddleware, (_req, res) => {
-  if (res.locals.authTier !== 'staging') {
-    res.status(403).json({ error: 'Forbidden' })
-    return
+// Dead session rows are useless for authentication but still hold a token
+// hash and a user link, so they are cleared out once per boot (deploys are
+// frequent enough that no scheduler is warranted). Best-effort: a failure
+// here is housekeeping, never a reason to refuse traffic.
+async function pruneSessions(): Promise<void> {
+  try {
+    const removed = await pruneExpiredSessions()
+    if (removed > 0) console.log(`[library] pruned ${removed} expired/revoked session rows.`)
+  } catch (err: any) {
+    console.warn(`[library] session prune failed (${err?.message || err}) — rows kept, login unaffected.`)
   }
-  res.json({ status: 'ok', usage: getUsageSnapshot() })
-})
-
-// Session mint + legacy password auth (rate-limited in their route files)
-app.use(sessionRouter)
-app.use(authRouter)
-
-// Internal usage dashboard + /api/usage (gates itself: staging token for the
-// data, public same-origin assets for the page).
-app.use(usageRouter)
-
-// Query + chat routes (auth + rate limiting + daily budget)
-app.use(authMiddleware, queryRateLimit, dailyBudgetMiddleware, queryRouter)
-app.use(authMiddleware, queryRateLimit, dailyBudgetMiddleware, chatRouter)
-
-// Terminal error handler: malformed JSON, CORS rejections, anything thrown.
-// Express's default handler would leak stack traces when NODE_ENV isn't
-// "production"; this one never does.
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  if (err?.message === 'Not allowed by CORS') {
-    res.status(403).json({ error: 'Origin not allowed' })
-    return
+  // Same reasoning for the OAuth tables (P5-51): spent codes, abandoned
+  // authorize requests and dead tokens authenticate nobody, but each row still
+  // holds a hash and a user link. Separately caught so a failure in one prune
+  // never skips the other.
+  try {
+    const removed = await pruneOAuth()
+    if (removed > 0) console.log(`[library] pruned ${removed} expired OAuth rows.`)
+  } catch (err: any) {
+    console.warn(`[library] oauth prune failed (${err?.message || err}) — rows kept, connections unaffected.`)
   }
-  const status = typeof err?.status === 'number' && err.status >= 400 && err.status < 600 ? err.status : 500
-  if (status >= 500) console.error('Unhandled error:', err?.message || err)
-  res.status(status).json({ error: status < 500 ? 'Bad request' : 'Internal server error' })
-})
+}
 
-// Initialize the usage store (Postgres if DATABASE_URL is set, else
-// in-memory) before accepting traffic, then listen.
-initUsageStore().finally(() => {
+// Boot is not often enough for the OAuth tables (P5-51 security review,
+// finding 9): a parked authorize request lives 10 minutes and an unattended
+// instance can run for weeks, so the pending table would hold every abandoned
+// request in between. One small DELETE a quarter of an hour costs nothing and
+// keeps the window bounded. unref() so this timer never holds the process
+// open, and the catch is deliberate — housekeeping never takes the server
+// down, and the boot prune above already logs when the store is unreachable.
+setInterval(() => void pruneOAuth().catch(() => {}), 15 * 60_000).unref()
+
+// Initialize both Postgres-backed stores before accepting traffic:
+// usage store falls back to in-memory, library store disables its features —
+// the public map's routes never depend on either succeeding.
+Promise.allSettled([
+  initUsageStore(),
+  initLibraryDb().then(ok => (ok ? seedDevUser().then(pruneSessions) : undefined)),
+  // Bucket mirror rebuild (P5-7): the host disk is assumed ephemeral, so the
+  // local library tree is re-synced from the bucket on every boot. Failures
+  // log inside and never block the listen below.
+  initLibraryBucket().then(async ok => {
+    if (!ok) return
+    const { downloaded, removed, kept } = await syncMirror()
+    console.log(`[library] mirror synced: ${downloaded} downloaded, ${kept} kept, ${removed} pruned.`)
+  }).catch(err => console.warn(`[library] mirror sync failed (${err?.message || err}) — file serving degraded until next restart.`)),
+]).then(async results => {
+  // Dev store only (LIBRARY_DEV_PGMEM=1): the in-memory catalog starts empty
+  // every boot, and `npm run demo` should come up with the library already
+  // there rather than asking for a press of Reindex first. Production and any
+  // real Postgres keep their index across restarts and are left alone.
+  const [, db, bucket] = results
+  if (process.env.LIBRARY_DEV_PGMEM !== '1' || process.env.NODE_ENV === 'production') return
+  // The settled values are housekeeping results, not readiness — ask the stores.
+  if (db.status !== 'fulfilled' || bucket.status !== 'fulfilled' || !isLibraryEnabled() || !isBucketEnabled()) return
+  try {
+    const { reindexCatalog } = await import('./services/libraryCatalog.js')
+    const { indexed } = await reindexCatalog()
+    console.warn(`[library] dev store indexed from the bucket: ${indexed} entries`)
+  } catch (err) {
+    console.warn(`[library] dev index failed (${(err as Error)?.message || err}) — press Reindex in the app`)
+  }
+}).finally(() => {
   app.listen(port, () => {
     console.log(`BLO API server listening on port ${port}`)
   })

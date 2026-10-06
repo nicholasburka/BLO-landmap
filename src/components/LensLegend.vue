@@ -3,6 +3,12 @@
     <!-- Single-layer or default state: full gradient + low/high labels -->
     <div v-if="primaryLegend" class="lens-legend-bar">
       <div class="lens-legend-title">{{ primaryTitle }}</div>
+      <!-- P7-10: WHEN this layer's data is from. A choropleth gave no
+           indication of its vintage, and for a dashboard that argues from a
+           map — "where is the potential?" — that is a correctness problem
+           rather than a nicety. The legend is where a layer announces itself,
+           so it is where the date goes. -->
+      <div v-if="primaryWhen" class="lens-legend-when" data-testid="legend-when">{{ primaryWhen }}</div>
       <div class="lens-legend-gradient" :style="{ background: primaryLegend.gradient }"></div>
       <div class="lens-legend-bounds">
         <span>{{ primaryLegend.lowLabel }}</span>
@@ -20,6 +26,13 @@
           class="lens-legend-breakdown-row"
         >
           <span class="lens-legend-breakdown-name">{{ row.name }}</span>
+          <!-- P7-10's hardest case: two layers drawn together can be a decade
+               apart and the reader could not tell. The breakdown already
+               enumerates the contributing layers, so one date per row is what
+               makes both legible — compact here, with the full sentence on
+               hover, because "2019–2023" and "Oct 2026" side by side is the
+               whole point. -->
+          <span v-if="row.when" class="lens-legend-breakdown-when" :title="row.whenLong" data-testid="legend-breakdown-when">{{ row.when }}</span>
           <span class="lens-legend-breakdown-arrow" :class="row.directionClass">{{ row.arrow }}</span>
           <span class="lens-legend-breakdown-weight">w {{ row.weight }}</span>
         </li>
@@ -37,6 +50,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { LAYER_REGISTRY } from '@/config/layerRegistry'
+import { coversLabel, dataDateLabel, layerDatesOf, publishedLabel } from '@/lib/dataDates'
 
 interface LayerLegendInfo {
   id: string
@@ -44,6 +58,8 @@ interface LayerLegendInfo {
   gradient: string
   lowLabel: string
   highLabel: string
+  /** P7-10: the one sentence saying when this layer's data is from. */
+  when: string
 }
 
 interface ScoringBreakdownRow {
@@ -52,6 +68,10 @@ interface ScoringBreakdownRow {
   arrow: string
   directionClass: string
   weight: number
+  /** P7-10: compact, for a row in a list ("2019–2023"). */
+  when: string
+  /** The same date in full words, on hover. */
+  whenLong: string
 }
 
 const props = defineProps<{
@@ -60,6 +80,8 @@ const props = defineProps<{
   selectedHousingLayers: string[]
   selectedEquityLayers: string[]
   selectedTransportationLayers: string[]
+  /** P5-18: runtime-registered internal layers (logged-in only; omitted on the public map). */
+  selectedInternalLayers?: string[]
   showContaminationChoropleth: boolean
   layerDirections: Record<string, string>
   layerWeights: Record<string, number>
@@ -75,7 +97,37 @@ function getLegend(id: string): LayerLegendInfo | null {
     gradient: reg.gradient.css,
     lowLabel: reg.gradient.lowLabel,
     highLabel: reg.gradient.highLabel,
+    when: whenOf(id),
   }
+}
+
+/**
+ * P7-10: the one sentence a legend has room for.
+ *
+ * `covers` answers the reader's question — *when is this data from?* — and the
+ * grammar decides the words: a period reads "Covers 2019–2023", a snapshot
+ * reads "As of October 2026", which is Nick's own split between a research
+ * dataset and a living inventory. A layer that states only a release date
+ * falls back to it, because for a list nobody has refreshed since 2019 that is
+ * exactly the fact worth showing. '' for a layer that says nothing, which
+ * renders no line at all — an untagged layer is not a defect.
+ *
+ * All three dates are on the layer's About page, where there is room for the
+ * distinction to be spelled out.
+ */
+function whenOf(id: string): string {
+  const reg = LAYER_REGISTRY[id]
+  if (!reg) return ''
+  const dates = layerDatesOf(reg)
+  return coversLabel(dates.covers) || publishedLabel(dates.published)
+}
+
+/** The same fact, short enough for a breakdown row. */
+function shortWhenOf(id: string): string {
+  const reg = LAYER_REGISTRY[id]
+  if (!reg) return ''
+  const dates = layerDatesOf(reg)
+  return dataDateLabel(dates.covers) || dataDateLabel(dates.published)
 }
 
 /** All non-BLO scoring layer IDs currently active. */
@@ -86,6 +138,7 @@ const scoringIds = computed<string[]>(() => {
     ...props.selectedHousingLayers,
     ...props.selectedEquityLayers,
     ...props.selectedTransportationLayers,
+    ...(props.selectedInternalLayers ?? []),
   ].filter(id => id !== 'combined_scores' && id !== 'combined_scores_v2')
   if (props.showContaminationChoropleth) all.push('contamination')
   return all
@@ -110,6 +163,20 @@ const primaryTitle = computed(() => {
   return primaryLegend.value?.name ?? ''
 })
 
+/**
+ * P7-10: the date under the title.
+ *
+ * Nothing when two or more layers are drawn, because then the title is
+ * "Custom score" and the dates belong to the contributing layers one by one —
+ * a single date over a composite of a 2014 layer and a 2024 one would be a
+ * claim about neither. The breakdown rows carry them instead, which is the
+ * case the ticket exists for.
+ */
+const primaryWhen = computed(() => {
+  if (scoringIds.value.length >= 2) return ''
+  return primaryLegend.value?.when ?? ''
+})
+
 /** Breakdown rendered only in composite (≥2 layer) mode. */
 const scoringBreakdown = computed<ScoringBreakdownRow[]>(() => {
   const ids = scoringIds.value
@@ -123,6 +190,8 @@ const scoringBreakdown = computed<ScoringBreakdownRow[]>(() => {
       arrow: dir === 'lower_better' ? '↓' : '↑',
       directionClass: dir === 'lower_better' ? 'dir-lower' : 'dir-higher',
       weight: props.layerWeights[id] ?? 5,
+      when: shortWhenOf(id),
+      whenLong: whenOf(id),
     }
   })
 })
@@ -190,9 +259,18 @@ const scoringBreakdown = computed<ScoringBreakdownRow[]>(() => {
   gap: 4px;
 }
 
+/* P7-10: when the data is from, under the layer's name and above its scale —
+   subdued, because it qualifies the title rather than competing with it. */
+.lens-legend-when {
+  font-size: 11px;
+  color: var(--blo-stone, #6b6560);
+  margin: -2px 0 6px;
+  font-feature-settings: "tnum";
+}
+
 .lens-legend-breakdown-row {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto auto auto;
   align-items: baseline;
   gap: 8px;
   font-size: 12px;
@@ -211,6 +289,13 @@ const scoringBreakdown = computed<ScoringBreakdownRow[]>(() => {
 }
 .lens-legend-breakdown-arrow.dir-higher { color: var(--blo-green-deep, #1f7a2e); }
 .lens-legend-breakdown-arrow.dir-lower  { color: var(--blo-stone, #6b6560); }
+
+.lens-legend-breakdown-when {
+  font-size: 10.5px;
+  color: var(--blo-stone, #6b6560);
+  white-space: nowrap;
+  font-feature-settings: "tnum";
+}
 
 .lens-legend-breakdown-weight {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;

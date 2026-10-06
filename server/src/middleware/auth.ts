@@ -22,6 +22,10 @@ function getSecret(): string {
   return secret
 }
 
+/** The values every NODE_ENV check in this server tests for. Anything else
+ *  falls through to the permissive branch of all of them at once. */
+const KNOWN_NODE_ENVS = new Set(['production', 'development', 'test'])
+
 /** Boot-time guard, called from index.ts before listen(). Exits rather
  *  than serving with a forgeable token scheme. */
 export function requireAuthEnv(): void {
@@ -32,6 +36,22 @@ export function requireAuthEnv(): void {
         "Generate one with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
     )
     process.exit(1)
+  }
+
+  // A typo'd or unset NODE_ENV fails *open*: session cookies lose Secure and
+  // SameSite=None, the error handler is chattier, and BUDGET_BYPASS stops
+  // being force-disabled. Warn loudly rather than exit — a running deploy
+  // that is merely mislabelled should not be taken down by a boot check.
+  const nodeEnv = process.env.NODE_ENV || ''
+  if (!KNOWN_NODE_ENVS.has(nodeEnv)) {
+    console.warn(
+      (nodeEnv === ''
+        ? 'WARNING: NODE_ENV is unset.'
+        : `WARNING: NODE_ENV is "${nodeEnv}", which this server does not recognise.`) +
+        ' Running in the permissive non-production mode: session cookies without' +
+        ' Secure/SameSite=None, verbose errors, budget bypass permitted.' +
+        ' Set NODE_ENV=production on any deployed instance.',
+    )
   }
 }
 

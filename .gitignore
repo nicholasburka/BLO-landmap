@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 .DS_Store
 dist
+dist-e2e
 dist-ssr
 coverage
 *.local
@@ -48,9 +49,22 @@ __pycache__/
 dist/
 build/
 
+# Prebuilt county data (P5-90) — generated from the tracked public datasets by
+# `npm run build:datasets`, named by content hash, and regenerated on every
+# build. Derived bytes, so they are not committed; `scripts/check-bundle-leaks.mjs`
+# gates them against the generated manifest instead of against git.
+# (The bare `build/` above already matches this; spelled out so it survives a
+# tightening of that pattern.)
+public/datasets/build/
+
 # Local Netlify folder
 .netlify
 
 # Session screenshots and browser-automation artifacts
 screenshots/
 .playwright-mcp/
+
+# Internal library data (mirrored files; index lives in Postgres) — never commit
+library-data/
+# Dev sync-CLI working folder (`npm run library -- pull`) — never commit
+library-local/

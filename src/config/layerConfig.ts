@@ -1,4 +1,5 @@
 import { LAYER_REGISTRY, getLayer } from './layerRegistry'
+import { SITE_LAYERS } from './siteLayers'
 
 export interface DemographicLayer {
   id: string
@@ -10,6 +11,10 @@ export interface DemographicLayer {
   category?: string
 }
 
+/** P5-74: where a contamination GeoJSON is in its on-demand load. Absent
+ *  means it has never been asked for — which is every layer at startup. */
+export type ContaminationLoadStatus = 'loading' | 'loaded' | 'error'
+
 export interface ContaminationLayer {
   id: string
   name: string
@@ -17,6 +22,9 @@ export interface ContaminationLayer {
   color: string
   visible: boolean
   tooltip?: string
+  /** Runtime, not configuration: set by the map the first time the layer is
+   *  switched on, and read by the checkbox row (P5-74). */
+  status?: ContaminationLoadStatus
 }
 
 export interface EconomicLayer {
@@ -103,51 +111,137 @@ export const DEMOGRAPHIC_LAYERS: DemographicLayer[] = [
   },
 ]
 
-// Contamination layers are point/polygon overlays, not in the registry
-export const CONTAMINATION_LAYERS: ContaminationLayer[] = [
-  {
-    id: 'acres_brownfields',
-    name: 'Brownfields',
-    file: '/datasets/epa-contamination/acres_brownfields.geojson',
-    color: '#FF0000',
-    visible: false,
-    tooltip: 'Properties with potential hazardous substances complicating development. (EPA)',
-  },
-  {
-    id: 'air_pollution_sources',
-    name: 'Air Pollution Sources',
-    file: '/datasets/epa-contamination/air_pollution_sources.geojson',
-    // Magenta — contrasts with the green choropleth so dots stay visible
-    // when overlaid (#00FF00 was nearly invisible against BLO green).
-    color: '#d946ef',
-    visible: false,
-    tooltip: 'Facilities that emit air pollutants tracked by EPA. (EPA)',
-  },
-  {
-    id: 'hazardous_waste_sites',
-    name: 'Hazardous Waste Sites',
-    file: '/datasets/epa-contamination/hazardous_waste_sites.geojson',
-    color: '#0000FF',
-    visible: false,
-    tooltip: 'RCRA-regulated facilities managing hazardous waste. (EPA)',
-  },
-  {
-    id: 'superfund_sites',
-    name: 'Superfund Sites',
-    file: '/datasets/epa-contamination/superfund_sites.geojson',
-    color: '#FFFF00',
-    visible: false,
-    tooltip: 'National Priorities List sites requiring long-term hazardous cleanup. (EPA)',
-  },
-  {
-    id: 'toxic_release_inventory',
-    name: 'Toxic Release Inventory',
-    file: '/datasets/epa-contamination/toxic_release_inventory.geojson',
-    color: '#FF00FF',
-    visible: false,
-    tooltip: 'Facilities reporting annual toxic chemical releases. (EPA)',
-  },
-]
+/* ---------------------------------------------------------------------------
+ * P5-74: contamination sources on demand
+ *
+ * The five EPA GeoJSONs below are 24 MB together. They used to be fetched and
+ * parsed before the map would accept a click; now nothing touches them until
+ * someone switches a layer on. The map plumbing lives here, beside the layer
+ * definitions and behind a minimal map interface (the same shape
+ * `lib/internalFeatureLayers.ts` uses), so it is testable without Mapbox.
+ * ------------------------------------------------------------------------ */
+
+export function contaminationSourceId(layerId: string): string {
+  return `contamination-source-${layerId}`
+}
+
+export function contaminationMapLayerId(layerId: string): string {
+  return `contamination-layer-${layerId}`
+}
+
+/** The subset of a map's API these helpers touch — mapboxgl.Map satisfies it.
+ *  Source/layer params are `any` on purpose: Mapbox's specification unions
+ *  aren't assignable to index-signature types. */
+export interface ContaminationMapLike {
+  getSource(id: string): unknown
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  addSource(id: string, source: any): unknown
+  getLayer(id: string): unknown
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  addLayer(layer: any): unknown
+  setLayoutProperty(id: string, name: string, value: unknown): unknown
+}
+
+const EPA_ATTRIBUTION =
+  'Data source: <a href="https://www.epa.gov/frs" target="_blank" rel="noopener">U.S. EPA Facility Registry Service</a>'
+
+/** Add one contamination GeoJSON as a hidden circle layer. Idempotent, so a
+ *  retry after a half-finished add is safe. The layer starts hidden — the
+ *  caller reveals it once it knows the user still wants it. */
+export function addContaminationToMap(
+  map: ContaminationMapLike,
+  layer: ContaminationLayer,
+  data: unknown,
+): void {
+  const sourceId = contaminationSourceId(layer.id)
+  const mapLayerId = contaminationMapLayerId(layer.id)
+  if (!map.getSource(sourceId)) {
+    map.addSource(sourceId, { type: 'geojson', data, attribution: EPA_ATTRIBUTION })
+  }
+  if (!map.getLayer(mapLayerId)) {
+    map.addLayer({
+      id: mapLayerId,
+      type: 'circle',
+      source: sourceId,
+      paint: { 'circle-radius': 6, 'circle-color': layer.color, 'circle-opacity': 0.7 },
+      layout: { visibility: 'none' },
+    })
+  }
+}
+
+/** Show or hide an already-added contamination layer; a no-op while its
+ *  GeoJSON is still on the way. */
+export function setContaminationVisibility(
+  map: ContaminationMapLike,
+  layerId: string,
+  visible: boolean,
+): void {
+  const mapLayerId = contaminationMapLayerId(layerId)
+  if (!map.getLayer(mapLayerId)) return
+  map.setLayoutProperty(mapLayerId, 'visibility', visible ? 'visible' : 'none')
+}
+
+/** What the loader needs from its host. Both are functions so a load can
+ *  start before the map's style has settled: the download begins at once and
+ *  the add waits for `map()` to resolve. */
+export interface ContaminationHost {
+  /** The map, once its style can take sources; null if it never can. */
+  map: () => Promise<ContaminationMapLike | null>
+  fetchGeoJson: (url: string) => Promise<unknown>
+}
+
+async function loadContaminationOnce(
+  layer: ContaminationLayer,
+  host: ContaminationHost,
+): Promise<boolean> {
+  layer.status = 'loading'
+  try {
+    const data = await host.fetchGeoJson(layer.file)
+    const map = await host.map()
+    if (!map) throw new Error('the map went away before the layer could be added')
+    addContaminationToMap(map, layer, data)
+    layer.status = 'loaded'
+    return true
+  } catch (error) {
+    console.warn(
+      `[layers] contamination layer ${layer.id} failed:`,
+      error instanceof Error ? error.message : error,
+    )
+    layer.status = 'error'
+    return false
+  }
+}
+
+/**
+ * Fetch a contamination GeoJSON and put it on the map, at most once per layer
+ * (P5-74). `layer.status` carries the result to the checkbox row: 'loading'
+ * while it is on the way, 'loaded' once the map has it, 'error' when it could
+ * not be had — and an errored layer loads again on the next ask, which is what
+ * makes the row's "try again" work. `inflight` de-dupes callers that arrive
+ * together: a checkbox click and a `?layers=` deep link share one download
+ * rather than racing for two.
+ */
+export function ensureContaminationLayer(
+  layer: ContaminationLayer,
+  host: ContaminationHost,
+  inflight: Map<string, Promise<boolean>>,
+): Promise<boolean> {
+  if (layer.status === 'loaded') return Promise.resolve(true)
+  const existing = inflight.get(layer.id)
+  if (existing) return existing
+  const load = loadContaminationOnce(layer, host).finally(() => inflight.delete(layer.id))
+  inflight.set(layer.id, load)
+  return load
+}
+
+// Contamination layers are point/polygon overlays, not in the registry. The
+// definitions live in `siteLayers.ts` because the server needs the same ids
+// and labels to validate and describe a saved view's `siteLayers` (P5-78);
+// `visible` is runtime state, so it is added here and always starts off.
+export const CONTAMINATION_LAYERS: ContaminationLayer[] = SITE_LAYERS.map(layer => ({
+  ...layer,
+  visible: false,
+}))
 
 export const ECONOMIC_LAYERS: EconomicLayer[] = [
   {

@@ -1,11 +1,34 @@
-import { ref, type Ref, reactive } from 'vue'
-import Papa from 'papaparse'
-import { DATA_PATHS, debugLog } from '@/config/constants'
+/**
+ * County data for the map.
+ *
+ * P5-87 / P5-90. This used to be thirteen fetches issued one after another —
+ * `await` per file — with ten of them CSVs parsed on the main thread by Papa,
+ * and the Mapbox map constructed only after the last one landed. Counties
+ * reached the screen at 6.6 s locally and 25-38 s on a loaded laptop.
+ *
+ * Now there are two files, both built by `scripts/build-datasets.mjs` and both
+ * named by the hash of their contents (so `/datasets/build/*` is served
+ * `immutable` and a repeat visit re-fetches nothing):
+ *
+ *   - `county-data.<hash>.json` — every per-county number the map reads, in
+ *     sections keyed exactly like the refs below, so consumers did not change.
+ *   - `counties.<hash>.geojson` — the polygons.
+ *
+ * They are fetched in parallel by the caller (`Map.vue` starts both before the
+ * map's own style is up). The county-name lookup (`lib/countyLookup.ts`) is
+ * deliberately not part of this: it is a nicety for the chat tools, not
+ * something the first paint waits on.
+ */
+import { ref, reactive } from 'vue'
+import DATASETS from '@/config/datasetsManifest.generated.json'
+import { debugLog } from '@/config/constants'
 import type {
   DiversityData,
   LifeExpectancyDataMap,
   ContaminationDataMap,
+  CombinedScoreData,
   CombinedScoresDataMap,
+  BLOScoreV2Data,
   BLOScoreV2DataMap,
   EconomicDataMap,
   HousingDataMap,
@@ -13,6 +36,81 @@ import type {
   TransportationDataMap,
   CountiesGeoJSON,
 } from '@/types/mapTypes'
+
+/**
+ * The prebuilt file's shape. Every section is `{ GEOID → record }` with the
+ * field names the refs expose.
+ *
+ * The two score sections are trimmed by the build: nothing renders BLO v1's
+ * component breakdown or v2's `components`/`raw` blobs (3.3 MB of the source
+ * file), so the build keeps only the fields consumers reach for.
+ */
+export interface CountyDataBundle {
+  version: number
+  diversity: DiversityData
+  lifeExpectancy: LifeExpectancyDataMap
+  contamination: ContaminationDataMap
+  combinedScores: Record<string, Pick<CombinedScoreData, 'combinedScore' | 'rankScore'>>
+  combinedScoresV2: Record<string, Pick<BLOScoreV2Data, 'blo_score_v2'>>
+  economic: EconomicDataMap
+  housing: HousingDataMap
+  equity: EquityDataMap
+  transportation: TransportationDataMap
+}
+
+/** In-flight or settled fetch of the built file, shared by every caller:
+ *  the map and a layer page mounted in the same session read one download. */
+let bundleRequest: Promise<CountyDataBundle> | null = null
+
+/**
+ * Fetch (once) the prebuilt county file. A failure clears the cached promise
+ * so a later attempt can genuinely retry instead of replaying the error.
+ */
+export function fetchCountyDataBundle(): Promise<CountyDataBundle> {
+  bundleRequest ??= fetch(DATASETS.countyData)
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error(`County data ${response.status} from ${DATASETS.countyData}`)
+      }
+      return (await response.json()) as CountyDataBundle
+    })
+    .catch((error) => {
+      bundleRequest = null
+      throw error
+    })
+  return bundleRequest
+}
+
+/** In-flight or settled fetch of the polygons, shared the same way (P6-10).
+ *  Two maps can live in one page now — the home map and the chat pane — and
+ *  the second one must not re-download and re-parse 1.86 MB the first already
+ *  holds. Both get the same parsed object, so the cost is one copy. */
+let geometryRequest: Promise<CountiesGeoJSON> | null = null
+
+/**
+ * Fetch (once) the county polygons. Same eviction-on-failure rule as the data
+ * file above: a failed download is not cached, so the next caller retries.
+ */
+export function fetchCountiesGeoJSON(): Promise<CountiesGeoJSON> {
+  geometryRequest ??= fetch(DATASETS.counties)
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error(`County geometry ${response.status} from ${DATASETS.counties}`)
+      }
+      return (await response.json()) as CountiesGeoJSON
+    })
+    .catch((error) => {
+      geometryRequest = null
+      throw error
+    })
+  return geometryRequest
+}
+
+/** Test seam: forget both cached downloads. */
+export function resetCountyDataCache(): void {
+  bundleRequest = null
+  geometryRequest = null
+}
 
 export function useMapData() {
   // Data refs
@@ -28,16 +126,15 @@ export function useMapData() {
   const transportationData = ref<TransportationDataMap>({})
 
   /**
-   * Load counties GeoJSON data
+   * Load the county polygons. Independent of the data file — the caller runs
+   * the two together.
    */
   const loadCountiesGeoJSON = async (): Promise<void> => {
     try {
-      const response = await fetch(DATA_PATHS.COUNTIES)
-      countiesData.value = await response.json()
+      countiesData.value = await fetchCountiesGeoJSON()
 
-      debugLog('Counties data loaded:', {
+      debugLog('Counties geometry loaded:', {
         features: countiesData.value?.features?.length,
-        sampleFeature: countiesData.value?.features?.[0],
       })
     } catch (error) {
       console.error('Error loading counties GeoJSON:', error)
@@ -46,435 +143,63 @@ export function useMapData() {
   }
 
   /**
-   * Load contamination counts data
+   * Load the prebuilt county data file into every data ref.
+   *
+   * Each section is assigned whole rather than built key by key: ~3,200
+   * per-county writes into a reactive ref was a dependency trigger per county
+   * per dataset, for maps nothing watches at that granularity.
    */
-  const loadContaminationData = async (): Promise<void> => {
+  const loadCountyData = async (): Promise<void> => {
     try {
-      const response = await fetch(DATA_PATHS.CONTAMINATION_COUNTS)
-      const data = await response.json()
-      Object.assign(countyContaminationCounts, data)
+      const bundle = await fetchCountyDataBundle()
 
-      debugLog('Contamination data loaded:', {
-        totalCounties: Object.keys(countyContaminationCounts).length,
+      diversityData.value = bundle.diversity ?? {}
+      lifeExpectancyData.value = bundle.lifeExpectancy ?? {}
+      Object.assign(countyContaminationCounts, bundle.contamination ?? {})
+      // The built file carries only the fields consumers read from the two
+      // score blobs; see CountyDataBundle.
+      combinedScoresData.value = (bundle.combinedScores ?? {}) as CombinedScoresDataMap
+      combinedScoresV2Data.value = (bundle.combinedScoresV2 ?? {}) as BLOScoreV2DataMap
+      economicData.value = bundle.economic ?? {}
+      housingData.value = bundle.housing ?? {}
+      equityData.value = bundle.equity ?? {}
+      transportationData.value = bundle.transportation ?? {}
+
+      debugLog('County data loaded:', {
+        version: bundle.version,
+        counties: Object.keys(bundle.diversity ?? {}).length,
       })
     } catch (error) {
-      console.error('Error loading contamination data:', error)
+      console.error('Error loading county data:', error)
       throw error
     }
   }
 
   /**
-   * Load diversity data from CSV
+   * Per-layer entry points for the layer pages (`LAYER_DATA_SOURCES` in
+   * `lib/publicLayers.ts`), which load one layer's values and nothing else.
+   * They all resolve the same prebuilt file now — one download, deduped —
+   * so the names stay as the documented per-layer contract while the ten CSV
+   * parsers they used to run are gone.
    */
-  const loadDiversityData = async (): Promise<void> => {
-    try {
-      const response = await fetch(DATA_PATHS.DIVERSITY_DATA)
-      const csvText = await response.text()
-
-      const results = Papa.parse(csvText, {
-        header: true,
-        dynamicTyping: true,
-      })
-
-      debugLog('Diversity data parsing:', {
-        totalRows: results.data.length,
-        sampleRows: results.data.slice(0, 5),
-        sampleGEOIDs: results.data.slice(0, 5).map((row: any) => row.GEOID),
-        errors: results.errors,
-      })
-
-      results.data.forEach((row: any) => {
-        if (!row.GEOID) return
-
-        // Ensure GEOID is properly formatted (5 digits with leading zeros)
-        const geoID = row.GEOID.toString().padStart(5, '0')
-
-        diversityData.value[geoID] = {
-          diversityIndex: row.diversity_index,
-          totalPopulation: row.total_population,
-          pct_nhBlack: row.pct_nhBlack,
-          pct_Black: row.pct_Black,
-          total_Black: row.total_Black,
-          nhWhite: row.NH_White,
-          nhBlack: row.NH_Black,
-          nhAmIndian: row.NH_AmIndian,
-          nhAsian: row.NH_Asian,
-          nhPacIslander: row.NH_PacIslander,
-          nhTwoOrMore: row.NH_TwoOrMore,
-          hispanic: row.Hispanic,
-          countyName: row.CTYNAME,
-          stateName: row.STNAME,
-        }
-      })
-
-      debugLog('Diversity data loaded:', {
-        totalCounties: Object.keys(diversityData.value).length,
-        sampleKeys: Object.keys(diversityData.value).slice(0, 5),
-        sampleData: Object.entries(diversityData.value).slice(0, 2),
-      })
-    } catch (error) {
-      console.error('Error loading diversity data:', error)
-      throw error
-    }
-  }
+  const loadContaminationData = loadCountyData
+  const loadDiversityData = loadCountyData
+  const loadLifeExpectancyData = loadCountyData
+  const loadCombinedScores = loadCountyData
+  const loadCombinedScoresV2 = loadCountyData
+  const loadEconomicData = loadCountyData
+  const loadHousingData = loadCountyData
+  const loadEquityData = loadCountyData
+  const loadTransportationData = loadCountyData
 
   /**
-   * Load life expectancy data from CSV
-   */
-  const loadLifeExpectancyData = async (): Promise<void> => {
-    try {
-      const response = await fetch(DATA_PATHS.LIFE_EXPECTANCY)
-      const csvText = await response.text()
-
-      const results = Papa.parse(csvText, {
-        header: true,
-        dynamicTyping: true,
-      })
-
-      debugLog('Life expectancy raw data sample:', {
-        headers: results.meta.fields,
-        firstFewRows: results.data.slice(0, 10).map((row: any) => ({
-          rawGEOID: row.GEOID,
-          typeofGEOID: typeof row.GEOID,
-          state: row.STATE2KX,
-          county: row.CNTY2KX,
-          lifeExp: row['e(0)'],
-        })),
-      })
-
-      results.data.forEach((row: any) => {
-        if (!row.GEOID) return
-
-        // Convert state and county codes to proper GEOID format
-        let geoID: string
-        if (row.STATE2KX && row.CNTY2KX) {
-          const stateCode = row.STATE2KX.toString().padStart(2, '0')
-          const countyCode = row.CNTY2KX.toString().padStart(3, '0')
-          geoID = stateCode + countyCode
-        } else {
-          geoID = row.GEOID.toString().padStart(5, '0')
-        }
-
-        lifeExpectancyData.value[geoID] = {
-          lifeExpectancy: row['e(0)'],
-          standardError: row['se(e(0))'],
-        }
-      })
-
-      debugLog('Life expectancy data loaded:', {
-        totalCounties: Object.keys(lifeExpectancyData.value).length,
-      })
-    } catch (error) {
-      console.error('Error loading life expectancy data:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Load combined scores data
-   */
-  const loadCombinedScores = async (): Promise<void> => {
-    try {
-      const response = await fetch(DATA_PATHS.COMBINED_SCORES)
-      combinedScoresData.value = await response.json()
-
-      debugLog('Combined scores loaded:', {
-        totalCounties: Object.keys(combinedScoresData.value).length,
-      })
-    } catch (error) {
-      console.error('Error loading combined scores:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Load BLO v2.0 combined scores data
-   */
-  const loadCombinedScoresV2 = async (): Promise<void> => {
-    try {
-      const response = await fetch(DATA_PATHS.COMBINED_SCORES_V2)
-      combinedScoresV2Data.value = await response.json()
-
-      debugLog('BLO v2.0 scores loaded:', {
-        totalCounties: Object.keys(combinedScoresV2Data.value).length,
-      })
-    } catch (error) {
-      console.error('Error loading BLO v2.0 scores:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Load economic data from CSV files
-   */
-  const loadEconomicData = async (): Promise<void> => {
-    try {
-      // Load average weekly wages
-      const wagesResponse = await fetch(DATA_PATHS.AVG_WEEKLY_WAGES)
-      const wagesText = await wagesResponse.text()
-      const wagesResults = Papa.parse(wagesText, {
-        header: true,
-        dynamicTyping: true,
-      })
-
-      // Load median income by race
-      const incomeResponse = await fetch(DATA_PATHS.MEDIAN_INCOME_BY_RACE)
-      const incomeText = await incomeResponse.text()
-      const incomeResults = Papa.parse(incomeText, {
-        header: true,
-        dynamicTyping: true,
-      })
-
-      // Merge data by GEOID
-      wagesResults.data.forEach((row: any) => {
-        if (!row.GEOID) return
-        const geoID = row.GEOID.toString().padStart(5, '0')
-
-        economicData.value[geoID] = {
-          GEOID: geoID,
-          county_name: row.county_name,
-          state_name: row.state_name,
-          year: row.year,
-          avg_weekly_wage: row.avg_weekly_wage,
-        }
-      })
-
-      incomeResults.data.forEach((row: any) => {
-        if (!row.GEOID) return
-        const geoID = row.GEOID.toString().padStart(5, '0')
-
-        if (economicData.value[geoID]) {
-          economicData.value[geoID].median_income_black = row.median_income_black
-        } else {
-          economicData.value[geoID] = {
-            GEOID: geoID,
-            county_name: row.county_name,
-            state_name: row.state_name,
-            year: row.year,
-            avg_weekly_wage: 0,
-            median_income_black: row.median_income_black,
-          }
-        }
-      })
-
-      debugLog('Economic data loaded:', {
-        totalCounties: Object.keys(economicData.value).length,
-      })
-    } catch (error) {
-      console.error('Error loading economic data:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Load housing data from CSV files
-   */
-  const loadHousingData = async (): Promise<void> => {
-    try {
-      // Load median home value
-      const homeValueResponse = await fetch(DATA_PATHS.MEDIAN_HOME_VALUE)
-      const homeValueText = await homeValueResponse.text()
-      const homeValueResults = Papa.parse(homeValueText, {
-        header: true,
-        dynamicTyping: true,
-      })
-
-      // Load median property tax
-      const propertyTaxResponse = await fetch(DATA_PATHS.MEDIAN_PROPERTY_TAX)
-      const propertyTaxText = await propertyTaxResponse.text()
-      const propertyTaxResults = Papa.parse(propertyTaxText, {
-        header: true,
-        dynamicTyping: true,
-      })
-
-      // Load homeownership by race
-      const homeownershipResponse = await fetch(DATA_PATHS.HOMEOWNERSHIP_BY_RACE)
-      const homeownershipText = await homeownershipResponse.text()
-      const homeownershipResults = Papa.parse(homeownershipText, {
-        header: true,
-        dynamicTyping: true,
-      })
-
-      // Merge data by GEOID
-      homeValueResults.data.forEach((row: any) => {
-        if (!row.GEOID) return
-        const geoID = row.GEOID.toString().padStart(5, '0')
-
-        housingData.value[geoID] = {
-          GEOID: geoID,
-          county_name: row.county_name,
-          state_name: row.state_name,
-          year: row.year,
-          median_home_value: row.median_home_value_with_mortgage,
-        }
-      })
-
-      propertyTaxResults.data.forEach((row: any) => {
-        if (!row.GEOID) return
-        const geoID = row.GEOID.toString().padStart(5, '0')
-
-        if (housingData.value[geoID]) {
-          housingData.value[geoID].median_property_tax =
-            row.median_property_tax_with_mortgage
-        } else {
-          housingData.value[geoID] = {
-            GEOID: geoID,
-            county_name: row.county_name,
-            state_name: row.state_name,
-            year: row.year,
-            median_property_tax: row.median_property_tax_with_mortgage,
-          }
-        }
-      })
-
-      homeownershipResults.data.forEach((row: any) => {
-        if (!row.GEOID) return
-        const geoID = row.GEOID.toString().padStart(5, '0')
-
-        if (housingData.value[geoID]) {
-          housingData.value[geoID].homeownership_rate_black =
-            row.homeownership_rate_black
-        } else {
-          housingData.value[geoID] = {
-            GEOID: geoID,
-            county_name: row.county_name,
-            state_name: row.state_name,
-            year: row.year,
-            homeownership_rate_black: row.homeownership_rate_black,
-          }
-        }
-      })
-
-      debugLog('Housing data loaded:', {
-        totalCounties: Object.keys(housingData.value).length,
-      })
-    } catch (error) {
-      console.error('Error loading housing data:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Load equity data from CSV files
-   */
-  const loadEquityData = async (): Promise<void> => {
-    try {
-      // Load poverty by race
-      const povertyResponse = await fetch(DATA_PATHS.POVERTY_BY_RACE)
-      const povertyText = await povertyResponse.text()
-      const povertyResults = Papa.parse(povertyText, {
-        header: true,
-        dynamicTyping: true,
-      })
-
-      // Load Black Progress Index
-      const blackProgressResponse = await fetch(DATA_PATHS.BLACK_PROGRESS_INDEX)
-      const blackProgressText = await blackProgressResponse.text()
-      const blackProgressResults = Papa.parse(blackProgressText, {
-        header: true,
-        dynamicTyping: true,
-      })
-
-      // Merge data by GEOID
-      povertyResults.data.forEach((row: any) => {
-        if (!row.GEOID) return
-        const geoID = row.GEOID.toString().padStart(5, '0')
-
-        equityData.value[geoID] = {
-          GEOID: geoID,
-          county_name: row.county_name,
-          state_name: row.state_name,
-          year: row.year,
-          poverty_rate_black: row.poverty_rate_black,
-        }
-      })
-
-      blackProgressResults.data.forEach((row: any) => {
-        if (!row.GEOID) return
-        const geoID = row.GEOID.toString().padStart(5, '0')
-
-        if (equityData.value[geoID]) {
-          equityData.value[geoID].black_progress_index = row.black_progress_index
-        } else {
-          equityData.value[geoID] = {
-            GEOID: geoID,
-            county_name: row.county_name,
-            state: row.state,
-            black_progress_index: row.black_progress_index,
-          }
-        }
-      })
-
-      debugLog('Equity data loaded:', {
-        totalCounties: Object.keys(equityData.value).length,
-      })
-    } catch (error) {
-      console.error('Error loading equity data:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Load transportation/commute data from CSV
-   */
-  const loadTransportationData = async (): Promise<void> => {
-    try {
-      const response = await fetch(DATA_PATHS.COMMUTE_TIMES)
-      const csvText = await response.text()
-
-      const results = Papa.parse(csvText, {
-        header: true,
-        dynamicTyping: true,
-      })
-
-      results.data.forEach((row: any) => {
-        if (!row.GEOID) return
-        const geoID = row.GEOID.toString().padStart(5, '0')
-
-        transportationData.value[geoID] = {
-          GEOID: geoID,
-          county_name: row.county_name,
-          state_name: row.state_name,
-          year: row.year,
-          most_frequent_commute_time: row.most_frequent_commute_time,
-          commute_time_ordinal: row.commute_time_ordinal,
-          pct_drove_alone: row.pct_drove_alone,
-          pct_carpooled: row.pct_carpooled,
-          pct_public_transit: row.pct_public_transit,
-          pct_black: row.pct_black,
-        }
-      })
-
-      debugLog('Transportation data loaded:', {
-        totalCounties: Object.keys(transportationData.value).length,
-      })
-    } catch (error) {
-      console.error('Error loading transportation data:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Load all county data
+   * Geometry and data together, in parallel. The map uses the two promises
+   * separately (it counts files for the loading overlay); this is the simple
+   * form for anything that just wants everything.
    */
   const loadAllCountyData = async (): Promise<void> => {
-    try {
-      await loadCountiesGeoJSON()
-      await loadContaminationData()
-      await loadDiversityData()
-      await loadLifeExpectancyData()
-      await loadCombinedScores()
-      await loadCombinedScoresV2()
-      await loadEconomicData()
-      await loadHousingData()
-      await loadEquityData()
-      await loadTransportationData()
-
-      debugLog('All data loaded successfully')
-    } catch (error) {
-      console.error('Error loading counties data:', error)
-      throw error
-    }
+    await Promise.all([loadCountiesGeoJSON(), loadCountyData()])
+    debugLog('All data loaded successfully')
   }
 
   return {
@@ -492,6 +217,7 @@ export function useMapData() {
 
     // Loading functions
     loadCountiesGeoJSON,
+    loadCountyData,
     loadContaminationData,
     loadDiversityData,
     loadLifeExpectancyData,

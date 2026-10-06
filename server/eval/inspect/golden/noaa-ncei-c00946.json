@@ -1,0 +1,123 @@
+{
+  "slug": "noaa-ncei-c00946",
+  "url": "https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncdc:C00946",
+  "capturedAt": "2026-09-07T01:44:25.429Z",
+  "recordedAt": "2026-09-07T02:06:06.029Z",
+  "model": "claude-sonnet-5",
+  "answer": "{\n  \"isDataset\": true,\n  \"links\": [\n    {\"index\": 0, \"role\": \"viewer\", \"reason\": \"NCEI Data Search lets users query the GSOM dataset by time, location and type.\"},\n    {\"index\": 1, \"role\": \"viewer\", \"reason\": \"Interactive map server to locate GSOM stations and data layers.\"},\n    {\"index\": 2, \"role\": \"directory\", \"reason\": \"Direct download page holding the GSOM dataset files.\"},\n    {\"index\": 3, \"role\": \"data-file\", \"reason\": \"KMZ file giving geographic information for the GSOM dataset.\"},\n    {\"index\": 9, \"role\": \"docs\", \"reason\": \"PDF documentation describing GSOM data collection, processing and quality control.\"},\n    {\"index\": 8, \"role\": \"landing\", \"reason\": \"DOI-resolved NCEI landing page for this same dataset.\"}\n  ],\n  \"provider\": \"NOAA National Centers for Environmental Information (NCEI)\",\n  \"program\": \"Global Summary of the Month (GSOM), Version 1\",\n  \"updateCadence\": \"updates applied weekly\",\n  \"coverage\": \"1763 to present\",\n  \"accessNotes\": [\n    {\"kind\": \"viewer\", \"text\": \"Search for data by time period, location and type.\", \"url\": \"https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-month\"},\n    {\"kind\": \"viewer\", \"text\": \"Dynamic GIS mapping application to locate stations and data for selected layers.\", \"url\": \"https://www.ncei.noaa.gov/maps/monthly/\"},\n    {\"kind\": \"download\", \"text\": \"Direct download links for the dataset files.\", \"url\": \"https://www.ncei.noaa.gov/data/global-summary-of-the-month/\"},\n    {\"kind\": \"download\", \"text\": \"Geographic information for the dataset in a KMZ file format.\", \"url\": \"https://gis.ncdc.noaa.gov/kml/gsom.kmz\"}\n  ],\n  \"evidence\": {\n    \"updateCadence\": \"This Global Summaries dataset, known as GSOM for Monthly, contains a monthly resolution of meteorological elements from 1763 to present with updates applied weekly.\",\n    \"coverage\": \"This Global Summaries dataset, known as GSOM for Monthly, contains a monthly resolution of meteorological elements from 1763 to present with updates applied weekly.\"\n  }\n}",
+  "candidates": [
+    {
+      "url": "https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-month",
+      "context": "Search for data by time period, location and type. Listed in the page’s structured data as a distribution of this dataset.",
+      "via": "json-ld"
+    },
+    {
+      "url": "https://www.ncei.noaa.gov/maps/monthly/",
+      "context": "Dynamic GIS mapping application to locate stations and data for selected layers Listed in the page’s structured data as a distribution of this dataset.",
+      "via": "json-ld"
+    },
+    {
+      "url": "https://www.ncei.noaa.gov/data/global-summary-of-the-month/",
+      "context": "Direct download links for the dataset files. Listed in the page’s structured data as a distribution of this dataset.",
+      "via": "json-ld"
+    },
+    {
+      "url": "https://gis.ncdc.noaa.gov/kml/gsom.kmz",
+      "context": "Geographic information for the dataset in a KMZ file format. Listed in the page’s structured data as a distribution of this dataset.",
+      "via": "json-ld",
+      "kind": "file"
+    },
+    {
+      "url": "https://www.ncei.noaa.gov/pub/data/cdo/samples/gsom_sample_csv.csv",
+      "context": "This sample data file shows how the data are formatted in CSV and is for example purposes only. Listed in the page’s structured data as a distribution of this dataset.",
+      "via": "json-ld",
+      "kind": "file"
+    },
+    {
+      "url": "https://www.ncei.noaa.gov/pub/data/cdo/samples/gsom_sample_pdf.pdf",
+      "context": "This sample data file shows how the data are formatted in PDF and is for example purposes only. Listed in the page’s structured data as a distribution of this dataset.",
+      "via": "json-ld",
+      "kind": "file"
+    },
+    {
+      "url": "https://www.ncei.noaa.gov/archive",
+      "label": "Archive",
+      "context": "=\"/\"> Home Products Services Access Certification Maps Monitoring Online Store Regional World Data System <a h",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.ncei.noaa.gov/services/world-data-system",
+      "label": "World Data System",
+      "context": "Home Products Services Access Archive Certification Maps Monitoring Online Store Regional Resources Alerts Education Metadata NEWIS Quick Links",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://doi.org/10.7289/V5QV3JJ5",
+      "label": "NCEI Dataset Landing Page",
+      "context": "x\"> East: 180.0 South: -90.0 North: 90.0 Spatial Coverage Map General Documentation Landing page for the dataset.",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.ncei.noaa.gov/data/global-summary-of-the-month/doc/GSOM_documentation.pdf",
+      "label": "GSOM Dataset Description Document",
+      "context": "Processing Documents Dataset Description Document - Global Summary of the Month Dataset Description of the data collection, processing and quality control.",
+      "via": "anchor-text",
+      "kind": "file"
+    },
+    {
+      "url": "https://doi.org/10.7289/JWPF-Y430",
+      "label": "NCEI landing page for Global Summary of the Year (GSOY)",
+      "context": "Associated Resources Global Summary of the Year (GSOY), Version 1 Related dataset landing page.",
+      "via": "anchor"
+    }
+  ],
+  "expected": {
+    "links": [
+      {
+        "url": "https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-month",
+        "role": "viewer",
+        "reason": "NCEI Data Search lets users query the GSOM dataset by time, location and type. Search for data by time period, location and type."
+      },
+      {
+        "url": "https://www.ncei.noaa.gov/maps/monthly/",
+        "role": "viewer",
+        "reason": "Interactive map server to locate GSOM stations and data layers. Dynamic GIS mapping application to locate stations and data for selected layers."
+      },
+      {
+        "url": "https://www.ncei.noaa.gov/data/global-summary-of-the-month/",
+        "role": "directory",
+        "reason": "Direct download page holding the GSOM dataset files. Direct download links for the dataset files."
+      },
+      {
+        "url": "https://gis.ncdc.noaa.gov/kml/gsom.kmz",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "KMZ file giving geographic information for the GSOM dataset. Geographic information for the dataset in a KMZ file format."
+      },
+      {
+        "url": "https://www.ncei.noaa.gov/data/global-summary-of-the-month/doc/GSOM_documentation.pdf",
+        "label": "GSOM Dataset Description Document",
+        "kind": "file",
+        "role": "docs",
+        "reason": "PDF documentation describing GSOM data collection, processing and quality control."
+      },
+      {
+        "url": "https://doi.org/10.7289/V5QV3JJ5",
+        "label": "NCEI Dataset Landing Page",
+        "role": "landing",
+        "reason": "DOI-resolved NCEI landing page for this same dataset."
+      }
+    ],
+    "prose": {
+      "provider": "NOAA National Centers for Environmental Information (NCEI)",
+      "program": "Global Summary of the Month (GSOM), Version 1",
+      "updateCadence": "updates applied weekly",
+      "coverage": "1763 to present",
+      "evidence": {
+        "updateCadence": "This Global Summaries dataset, known as GSOM for Monthly, contains a monthly resolution of meteorological elements from 1763 to present with updates applied weekly.",
+        "coverage": "This Global Summaries dataset, known as GSOM for Monthly, contains a monthly resolution of meteorological elements from 1763 to present with updates applied weekly."
+      },
+      "isDataset": true
+    }
+  }
+}

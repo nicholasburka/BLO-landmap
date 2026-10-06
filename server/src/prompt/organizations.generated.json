@@ -1,0 +1,272 @@
+[
+  {
+    "id": "epa",
+    "label": "US EPA",
+    "aliases": [
+      "us epa",
+      "epa",
+      "environmental protection agency",
+      "us environmental protection agency",
+      "united states environmental protection agency"
+    ]
+  },
+  {
+    "id": "usgs",
+    "label": "USGS",
+    "aliases": [
+      "usgs",
+      "us geological survey",
+      "united states geological survey"
+    ]
+  },
+  {
+    "id": "fema",
+    "label": "FEMA",
+    "aliases": [
+      "fema",
+      "federal emergency management agency"
+    ]
+  },
+  {
+    "id": "noaa",
+    "label": "NOAA",
+    "aliases": [
+      "noaa",
+      "national oceanic and atmospheric administration"
+    ]
+  },
+  {
+    "id": "hud",
+    "label": "HUD",
+    "aliases": [
+      "hud",
+      "us department of housing and urban development",
+      "department of housing and urban development"
+    ]
+  },
+  {
+    "id": "census",
+    "label": "US Census Bureau",
+    "aliases": [
+      "us census bureau",
+      "united states census bureau",
+      "census bureau",
+      "us census"
+    ]
+  },
+  {
+    "id": "usdot-phmsa",
+    "label": "US DOT · PHMSA",
+    "aliases": [
+      "us dot pipeline and hazardous materials safety administration",
+      "us dot phmsa",
+      "pipeline and hazardous materials safety administration",
+      "phmsa"
+    ]
+  },
+  {
+    "id": "dol-msha",
+    "label": "US Department of Labor · MSHA",
+    "aliases": [
+      "us department of labor mine safety and health administration",
+      "us department of labor msha",
+      "mine safety and health administration",
+      "msha"
+    ]
+  },
+  {
+    "id": "usfws",
+    "label": "US Fish and Wildlife Service",
+    "aliases": [
+      "us fish and wildlife service",
+      "united states fish and wildlife service",
+      "fish and wildlife service",
+      "usfws"
+    ]
+  },
+  {
+    "id": "eia",
+    "label": "US Energy Information Administration",
+    "aliases": [
+      "us energy information administration",
+      "energy information administration",
+      "eia"
+    ]
+  },
+  {
+    "id": "usda",
+    "label": "USDA",
+    "aliases": [
+      "usda",
+      "us department of agriculture",
+      "united states department of agriculture",
+      "department of agriculture"
+    ]
+  },
+  {
+    "id": "usda-nass",
+    "label": "USDA · NASS",
+    "parent": "usda",
+    "aliases": [
+      "usda nass",
+      "usda national agricultural statistics service",
+      "national agricultural statistics service",
+      "nass"
+    ]
+  },
+  {
+    "id": "usda-nrcs",
+    "label": "USDA · NRCS",
+    "parent": "usda",
+    "aliases": [
+      "usda nrcs",
+      "usda natural resources conservation service",
+      "natural resources conservation service",
+      "nrcs"
+    ]
+  },
+  {
+    "id": "usda-fs",
+    "label": "USDA · Forest Service",
+    "parent": "usda",
+    "aliases": [
+      "usda forest service",
+      "us forest service",
+      "forest service",
+      "usfs"
+    ]
+  },
+  {
+    "id": "usda-fpac",
+    "label": "USDA · Farm Production and Conservation",
+    "parent": "usda",
+    "aliases": [
+      "usda farm production and conservation",
+      "farm production and conservation",
+      "usda fpac",
+      "usda farm service agency",
+      "farm service agency"
+    ]
+  },
+  {
+    "id": "georgia-epd",
+    "label": "Georgia EPD",
+    "aliases": [
+      "georgia environmental protection division",
+      "georgia epd",
+      "ga epd"
+    ]
+  },
+  {
+    "id": "nc-deq",
+    "label": "North Carolina DEQ",
+    "aliases": [
+      "north carolina department of environmental quality",
+      "north carolina deq",
+      "nc deq"
+    ]
+  },
+  {
+    "id": "alabama-adem",
+    "label": "Alabama ADEM",
+    "aliases": [
+      "alabama department of environmental management",
+      "alabama adem",
+      "adem"
+    ]
+  },
+  {
+    "id": "dc-open-data",
+    "label": "DC Open Data",
+    "aliases": [
+      "dc open data",
+      "district of columbia open data",
+      "opendata dc"
+    ]
+  },
+  {
+    "id": "memphis-horticulture",
+    "label": "Memphis Horticulture Society",
+    "aliases": [
+      "memphis horticulture society",
+      "memphis horticultural society"
+    ]
+  },
+  {
+    "id": "nced",
+    "label": "NCED partnership",
+    "aliases": [
+      "nced partnership",
+      "nced",
+      "national conservation easement database"
+    ]
+  },
+  {
+    "id": "regrid",
+    "label": "Regrid",
+    "aliases": [
+      "regrid",
+      "loveland technologies"
+    ]
+  },
+  {
+    "id": "urban-institute",
+    "label": "Urban Institute",
+    "aliases": [
+      "urban institute",
+      "diversity data kids",
+      "diversitydatakids"
+    ]
+  },
+  {
+    "id": "bwdc",
+    "label": "Black Worker Data Center",
+    "aliases": [
+      "black worker data center",
+      "bwdc"
+    ]
+  },
+  {
+    "id": "bls",
+    "label": "US Bureau of Labor Statistics",
+    "aliases": [
+      "us bureau of labor statistics",
+      "bureau of labor statistics",
+      "bls"
+    ]
+  },
+  {
+    "id": "naacp-brookings",
+    "label": "NAACP & Brookings",
+    "aliases": [
+      "naacp brookings",
+      "naacp and brookings"
+    ]
+  },
+  {
+    "id": "ihme",
+    "label": "Institute for Health Metrics and Evaluation",
+    "aliases": [
+      "institute for health metrics and evaluation",
+      "ihme"
+    ]
+  },
+  {
+    "id": "tele",
+    "label": "TELE (Yale / UMass)",
+    "aliases": [
+      "engaginglandowners",
+      "tele",
+      "tools for engaging landowners effectively"
+    ]
+  },
+  {
+    "id": "blo",
+    "label": "Black Land Ownership (BLO)",
+    "aliases": [
+      "black land ownership",
+      "blo",
+      "final folder for"
+    ]
+  }
+]

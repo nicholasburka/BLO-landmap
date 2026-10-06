@@ -1,0 +1,61 @@
+{
+  "slug": "ers-county-level-data",
+  "url": "https://www.ers.usda.gov/data-products/county-level-data-sets",
+  "capturedAt": "2026-09-07T01:44:28.235Z",
+  "recordedAt": "2026-09-07T02:05:18.638Z",
+  "model": "claude-sonnet-5",
+  "answer": "{\n  \"isDataset\": true,\n  \"links\": [\n    {\"index\": 4, \"role\": \"landing\", \"reason\": \"Links to the actual county-level data download page with poverty, population, unemployment, education files.\"}\n  ],\n  \"provider\": \"USDA Economic Research Service\",\n  \"program\": \"County-level Data Sets\",\n  \"updateCadence\": \"Updated: 1/31/2025\",\n  \"coverage\": \"Poverty (2023 latest), Population (2023 latest), Unemployment and Median Household Income (2023/2022 latest), Education (2019–23, 5-year period latest)\",\n  \"geography\": \"one row per U.S. State and county/county equivalent, including Puerto Rico when available\",\n  \"accessNotes\": [\n    {\"kind\": \"download\", \"text\": \"Data are also available for download in Excel.\", \"url\": \"https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data\"}\n  ],\n  \"evidence\": {\n    \"updateCadence\": \"Updated: 1/31/2025\",\n    \"coverage\": \"Poverty (2023 latest) Population (2023 latest) Unemployment, and Median Household Income (annual average 2023 unemployment and 2022 median income latest) Education (2019–23, 5-year period latest)\",\n    \"geography\": \"ERS compiles the latest statistics on these measures and provides maps and data for U.S. States and counties/county equivalents, including Puerto Rico when available.\"\n  }\n}",
+  "candidates": [
+    {
+      "url": "https://www.ers.usda.gov/data-products",
+      "label": "Browse All Data",
+      "context": "n>Data Access the Data Access and analyze data sets, maps, charts and graphs. Data by Type <p class=\"hide-mobi",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.ers.usda.gov/data-products?type=downloadable-data-files",
+      "label": "Downloadable Data Files",
+      "context": "usa-nav__submenu-list block block-block-content block-block-contenta6258f45-9115-46d5-8c89-26b57c9843bd\"> Data by Type Access the Data Charts Queryable Data Applications Maps <ul id=\"block-navdatacolu",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.ers.usda.gov/data-products?type=queryable-data-applications",
+      "label": "Queryable Data Applications",
+      "context": "em desktop:border-bottom\"> Data by Type Access the Data Charts Downloadable Data Files Maps <li class=\"usa-nav__submenu-ite",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.ers.usda.gov/publications",
+      "label": "Browse All Analysis",
+      "context": "Understand the Research Get insights and objective analysis from experts in the field. <li class=\"usa-nav__submenu-item desktop:border-left-05 desktop:bord",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data",
+      "label": "County-level Data Sets: Download Data",
+      "context": "Population Unemployment Education Documentation Socioeconomic indicators like poverty rates, po",
+      "via": "anchor-text"
+    }
+  ],
+  "expected": {
+    "links": [
+      {
+        "url": "https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data",
+        "label": "County-level Data Sets: Download Data",
+        "role": "landing",
+        "reason": "Links to the actual county-level data download page with poverty, population, unemployment, education files. Data are also available for download in Excel."
+      }
+    ],
+    "prose": {
+      "provider": "USDA Economic Research Service",
+      "program": "County-level Data Sets",
+      "updateCadence": "Updated: 1/31/2025",
+      "coverage": "Poverty (2023 latest), Population (2023 latest), Unemployment and Median Household Income (2023/2022 latest), Education (2019–23, 5-year period latest)",
+      "geography": "one row per U.S. State and county/county equivalent, including Puerto Rico when available",
+      "evidence": {
+        "geography": "ERS compiles the latest statistics on these measures and provides maps and data for U.S. States and counties/county equivalents, including Puerto Rico when available."
+      },
+      "isDataset": true
+    }
+  }
+}

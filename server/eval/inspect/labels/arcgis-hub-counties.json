@@ -1,0 +1,9 @@
+{
+  "url": "https://hub.arcgis.com/datasets/esri::usa-counties/about",
+  "capturedAt": "2026-09-06",
+  "isDataset": false,
+  "keep": [],
+  "drop": [],
+  "prose": {},
+  "notes": "An ArcGIS Hub dataset page draws everything in the browser: the captured HTML has no links, no description and a <title> of 'ArcGIS Hub'. isDataset is FALSE on purpose — from this HTML alone nobody could say it describes a dataset, and the honest answer is to keep nothing rather than invent something. In production `inspectHubDataset` reads the portal's catalogue record instead and never asks the model. What this fixture protects is that an empty page produces an empty answer."
+}

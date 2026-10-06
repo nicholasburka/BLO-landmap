@@ -69,6 +69,14 @@
         >{{ tab.label }}</button>
       </div>
 
+      <!-- P5-74: an internal-only action row under the tabs (Save view).
+           The public panel must not gain so much as a wrapper, so the row
+           renders only when the host says it has one — `Lens.spec.ts` pins
+           the logged-out markup byte-for-byte. -->
+      <div v-if="actions" class="lens-actions" data-testid="lens-actions">
+        <slot name="actions" />
+      </div>
+
       <!-- Tab panels: only one visible at a time, cross-fade between -->
       <div
         class="lens-body"
@@ -105,6 +113,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+
+/** `actions` is the one thing the panel renders for internal users only:
+ *  the Save-view row under the tabs. Off by default, so nothing about the
+ *  public map's panel changes. */
+withDefaults(defineProps<{ actions?: boolean }>(), { actions: false })
 
 type TabId = 'legend' | 'layers' | 'context'
 
@@ -308,6 +321,17 @@ onBeforeUnmount(() => {
   outline: 2px solid var(--blo-green-deep, #1f7a2e);
   outline-offset: -3px;
   border-radius: 4px;
+}
+
+/* P5-74: Save view. Reads as a strip of the panel chrome, not as content —
+   same cream ground and hairline as the tabs it sits under. */
+.lens-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--blo-cream, #f7f4ee);
+  border-bottom: 1px solid var(--blo-cream-divider, #e0d9ca);
 }
 
 .lens-body {

@@ -15,6 +15,19 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), camera=(), microphone=()"
 
+# Internal-only routes (P5-5): the login page and account page are part of
+# the public SPA bundle by necessity, but search engines have no business
+# indexing them — keep the internal library entrance out of search results.
+[[headers]]
+  for = "/login"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/account"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
 # Hashed build assets never change — cache forever.
 [[headers]]
   for = "/assets/*"
@@ -27,3 +40,13 @@
   for = "/datasets/*"
   [headers.values]
     Cache-Control = "public, max-age=86400"
+
+# P5-90: the prebuilt county files are named by the hash of their contents
+# (scripts/build-datasets.mjs), so a given URL can never change. Cache them
+# the way hashed JS is cached — forever. A data refresh publishes new names
+# and the bundle asks for those instead.
+# The more specific path wins over the /datasets/* rule above.
+[[headers]]
+  for = "/datasets/build/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

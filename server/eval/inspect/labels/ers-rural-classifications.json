@@ -1,0 +1,20 @@
+{
+  "url": "https://www.ers.usda.gov/topics/rural-economy-population/rural-classifications",
+  "capturedAt": "2026-09-06",
+  "isDataset": false,
+  "keep": [],
+  "drop": [
+    "https://www.ers.usda.gov/data-products",
+    "https://www.ers.usda.gov/data-products?type=downloadable-data-files",
+    "https://www.ers.usda.gov/data-products?type=queryable-data-applications",
+    "https://www.ers.usda.gov/publications",
+    "https://www.ers.usda.gov/media/28551/108692-chart-image-file.png?v=40714",
+    "https://www.ers.usda.gov/publications/109610"
+  ],
+  "prose": {},
+  "topic": "demographic",
+  "tags": [
+    "population"
+  ],
+  "notes": "The hardest negative in the set: a programme overview that NAMES half a dozen real ERS data products (Rural-Urban Continuum Codes, Urban Influence Codes, Frontier and Remote Area Codes) without being one. It describes classifications, not a dataset you could fetch. The 'Download chart image' PNG is the trap — a real download of a picture."
+}

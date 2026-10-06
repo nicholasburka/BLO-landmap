@@ -1,0 +1,22 @@
+{
+  "url": "https://www.usgs.gov/news/national-news-release/usgs-cooperative-national-geologic-map-now-covers-50-states-us",
+  "capturedAt": "2026-09-06",
+  "isDataset": false,
+  "keep": [],
+  "drop": [
+    "https://www.usgs.gov/products/data",
+    "https://www.usgs.gov/products/data-and-tools/data-management",
+    "https://www.usgs.gov/products/data/data-releases",
+    "https://www.usgs.gov/products/data/real-time-data",
+    "https://www.usgs.gov/products/data/all-data",
+    "https://www.usgs.gov/products/web-tools/data-access-tools",
+    "https://www.usgs.gov/products/web-tools/data-analysis-tools",
+    "https://www.usgs.gov/products/web-tools/data-visualizations"
+  ],
+  "prose": {},
+  "topic": "land",
+  "tags": [
+    "geology"
+  ],
+  "notes": "A press release ABOUT a dataset: 'released Version 2.0 of the Cooperative National Geologic Map', 'standardized geologic data for all 50 states'. Every word says data and nothing on the page IS data — the eight candidates are all USGS mega-menu items. The right answer is isDataset false and an empty keep list; anything else is the model agreeing with the vocabulary instead of the page."
+}

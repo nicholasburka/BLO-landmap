@@ -1,0 +1,43 @@
+{
+  "url": "https://catalog.data.gov/dataset/state-normed-well-water-index-wwi",
+  "capturedAt": "2026-09-06",
+  "isDataset": true,
+  "keep": [
+    {
+      "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/export.csv?accessType=DOWNLOAD",
+      "role": "data-file"
+    },
+    {
+      "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/query.json?accessType=DOWNLOAD",
+      "role": "data-file",
+      "note": "A download despite the /api/ in the path — accessType=DOWNLOAD returns the file"
+    },
+    {
+      "url": "https://data.cdc.gov/api/v3/views/snkv-n8f6/query.xml?accessType=DOWNLOAD",
+      "role": "data-file"
+    },
+    {
+      "url": "https://data.cdc.gov/d/snkv-n8f6",
+      "role": "landing",
+      "note": "The dataset's own page on the CDC portal"
+    }
+  ],
+  "drop": [
+    "https://catalog.data.gov/",
+    "https://catalog.data.gov/harvest_record/af93f497-f0a3-4ae4-a21c-7212db1d9f0f/raw",
+    "https://github.com/GSA/data.gov",
+    "https://www.gsa.gov/reference/civil-rights-programs/notification-and-federal-employee-antidiscrimination-and-retaliation-act-of-2002"
+  ],
+  "prose": {
+    "provider": "Centers for Disease Control and Prevention",
+    "program": "State-normed Well Water Index (WWI)",
+    "coverage": "continental US census tracts",
+    "geography": "one row per census tract"
+  },
+  "topic": "water",
+  "tags": [
+    "wells",
+    "drinking-water"
+  ],
+  "notes": "In production this page is read through the CKAN API and never reaches the model pass; the eval scores the harvest+prune path anyway, because the JSON-LD route is the one that runs when package_show 404s (it did, live, for this very slug). No update cadence is stated — only a 'Dataset Last Updated' date, which is not a cadence."
+}

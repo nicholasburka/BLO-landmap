@@ -178,6 +178,10 @@ export function useChat(toolCtx: ToolContext, options: ChatOptions = {}) {
     try {
       const res = await fetch(`${API_URL}/api/chat`, {
         method: 'POST',
+        // P5-26: include the internal-session cookie (when logged in) so the
+        // server can add internal layers to the prompt; anonymous users have
+        // no cookie and nothing changes for them.
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,

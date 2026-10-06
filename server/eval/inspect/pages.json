@@ -1,0 +1,107 @@
+{
+  "note": "The eval set (P5-62). Every page is captured ONCE, through the same guarded fetch the inspector uses, and the HTML is checked in. Add a page here, run `npx tsx eval/inspect/capture.ts`, then write its label by hand.",
+  "pages": [
+    {
+      "slug": "usda-ers-rucc",
+      "url": "https://www.ers.usda.gov/data-products/rural-urban-continuum-codes",
+      "shape": "agency prose page, many data files among the navigation",
+      "why": "One of the three pages the P5-61 live check used. The hand-eval found coverage repeating the cadence sentence here."
+    },
+    {
+      "slug": "epa-frs-download",
+      "url": "https://www.epa.gov/frs/geospatial-data-download-service",
+      "shape": "agency prose page, real downloads plus API documentation",
+      "why": "The page that overran the token cap, and the one whose API *docs* were kept as `api`."
+    },
+    {
+      "slug": "census-tiger-line",
+      "url": "https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html",
+      "shape": "agency prose page whose only route to the data is a directory and a query form",
+      "why": "The page that produced the `directory` role, and the one whose web interface was labelled `api`."
+    },
+    {
+      "slug": "datagov-well-water",
+      "url": "https://catalog.data.gov/dataset/state-normed-well-water-index-wwi",
+      "shape": "CKAN portal page carrying schema.org Dataset JSON-LD",
+      "why": "The typed-distribution path: no model pass in production, but the harvest still has to find the resources."
+    },
+    {
+      "slug": "arcgis-hub-counties",
+      "url": "https://hub.arcgis.com/datasets/esri::usa-counties/about",
+      "shape": "ArcGIS Hub dataset page, drawn in the browser (SPA)",
+      "why": "Almost nothing is in the HTML. The right answer is to keep very little and say so."
+    },
+    {
+      "slug": "socrata-cdc-wwi",
+      "url": "https://data.cdc.gov/dataset/State-normed-Well-Water-Index-WWI-/snkv-n8f6",
+      "shape": "Socrata dataset page",
+      "why": "A portal page whose export links are the data and whose `/d/<id>` links are the page itself."
+    },
+    {
+      "slug": "census-tiger-directory",
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/",
+      "shape": "directory listing, nothing else",
+      "why": "A page that is ONLY a folder of folders. Nothing on it is a file; the folders are the answer."
+    },
+    {
+      "slug": "noaa-ncei-c00946",
+      "url": "https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncdc:C00946",
+      "shape": "schema.org Dataset JSON-LD that is not data.gov",
+      "why": "Structured data from a publisher who is not a portal — the distribution list is theirs, not CKAN's."
+    },
+    {
+      "slug": "usda-nass-quickstats",
+      "url": "https://www.nass.usda.gov/Quick_Stats/",
+      "shape": "agency landing page: one query tool, one bulk download, many nav links",
+      "why": "The clearest `viewer` case in the set — the whole page is a query form."
+    },
+    {
+      "slug": "usgs-nhd-access",
+      "url": "https://www.usgs.gov/national-hydrography/access-national-hydrography-products",
+      "shape": "agency landing page: downloads and services among many nav links",
+      "why": "Stands in for the FEMA NFHL page, which refuses automated clients (403)."
+    },
+    {
+      "slug": "ers-county-level-data",
+      "url": "https://www.ers.usda.gov/data-products/county-level-data-sets",
+      "shape": "agency prose page, a per-state download tool and bulk files",
+      "why": "A second ERS page so the set is not one agency's HTML twice."
+    },
+    {
+      "slug": "usgs-press-release",
+      "url": "https://www.usgs.gov/news/national-news-release/usgs-cooperative-national-geologic-map-now-covers-50-states-us",
+      "shape": "NOT a dataset: a press release about mapping data",
+      "why": "Full of the words `map`, `data` and `geologic`. isDataset must be false."
+    },
+    {
+      "slug": "farmers-heirs-property",
+      "url": "https://www.farmers.gov/working-with-us/heirs-property-eligibility",
+      "shape": "NOT a dataset: an explainer article",
+      "why": "The 'what is heirs' property' article. Nothing on it is data."
+    },
+    {
+      "slug": "ers-rural-classifications",
+      "url": "https://www.ers.usda.gov/topics/rural-economy-population/rural-classifications",
+      "shape": "NOT a dataset: a programme overview that LINKS to datasets",
+      "why": "The hardest negative: it points at real data products without being one."
+    }
+  ],
+  "skipped": [
+    {
+      "url": "https://www.fema.gov/flood-maps/national-flood-hazard-layer",
+      "reason": "403 to every automated client we tried, browser user-agent included (2026-09-06)."
+    },
+    {
+      "url": "https://www.bls.gov/cew/downloadable-data-files.htm",
+      "reason": "403 to automated clients (2026-09-06)."
+    },
+    {
+      "url": "https://www.huduser.gov/portal/datasets/usps_crosswalk.html",
+      "reason": "Answers 202 with an empty body to an automated client (2026-09-06)."
+    },
+    {
+      "url": "https://www.nrcs.usda.gov/resources/data-and-reports/gridded-soil-survey-geographic-gssurgo-database",
+      "reason": "Connection refused / reset from here (2026-09-06)."
+    }
+  ]
+}

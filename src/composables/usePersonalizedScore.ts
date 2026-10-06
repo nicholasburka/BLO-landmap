@@ -33,6 +33,9 @@ export interface DataMaps {
   housingData: Ref<HousingDataMap>
   equityData: Ref<EquityDataMap>
   transportationData: Ref<TransportationDataMap>
+  /** P5-18: internal library layers, keyed by layer id → { GEOID → value }.
+   *  Registered at runtime after login; empty (and unused) on the public map. */
+  internalLayerValues: Ref<Record<string, Record<string, number>>>
 }
 
 /**
@@ -45,6 +48,13 @@ function getRawValue(
   dataKey: string,
   dataMaps: DataMaps
 ): number | undefined {
+  // Internal layers (P5-18) carry their own { GEOID → number } map; the
+  // registry id prefix is the routing key, not a dataKey lookup.
+  if (layerId.startsWith('internal-')) {
+    const v = dataMaps.internalLayerValues.value[layerId]?.[geoId]
+    return typeof v === 'number' && !isNaN(v) ? v : undefined
+  }
+
   let record: Record<string, any> | undefined
 
   switch (layerId) {
@@ -143,6 +153,9 @@ function getAllGeoIds(dataMaps: DataMaps): Set<string> {
   for (const id of Object.keys(dataMaps.housingData.value)) ids.add(id)
   for (const id of Object.keys(dataMaps.equityData.value)) ids.add(id)
   for (const id of Object.keys(dataMaps.transportationData.value)) ids.add(id)
+  for (const layer of Object.values(dataMaps.internalLayerValues.value)) {
+    for (const id of Object.keys(layer)) ids.add(id)
+  }
   return ids
 }
 
