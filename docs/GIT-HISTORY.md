@@ -71,3 +71,45 @@ The tree should be byte-identical; only SHAs move. Prove it:
 git diff --stat backup-pre-rewrite-YYYYMMDD <branch>   # expect empty
 git rev-list --count backup-pre-rewrite-YYYYMMDD <branch>  # expect equal counts
 ```
+
+---
+
+## Try a squash FIRST — 2026-10-06
+
+The rules above are correct, but on 2026-10-06 the same `socrata-cdc-wwi.html`
+token blocked the same branch again, and **a rewrite was not needed at all.**
+
+The secret was introduced 2026-09-06 and redacted 2026-09-22, so **HEAD's tree
+was already clean** and the blob existed only in intermediate commits. A single
+commit containing HEAD's tree therefore carries nothing to find:
+
+```bash
+git checkout -b prod-cutover origin/main
+git merge --squash phase6-knowledge-base
+# verify before committing — the staged tree must equal the branch's tree:
+git write-tree                                   # e.g. cb67a11adef9
+git rev-parse phase6-knowledge-base^{tree}        # must match exactly
+git commit
+git push -u origin prod-cutover
+```
+
+That pushed cleanly on the first attempt. No `filter-repo`, no force-push, no
+risk of leaving the branch disjoint from `main` — which is the failure mode
+rule 2 exists to prevent and which cost a full restore from backup in October.
+
+**So the order of preference is:**
+
+1. **Squash onto `origin/main`** when HEAD is clean. Non-destructive: it only
+   creates a new branch, touches no existing ref, and cannot orphan anything.
+   Cost: you lose per-commit granularity *on the remote*. The full history
+   stays on the local branch, so nothing is actually lost.
+2. **`filter-repo` in a bare mirror, scoped `main..<branch>`** (rules 1–4) when
+   you need the individual commits published, or when HEAD itself carries the
+   secret.
+
+Check which locations GitHub flagged before deciding. It lists **all** of them,
+so a single intermediate commit in the report means HEAD is fine and a squash
+will work.
+
+Still true, and the most important line in this file: **do not use GitHub's
+"allow this secret" link.**
