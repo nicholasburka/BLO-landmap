@@ -1,0 +1,56 @@
+{
+  "url": "https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncdc:C00946",
+  "capturedAt": "2026-09-06",
+  "isDataset": true,
+  "keep": [
+    {
+      "url": "https://www.ncei.noaa.gov/data/global-summary-of-the-month/",
+      "role": "directory",
+      "note": "NCEI Direct Download — the folder the real files live in"
+    },
+    {
+      "url": "https://gis.ncdc.noaa.gov/kml/gsom.kmz",
+      "role": "data-file",
+      "note": "Station geography as KMZ"
+    },
+    {
+      "url": "https://www.ncei.noaa.gov/access/search/data-search/global-summary-of-the-month",
+      "role": "viewer",
+      "note": "NCEI Data Search: pick a time period and a place"
+    },
+    {
+      "url": "https://www.ncei.noaa.gov/maps/monthly/",
+      "role": "viewer",
+      "note": "The NCEI Map Server viewer"
+    },
+    {
+      "url": "https://www.ncei.noaa.gov/data/global-summary-of-the-month/doc/GSOM_documentation.pdf",
+      "role": "docs"
+    },
+    {
+      "url": "https://doi.org/10.7289/V5QV3JJ5",
+      "role": "landing",
+      "note": "The dataset's DOI landing page"
+    }
+  ],
+  "drop": [
+    "https://www.ncei.noaa.gov/pub/data/cdo/samples/gsom_sample_csv.csv",
+    "https://www.ncei.noaa.gov/pub/data/cdo/samples/gsom_sample_pdf.pdf",
+    "https://www.ncei.noaa.gov/archive",
+    "https://www.ncei.noaa.gov/services/world-data-system",
+    "https://doi.org/10.7289/JWPF-Y430"
+  ],
+  "prose": {
+    "provider": "NOAA National Centers for Environmental Information",
+    "program": "Global Summary of the Month (GSOM), Version 1",
+    "updateCadence": "updates applied weekly",
+    "coverage": "1763 to present",
+    "geography": "one row per station and month"
+  },
+  "topic": "environment",
+  "tags": [
+    "climate",
+    "weather"
+  ],
+  "notes": "schema.org Dataset JSON-LD from a publisher who is not a portal. The two sample files are the trap: they are real CSVs, they are in the structured data, and the page says in words that they are 'for example purposes only'. So is the GSOY sibling dataset, which is a different product with a nearly identical name."
+}

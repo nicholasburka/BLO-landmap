@@ -1,0 +1,164 @@
+{
+  "slug": "epa-frs-download",
+  "url": "https://www.epa.gov/frs/geospatial-data-download-service",
+  "capturedAt": "2026-09-07T01:44:21.275Z",
+  "recordedAt": "2026-09-07T02:04:51.655Z",
+  "model": "claude-sonnet-5",
+  "answer": "{\n  \"isDataset\": true,\n  \"links\": [\n    {\"index\": 2, \"role\": \"data-file\", \"reason\": \"National KML file of FRS facility geospatial data available for download.\"},\n    {\"index\": 3, \"role\": \"data-file\", \"reason\": \"Zipped File Geodatabase of FRS Environmental Interests geospatial data.\"},\n    {\"index\": 4, \"role\": \"data-file\", \"reason\": \"Zipped XML download of Brownfield Properties geospatial data.\"},\n    {\"index\": 5, \"role\": \"data-file\", \"reason\": \"KMZ file of ACRES Brownfield facilities with lat/long data.\"},\n    {\"index\": 0, \"role\": \"viewer\", \"reason\": \"Search tool for querying FRS facility data directly.\"}\n  ],\n  \"provider\": \"US EPA\",\n  \"program\": \"Facility Registry Service (FRS) Geospatial Data Download Service\",\n  \"coverage\": \"All publicly available FRS facilities with latitude/longitude data.\",\n  \"geography\": \"one row per FRS facility or site\",\n  \"accessNotes\": [\n    {\"kind\": \"download\", \"text\": \"National and Regional KML files available for download.\", \"url\": \"https://ordsext.epa.gov/FLA/www3/national_frs.kmz\"},\n    {\"kind\": \"download\", \"text\": \"CSV files for all FRS facilities available for download.\"},\n    {\"kind\": \"download\", \"text\": \"File Geodatabase of Environmental Interests available weekly.\", \"url\": \"https://edg.epa.gov/data/public/OEI/FRS/FRS_Interests_Download.zip\"},\n    {\"kind\": \"viewer\", \"text\": \"Search tool for FRS data.\", \"url\": \"https://www.epa.gov/frs/search-frs-data\"}\n  ],\n  \"evidence\": {\n    \"coverage\": \"Geospatial information for all publicly available FRS facilities that have latitude/longitude data.\"\n  }\n}",
+  "candidates": [
+    {
+      "url": "https://www.epa.gov/frs/search-frs-data",
+      "label": "Search for FRS data",
+      "context": "Breadcrumb Home Facility Registry Service (FRS) Geospatial Data Download Service <div data-dr",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://edg.epa.gov/metadata/catalog/main/home.page",
+      "label": "EPA's Environmental Dataset Gateway (EDG)",
+      "context": "Note - find additional EPA data through .",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://ordsext.epa.gov/FLA/www3/national_frs.kmz",
+      "label": "National File",
+      "context": "Geospatial Data Download Description File Type Data as of Posted date and Location EPA National KML file KML August 1, 2026 August 7, 2026 EPA Regional KML files KML August 1, 2026 EPA Region August 7",
+      "via": "anchor",
+      "kind": "file"
+    },
+    {
+      "url": "https://edg.epa.gov/data/public/OEI/FRS/FRS_Interests_Download.zip",
+      "context": "File Geodatabase Weekly Weekly Featured Environmental Interests Description File Type Data as of Posted date and Location Geospatial information for FRS facilities with latitude/longitude data and con",
+      "via": "anchor",
+      "kind": "file"
+    },
+    {
+      "url": "https://ordsext.epa.gov/FLA/www3/state_files/EPAXMLDownload.zip",
+      "context": "XML August 1, 2026 Posted: August 7, 2026 Geospatial information for Brownfield Properties with latitude/longitude data.",
+      "via": "anchor",
+      "kind": "file"
+    },
+    {
+      "url": "https://ordsext.epa.gov/FLA/www3/acres_frs.kmz",
+      "context": "KMZ August 1, 2026 Posted: August 7, 2026 Facility Registry Servic",
+      "via": "anchor",
+      "kind": "file"
+    },
+    {
+      "url": "https://www.epa.gov/frs/frs-data-sources",
+      "label": "FRS Data Sources",
+      "context": "low-multiple=\"true\"> FRS Description expand or collapse the child menu expand or collapse the child menu <a href=\"https://frs-public.epa.gov/ords/frs_public2/frs_html_public_pag",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://frs-public.epa.gov/ords/frs_public2/frs_html_public_pages.frs_refresh_stats",
+      "label": "FRS Data Resource Updates Dashboard",
+      "context": "enu__subnav\"> FRS Data Sources expand or collapse the child menu FRS Program Data Submission Statistics FRS Physical Data Model",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.epa.gov/frs/frs-program-data-submission-statistics",
+      "label": "FRS Program Data Submission Statistics",
+      "context": "ass=\"menu__link has-subnav\" data-drupal-link-system-path=\"node/204697\">FRS Data Sources expand or collapse the child menu FRS Data Resource Updates Dashboard FRS Physical Data Model <li class=\"menu__i",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.epa.gov/frs/frs-physical-data-model",
+      "label": "FRS Physical Data Model",
+      "context": "s=\"icon menu__link-icon\" role=\"img\"> expand or collapse the child menu FRS Data Resource Updates Dashboard FRS Program Data Submission Statistics <a href=\"/frs/search-frs-data\" title=\"Different ways t",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.epa.gov/frs/frs-data-download-options",
+      "label": "Data Download Options",
+      "context": "type=\"button\"> expand or collapse the child menu FRS Query Form's User Guide Enforcement and Compliance History Online Geospatial Data Download Options FRS Query Builder <a href=\"https",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.epa.gov/frs/frs-api",
+      "label": "FRS API",
+      "context": "FRS data search\" class=\"menu__link\">Enforcement and Compliance History Online Data Download Options Geospatial Data Download Options FRS Query Builder Intergovernmental FRS API Envirofacts Multisystem",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.epa.gov/frs/intergovernmental-frs-api",
+      "label": "Intergovernmental FRS API",
+      "context": "u__item\"> Data Download Options Geospatial Data Download Options FRS Query Builder FRS API Envirofacts Multisystem Search expand or collapse the child menu <",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.epa.gov/enviro/envirofacts-data-service-api-v1",
+      "label": "Envirofacts Data Service API",
+      "context": "al-link-system-path=\"node/263389\">Intergovernmental FRS API Envirofacts Multisystem Search expand or collapse the child menu Facility L",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.epa.gov/frs/data-steward-resources",
+      "label": "Data Steward Resources",
+      "context": "allow-multiple=\"true\"> Facility Linkage Application (FLA) expand or collapse the child menu expand or collapse the child menu <a href=\"/frs/facility-linkage-application-fla-best-practices\" class=\"me",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.epa.gov/ocr/no-fear-act-data",
+      "label": "No FEAR Act Data",
+      "context": "nk\">EPA Administrator Budget & Performance Contracting EPA www Web Snapshot Grants Plain Writing Privacy and Security Notice <",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.epa.gov/data",
+      "label": "Data",
+      "context": "=\"menu__item\"> No FEAR Act Data Plain Writing Privacy and Security Notice Connect. Inspector General Jobs Newsroom <li class=\"",
+      "via": "anchor-text"
+    }
+  ],
+  "expected": {
+    "links": [
+      {
+        "url": "https://ordsext.epa.gov/FLA/www3/national_frs.kmz",
+        "label": "National File",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "National KML file of FRS facility geospatial data available for download. National and Regional KML files available for download."
+      },
+      {
+        "url": "https://edg.epa.gov/data/public/OEI/FRS/FRS_Interests_Download.zip",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "Zipped File Geodatabase of FRS Environmental Interests geospatial data. File Geodatabase of Environmental Interests available weekly."
+      },
+      {
+        "url": "https://ordsext.epa.gov/FLA/www3/state_files/EPAXMLDownload.zip",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "Zipped XML download of Brownfield Properties geospatial data."
+      },
+      {
+        "url": "https://ordsext.epa.gov/FLA/www3/acres_frs.kmz",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "KMZ file of ACRES Brownfield facilities with lat/long data."
+      },
+      {
+        "url": "https://www.epa.gov/frs/search-frs-data",
+        "label": "Search for FRS data",
+        "role": "viewer",
+        "reason": "Search tool for querying FRS facility data directly. Search tool for FRS data."
+      }
+    ],
+    "prose": {
+      "provider": "US EPA",
+      "program": "Facility Registry Service (FRS) Geospatial Data Download Service",
+      "coverage": "All publicly available FRS facilities with latitude/longitude data.",
+      "geography": "one row per FRS facility or site",
+      "evidence": {
+        "coverage": "Geospatial information for all publicly available FRS facilities that have latitude/longitude data."
+      },
+      "isDataset": true,
+      "accessNotes": [
+        {
+          "kind": "download",
+          "text": "CSV files for all FRS facilities available for download."
+        }
+      ]
+    }
+  }
+}

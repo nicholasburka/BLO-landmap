@@ -1,0 +1,31 @@
+{
+  "url": "https://www.ers.usda.gov/data-products/county-level-data-sets",
+  "capturedAt": "2026-09-06",
+  "isDataset": true,
+  "keep": [
+    {
+      "url": "https://www.ers.usda.gov/data-products/county-level-data-sets/county-level-data-sets-download-data",
+      "role": "directory",
+      "note": "'Data are also available for download in Excel' — the page holding the county files"
+    }
+  ],
+  "drop": [
+    "https://www.ers.usda.gov/data-products",
+    "https://www.ers.usda.gov/data-products?type=downloadable-data-files",
+    "https://www.ers.usda.gov/data-products?type=queryable-data-applications",
+    "https://www.ers.usda.gov/publications"
+  ],
+  "prose": {
+    "provider": "USDA Economic Research Service",
+    "program": "County-level Data Sets",
+    "coverage": "U.S. States and counties, including Puerto Rico when available",
+    "geography": "one row per county"
+  },
+  "topic": "economic",
+  "tags": [
+    "poverty",
+    "income",
+    "population"
+  ],
+  "notes": "One real link among four navigation items. No update cadence is stated anywhere on the page — 'Updated: 1/31/2025' is a date, not a cadence — so a filled-in updateCadence here is invented. The same site chrome as usda-ers-rucc, deliberately: the two pages differ only in what they actually offer."
+}

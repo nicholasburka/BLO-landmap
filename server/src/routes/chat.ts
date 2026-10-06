@@ -4,6 +4,8 @@ import { chatHaiku, type ClientChatContext } from '../services/haiku.js'
 import { settleReservation } from '../middleware/budget.js'
 import { recordUsage, hashIp } from '../services/usageStore.js'
 import { themesFromMessages } from '../prompt/themes.js'
+import { listInternalLayers } from '../services/internalLayers.js'
+import { isLibraryEnabled } from '../services/libraryDb.js'
 
 const router = Router()
 
@@ -86,7 +88,9 @@ router.post('/api/chat', async (req, res) => {
   const themes = themesFromMessages(messages)
   const start = Date.now()
   try {
-    const result = await chatHaiku(messages!, context)
+    // P5-26: a logged-in team member's prompt also knows the internal layers.
+    const internal = res.locals.internalUser && isLibraryEnabled() ? await listInternalLayers().catch(() => []) : []
+    const result = await chatHaiku(messages!, context, internal)
     settleReservation(clientIp, reserved, result.usedTokens)
     recordUsage({
       ts: start,

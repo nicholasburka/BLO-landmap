@@ -4,14 +4,26 @@
       <div class="progress-bar">
         <div class="progress" :style="{ width: `${progress}%` }"></div>
       </div>
-      <div class="loading-text">Loading layers: {{ progress }}%</div>
+      <div class="loading-text">Loading counties…</div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+/**
+ * The map's startup overlay. P5-74: it reports the county dataset and
+ * nothing else — contamination GeoJSONs load on demand now — and it never
+ * takes a click, so the map underneath stays usable while the counties
+ * arrive.
+ *
+ * P5-87: the basemap is already up and painting behind it — the map is
+ * constructed before the county files are fetched, not after — so this is a
+ * progress report on two downloads, not a wait for the map itself.
+ */
 interface Props {
+  /** True once the choropleth can paint; the overlay disappears. */
   loaded: boolean
+  /** 0-100: county files landed, out of county files expected. */
   progress: number
 }
 
@@ -30,6 +42,9 @@ defineProps<Props>()
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  /* P5-74: never blocks. The overlay is a status report, not a modal —
+     panning, zooming and the Lens all keep working underneath it. */
+  pointer-events: none;
 }
 
 .loading-content {

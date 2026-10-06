@@ -1,0 +1,22 @@
+[
+  {
+    "id": "acres_brownfields",
+    "name": "Brownfields"
+  },
+  {
+    "id": "air_pollution_sources",
+    "name": "Air Pollution Sources"
+  },
+  {
+    "id": "hazardous_waste_sites",
+    "name": "Hazardous Waste Sites"
+  },
+  {
+    "id": "superfund_sites",
+    "name": "Superfund Sites"
+  },
+  {
+    "id": "toxic_release_inventory",
+    "name": "Toxic Release Inventory"
+  }
+]

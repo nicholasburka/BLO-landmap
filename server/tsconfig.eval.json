@@ -1,0 +1,13 @@
+{
+  "//": "P5-62's eval set lives outside src/, so the build's rootDir cannot see it. This type-checks it (and the test files the build excludes) without emitting anything.",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "rootDir": "."
+  },
+  "include": ["src/**/*", "eval/**/*"],
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts"]
+}

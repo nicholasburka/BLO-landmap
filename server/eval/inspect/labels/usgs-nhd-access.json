@@ -1,0 +1,80 @@
+{
+  "url": "https://www.usgs.gov/national-hydrography/access-national-hydrography-products",
+  "capturedAt": "2026-09-06",
+  "isDataset": true,
+  "keep": [
+    {
+      "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHDPlusHR/",
+      "role": "directory",
+      "note": "NHDPlus HR by hydrologic unit"
+    },
+    {
+      "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHD/HU4/",
+      "role": "directory"
+    },
+    {
+      "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHD/HU8/",
+      "role": "directory"
+    },
+    {
+      "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHD/State/",
+      "role": "directory"
+    },
+    {
+      "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/NHD/National/",
+      "role": "directory"
+    },
+    {
+      "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/WBD/HU2/",
+      "role": "directory"
+    },
+    {
+      "url": "https://prd-tnm.s3.amazonaws.com/index.html?prefix=StagedProducts/Hydrography/WBD/National/",
+      "role": "directory"
+    },
+    {
+      "url": "https://apps.nationalmap.gov/downloader/",
+      "role": "viewer",
+      "note": "The National Map Downloader: pick a hydrologic unit or a state"
+    },
+    {
+      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer",
+      "role": "service-layer"
+    },
+    {
+      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer",
+      "role": "service-layer"
+    },
+    {
+      "url": "https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer",
+      "role": "service-layer"
+    },
+    {
+      "url": "https://www.sciencebase.gov/catalog/item/679d39cbd34eb38981c9c7a5",
+      "role": "landing",
+      "note": "NHDPlus HR National Release 2 — the current national release"
+    }
+  ],
+  "drop": [
+    "https://www.usgs.gov/products/data",
+    "https://www.usgs.gov/products/data-and-tools/data-management",
+    "https://www.usgs.gov/products/data/data-releases",
+    "https://www.usgs.gov/products/data/real-time-data",
+    "https://www.usgs.gov/products/data/all-data",
+    "https://www.usgs.gov/products/web-tools/data-access-tools",
+    "https://www.usgs.gov/products/web-tools/data-analysis-tools",
+    "https://www.usgs.gov/products/web-tools/data-visualizations"
+  ],
+  "prose": {
+    "provider": "U.S. Geological Survey",
+    "program": "National Hydrography Dataset (NHD), NHDPlus High Resolution and Watershed Boundary Dataset",
+    "updateCadence": "the NHD was retired on 1 October 2023 and is no longer maintained",
+    "coverage": "CONUS, Hawaii, Alaska and the U.S. territories",
+    "geography": "hydrologic units and watershed boundaries"
+  },
+  "topic": "water",
+  "tags": [
+    "watershed"
+  ],
+  "notes": "Stands in for the FEMA NFHL page (403 to automated clients). Exactly twelve wanted links — the storage cap — so this page is the one that says whether the pass ranks well when it cannot keep everything. Eight USGS mega-menu items reading 'Data', 'All Data', 'Data Access Tools' are the nav trap. The cadence sentence here is a RETIREMENT notice, which is the kind of thing a summary silently loses."
+}

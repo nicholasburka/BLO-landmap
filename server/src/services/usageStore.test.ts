@@ -5,9 +5,16 @@ process.env.SESSION_HMAC_SECRET = 'test-secret-0123456789abcdef0123456789abcdef'
 
 const store = await import('./usageStore.js')
 
+// Shared fixture timestamp: noon UTC *yesterday*, computed from Date.now().
+// Relative (not hardcoded) so the aggregate tests can't silently expire out
+// of the rolling 30-day window; one shared value so every default-ts entry
+// lands on the same day bucket; noon keeps it clear of midnight boundaries
+// in any timezone.
+const BASE_TS = new Date().setUTCHours(12, 0, 0, 0) - 24 * 3600 * 1000
+
 function entry(over: Partial<import('./usageStore.js').UsageEntry> = {}) {
   return {
-    ts: Date.parse('2026-07-03T12:00:00Z'),
+    ts: BASE_TS,
     path: '/api/chat',
     status: 200,
     durationMs: 900,

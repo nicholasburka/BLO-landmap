@@ -1,0 +1,59 @@
+{
+  "url": "https://www.ers.usda.gov/data-products/rural-urban-continuum-codes",
+  "capturedAt": "2026-09-06",
+  "isDataset": true,
+  "keep": [
+    {
+      "url": "https://www.ers.usda.gov/media/5767/2023-rural-urban-continuum-codes.xlsx?v=95780",
+      "role": "data-file",
+      "note": "2023 codes, XLSX"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/5768/2023-rural-urban-continuum-codes.csv?v=68442",
+      "role": "data-file",
+      "note": "2023 codes, CSV — the one a pipeline would take"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/5769/2013-rural-urban-continuum-codes.xls?v=44441",
+      "role": "data-file"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/5770/2003-rural-urban-continuum-codes.xls?v=36916",
+      "role": "data-file"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/5771/2003-rural-urban-continuum-codes-codes-for-puerto-rico.xls?v=16153",
+      "role": "data-file"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/5772/1993-rural-urban-continuum-codes.xls?v=14339",
+      "role": "data-file"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/5773/1983-and-1993-rural-urban-continuum-codes.xls?v=13533",
+      "role": "data-file"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/5774/1974-rural-urban-continuum-codes.xls?v=58207",
+      "role": "data-file"
+    }
+  ],
+  "drop": [
+    "https://www.ers.usda.gov/data-products",
+    "https://www.ers.usda.gov/data-products?type=downloadable-data-files",
+    "https://www.ers.usda.gov/data-products?type=queryable-data-applications",
+    "https://www.ers.usda.gov/publications"
+  ],
+  "prose": {
+    "provider": "USDA Economic Research Service",
+    "program": "Rural-Urban Continuum Codes",
+    "updateCadence": "updated each decade",
+    "coverage": "1974 through 2023 vintages",
+    "geography": "one row per county"
+  },
+  "topic": "demographic",
+  "tags": [
+    "population"
+  ],
+  "notes": "Eight release files under one heading, wrapped in the ERS site's 'Data by Type' navigation. The page states no licence, so a licence field is a hallucination. Coverage is the run of vintages (1974-2023); the update sentence ('updated each decade since') belongs in updateCadence and must not be repeated as coverage — this is the page the hand-eval caught doing exactly that."
+}

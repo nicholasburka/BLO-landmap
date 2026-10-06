@@ -1,0 +1,64 @@
+{
+  "url": "https://www2.census.gov/geo/tiger/TIGER2025/",
+  "capturedAt": "2026-09-06",
+  "isDataset": true,
+  "keep": [
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/COUNTY/",
+      "role": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/TRACT/",
+      "role": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/BG/",
+      "role": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/STATE/",
+      "role": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/PLACE/",
+      "role": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/COUSUB/",
+      "role": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/ZCTA520/",
+      "role": "directory"
+    },
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/TABBLOCK20/",
+      "role": "directory"
+    }
+  ],
+  "keepUnharvested": [
+    {
+      "url": "https://www2.census.gov/geo/tiger/TIGER2025/2025_TL_Shapefiles_File_Name_Definitions.pdf",
+      "role": "docs",
+      "why": "A PDF: the harvester deliberately collects data extensions and not documents, so this is invisible to it. Worth a researcher's time all the same."
+    }
+  ],
+  "drop": [
+    "https://www2.census.gov/geo/tiger/TIGER2025/?C=N;O=D",
+    "https://www2.census.gov/geo/tiger/TIGER2025/?C=M;O=A",
+    "https://www2.census.gov/geo/tiger/TIGER2025/?C=S;O=A",
+    "https://www2.census.gov/geo/tiger/TIGER2025/?C=D;O=A",
+    "https://www2.census.gov/geo/tiger/"
+  ],
+  "notesOnKeep": "Fifty-odd sibling directories are neither kept nor dropped: every one is real data and no reviewer would want all of them stored. The eight in `keep` are the ones a county-level project needs.",
+  "prose": {
+    "provider": "U.S. Census Bureau",
+    "program": "TIGER/Line Shapefiles 2025",
+    "geography": "one folder per geographic entity type"
+  },
+  "topic": "land",
+  "tags": [
+    "boundaries"
+  ],
+  "notes": "A bare Apache index and nothing else: no prose, no title beyond 'Index of /geo/tiger/TIGER2025'. The distractors are the column-sort links (?C=N;O=D and friends) and the Parent Directory link, all four of which look like navigation and are. There is no file on this page at all — every answer here has to be a directory."
+}

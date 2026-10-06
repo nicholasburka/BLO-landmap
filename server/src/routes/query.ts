@@ -1,5 +1,7 @@
 import { Router } from 'express'
 import { queryHaiku } from '../services/haiku.js'
+import { listInternalLayers } from '../services/internalLayers.js'
+import { isLibraryEnabled } from '../services/libraryDb.js'
 import { settleReservation } from '../middleware/budget.js'
 import { recordUsage, hashIp } from '../services/usageStore.js'
 import { extractThemes } from '../prompt/themes.js'
@@ -25,7 +27,8 @@ router.post('/api/query', async (req, res) => {
   const themes = extractThemes(prompt)
   const start = Date.now()
   try {
-    const result = await queryHaiku(prompt.trim())
+    const internal = res.locals.internalUser && isLibraryEnabled() ? await listInternalLayers().catch(() => []) : []
+    const result = await queryHaiku(prompt.trim(), internal)
     settleReservation(clientIp, reserved, result.usedTokens)
     recordUsage({
       ts: start,

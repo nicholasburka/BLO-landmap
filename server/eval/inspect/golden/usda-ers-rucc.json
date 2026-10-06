@@ -1,0 +1,168 @@
+{
+  "slug": "usda-ers-rucc",
+  "url": "https://www.ers.usda.gov/data-products/rural-urban-continuum-codes",
+  "capturedAt": "2026-09-07T01:44:21.080Z",
+  "recordedAt": "2026-09-07T02:06:31.695Z",
+  "model": "claude-sonnet-5",
+  "answer": "{\n  \"isDataset\": true,\n  \"links\": [\n    {\"index\": 4, \"role\": \"data-file\", \"reason\": \"2023 Rural-Urban Continuum Codes file in XLSX format.\"},\n    {\"index\": 5, \"role\": \"data-file\", \"reason\": \"2023 Rural-Urban Continuum Codes file in CSV format.\"},\n    {\"index\": 6, \"role\": \"data-file\", \"reason\": \"2013 Rural-Urban Continuum Codes file.\"},\n    {\"index\": 7, \"role\": \"data-file\", \"reason\": \"2003 Rural-Urban Continuum Codes file.\"},\n    {\"index\": 8, \"role\": \"data-file\", \"reason\": \"2003 Rural-Urban Continuum Codes for Puerto Rico.\"},\n    {\"index\": 9, \"role\": \"data-file\", \"reason\": \"1993 Rural-Urban Continuum Codes file.\"},\n    {\"index\": 10, \"role\": \"data-file\", \"reason\": \"1983 and 1993 Rural-Urban Continuum Codes file.\"},\n    {\"index\": 11, \"role\": \"data-file\", \"reason\": \"1974 Rural-Urban Continuum Codes file.\"}\n  ],\n  \"provider\": \"USDA Economic Research Service\",\n  \"program\": \"Rural-Urban Continuum Codes\",\n  \"updateCadence\": \"Developed in 1974, the Rural-Urban Continuum Codes have been updated each decade since (1983, 1993, 2003, 2013, 2023).\",\n  \"coverage\": \"1974 to 2023, county-level data for the United States including outlying territories and Puerto Rico.\",\n  \"geography\": \"Each county and census-designated county-equivalent in the United States, including those in outlying territories, is assigned one of these nine codes.\",\n  \"accessNotes\": [\n    {\"kind\": \"download\", \"text\": \"Downloadable files for each decade of Rural-Urban Continuum Codes from 1974 to 2023 are provided in XLS, XLSX, and CSV formats.\"}\n  ],\n  \"evidence\": {\n    \"updateCadence\": \"Developed in 1974, the Rural-Urban Continuum Codes have been updated each decade since (1983, 1993, 2003, 2013, 2023).\",\n    \"geography\": \"Each county and census-designated county-equivalent in the United States, including those in outlying territories, is assigned one of these nine codes.\"\n  }\n}",
+  "candidates": [
+    {
+      "url": "https://www.ers.usda.gov/data-products",
+      "label": "Browse All Data",
+      "context": "n>Data Access the Data Access and analyze data sets, maps, charts and graphs. Data by Type <p class=\"hide-mobi",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.ers.usda.gov/data-products?type=downloadable-data-files",
+      "label": "Downloadable Data Files",
+      "context": "usa-nav__submenu-list block block-block-content block-block-contenta6258f45-9115-46d5-8c89-26b57c9843bd\"> Data by Type Access the Data Charts Queryable Data Applications Maps <ul id=\"block-navdatacolu",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.ers.usda.gov/data-products?type=queryable-data-applications",
+      "label": "Queryable Data Applications",
+      "context": "em desktop:border-bottom\"> Data by Type Access the Data Charts Downloadable Data Files Maps <li class=\"usa-nav__submenu-ite",
+      "via": "anchor-text"
+    },
+    {
+      "url": "https://www.ers.usda.gov/publications",
+      "label": "Browse All Analysis",
+      "context": "Understand the Research Get insights and objective analysis from experts in the field. <li class=\"usa-nav__submenu-item desktop:border-left-05 desktop:bord",
+      "via": "directory"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/5767/2023-rural-urban-continuum-codes.xlsx?v=95780",
+      "label": "Download (XLSX, 158.4 KB)",
+      "context": "File Downloads 2023 Rural-Urban Continuum Codes | Download (CSV, 614.57 KB) Last Upda",
+      "via": "anchor",
+      "kind": "file"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/5768/2023-rural-urban-continuum-codes.csv?v=68442",
+      "label": "Download (CSV, 614.57 KB)",
+      "context": "lock-ers-blocks block-data-products-data-files-2\"> File Downloads 2023 Rural-Urban Continuum Codes Download (XLSX, 158.4 KB) | Last Updated 1/22/2024 <h3",
+      "via": "anchor",
+      "kind": "file"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/5769/2013-rural-urban-continuum-codes.xls?v=44441",
+      "label": "Download (XLS, 410.5 KB)",
+      "context": "rban-continuum-codes.csv?v=68442\" target=\"_blank\" rel=\"noopener noreferrer\">Download (CSV, 614.57 KB) Last Updated 1/22/2024 2013 Rural-Urban Continuum Codes Last Updated 12/10/2020 <h",
+      "via": "anchor",
+      "kind": "file"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/5770/2003-rural-urban-continuum-codes.xls?v=36916",
+      "label": "Download (XLS, 436.5 KB)",
+      "context": "rban-continuum-codes.xls?v=44441\" target=\"_blank\" rel=\"noopener noreferrer\">Download (XLS, 410.5 KB) Last Updated 12/10/2020 2003 Rural-Urban Continuum Codes Last Updated 7/29/2004 <h3",
+      "via": "anchor",
+      "kind": "file"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/5771/2003-rural-urban-continuum-codes-codes-for-puerto-rico.xls?v=16153",
+      "label": "Download (XLS, 22 KB)",
+      "context": "xls?v=36916\" target=\"_blank\" rel=\"noopener noreferrer\">Download (XLS, 436.5 KB) Last Updated 7/29/2004 2003 Rural-Urban Continuum Codes codes for Puerto Rico Last Updated 10/28/2004 <h",
+      "via": "anchor",
+      "kind": "file"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/5772/1993-rural-urban-continuum-codes.xls?v=14339",
+      "label": "Download (XLS, 350.5 KB)",
+      "context": "s-codes-for-puerto-rico.xls?v=16153\" target=\"_blank\" rel=\"noopener noreferrer\">Download (XLS, 22 KB) Last Updated 10/28/2004 1993 Rural-Urban Continuum Codes Last Updated 5/20/2004 <h3",
+      "via": "anchor",
+      "kind": "file"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/5773/1983-and-1993-rural-urban-continuum-codes.xls?v=13533",
+      "label": "Download (XLS, 340 KB)",
+      "context": "tinuum-codes.xls?v=14339\" target=\"_blank\" rel=\"noopener noreferrer\">Download (XLS, 350.5 KB) Last Updated 5/20/2004 1983 and 1993 Rural-Urban Continuum Codes Last Updated 5/20/2004 <h3",
+      "via": "anchor",
+      "kind": "file"
+    },
+    {
+      "url": "https://www.ers.usda.gov/media/5774/1974-rural-urban-continuum-codes.xls?v=58207",
+      "label": "Download (XLS, 365 KB)",
+      "context": "l-urban-continuum-codes.xls?v=13533\" target=\"_blank\" rel=\"noopener noreferrer\">Download (XLS, 340 KB) Last Updated 5/20/2004 1974 Rural-Urban Continuum Codes Last Updated 8/6/2003 <!-- Content fu",
+      "via": "anchor",
+      "kind": "file"
+    }
+  ],
+  "expected": {
+    "links": [
+      {
+        "url": "https://www.ers.usda.gov/media/5767/2023-rural-urban-continuum-codes.xlsx?v=95780",
+        "label": "Download (XLSX, 158.4 KB)",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "2023 Rural-Urban Continuum Codes file in XLSX format."
+      },
+      {
+        "url": "https://www.ers.usda.gov/media/5768/2023-rural-urban-continuum-codes.csv?v=68442",
+        "label": "Download (CSV, 614.57 KB)",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "2023 Rural-Urban Continuum Codes file in CSV format."
+      },
+      {
+        "url": "https://www.ers.usda.gov/media/5769/2013-rural-urban-continuum-codes.xls?v=44441",
+        "label": "Download (XLS, 410.5 KB)",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "2013 Rural-Urban Continuum Codes file."
+      },
+      {
+        "url": "https://www.ers.usda.gov/media/5770/2003-rural-urban-continuum-codes.xls?v=36916",
+        "label": "Download (XLS, 436.5 KB)",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "2003 Rural-Urban Continuum Codes file."
+      },
+      {
+        "url": "https://www.ers.usda.gov/media/5771/2003-rural-urban-continuum-codes-codes-for-puerto-rico.xls?v=16153",
+        "label": "Download (XLS, 22 KB)",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "2003 Rural-Urban Continuum Codes for Puerto Rico."
+      },
+      {
+        "url": "https://www.ers.usda.gov/media/5772/1993-rural-urban-continuum-codes.xls?v=14339",
+        "label": "Download (XLS, 350.5 KB)",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "1993 Rural-Urban Continuum Codes file."
+      },
+      {
+        "url": "https://www.ers.usda.gov/media/5773/1983-and-1993-rural-urban-continuum-codes.xls?v=13533",
+        "label": "Download (XLS, 340 KB)",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "1983 and 1993 Rural-Urban Continuum Codes file."
+      },
+      {
+        "url": "https://www.ers.usda.gov/media/5774/1974-rural-urban-continuum-codes.xls?v=58207",
+        "label": "Download (XLS, 365 KB)",
+        "kind": "file",
+        "role": "data-file",
+        "reason": "1974 Rural-Urban Continuum Codes file."
+      }
+    ],
+    "prose": {
+      "provider": "USDA Economic Research Service",
+      "program": "Rural-Urban Continuum Codes",
+      "updateCadence": "Developed in 1974, the Rural-Urban Continuum Codes have been updated each decade since (1983, 1993, 2003, 2013, 2023).",
+      "coverage": "1974 to 2023, county-level data for the United States including outlying territories and Puerto Rico.",
+      "geography": "Each county and census-designated county-equivalent in the United States, including those in outlying territories, is assigned one of these nine codes.",
+      "accessNotes": [
+        {
+          "kind": "download",
+          "text": "Downloadable files for each decade of Rural-Urban Continuum Codes from 1974 to 2023 are provided in XLS, XLSX, and CSV formats."
+        }
+      ],
+      "evidence": {
+        "updateCadence": "Developed in 1974, the Rural-Urban Continuum Codes have been updated each decade since (1983, 1993, 2003, 2013, 2023).",
+        "geography": "Each county and census-designated county-equivalent in the United States, including those in outlying territories, is assigned one of these nine codes."
+      },
+      "isDataset": true
+    }
+  }
+}

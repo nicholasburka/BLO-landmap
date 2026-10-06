@@ -1,6 +1,5 @@
 import { Router } from 'express'
-import type { Request, Response, NextFunction } from 'express'
-import { authMiddleware } from '../middleware/auth.js'
+import { requireInternalUser } from '../middleware/requireInternalUser.js'
 import { getUsageSnapshot } from '../middleware/budget.js'
 import {
   getDailyAggregates,
@@ -12,23 +11,16 @@ import { DASHBOARD_HTML, DASHBOARD_CSS, DASHBOARD_JS } from './dashboardAssets.j
 
 const router = Router()
 
-/** Usage data is operator-only: a valid staging-tier token is required, the
- *  same gate as /api/health/usage. */
-function requireStaging(_req: Request, res: Response, next: NextFunction): void {
-  if (res.locals.authTier !== 'staging') {
-    res.status(403).json({ error: 'Forbidden' })
-    return
-  }
-  next()
-}
-
 function clampDays(raw: unknown): number {
   const n = parseInt(String(raw ?? ''), 10)
   if (!Number.isFinite(n)) return 14
   return Math.max(1, Math.min(90, n))
 }
 
-router.get('/api/usage', authMiddleware, requireStaging, async (req, res) => {
+// Usage data is internal-tier (P5-20): a logged-in internal user's session
+// cookie is required — the staging password's deploy-gating role no longer
+// opens operational data.
+router.get('/api/usage', requireInternalUser, async (req, res) => {
   const days = clampDays(req.query.days)
   try {
     const [daily, themes, recent] = await Promise.all([
@@ -52,8 +44,9 @@ router.get('/api/usage', authMiddleware, requireStaging, async (req, res) => {
 })
 
 // Dashboard is served as same-origin HTML/CSS/JS so it complies with the
-// strict helmet CSP (script-src 'self'); the page itself prompts for the
-// staging password and calls the gated /api/usage above.
+// strict helmet CSP (script-src 'self'). The page shell is public (it holds
+// no data); its JS logs in with an internal account via /api/login and
+// calls the cookie-gated /api/usage above.
 router.get('/dashboard', (_req, res) => {
   res.type('html').send(DASHBOARD_HTML)
 })

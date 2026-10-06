@@ -1,0 +1,60 @@
+{
+  "url": "https://www.epa.gov/frs/geospatial-data-download-service",
+  "capturedAt": "2026-09-06",
+  "isDataset": true,
+  "keep": [
+    {
+      "url": "https://ordsext.epa.gov/FLA/www3/national_frs.kmz",
+      "role": "data-file",
+      "note": "National KML of every FRS facility"
+    },
+    {
+      "url": "https://edg.epa.gov/data/public/OEI/FRS/FRS_Interests_Download.zip",
+      "role": "data-file",
+      "note": "Facilities with their environmental interests"
+    },
+    {
+      "url": "https://ordsext.epa.gov/FLA/www3/state_files/EPAXMLDownload.zip",
+      "role": "data-file",
+      "note": "State XML files"
+    },
+    {
+      "url": "https://ordsext.epa.gov/FLA/www3/acres_frs.kmz",
+      "role": "data-file",
+      "note": "Brownfield properties"
+    },
+    {
+      "url": "https://www.epa.gov/frs/frs-api",
+      "role": "docs",
+      "note": "The page DESCRIBING the FRS API — documentation, not an endpoint"
+    },
+    {
+      "url": "https://www.epa.gov/frs/frs-data-download-options",
+      "role": "docs",
+      "note": "The overview of every download route"
+    }
+  ],
+  "drop": [
+    "https://www.epa.gov/frs/search-frs-data",
+    "https://edg.epa.gov/metadata/catalog/main/home.page",
+    "https://www.epa.gov/frs/frs-data-sources",
+    "https://frs-public.epa.gov/ords/frs_public2/frs_html_public_pages.frs_refresh_stats",
+    "https://www.epa.gov/frs/frs-program-data-submission-statistics",
+    "https://www.epa.gov/frs/data-steward-resources",
+    "https://www.epa.gov/ocr/no-fear-act-data",
+    "https://www.epa.gov/data"
+  ],
+  "prose": {
+    "provider": "U.S. Environmental Protection Agency",
+    "program": "Facility Registry Service (FRS) Geospatial Data Download Service",
+    "updateCadence": "weekly",
+    "coverage": "national and per-EPA-region files, data as of August 2026",
+    "geography": "one row per facility"
+  },
+  "topic": "environment",
+  "tags": [
+    "contamination",
+    "facilities"
+  ],
+  "notes": "The page the hand-eval found keeping three API DOCUMENTATION pages as `api`. Two of them are in `keep` with role `docs` — a researcher does want them, just not as endpoints. The self-link (the page's own address in its side navigation) is in `drop`; so is the Environmental Dataset Gateway, which is a different catalogue and the most tempting wrong answer here. Geography evidence on this page is a download TABLE, which is why P5-62 refuses a table row as a quotation. (P5-62 round two: the page's own address was in `drop` here; the harvester now refuses a self-link outright, so it is no longer a candidate and no longer a distractor.)"
+}

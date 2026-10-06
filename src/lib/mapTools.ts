@@ -48,6 +48,14 @@ export interface QueryStateInput {
   limit: number | null
   regionStates: string[]
   explanation?: string
+  /**
+   * P6-10: render exactly these GEOIDs as the answer — a page's own filtered
+   * or selected rows, handed to a map pane that is showing that page's data.
+   * Omitted leaves whatever subset was already set (null clears it). The
+   * `set_query_state` tool never sets this: it is for a host page, not the
+   * model, which has no row set to speak of.
+   */
+  only?: string[] | null
 }
 
 /** Context injected by Map.vue — gives tools access to app state + mutators */
@@ -66,6 +74,10 @@ export interface ToolContext {
   zoomToGeoId: (geoId: string) => void
   /** Read the current top-N ranked counties (after scoring has run) */
   getTopRankedCounties: (limit: number) => Promise<RankedCountyInfo[]>
+  /** P5-26: turn a layer on/off by id (public, internal county, or internal
+   *  point). Resolves to a short status line, or null when the id is unknown
+   *  in this session. */
+  showLayer?: (layerId: string, on: boolean) => Promise<string | null>
 }
 
 /** Anthropic tool definitions passed to Claude */
@@ -153,6 +165,18 @@ export const TOOL_DEFINITIONS = [
         expanded: { type: 'boolean' as const, description: 'true to expand, false to collapse' },
       },
       required: ['expanded'],
+    },
+  },
+  {
+    name: 'show_layer',
+    description: "Turn a map layer on (or off) and, for an overlay layer, fly to its extent. Use for the internal point, line and state layers listed under 'Internal data layers' (they cannot be scored), or to switch any single layer on by id without changing the ranked query. Do NOT use this for scoring — use set_query_state for that.",
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        layerId: { type: 'string' as const, description: 'Exact layer id' },
+        on: { type: 'boolean' as const, description: 'true to show (default), false to hide' },
+      },
+      required: ['layerId'],
     },
   },
   {
@@ -309,6 +333,15 @@ export async function executeTool(
           .join('\n')
         const emptyNote = topCounties.length === 0 ? '\n\nNo counties match the current criteria.' : ''
         return `Applied query state. Layers: ${layerNames}.${filterSummary}${regionSummary}${ignoredNote} Map recolored.\n\nTop ${Math.min(resultCount, topCounties.length)} counties:\n${topList}${emptyNote}`
+      }
+
+      case 'show_layer': {
+        const layerId = typeof toolInput?.layerId === 'string' ? toolInput.layerId.trim() : ''
+        const on = toolInput?.on !== false
+        if (!layerId || !/^[A-Za-z0-9_][A-Za-z0-9_-]{0,99}$/.test(layerId)) return 'show_layer needs a layerId.'
+        if (!ctx.showLayer) return 'Layer toggling is not available here.'
+        const result = await ctx.showLayer(layerId, on)
+        return result ?? `No layer with id "${layerId}" is available in this session.`
       }
 
       case 'toggle_ranking_panel': {

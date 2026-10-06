@@ -1,0 +1,291 @@
+import { describe, it, expect } from 'vitest'
+import {
+  COMPOSITE_BYTES_BUDGET,
+  COMPOSITE_DECIMALS,
+  COMPOSITE_TERMS_MAX,
+  COMPOSITE_TERMS_MIN,
+  COMPOSITE_WEIGHT_MAX,
+  canonicalTerms,
+  compositeMethod,
+  compositeRefusal,
+  computeComposite,
+  readCompositeTerms,
+  sameTerms,
+  type CompositeTermValues,
+} from './composite.js'
+
+/** A term over a handful of counties, spelled the way the service hands it in. */
+function term(
+  layer: string,
+  weight: number,
+  direction: 'higher_better' | 'lower_better',
+  values: Record<string, number>,
+): CompositeTermValues {
+  return { layer, weight, direction, values }
+}
+
+describe('computeComposite — the Lens, generalised', () => {
+  it('normalises each term over its own counties and weights the result onto 0-100', () => {
+    // One term, three counties, 0/50/100 of its own span.
+    const result = computeComposite([term('a', 1, 'higher_better', { '01001': 0, '01003': 5, '01005': 10 })])
+    expect(result.values).toEqual({ '01001': 0, '01003': 50, '01005': 100 })
+    expect(result.scales).toEqual([
+      { layer: 'a', weight: 1, direction: 'higher_better', min: 0, max: 10, counties: 3 },
+    ])
+  })
+
+  it('inverts a lower_better term rather than the score', () => {
+    const result = computeComposite([term('a', 1, 'lower_better', { '01001': 0, '01003': 5, '01005': 10 })])
+    expect(result.values).toEqual({ '01001': 100, '01003': 50, '01005': 0 })
+  })
+
+  it('weights terms against each other', () => {
+    // 3:1 — the first term's county wins on the heavier layer.
+    const result = computeComposite([
+      term('a', 3, 'higher_better', { '01001': 10, '01003': 0 }),
+      term('b', 1, 'higher_better', { '01001': 0, '01003': 10 }),
+    ])
+    expect(result.values).toEqual({ '01001': 75, '01003': 25 })
+  })
+
+  it('is invariant under a proportional rescaling of every weight', () => {
+    const values = { '01001': 10, '01003': 4, '01005': 0 }
+    const other = { '01001': 1, '01003': 9, '01005': 3 }
+    const small = computeComposite([
+      term('a', 2, 'higher_better', values),
+      term('b', 1, 'lower_better', other),
+    ])
+    const large = computeComposite([
+      term('a', 8, 'higher_better', values),
+      term('b', 4, 'lower_better', other),
+    ])
+    expect(large.values).toEqual(small.values)
+  })
+
+  it('divides by the FULL declared weight, so a county missing a layer scores lower', () => {
+    // 01001 carries both layers at the top; 01003 carries only the first, also
+    // at the top. Redistributing the missing weight would tie them at 100.
+    const result = computeComposite([
+      term('a', 1, 'higher_better', { '01001': 10, '01003': 10, '01005': 0 }),
+      term('b', 1, 'higher_better', { '01001': 10, '01005': 0 }),
+    ])
+    expect(result.values['01001']).toBe(100)
+    expect(result.values['01003']).toBe(50)
+    expect(result.values['01005']).toBe(0)
+    expect(result.stats.complete).toBe(2)
+    expect(result.stats.partial).toBe(1)
+  })
+
+  it('gives a county no term covers no number at all, rather than a zero', () => {
+    const result = computeComposite([
+      term('a', 1, 'higher_better', { '01001': 1, '01003': 9 }),
+      term('b', 1, 'higher_better', { '01001': 1, '01003': 9 }),
+    ])
+    expect(Object.keys(result.values).sort()).toEqual(['01001', '01003'])
+    expect('99999' in result.values).toBe(false)
+  })
+
+  it('treats a non-finite value as missing rather than as arithmetic', () => {
+    const result = computeComposite([
+      term('a', 1, 'higher_better', { '01001': 10, '01003': Number.NaN, '01005': 0 }),
+      term('b', 1, 'higher_better', { '01001': 10, '01003': 10, '01005': 0 }),
+    ])
+    expect(result.values['01003']).toBe(50)
+    expect(Number.isFinite(result.values['01001'])).toBe(true)
+    expect(result.scales[0].counties).toBe(2)
+  })
+
+  it('rounds to a fixed number of decimals, so the same definition prints the same number', () => {
+    const result = computeComposite([
+      term('a', 1, 'higher_better', { '01001': 1, '01003': 2, '01005': 10 }),
+      term('b', 2, 'higher_better', { '01001': 7, '01003': 3, '01005': 10 }),
+    ])
+    for (const value of Object.values(result.values)) {
+      const decimals = (String(value).split('.')[1] ?? '').length
+      expect(decimals).toBeLessThanOrEqual(COMPOSITE_DECIMALS)
+    }
+  })
+
+  it('refuses a term that cannot rank anything instead of scoring it as zero', () => {
+    // Every county the same: `normalize` would hand back 0 for all of them,
+    // quietly dragging every score down by this term's whole weight share.
+    expect(() => computeComposite([term('flat', 1, 'higher_better', { '01001': 4, '01003': 4 })])).toThrow(
+      /“flat” has the same value in every county/,
+    )
+  })
+
+  it('refuses a term no county carries', () => {
+    expect(() => computeComposite([term('empty', 1, 'higher_better', {})])).toThrow(
+      /“empty” has no county values/,
+    )
+  })
+
+  it('is order-independent to the last bit, because the terms are sorted first', () => {
+    const a = term('aaa', 3, 'higher_better', { '01001': 0.1, '01003': 0.7, '01005': 0.33 })
+    const b = term('bbb', 7, 'lower_better', { '01001': 12.5, '01003': 0.25, '01005': 9.1 })
+    const c = term('ccc', 2, 'higher_better', { '01001': 5, '01003': 11, '01005': 2 })
+    const one = computeComposite([a, b, c])
+    const other = computeComposite([c, a, b])
+    expect(other.values).toEqual(one.values)
+    expect(other.scales.map(s => s.layer)).toEqual(['aaa', 'bbb', 'ccc'])
+  })
+})
+
+describe('canonicalTerms / sameTerms — readable field equality', () => {
+  it('sorts by layer id, so the same formula typed in another order is the same formula', () => {
+    const typed = [
+      { layer: 'b', weight: 1, direction: 'higher_better' as const },
+      { layer: 'a', weight: 2, direction: 'lower_better' as const },
+    ]
+    expect(canonicalTerms(typed)).toEqual([
+      { layer: 'a', weight: 2, direction: 'lower_better' },
+      { layer: 'b', weight: 1, direction: 'higher_better' },
+    ])
+    expect(sameTerms(typed, canonicalTerms(typed))).toBe(true)
+  })
+
+  it('a changed weight, direction or layer is a different formula', () => {
+    const base = [
+      { layer: 'a', weight: 2, direction: 'higher_better' as const },
+      { layer: 'b', weight: 1, direction: 'higher_better' as const },
+    ]
+    expect(sameTerms(base, [{ ...base[0], weight: 3 }, base[1]])).toBe(false)
+    expect(sameTerms(base, [{ ...base[0], direction: 'lower_better' }, base[1]])).toBe(false)
+    expect(sameTerms(base, [{ ...base[0], layer: 'c' }, base[1]])).toBe(false)
+    expect(sameTerms(base, [base[0]])).toBe(false)
+  })
+})
+
+describe('readCompositeTerms — what a definition may say', () => {
+  it('takes a well-formed list', () => {
+    const read = readCompositeTerms([
+      { layer: 'internal-votes', weight: 6, direction: 'higher_better' },
+      { layer: 'poverty_by_race', weight: 4, direction: 'lower_better' },
+    ])
+    expect(read).toEqual({
+      terms: [
+        { layer: 'internal-votes', weight: 6, direction: 'higher_better' },
+        { layer: 'poverty_by_race', weight: 4, direction: 'lower_better' },
+      ],
+    })
+  })
+
+  it('requires a direction per term rather than guessing one', () => {
+    expect(readCompositeTerms([{ layer: 'a', weight: 1 }, { layer: 'b', weight: 1 }])).toEqual({
+      error: 'Every layer in an index needs a direction — “higher_better” or “lower_better”. “a” has none.',
+    })
+  })
+
+  it('refuses an index over one layer, which is that layer', () => {
+    const read = readCompositeTerms([{ layer: 'a', weight: 1, direction: 'higher_better' }])
+    expect(read).toEqual({
+      error: `An index needs at least ${COMPOSITE_TERMS_MIN} layers — over one layer it is that layer rescaled, so draw the layer instead.`,
+    })
+  })
+
+  it('refuses more terms than a person can read', () => {
+    const many = Array.from({ length: COMPOSITE_TERMS_MAX + 1 }, (_, i) => ({
+      layer: `l${i}`,
+      weight: 1,
+      direction: 'higher_better' as const,
+    }))
+    expect(readCompositeTerms(many)).toEqual({
+      error:
+        `${COMPOSITE_TERMS_MAX + 1} layers is more than an index holds — ${COMPOSITE_TERMS_MAX} is the most, ` +
+        `because past that nobody can say what the number means.`,
+    })
+  })
+
+  it('refuses a weight that is not a positive number', () => {
+    for (const weight of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+      const read = readCompositeTerms([
+        { layer: 'a', weight, direction: 'higher_better' },
+        { layer: 'b', weight: 1, direction: 'higher_better' },
+      ])
+      expect(read).toHaveProperty('error')
+      expect((read as { error: string }).error).toContain('“a”')
+    }
+    expect(
+      readCompositeTerms([
+        { layer: 'a', weight: COMPOSITE_WEIGHT_MAX + 1, direction: 'higher_better' },
+        { layer: 'b', weight: 1, direction: 'higher_better' },
+      ]),
+    ).toEqual({
+      error: `A weight of ${COMPOSITE_WEIGHT_MAX + 1} is past the ${COMPOSITE_WEIGHT_MAX} an index takes — weights are relative, so scale them all down instead.`,
+    })
+  })
+
+  it('refuses the same layer twice, which is one layer with two weights', () => {
+    expect(
+      readCompositeTerms([
+        { layer: 'a', weight: 1, direction: 'higher_better' },
+        { layer: 'a', weight: 2, direction: 'higher_better' },
+      ]),
+    ).toEqual({ error: '“a” is in this index twice. One layer, one weight.' })
+  })
+
+  it('refuses anything that is not a list of terms', () => {
+    expect(readCompositeTerms(undefined)).toHaveProperty('error')
+    expect(readCompositeTerms('a,b')).toHaveProperty('error')
+    expect(readCompositeTerms([{ weight: 1, direction: 'higher_better' }, { layer: 'b', weight: 1, direction: 'higher_better' }])).toHaveProperty('error')
+  })
+})
+
+describe('compositeRefusal — the ceiling', () => {
+  it('passes a small index', () => {
+    expect(compositeRefusal(3, 2_000_000)).toBeNull()
+  })
+
+  it('refuses past the byte budget, and names the local pass', () => {
+    const refusal = compositeRefusal(3, COMPOSITE_BYTES_BUDGET + 1)
+    expect(refusal).toContain('npm run library -- index')
+    expect(refusal).toContain('The layer count alone cannot see this')
+  })
+
+  it('says the budget is read off the index before anything is opened', () => {
+    // The whole point of bounding BYTES rather than rows: it is decided from
+    // the catalog, so a refusal costs no parse at all.
+    const refusal = compositeRefusal(12, COMPOSITE_BYTES_BUDGET * 4)
+    expect(refusal).toMatch(/MB/)
+  })
+})
+
+describe('compositeMethod', () => {
+  const scales = [
+    { layer: 'internal-votes', weight: 6, direction: 'higher_better' as const, min: 1, max: 88, counties: 300 },
+    { layer: 'poverty_by_race', weight: 4, direction: 'lower_better' as const, min: 3, max: 44, counties: 318 },
+  ]
+
+  it('names every layer with its weight and its direction', () => {
+    const method = compositeMethod({
+      names: { 'internal-votes': 'Black voter registration', poverty_by_race: 'Black poverty rate' },
+      scales,
+      stats: { terms: 2, counties: 318, complete: 300, partial: 18 },
+    })
+    expect(method).toContain('Black voter registration ×6 higher is better')
+    expect(method).toContain('Black poverty rate ×4 lower is better')
+    expect(method).toContain('318 counties')
+    expect(method).toContain('300 with every layer')
+  })
+
+  it("stays inside the 500 characters a column's method holds, even at the term ceiling", () => {
+    const many = Array.from({ length: COMPOSITE_TERMS_MAX }, (_, i) => ({
+      layer: `internal-a-rather-long-layer-slug-number-${i}`,
+      weight: 10,
+      direction: 'higher_better' as const,
+      min: 0,
+      max: 100,
+      counties: 3142,
+    }))
+    const names = Object.fromEntries(
+      many.map(s => [s.layer, `A rather long human readable layer name number ${s.layer.slice(-1)}`]),
+    )
+    const method = compositeMethod({
+      names,
+      scales: many,
+      stats: { terms: many.length, counties: 3142, complete: 3000, partial: 142 },
+    })
+    expect(method.length).toBeLessThanOrEqual(500)
+    expect(method).toContain('more')
+  })
+})

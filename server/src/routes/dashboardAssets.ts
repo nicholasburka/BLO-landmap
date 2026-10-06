@@ -1,8 +1,10 @@
 /**
  * Self-contained assets for the internal usage dashboard, served same-origin
  * by usage.ts so they satisfy the strict helmet CSP (no inline script/style).
- * The page asks for the staging password, exchanges it at /api/auth for a
- * staging-tier token, then renders data from the gated /api/usage endpoint.
+ * Access is internal-tier (P5-20): the page rides the httpOnly internal
+ * session cookie. A user already logged in on the map site loads straight
+ * into the data; otherwise the page offers the same /api/login used by the
+ * map's login screen (same origin here, so the cookie applies to both).
  */
 
 export const DASHBOARD_HTML = `<!doctype html>
@@ -25,10 +27,11 @@ export const DASHBOARD_HTML = `<!doctype html>
     </header>
 
     <section id="gate" class="card gate" hidden>
-      <p>Enter the staging password to view usage.</p>
+      <p>Log in with your internal account to view usage.</p>
       <form id="gate-form">
-        <input id="password" type="password" autocomplete="current-password" placeholder="Staging password" />
-        <button type="submit">Unlock</button>
+        <input id="username" type="text" autocomplete="username" placeholder="Username" />
+        <input id="password" type="password" autocomplete="current-password" placeholder="Password" />
+        <button type="submit">Log in</button>
       </form>
       <p id="gate-error" class="error" hidden></p>
     </section>
@@ -93,8 +96,7 @@ input,select{font:inherit;background:var(--card);color:var(--fg);border:1px soli
 .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .card h2{font-size:14px;margin:0 0 10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
 .gate{max-width:420px}
-.gate form{display:flex;gap:8px}
-.gate input{flex:1}
+.gate form{display:flex;flex-direction:column;gap:8px}
 .error{color:var(--err)}
 .muted{color:var(--muted)}
 .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
@@ -120,13 +122,9 @@ th{color:var(--muted);font-weight:600}
 td.err{color:var(--err)}`
 
 export const DASHBOARD_JS = String.raw`(function(){
-  var TOKEN_KEY='blo_usage_token';
   var $=function(id){return document.getElementById(id);};
   function show(el,on){el.hidden=!on;}
   function fmt(n){return (n||0).toLocaleString();}
-  function getToken(){try{return localStorage.getItem(TOKEN_KEY)||'';}catch(e){return '';}}
-  function setToken(t){try{localStorage.setItem(TOKEN_KEY,t);}catch(e){}}
-  function clearToken(){try{localStorage.removeItem(TOKEN_KEY);}catch(e){}}
 
   function svgEl(name,attrs){
     var el=document.createElementNS('http://www.w3.org/2000/svg',name);
@@ -197,13 +195,12 @@ export const DASHBOARD_JS = String.raw`(function(){
   }
 
   function load(){
-    var token=getToken();
-    if(!token){show($('gate'),true);return;}
     show($('gate'),false); show($('loading'),true);
     var days=$('days').value;
-    fetch('/api/usage?days='+days,{headers:{Authorization:'Bearer '+token}})
+    // The httpOnly internal-session cookie rides along on same-origin fetches.
+    fetch('/api/usage?days='+days,{credentials:'same-origin'})
       .then(function(res){
-        if(res.status===401||res.status===403){clearToken();throw new Error('auth');}
+        if(res.status===401||res.status===403){throw new Error('auth');}
         if(!res.ok){throw new Error('http '+res.status);}
         return res.json();
       })
@@ -223,13 +220,18 @@ export const DASHBOARD_JS = String.raw`(function(){
 
   $('gate-form').addEventListener('submit',function(e){
     e.preventDefault();
-    var pw=$('password').value; var errEl=$('gate-error'); show(errEl,false);
-    fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})})
-      .then(function(res){return res.json().then(function(b){return {ok:res.ok,body:b};});})
-      .then(function(r){
-        if(!r.ok){errEl.textContent='Invalid password.';show(errEl,true);return;}
-        if(r.body.tier!=='staging'){errEl.textContent='That password is not staging-tier.';show(errEl,true);return;}
-        setToken(r.body.token); $('password').value=''; load();
+    var user=$('username').value, pw=$('password').value;
+    var errEl=$('gate-error'); show(errEl,false);
+    fetch('/api/login',{
+      method:'POST',
+      credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:user,password:pw})
+    })
+      .then(function(res){
+        if(res.status===429){errEl.textContent='Too many attempts — try again later.';show(errEl,true);return;}
+        if(!res.ok){errEl.textContent='Invalid credentials.';show(errEl,true);return;}
+        $('password').value=''; load();
       })
       .catch(function(){errEl.textContent='Network error.';show(errEl,true);});
   });

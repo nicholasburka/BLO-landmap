@@ -9,11 +9,15 @@
     :equity-layers="equityLayers"
     :transportation-layers="transportationLayers"
     :contamination-layers="contaminationLayers"
+    :internal-layers="internalLayers"
+    :internal-point-layers="internalPointLayers"
     :selected-demographic-layers="selectedDemographicLayers"
     :selected-economic-layers="selectedEconomicLayers"
     :selected-housing-layers="selectedHousingLayers"
     :selected-equity-layers="selectedEquityLayers"
     :selected-transportation-layers="selectedTransportationLayers"
+    :selected-internal-layers="selectedInternalLayers"
+    :selected-internal-feature-layers="selectedInternalFeatureLayers"
     :show-contamination-layers="showContaminationLayers"
     :show-contamination-choropleth="showContaminationChoropleth"
     :dev-mode-only="devModeOnly"
@@ -21,17 +25,20 @@
     :layer-weights="layerWeights"
     :layer-directions="layerDirections"
     :active-filters="activeFilters"
-    @toggle-demographic="(id) => $emit('toggle-demographic', id)"
-    @toggle-economic="(id) => $emit('toggle-economic', id)"
-    @toggle-housing="(id) => $emit('toggle-housing', id)"
-    @toggle-equity="(id) => $emit('toggle-equity', id)"
-    @toggle-transportation="(id) => $emit('toggle-transportation', id)"
-    @toggle-contamination="(id) => $emit('toggle-contamination', id)"
+    @toggle-demographic="(id: string) => $emit('toggle-demographic', id)"
+    @toggle-economic="(id: string) => $emit('toggle-economic', id)"
+    @toggle-housing="(id: string) => $emit('toggle-housing', id)"
+    @toggle-equity="(id: string) => $emit('toggle-equity', id)"
+    @toggle-transportation="(id: string) => $emit('toggle-transportation', id)"
+    @toggle-internal="(id: string) => $emit('toggle-internal', id)"
+    @toggle-internal-point="(id: string) => $emit('toggle-internal-point', id)"
+    @toggle-contamination="(id: string) => $emit('toggle-contamination', id)"
+    @retry-contamination="(id: string) => $emit('retry-contamination', id)"
     @toggle-contamination-layers="$emit('toggle-contamination-layers')"
     @toggle-contamination-choropleth="$emit('toggle-contamination-choropleth')"
-    @update-weight="(id, w) => $emit('update-weight', id, w)"
-    @update-direction="(id, d) => $emit('update-direction', id, d)"
-    @update-filter="(id, f) => $emit('update-filter', id, f)"
+    @update-weight="(id: string, w: number) => $emit('update-weight', id, w)"
+    @update-direction="(id: string, d: string) => $emit('update-direction', id, d)"
+    @update-filter="(id: string, f: ScoringFilter | null) => $emit('update-filter', id, f)"
   />
 </template>
 
@@ -46,11 +53,15 @@ defineProps<{
   equityLayers?: any[]
   transportationLayers?: any[]
   contaminationLayers?: any[]
+  internalLayers?: any[]
+  internalPointLayers?: any[]
   selectedDemographicLayers: string[]
   selectedEconomicLayers?: string[]
   selectedHousingLayers?: string[]
   selectedEquityLayers?: string[]
   selectedTransportationLayers?: string[]
+  selectedInternalLayers?: string[]
+  selectedInternalFeatureLayers?: string[]
   showContaminationLayers: boolean
   showContaminationChoropleth: boolean
   devModeOnly?: boolean
@@ -66,7 +77,11 @@ defineEmits<{
   (e: 'toggle-housing', id: string): void
   (e: 'toggle-equity', id: string): void
   (e: 'toggle-transportation', id: string): void
+  (e: 'toggle-internal', id: string): void
+  (e: 'toggle-internal-point', id: string): void
   (e: 'toggle-contamination', id: string): void
+  /** P5-74: "try again" after a contamination GeoJSON failed to load. */
+  (e: 'retry-contamination', id: string): void
   (e: 'toggle-contamination-layers'): void
   (e: 'toggle-contamination-choropleth'): void
   (e: 'update-weight', id: string, weight: number): void

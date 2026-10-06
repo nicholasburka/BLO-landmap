@@ -1,4 +1,4 @@
-import { ref, type Ref } from 'vue'
+import { ref, shallowRef, toRaw, type Ref } from 'vue'
 import { debugLog } from '@/config/constants'
 import type {
   ColorBlend,
@@ -11,13 +11,43 @@ import type {
   RGBAColor,
 } from '@/types/mapTypes'
 
+/** The colour table for every county, keyed by GEOID. Frozen and non-reactive
+ *  (P5-87): nothing watches an individual county's colour — the choropleth
+ *  reads the whole table when it repaints — so paying for ~3,200 reactive
+ *  proxies and ~3,200 dependency triggers bought nothing but latency. */
+export type ColorTable = Readonly<Record<string, ColorBlend>>
+
+/** `Math.max` over an iterable, without spreading it into an argument list.
+ *  Spreading ~3,200 values is already close to the engine's argument cap and
+ *  allocates the whole array first; these keep the exact semantics (any NaN
+ *  poisons the result, an empty run is ±Infinity) at no cost. */
+function maxOf(values: Iterable<number | null | undefined>): number {
+  let max = -Infinity
+  for (const value of values) {
+    const n = Number(value)
+    if (Number.isNaN(n)) return NaN
+    if (n > max) max = n
+  }
+  return max
+}
+
+function minOf(values: Iterable<number | null | undefined>): number {
+  let min = Infinity
+  for (const value of values) {
+    const n = Number(value)
+    if (Number.isNaN(n)) return NaN
+    if (n < min) min = n
+  }
+  return min
+}
+
 export function useColorCalculation(
   diversityData: Ref<DiversityData>,
   lifeExpectancyData: Ref<LifeExpectancyDataMap>,
   countyContaminationCounts: ContaminationDataMap,
   combinedScoresData: Ref<CombinedScoresDataMap>
 ) {
-  const preCalculatedColors = ref<{ [key: string]: ColorBlend }>({})
+  const preCalculatedColors = shallowRef<ColorTable>({})
   const colorCalculationComplete = ref(false)
 
   /**
@@ -72,7 +102,11 @@ export function useColorCalculation(
   }
 
   /**
-   * Pre-calculate colors for all counties
+   * Pre-calculate colors for all counties.
+   *
+   * Builds a plain object and publishes it in one assignment. The colours are
+   * identical to the reactive-per-county version this replaced — see
+   * `useColorCalculation.spec.ts`, whose expectations were captured from it.
    */
   const preCalculateColors = () => {
     debugLog('Pre-calculating color blends...')
@@ -88,33 +122,41 @@ export function useColorCalculation(
       },
     }
 
-    // Get the range of combined scores
-    const combinedScores = Object.values(combinedScoresData.value || {})
-      .filter((d) => d && typeof d.combinedScore === 'number')
-      .map((d) => d.combinedScore)
+    // Read through the raw objects: these maps are only ever read here, and
+    // going through Vue's proxies costs a trap per county per field.
+    const diversity = toRaw(diversityData.value) ?? {}
+    const lifeExpectancy = toRaw(lifeExpectancyData.value) ?? {}
+    const contamination = toRaw(countyContaminationCounts) ?? {}
+    const combined = toRaw(combinedScoresData.value) ?? {}
 
-    const maxCombinedScore =
-      combinedScores.length > 0 ? Math.max(...combinedScores) : 5
-    const minCombinedScore =
-      combinedScores.length > 0 ? Math.min(...combinedScores) : 0
+    // Get the range of combined scores
+    const combinedScores: number[] = []
+    for (const d of Object.values(combined)) {
+      if (d && typeof d.combinedScore === 'number') combinedScores.push(d.combinedScore)
+    }
+    const maxCombinedScore = combinedScores.length > 0 ? maxOf(combinedScores) : 5
+    const minCombinedScore = combinedScores.length > 0 ? minOf(combinedScores) : 0
 
     // Get all necessary ranges
-    const maxDiversityIndex = Math.max(
-      ...Object.values(diversityData.value).map((d) => d.diversityIndex || 0)
-    )
+    const diversityIndexes: number[] = []
+    for (const d of Object.values(diversity)) diversityIndexes.push(d.diversityIndex || 0)
+    const maxDiversityIndex = maxOf(diversityIndexes)
 
-    const maxContamination = Math.max(
-      ...Object.values(countyContaminationCounts).map((d) =>
-        typeof d === 'number' ? d : d.total
-      )
-    )
+    const contaminationTotals: (number | undefined)[] = []
+    for (const d of Object.values(contamination)) {
+      contaminationTotals.push(typeof d === 'number' ? d : (d as ContaminationData)?.total)
+    }
+    const maxContamination = maxOf(contaminationTotals)
 
     // Get life expectancy range
-    const lifeExpectancyValues = Object.values(lifeExpectancyData.value)
-      .map((d) => d.lifeExpectancy)
-      .filter((v) => v !== undefined && v !== null)
-    const maxLifeExpectancy = Math.max(...lifeExpectancyValues)
-    const minLifeExpectancy = Math.min(...lifeExpectancyValues)
+    const lifeExpectancyValues: number[] = []
+    for (const d of Object.values(lifeExpectancy)) {
+      if (d.lifeExpectancy !== undefined && d.lifeExpectancy !== null) {
+        lifeExpectancyValues.push(d.lifeExpectancy)
+      }
+    }
+    const maxLifeExpectancy = maxOf(lifeExpectancyValues)
+    const minLifeExpectancy = minOf(lifeExpectancyValues)
 
     debugLog('Pre-calculation ranges:', {
       maxDiversityIndex,
@@ -130,7 +172,10 @@ export function useColorCalculation(
     })
 
     // Pre-calculate colors for each county
-    Object.entries(diversityData.value).forEach(([geoID, data]) => {
+    const table: Record<string, ColorBlend> = {}
+    for (const geoID of Object.keys(diversity)) {
+      const data = diversity[geoID]
+
       // Check if diversity data exists, return 0 alpha if missing
       const diversityValue =
         data.diversityIndex != null && maxDiversityIndex > 0
@@ -141,45 +186,46 @@ export function useColorCalculation(
       const blackPctValue = data.pct_Black != null ? data.pct_Black / 100 : 0
       const hasBlackPctData = data.pct_Black != null
 
+      const counts = contamination[geoID]
       const contaminationValue =
-        typeof countyContaminationCounts[geoID] === 'number'
-          ? countyContaminationCounts[geoID]
-          : ((countyContaminationCounts[geoID] as ContaminationData | undefined)
-              ?.total as number) || 0
+        typeof counts === 'number'
+          ? counts
+          : ((counts as ContaminationData | undefined)?.total as number) || 0
       const contaminationNormalized =
-        maxContamination > 0 ? (contaminationValue as number) / maxContamination : 0
+        maxContamination > 0 ? contaminationValue / maxContamination : 0
 
       // Linear normalization to [0,1] range - check if life expectancy data exists
-      const lifeExpectancyValue = lifeExpectancyData.value[geoID]?.lifeExpectancy
+      const lifeExpectancyValue = lifeExpectancy[geoID]?.lifeExpectancy
       const hasLifeExpectancyData = lifeExpectancyValue != null
       const lifeExpectancyNormalized = hasLifeExpectancyData
         ? normalizeValue(lifeExpectancyValue, minLifeExpectancy, maxLifeExpectancy)
         : 0
 
       // Calculate combined score color
-      const combinedScore =
-        combinedScoresData.value?.[geoID]?.combinedScore ?? minCombinedScore
+      const combinedScore = combined[geoID]?.combinedScore ?? minCombinedScore
       const combinedScoreNormalized = normalizeValue(
         combinedScore,
         minCombinedScore,
         maxCombinedScore
       )
 
-      preCalculatedColors.value[geoID] = {
+      table[geoID] = {
         geoID,
         diversityColor: hasDiversityData
-          ? [...colors.diversity_index, diversityValue] as RGBAColor
-          : [0, 0, 0, 0] as RGBAColor,
+          ? [colors.diversity_index[0], colors.diversity_index[1], colors.diversity_index[2], diversityValue]
+          : [0, 0, 0, 0],
         blackPctColor: hasBlackPctData
-          ? [...colors.pct_Black, blackPctValue] as RGBAColor
-          : [0, 0, 0, 0] as RGBAColor,
+          ? [colors.pct_Black[0], colors.pct_Black[1], colors.pct_Black[2], blackPctValue]
+          : [0, 0, 0, 0],
         contaminationColor: [
-          ...colors.contamination,
+          colors.contamination[0],
+          colors.contamination[1],
+          colors.contamination[2],
           contaminationNormalized,
-        ] as RGBAColor,
+        ],
         lifeExpectancyColor: hasLifeExpectancyData
-          ? [...colors.life_expectancy, lifeExpectancyNormalized] as RGBAColor
-          : [0, 0, 0, 0] as RGBAColor,
+          ? [colors.life_expectancy[0], colors.life_expectancy[1], colors.life_expectancy[2], lifeExpectancyNormalized]
+          : [0, 0, 0, 0],
         blendedColors: {
           diversityAndContamination: blendColors(
             colors.diversity_index,
@@ -200,8 +246,9 @@ export function useColorCalculation(
           combinedScoreNormalized
         ),
       }
-    })
+    }
 
+    preCalculatedColors.value = Object.freeze(table)
     colorCalculationComplete.value = true
     debugLog('Color blend pre-calculation complete')
   }
