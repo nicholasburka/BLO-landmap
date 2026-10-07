@@ -150,9 +150,17 @@ export class StubMap {
     if (layer) layer.paint[name] = value
   }
 
+  /**
+   * P9-1b: real Mapbox THROWS here — "Style is not done loading" before the
+   * style settles, and "The layer '<id>' does not exist in the map's style"
+   * for an unknown id. The stub used to return quietly, so a caller that
+   * repainted too early passed every test and threw in the browser. A stub
+   * that cannot fail the way the real thing fails lets the bug ship.
+   */
   setLayoutProperty(id: string, name: string, value: unknown): void {
+    if (!this.styleLoaded) throw new Error('Style is not done loading')
     const layer = this.layers.get(id)
-    if (!layer) return
+    if (!layer) throw new Error(`The layer '${id}' does not exist in the map's style.`)
     if (name === 'visibility') layer.visibility = String(value)
   }
 
