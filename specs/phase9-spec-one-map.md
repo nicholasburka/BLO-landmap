@@ -67,46 +67,75 @@ So the work is mostly **wiring and deletion**, not new engine.
 
 ---
 
-## C. Two scorers, two numbers — and one of them has to go
+## C. One scale concept: a range is observed, then optionally pinned
 
-`composite.ts` states the divergence in its own header:
+Two earlier drafts of this section were wrong, and tracing the original script
+is what corrected them.
 
-> *"The scale comes from the data, never from a declared range. The Lens
-> normalises a registry layer against `LAYER_REGISTRY[id].range`, a literal."*
+**What `calculate_blo_v2_scores.cjs` actually does.** It computes observed
+min/max for most terms and declares bounds only where the measure *has* natural
+bounds:
 
-**What that means in plain terms.** To combine median income (dollars) with
-life expectancy (years), each is first converted to 0–100. The question is what
-0 and 100 mean:
+```js
+diversityIndex:     { min: 0, max: 1 },              // already an index
+pctBlack:           { min: 0, max: 100 },            // a percentage
+homeownershipBlack: { min: 0, max: 100 },
+povertyRateBlack:   { min: 0, max: 100 },
+blackProgressIndex: { min: 0, max: 100 },
+lifeExpectancy:     getMinMax(allCounties, …),       // observed
+contamination:      getMinMax(allCounties, …),       // a count — observed
+avgWeeklyWage:      getMinMax(allCounties, …),       // dollars — observed
+medianIncomeBlack:  getMinMax(…), medianHomeValue: getMinMax(…), …
+```
 
-- **declared** — a fixed range written in our code (income runs $20k–$120k), so
-  a county at $70k scores 50 forever;
-- **observed** — the range actually present in the data, so if the real spread
-  is $25k–$95k that same county scores 64.
+And `layerRegistry.ts` carries those forward with a `unit` beside each:
 
-With observed, adding or removing data moves every county's score. With
-declared, scores are stable but a human had to pick each range by hand.
+| layer | unit | range | what it is |
+|---|---|---|---|
+| `diversity_index` | index | 0 – 1 | natural bounds |
+| `pct_Black` | % | 0 – 100 | natural bounds |
+| `life_expectancy` | | 65 – 87 | observed, rounded |
+| `avg_weekly_wage` | | 300 – 3000 | observed, rounded |
+| `blo_score_v2` | score | 1.15 – 3.28 | pure observed, untouched |
 
-The public Lens uses declared. P7-8's composite uses observed. Same weights,
-different output.
+So **the registry's ranges are not declarations competing with observation —
+they ARE observation, recorded and tidied.** 65–87 and 300–3000 are the
+script's computed values rounded; 1.15–3.28 was not rounded at all.
 
-### Decision: one mechanism — observed
+### Therefore: one concept, not two modes
 
-An earlier draft proposed supporting both, with `declared` restricted to
-registry-backed terms. **That was over-engineering.** Nick's requirement is that
-anyone can build an index from any dataset in the library, and nobody is going
-to hand-write a declared range for CEJST's redlining share or a proximity
-column. Declared does not scale past the eleven layers someone once curated;
-observed works for every layer that exists or ever will.
+Every layer has a **range**. A range is **derived from the data by default**,
+and may be **pinned** once someone has decided it. There is no `declared` vs
+`observed` mode to choose between — observed is how you *get* a range, pinned
+is what you do with one you want to keep.
 
-So there is one scorer, and `usePersonalizedScore` stops being a second
-implementation of it.
+Two things make pinning worth having, and neither is the "mutable manifest"
+argument an earlier draft made:
 
-**The cost is real and one-time: re-deriving the BLO index through the single
-scorer will move published scores.** That is done deliberately and visibly —
-"Livability Index v3", with the old values kept and the change explained —
-never silently. The public map's byte-for-byte snapshots will fail on the
-migration commit; updating them is the *point* of that commit and must not be
-done in any other.
+1. **Stability.** A floating range means every reindex silently moves every
+   historical score, and two people's indices are not comparable because they
+   were scaled against different denominators. Pinning is what makes a
+   published index citable.
+2. **Natural bounds beat observation.** A percentage runs 0–100 whether or not
+   any county reaches either end. If Black homeownership actually spans 30–55%,
+   observed scaling stretches that to 0–100 and manufactures a dramatic
+   gradient out of a narrow real range. That is an analytical distortion, not a
+   cosmetic preference — and `unit: '%'` already tells us when it applies.
+
+For a new index over a library layer with no range, derive observed, show it,
+and offer to pin. Nobody hand-tunes anything unless they want to.
+
+### The scores do not shift
+
+An earlier draft claimed migrating the index would move published scores and
+should be released as "v3". **That was wrong.** The ranges are the script's own
+observed values; carry each layer's range forward and the arithmetic is
+identical.
+
+**Acceptance is byte-identical output:** re-derive all 3,144 county scores
+through the unified path and match `public/datasets/precomputed/
+combined_scores_v2.json` exactly. The public map's snapshots pass **unedited** —
+if they do not, the migration is wrong, not the snapshots.
 
 ## D. The public index is a frozen export of a real set — decided
 
@@ -168,6 +197,52 @@ What IS legitimate on screen is **progress** when something takes a few
 seconds — that is feedback, not a cost disclosure, and the place report's
 streaming progress (P6-16) is the house pattern.
 
+## F. A wide table is a set someone else authored
+
+Nick, 2026-10-07: *"CEJST sounds like it's basically a working set that someone
+else authored elsewhere — with 28 columns."* That is the right reading, and it
+suggests the bridge is a concept rather than a field.
+
+CEJST is one file, 3,234 county rows, ~22 measures: the disadvantaged share,
+eight burden categories, the redlining share, twelve indicator percentiles.
+That is not "a dataset with a layer" — it is **a curated bundle of measures
+over one geography**, which is exactly what a working set is. Somebody at CEQ
+did the curation; we imported the result.
+
+### The three nouns, if we get them right
+
+- **Measure** — one number per geography. The atom. (Today: a "layer", which is
+  overloaded, since it also means the drawn thing.)
+- **Dataset** — a file. May carry many measures. CEJST carries ~22.
+- **Working set** — a named selection of measures, plus derived columns and
+  framing. The thing you open, toggle, re-weight and fork.
+
+Then everything is the same shape:
+
+| | measures from | composite |
+|---|---|---|
+| BLO Livability Index | the registry | `BLO_PRESET` |
+| CEJST | its own 22 columns | CEQ's disadvantaged flag |
+| a user's index | anywhere in the library | theirs |
+
+### What that implies
+
+A dataset should **declare its measures** — the plumbing previously called
+`meta.layers[]`, probably better named `measures`. And a dataset that declares
+several should be **openable as a set**, without anyone hand-assembling one.
+Whether that is an auto-projected set or just "the dataset page gains the set
+surface" is an implementation choice; the concept is that **there is one thing
+you open and play with, and it is called a working set.**
+
+This also explains why `meta.layers[]` felt like a blocker in phase 8 and only
+half-explained itself: it is not a manifest convenience, it is **the mechanism
+by which imported analysis becomes ingredients.** Without it the library offers
+roughly fifteen ingredients; with it, hundreds.
+
+**Open:** whether "measure" replaces "layer" in the vocabulary, or whether
+layer keeps both jobs. Worth deciding before writing it, because the name ends
+up in the manifest and manifests are hand-edited.
+
 ## Tickets
 
 ### P9-1 [BUG] A layer is drawn as itself — fix `useShowOnMap`'s binary split
@@ -188,10 +263,11 @@ cost and where it runs (§E). The over-ceiling case shows the CLI command rather
 than failing. Fixes UX audit §2. **Size: M.**
 
 ### P9-4 [BUG] One scorer, not two
-Delete the second implementation. `usePersonalizedScore` and `composite.ts`
-compute the same thing; the composite's observed scale wins (§C). Acceptance is
-a diff of all 3,144 county scores old-vs-new, **published as part of the
-ticket** — the numbers move and we say by how much. **Size: M.** Blocks P9-5.
+`usePersonalizedScore` and `composite.ts` compute the same thing twice. Unify
+on one, honouring each layer's range (§C): derived by default, pinned where one
+exists, natural bounds where `unit` says so. **Acceptance is byte-identical
+output** — all 3,144 county scores match `combined_scores_v2.json` exactly and
+the public snapshots pass unedited. **Size: M.** Blocks P9-5.
 
 ### P9-5 [FEATURE] The livability index as a set definition
 One definition, one scorer. `BLO_PRESET` becomes a composite definition;
@@ -209,6 +285,13 @@ Rank, distribution, correlation, coverage, point-in-county rollup (§E). All
 client-side over county-scale data, no request. No cost disclosure anywhere in
 the UI — progress only, and only where it is slow enough to need it.
 **Size: M.** Independent of the map work — can run in parallel.
+
+### P9-0 [FEATURE] A dataset declares its measures
+Per §F. One file, many measures; a wide table becomes openable as a set. This
+is what turns imported analysis into ingredients — CEJST goes from 1 usable
+measure to ~22, and the library from ~15 to hundreds. Decide the vocabulary
+first (§F, open). **Size: M.** Blocks P9-6 in practice: forking an index is
+thin without things to fork with.
 
 ### P9-8 [BUG] Carried UX fixes from the audit
 Entry pages stop printing raw JSON and the nine mis-nested manifests are fixed
