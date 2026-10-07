@@ -294,6 +294,19 @@ Replace points-vs-scorable with a dispatch on the layer's declared geometry
 drawn, and scoring is requested explicitly. Line layers get a branch.
 Fixes UX audit §1. **Size: S.** No data-model change, no server change.
 
+### P9-1b [BUG] The canvas cannot take sources before the style loads, and nothing retries
+Found while verifying P9-1, and **pre-existing** — the console showed
+`Error: Style is not done loading` and `The layer 'county-choropleth' does not
+exist in the map's style` before P9-1 touched anything. Applying feature layers
+the moment the manifest lands (~800ms) throws, and there is no retry, so the
+set's points and lines never draw even once they are classified correctly.
+
+`MapCanvas` already polls for readiness (`isStyleLoaded()`, around line 371)
+but the feature-layer path does not go through it. The state layer should stay
+declarative — "these layers are on" — and the canvas should reconcile when it
+can draw, rather than callers guessing when that is.
+**Size: S.** Blocks the visible half of P9-1.
+
 ### P9-2 [FEATURE] The working set's map gets the public map's controls
 Give `MapPane` (or the workspace around it) `LayerControls` and the legend, so
 a set's layers can be toggled and read. These are the public map's components,
