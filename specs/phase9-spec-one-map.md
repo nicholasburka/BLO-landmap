@@ -325,6 +325,36 @@ layer's extent in the ordinary case, and the set's nine counties genuinely
 span Arizona to Virginia — so a near-national view IS the correct fit here. An
 earlier draft of this ticket called that a regression; it was not.
 
+### P9-2b [BUG] `LayerControls` hand-wrote one row twelve times — DONE
+839 lines, 22 props, 14 emits, and `class="layer-item"` twelve times. Six of
+those were **byte-identical** once the array, the selection and the emit name
+were normalised — the only remaining difference was `?.` optional chaining.
+`LayerScoringControls` was already its own component; the shell around it was
+not. `LayerRow` now owns that shell; LayerControls lost 119 lines and gained 60.
+
+**Extracted, not parameterised.** A `mode="set"` flag is how a component
+reaches 22 props and 14 emits in the first place.
+
+**The styling trick that made it safe:** Vue applies a parent's scoped styles
+to a child component's ROOT node, so `.layer-item` as `LayerRow`'s root keeps
+being styled by LayerControls with nothing copied or kept in sync. Only inner
+nodes — the label, the tooltip — needed `:deep()` in the host. Verified against
+a DOM baseline captured before the change: 33 rows, `display: block`,
+`margin-bottom: 10px`, label `margin-left: 5px`, tooltip `position: relative`,
+all identical after.
+
+**`SetLayerList` deliberately does NOT use it.** Its row is swatch-led with a
+geometry label and no tooltip; routing it through `LayerRow` would mean two
+optional props plus a scoped-style dance for one consumer whose row genuinely
+differs. The place the two surfaces really converge is **P9-6**, when a set
+needs weight controls — and what gets shared there is
+`LayerScoringControls`, which is already a component.
+
+The other six `layer-item` blocks (internal layers, point/line overlays,
+contamination) keep their hand-written markup: their innards differ — links, a
+text tooltip built from `description`, load-state and retry. They can migrate
+as they are touched, and should not be forced now.
+
 ### P9-3 [FEATURE] Proximity and the index, on the analysis surface
 Put both in `/analysis`'s grid and on the set, set-scoped. Each card states
 cost and where it runs (§E). The over-ceiling case shows the CLI command rather
