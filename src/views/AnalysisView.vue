@@ -364,7 +364,8 @@ function whoAndWhen(analysis: Analysis): string {
       <KbNav />
       <header class="analysis-header">
         <h1>Analysis</h1>
-        <p class="lede">The four things you can run over what the library holds, and what has been run lately.</p>
+        <p class="lede">What you can run over what the library holds, and what has been run lately.
+          Some tools work on the whole library; others need a working set, and say so.</p>
       </header>
 
       <ul class="tool-cards" data-testid="tool-cards">
@@ -419,24 +420,43 @@ function whoAndWhen(analysis: Analysis): string {
               <RouterLink :to="workingSetPlaceHref(row.set.slug)" data-testid="set-place">Check a place in this set</RouterLink>
               ·
               <RouterLink :to="workingSetDatasetsHref(row.set.slug)" data-testid="set-datasets">Its datasets</RouterLink>
-              <!-- P7-5, spec §F.5: a tool that operates on THIS set. Offered
-                   only when the set has both halves of the question — rows to
-                   measure from and a feature layer to measure to. -->
-              <template v-if="row.set.sites && measurableLayers(row.set).length">
+              <!-- P7-5, spec §F.5: a tool that operates on THIS set. It needs
+                   both halves of the question — rows to measure FROM and a
+                   feature layer to measure TO.
+                   P9-3: when a half is missing, SAY SO rather than vanish.
+                   P7-5 hid the control so it could not be refused, which is
+                   right when a reader cannot act on the reason and wrong when
+                   they can: both of these are things they set on the set. A
+                   capability nobody can see is one nobody knows exists. -->
+              <template v-if="measurableLayers(row.set).length">
                 ·
-                <button type="button" class="set-tool" data-testid="set-proximity" @click="openProximity(row.set)">
+                <button
+                  v-if="row.set.sites"
+                  type="button"
+                  class="set-tool"
+                  data-testid="set-proximity"
+                  @click="openProximity(row.set)"
+                >
                   {{ proximityFor === row.set.slug ? 'Close' : 'Measure proximity' }}
                 </button>
+                <span v-else class="set-tool-why" data-testid="set-proximity-why">
+                  Measure proximity — needs an anchor table, the rows to measure from
+                </span>
               </template>
-              <!-- P7-8, spec §F.5: the second set-scoped tool. Offered only
-                   when the set names at least two COUNTY layers — over one
-                   layer an index is that layer rescaled, and the server
-                   refuses it, so the control is not there to be refused. -->
+              <!-- P7-8, spec §F.5: over ONE layer an index is that layer
+                   rescaled, which the server refuses. Same P9-3 change: name
+                   the missing half instead of disappearing. -->
               <template v-if="indexableLayers(row.set).length >= 2">
                 ·
                 <button type="button" class="set-tool" data-testid="set-index" @click="openIndex(row.set)">
                   {{ indexFor === row.set.slug ? 'Close' : 'Build an index' }}
                 </button>
+              </template>
+              <template v-else>
+                ·
+                <span class="set-tool-why" data-testid="set-index-why">
+                  Build an index — needs two or more county layers to weigh against each other
+                </span>
               </template>
             </p>
 
@@ -1027,6 +1047,11 @@ a.analysis-row:hover {
 }
 
 /* P7-5: the proximity tool on a set's row. */
+.set-tool-why {
+  color: #6b6560;
+  font-size: 0.86rem;
+}
+
 .set-tool {
   background: none;
   border: none;

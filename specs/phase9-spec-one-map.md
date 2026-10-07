@@ -355,10 +355,31 @@ contamination) keep their hand-written markup: their innards differ — links, a
 text tooltip built from `description`, load-state and retry. They can migrate
 as they are touched, and should not be forced now.
 
-### P9-3 [FEATURE] Proximity and the index, on the analysis surface
-Put both in `/analysis`'s grid and on the set, set-scoped. Each card states
-cost and where it runs (§E). The over-ceiling case shows the CLI command rather
-than failing. Fixes UX audit §2. **Size: M.**
+### P9-3 [BUG] A gated capability says why, instead of vanishing — DONE
+**The audit was wrong about this one.** It reported proximity and the weighted
+index as having "no UI at all". They have a full UI — forms, results, the lot.
+They were **silently gated**: proximity needs `set.sites` (an anchor table) and
+an index needs **two** county layers, and the test set had neither. A full-text
+scan of the page found nothing because nothing rendered.
+
+P7-5's comment said the control "is not there to be refused", which is right
+when a reader cannot act on the reason and wrong when they can. Both of these
+are properties of the set a reader can change, so the missing half is now
+named — *"Measure proximity — needs an anchor table, the rows to measure
+from"*, *"Build an index — needs two or more county layers to weigh against
+each other"*. The two tests that asserted the old behaviour were updated with
+the reasoning rather than quietly flipped.
+
+One half stays silent on purpose: a set with no point or line layer has
+nothing to measure TO, and that is not a precondition a reader can read off
+the set — county choropleths are not places.
+
+The page lede said "the four things you can run" while six exist.
+
+Still open from the audit's §2 and §6: the set-scoped tools live in a run-on
+line of plain text under a heading, while the four library-wide tools get
+cards. That is the "working sets styled as a footnote" finding and belongs
+with a visual pass, not here.
 
 ### P9-4 [BUG] One scorer, not two
 `usePersonalizedScore` and `composite.ts` compute the same thing twice. Unify

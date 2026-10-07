@@ -534,16 +534,36 @@ describe('the proximity tool on a set', () => {
     expect(w.get('[data-testid="set-proximity"]').text()).toBe('Measure proximity')
   })
 
-  it('does NOT offer it on a set with no anchor table — there are no rows to measure from', async () => {
+  /**
+   * P9-3 changes P7-5's answer here, on purpose. P7-5 hid the control so it
+   * could not be refused — right when a reader cannot act on the reason, wrong
+   * when they can. An anchor table is something they set ON the set, so the
+   * missing half is named instead of the capability disappearing. A tool
+   * nobody can see is a tool nobody knows exists.
+   */
+  it('names the missing anchor table instead of hiding the tool', async () => {
     mockedSets.mockResolvedValue([{ ...MEASURABLE[0], sites: null }])
     const w = await mountIt()
     expect(w.find('[data-testid="set-proximity"]').exists()).toBe(false)
+    const why = w.get('[data-testid="set-proximity-why"]').text()
+    expect(why).toContain('Measure proximity')
+    expect(why).toContain('anchor table')
   })
 
+  /** Nothing to measure TO is not a precondition a reader can read off the
+   *  set, so this half stays silent: county choropleths are not places. */
   it('does NOT offer it on a set whose only layers are county choropleths', async () => {
     mockedSets.mockResolvedValue([{ ...MEASURABLE[0], layers: ['combined_scores_v2', 'internal-target-index'] }])
     const w = await mountIt()
     expect(w.find('[data-testid="set-proximity"]').exists()).toBe(false)
+    expect(w.find('[data-testid="set-proximity-why"]').exists()).toBe(false)
+  })
+
+  it('names what an index needs when the set has only one county layer', async () => {
+    mockedSets.mockResolvedValue([{ ...MEASURABLE[0], layers: ['internal-sites', 'internal-one-county'] }])
+    const w = await mountIt()
+    expect(w.find('[data-testid="set-index"]').exists()).toBe(false)
+    expect(w.get('[data-testid="set-index-why"]').text()).toContain('two or more county layers')
   })
 
   it('lists only the point and line layers, by the layer’s own name', async () => {
