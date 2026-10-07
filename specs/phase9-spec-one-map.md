@@ -67,100 +67,106 @@ So the work is mostly **wiring and deletion**, not new engine.
 
 ---
 
-## C. The one hard problem: two scorers, two numbers
+## C. Two scorers, two numbers — and one of them has to go
 
 `composite.ts` states the divergence in its own header:
 
 > *"The scale comes from the data, never from a declared range. The Lens
 > normalises a registry layer against `LAYER_REGISTRY[id].range`, a literal."*
 
-| | client Lens | server composite (P7-8) |
-|---|---|---|
-| scale source | `LAYER_REGISTRY[id].range`, declared in code | observed min/max in the data |
-| missing data | divides by the full declared weight | same (deliberately matched) |
+**What that means in plain terms.** To combine median income (dollars) with
+life expectancy (years), each is first converted to 0–100. The question is what
+0 and 100 mean:
 
-Same weights, same directions, **different output**. So "make the index a
-working set" naively **changes published livability scores**, and the public
-map's byte-for-byte snapshots will catch it — which is the system working.
+- **declared** — a fixed range written in our code (income runs $20k–$120k), so
+  a county at $70k scores 50 forever;
+- **observed** — the range actually present in the data, so if the real spread
+  is $25k–$95k that same county scores 64.
 
-### Proposed resolution
+With observed, adding or removing data moves every county's score. With
+declared, scores are stable but a human had to pick each range by hand.
 
-Give a composite an explicit **`scale`**: `'observed'` (default, P7-8's rule) or
-`'declared'`, which reads each term's registry range.
+The public Lens uses declared. P7-8's composite uses observed. Same weights,
+different output.
 
-P7-8 rejected declared ranges for a stated reason — a declared `range` lives on
-a **mutable manifest**, is excluded from the staleness fingerprint as cosmetic,
-and would let someone move a published index by editing a legend. That
-objection is exact and it **does not apply to the registry**: `LAYER_REGISTRY`
-is version-controlled code, reviewed, committed and covered by
-`publicLayerValues`'s own fingerprint. A code literal is not mutable at runtime.
+### Decision: one mechanism — observed
 
-So: `scale: 'declared'` is permitted **only** for terms whose range comes from
-code, and refused for library layers, where P7-8's reasoning stands untouched.
-The livability index pins `declared` and its numbers do not move.
+An earlier draft proposed supporting both, with `declared` restricted to
+registry-backed terms. **That was over-engineering.** Nick's requirement is that
+anyone can build an index from any dataset in the library, and nobody is going
+to hand-write a declared range for CEJST's redlining share or a proximity
+column. Declared does not scale past the eleven layers someone once curated;
+observed works for every layer that exists or ever will.
 
-**Acceptance is numerical, not visual:** the migrated index must reproduce
-today's scores for all 3,144 counties exactly, and the existing public-map
-snapshots must pass unedited.
+So there is one scorer, and `usePersonalizedScore` stops being a second
+implementation of it.
 
----
+**The cost is real and one-time: re-deriving the BLO index through the single
+scorer will move published scores.** That is done deliberately and visibly —
+"Livability Index v3", with the old values kept and the change explained —
+never silently. The public map's byte-for-byte snapshots will fail on the
+migration commit; updating them is the *point* of that commit and must not be
+done in any other.
 
-## D. The auth boundary — an open question, not a decision
+## D. The public index is a frozen export of a real set — decided
 
-The public map works **logged out**. Working sets are internal-tier
-(`requireInternalUser` guards every `/api/working-sets/*` route), and the
-catalog needs Postgres. So "the index is a working set" cannot mean the public
-map fetches a working set.
+The public map works **logged out**, and working sets are internal-tier, so the
+public map cannot fetch one at runtime.
 
-Two candidate shapes, and I do not think this should be decided in a spec:
+**Decision (Nick, 2026-10-07): export a frozen copy, so the index is a true
+working set people can play with.** The set is real and lives in the library
+like any other; a build step writes a frozen snapshot of its definition and its
+county values into the public bundle. `npm run export:layers` already does
+exactly this job for the layer registry and the taxonomy, and the staleness
+test that guards those extends to this.
 
-1. **Build-time artifact.** The public index stays what it is — registry plus
-   preset, compiled into the bundle — and the *set object* is its internal
-   mirror, generated from the same source so they cannot drift. Public map
-   unchanged, zero risk, but "the index is a set" is then true by construction
-   rather than at runtime.
-2. **Published set.** A set can be marked public; a frozen copy of its
-   definition and values is exported to the public bundle at build time by
-   `npm run export:layers`, which already does exactly this job for the
-   registry and the taxonomy.
+That gives both halves: the public map stays a static, logged-out,
+zero-dependency artifact, and the thing it draws is genuinely the same object a
+logged-in user can open, re-weight and fork.
 
-(2) is the honest version of Nick's idea and reuses an existing mechanism.
-(1) is a week cheaper. **This is the main question I want answered.**
+## E. Cheap analysis — our problem, not the reader's
 
----
+The constraint is "truly near-zero $". What costs money is **model calls**, not
+compute. 3,144 counties is nothing: most of this can run in the browser with no
+request at all.
 
-## E. Near-zero-cost analysis — what qualifies
-
-The constraint is "truly near-zero $". The thing that costs money is **model
-calls**, not compute. So the line to draw is not cheap/expensive, it is:
-
-- **Free, unlimited** — pure compute over bytes we already hold. 3,144 counties
-  is nothing; much of this can run in the browser with no request at all.
-- **Metered** — anything calling a model (Ask, remediation, inferred metadata).
-
-Free analyses worth having, all expressible over layers we already have:
+Analyses worth having, all expressible over layers we already hold:
 
 | analysis | over | notes |
 |---|---|---|
 | weighted index | county layers | P7-8, exists |
-| proximity | points → lines/points | P7-5, exists; national transmission must go local |
-| rank / top-N / percentile | any county layer | trivial, client-side |
+| proximity | points → lines/points | P7-5, exists |
+| rank / top-N / percentile | any county layer | client-side |
 | distribution + outliers | any county layer | histogram; names the tails |
 | correlation between two layers | county layers | one pass; **must show n and a scatter**, never a bare r |
 | compare two indices | two composites | the "how does re-weighting change it" question |
-| point-in-county rollup | point layer → county | already done by hand for CEJST; generalise it |
+| point-in-county rollup | point layer → county | done by hand for CEJST; generalise it |
 | coverage / completeness | any layer | how many counties have a value |
 
-**Three of these answer Nick's "test how re-weighting changes the analysis"
-directly**: compare two indices, rank movement between them, and correlation.
+Three of these answer the re-weighting question directly: **compare two
+indices, rank movement between them, and correlation.**
 
-The UX rule that makes this legible: **say where it runs and what it costs,
-before it runs.** A card should read "Free · runs here" or "Free · runs on the
-server" or "Too big for the server — run locally, here is the command." P7-5
-already refuses with a sentence naming the CLI; that pattern becomes the house
-style rather than an error path.
+### Where it runs is OUR problem
 
----
+An earlier draft proposed telling the reader where each analysis runs and what
+it costs. **That was wrong** (Nick, 2026-10-07): it is product and architecture
+leaking onto the screen. A person presses the button and gets the answer.
+Making it cheap is our job.
+
+So the rule is the inverse:
+
+- **Default to the browser.** County-scale work needs no server and no request.
+- **If it is too heavy for a request, precompute it locally and store the
+  result** — P7-5's local CLI pass and P7-6's stored results exist for exactly
+  this. National transmission proximity should be *already computed* before
+  anyone asks, not refused at the moment they do.
+- **A refusal is a design failure, not a message to write well.** P7-5's "run
+  this on the CLI" sentence is correct as a developer backstop and must never
+  be what a reader sees.
+
+What IS legitimate on screen is **progress** when something takes a few
+seconds — that is feedback, not a cost disclosure, and the place report's
+streaming progress (P6-16) is the house pattern.
 
 ## Tickets
 
@@ -181,10 +187,11 @@ Put both in `/analysis`'s grid and on the set, set-scoped. Each card states
 cost and where it runs (§E). The over-ceiling case shows the CLI command rather
 than failing. Fixes UX audit §2. **Size: M.**
 
-### P9-4 [FEATURE] `scale: 'declared' | 'observed'` on a composite
-Per §C. `declared` permitted only for registry-backed terms. Tests must show a
-declared-scale composite over `BLO_PRESET` reproducing today's Lens scores for
-all 3,144 counties. **Size: M.** Blocks P9-5.
+### P9-4 [BUG] One scorer, not two
+Delete the second implementation. `usePersonalizedScore` and `composite.ts`
+compute the same thing; the composite's observed scale wins (§C). Acceptance is
+a diff of all 3,144 county scores old-vs-new, **published as part of the
+ticket** — the numbers move and we say by how much. **Size: M.** Blocks P9-5.
 
 ### P9-5 [FEATURE] The livability index as a set definition
 One definition, one scorer. `BLO_PRESET` becomes a composite definition;
@@ -199,7 +206,8 @@ payoff — the reason for the whole phase. **Size: L.** Depends on P9-5.
 
 ### P9-7 [FEATURE] The free-analysis set
 Rank, distribution, correlation, coverage, point-in-county rollup (§E). All
-client-side over county-scale data. Each states its cost before running.
+client-side over county-scale data, no request. No cost disclosure anywhere in
+the UI — progress only, and only where it is slow enough to need it.
 **Size: M.** Independent of the map work — can run in parallel.
 
 ### P9-8 [BUG] Carried UX fixes from the audit
@@ -226,18 +234,26 @@ is built on top of it.
 
 ---
 
-## Open questions
+## Answered (Nick, 2026-10-07)
 
-1. **§D — build-time artifact or published set?** The main one. (2) is the real
-   version of the idea; (1) is materially cheaper and lower risk.
-2. **Does the public index's number being *re-derivable* matter, or only that
-   it does not change?** If re-derivable, P9-4 is required. If only stability
-   matters, the index could stay compiled and sets could use observed scale,
-   and P9-4/P9-5 shrink a lot.
-3. **Should re-weighting be public?** "Fork the index and see what changes" is a
-   strong public artifact and also a way to publish a number that disagrees
-   with ours. Internal-only first?
-4. **`meta.layers[]` (P8-carried) — before or after P9-6?** CEJST's other 21
-   columns cannot be terms until a manifest declares more than one layer. Not a
-   blocker for the index, but it is the blocker for "more kinds of data feeding
-   the analysis."
+1. **Frozen export of a real set**, not a build-time lookalike (§D). The index
+   is a working set people can open and play with.
+2. **Re-derivable.** The point is that anyone can build their own index from
+   the datasets available — so there is one scorer and one mechanism (§C), and
+   the BLO index is simply the one we happen to publish.
+3. **Internal publishing only, for now.** A logged-in user can publish an
+   authored, modified index; nothing public-facing yet.
+4. **Where an analysis runs is not the reader's concern** (§E).
+
+## Still open
+
+- **`meta.layers[]` — how much does it gate?** A manifest declares ONE drawable
+  column today, so the CEJST file contributes 1 ingredient out of 28 (the eight
+  burden categories, the redlining share and twelve percentiles are all
+  invisible to the map and unusable in an index). "Anyone can build an index
+  from the datasets available" is a thin offer while the library exposes ~15
+  ingredients instead of hundreds. It does not block P9-1 or P9-2; it probably
+  should land before P9-6, or forking an index has little to fork with.
+- **What happens to the old index values at the v3 cutover** — kept beside the
+  new ones for comparison, or archived? P9-6's compare-two-indices makes the
+  first option nearly free.
