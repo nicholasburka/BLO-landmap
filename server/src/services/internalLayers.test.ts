@@ -7,6 +7,7 @@ import { describe, it, expect } from 'vitest'
  */
 const {
   parseLayerBlock,
+  parseMeasures,
   projectCountyValues,
   projectPointFeatures,
   pointLayerBounds,
@@ -83,6 +84,86 @@ describe('parseLayerBlock', () => {
     const r = parseLayerBlock(meta as Record<string, unknown>)
     expect('error' in r).toBe(true)
     if ('error' in r) expect(r.error).toMatch(re)
+  })
+})
+
+describe('parseMeasures (P9-0) — one file, many measures', () => {
+  /**
+   * A dataset is a FILE; a measure is one number per geography. CEJST is one
+   * file with ~22 measures — the eight burden categories, the redlining
+   * share, twelve percentiles — and a manifest that declares one `layer`
+   * exposes exactly one of them. The other 21 are readable as a table and
+   * invisible to the map and to any index.
+   *
+   * A measure inherits WHERE the data is (file, geoKey, geometry, source,
+   * year) from the primary block, and declares only what differs: its column
+   * and what that column means.
+   */
+  it('inherits the primary block\'s file and key, and overrides the column', () => {
+    const r = parseMeasures({
+      layer: { ...valid, file: 'cejst.csv' },
+      measures: [
+        { valueKey: 'pct_pop_energy', name: 'Energy burden', unit: '%', direction: 'lower_better', dataType: 'percentage' },
+      ],
+    })
+    expect('error' in r).toBe(false)
+    if ('error' in r) return
+    expect(r.measures).toHaveLength(1)
+    expect(r.measures[0].valueKey).toBe('pct_pop_energy')
+    expect(r.measures[0].file).toBe('cejst.csv')
+    expect(r.measures[0].geoKey).toBe('GEOID')
+    expect(r.measures[0].geometry).toBe('county')
+    expect(r.measures[0].name).toBe('Energy burden')
+    expect(r.measures[0].direction).toBe('lower_better')
+  })
+
+  it('is empty when a manifest declares none, which is every manifest today', () => {
+    const r = parseMeasures({ layer: valid })
+    expect('error' in r).toBe(false)
+    if ('error' in r) return
+    expect(r.measures).toEqual([])
+  })
+
+  /** A measure is a column of numbers per county. A point or line layer's
+   *  extra columns are popup fields, not measures, and saying so here stops
+   *  a confusing half-working state later. */
+  it('refuses measures on a layer that is not county-shaped', () => {
+    const r = parseMeasures({
+      layer: { ...valid, geometry: 'point', latKey: 'lat', lngKey: 'lng', labelKey: 'name' },
+      measures: [{ valueKey: 'x', name: 'X', unit: '', direction: 'higher_better', dataType: 'index' }],
+    })
+    expect('error' in r).toBe(true)
+  })
+
+  it('refuses a measure that names no column, and says which one', () => {
+    const r = parseMeasures({
+      layer: valid,
+      measures: [{ name: 'Nameless', unit: '', direction: 'higher_better', dataType: 'index' }],
+    })
+    expect('error' in r).toBe(true)
+    if (!('error' in r)) return
+    expect(r.error).toMatch(/valueKey/i)
+  })
+
+  it('refuses a measure that repeats the primary column — it would shadow it', () => {
+    const r = parseMeasures({
+      layer: valid,
+      measures: [{ valueKey: 'score', name: 'Again', unit: '', direction: 'higher_better', dataType: 'index' }],
+    })
+    expect('error' in r).toBe(true)
+    if (!('error' in r)) return
+    expect(r.error).toMatch(/score/)
+  })
+
+  it('refuses two measures on the same column', () => {
+    const r = parseMeasures({
+      layer: valid,
+      measures: [
+        { valueKey: 'a', name: 'A', unit: '', direction: 'higher_better', dataType: 'index' },
+        { valueKey: 'a', name: 'B', unit: '', direction: 'higher_better', dataType: 'index' },
+      ],
+    })
+    expect('error' in r).toBe(true)
   })
 })
 

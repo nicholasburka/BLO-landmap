@@ -280,7 +280,29 @@ hundreds.
 
 ## Tickets
 
-### P9-0 [FEATURE] A dataset declares its `measures`
+### P9-0 [FEATURE] A dataset declares its `measures` — DONE
+`meta.measures` is a list of the other columns a file carries. Each says only
+what DIFFERS from the primary `layer` block — its column, and what that column
+means; where the data is (file, geoKey, geometry, source, year) is inherited,
+because it is the same file and repeating it would be two places to be wrong.
+
+A measure is served as `internal-<slug>~<column>`, the **same id shape as a
+set's derived column** (P7-8) — because it is the same idea, a value living
+inside something else, and the client needed no new code to draw one. The two
+are told apart by **the owner's kind**, not by the separator: a `working-set`
+owner routes to the derived path, anything else to the measure path.
+
+County-shaped only, deliberately: a point or line layer's extra columns are
+popup fields, and calling them measures would promise a choropleth we cannot
+draw from them.
+
+Proved on the real CEJST file: nine measures declared, **12 → 21 internal
+layers from one manifest edit**, and `pct_pop_redlined` reads back exactly
+**213 counties** — the count of counties with any HOLC-scored tract, so
+blank-is-not-zero survives from the rollup through the manifest to the API.
+
+Remaining, and worth doing when someone needs it: the twelve `pctile_*`
+columns are still undeclared, which would take CEJST to ~21 measures alone.
 Per §F. One file, many measures; a wide table becomes openable as a set. The
 mechanism by which imported analysis becomes ingredients — CEJST goes from 1
 usable measure to ~22, the library from ~15 to hundreds. Vocabulary is settled:

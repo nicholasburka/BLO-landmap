@@ -223,6 +223,74 @@ export interface InternalLayerManifestEntry {
  */
 export const DERIVED_LAYER_SEPARATOR = '~'
 
+/**
+ * P9-0: the other measures a dataset's file carries.
+ *
+ * A dataset is a FILE; a measure is one number per geography. CEJST is one
+ * county table with ~22 of them — eight burden categories, a redlining share,
+ * twelve indicator percentiles — and a manifest that declares a single
+ * `layer` exposes exactly one. The rest are readable as a table and invisible
+ * to the map and to any index, which is what made "build your own index from
+ * the datasets available" a thin offer: roughly fifteen ingredients across the
+ * whole library instead of hundreds.
+ *
+ * A measure says only what DIFFERS from the primary block — its column, and
+ * what that column means. Where the data is (file, geoKey, geometry, source,
+ * year) is inherited, because it is the same file: repeating it would be two
+ * places to be wrong.
+ *
+ * County-shaped only, deliberately. A point or line layer's extra columns are
+ * popup fields; calling them measures would promise a choropleth we cannot
+ * draw from them.
+ */
+export function parseMeasures(
+  meta: Record<string, unknown>,
+): { measures: CountyLayerBlock[] } | { error: string } {
+  const raw = meta.measures
+  if (raw === undefined || raw === null) return { measures: [] }
+  if (!Array.isArray(raw)) return { error: 'layer.measures must be a list' }
+  if (!raw.length) return { measures: [] }
+
+  const primary = parseLayerBlock(meta)
+  if ('error' in primary) return { error: `measures need a valid layer block first: ${primary.error}` }
+  if (primary.block.geometry !== 'county') {
+    return {
+      error:
+        `measures are county values, but this layer is "${primary.block.geometry}" — ` +
+        'extra columns on a point or line layer are popupFields',
+    }
+  }
+  const base = primary.block
+
+  const measures: CountyLayerBlock[] = []
+  const seen = new Set<string>([base.valueKey])
+  for (const [i, item] of raw.entries()) {
+    if (!isPlainObject(item)) return { error: `measures[${i}] must be an object` }
+    const valueKey = typeof item.valueKey === 'string' ? item.valueKey.trim() : ''
+    if (!valueKey) return { error: `measures[${i}].valueKey is required (the column it reads)` }
+    if (seen.has(valueKey)) {
+      return { error: `measures[${i}] reads "${valueKey}", which another measure already reads` }
+    }
+    seen.add(valueKey)
+    // Everything a measure does not say, it inherits — same file, same key.
+    const merged = parseLayerBlock({
+      layer: {
+        ...base,
+        valueKey,
+        name: typeof item.name === 'string' && item.name.trim() ? item.name.trim() : valueKey,
+        description: typeof item.description === 'string' ? item.description : '',
+        unit: typeof item.unit === 'string' ? item.unit : base.unit,
+        direction: typeof item.direction === 'string' ? item.direction : base.direction,
+        dataType: typeof item.dataType === 'string' ? item.dataType : base.dataType,
+        range: item.range === undefined ? base.range : item.range,
+      },
+    })
+    if ('error' in merged) return { error: `measures[${i}]: ${merged.error}` }
+    measures.push(merged.block as CountyLayerBlock)
+  }
+  return { measures }
+}
+
 export function derivedLayerSlug(set: string, column: string): string {
   return `${set}${DERIVED_LAYER_SEPARATOR}${column}`
 }
@@ -1062,6 +1130,37 @@ export async function listInternalLayers(): Promise<InternalLayerManifestEntry[]
       updatedAt: stamp,
     }
     layers.push(entry)
+
+    // P9-0: the file's other measures, each its own county layer. Same id
+    // shape as a set's derived column (`<slug>~<column>`) because it is the
+    // same idea — a value that lives inside something else — and the client
+    // needs no new code to draw one.
+    const extra = parseMeasures(meta)
+    if ('error' in extra) {
+      if (!warned.has(row.slug)) {
+        warned.add(row.slug)
+        console.warn(`[layers] "${row.slug}" has invalid measures and they are skipped: ${extra.error}`)
+      }
+    } else {
+      for (const m of extra.measures) {
+        const id = derivedLayerSlug(row.slug, m.valueKey)
+        layers.push({
+          ...entry,
+          id: `${INTERNAL_LAYER_ID_PREFIX}${id}`,
+          slug: id,
+          name: m.name,
+          description: m.description,
+          dataType: m.dataType,
+          unit: m.unit,
+          direction: m.direction,
+          range: m.range,
+          color: null,
+          popupFields: [],
+          detailFields: [],
+          width: null,
+        })
+      }
+    }
     if (b.geometry === 'point' || b.geometry === 'line') {
       // The version is everything the extent depends on — the entry's
       // revision and the block's geometry columns — so a re-pushed file or an
@@ -1081,13 +1180,42 @@ export async function listInternalLayers(): Promise<InternalLayerManifestEntry[]
 
 /** Values for one layer. Unknown, unpublished, and blockless slugs all 404
  *  identically — the manifest is the only discovery surface. */
+/**
+ * P9-0: one of a dataset file's other measures, read as a county layer.
+ *
+ * The same file and the same key column as the primary block — only the value
+ * column differs — so this is `projectCountyValues` over a block the manifest
+ * already described. Nothing here parses a second file or invents a shape.
+ */
+async function measureValues(
+  entry: { slug: string; status: string; meta: unknown },
+  column: string,
+): Promise<InternalLayerValues> {
+  if (entry.status !== 'published') throw new TabularError(404, 'not found')
+  const meta = isPlainObject(entry.meta) ? entry.meta : {}
+  const found = parseMeasures(meta)
+  if ('error' in found) throw new TabularError(404, 'not found')
+  const block = found.measures.find(m => m.valueKey === column)
+  if (!block) throw new TabularError(404, 'not found')
+  const { parsed: ds } = await readDataset(entry.slug, block.file)
+  const id = derivedLayerSlug(entry.slug, column)
+  const { values, count, range } = projectCountyValues(ds, block)
+  return { id: `${INTERNAL_LAYER_ID_PREFIX}${id}`, slug: id, geometry: 'county', values, count, range }
+}
+
 export async function readInternalLayerValues(
   slug: string,
 ): Promise<InternalLayerValues | InternalLayerPoints | InternalLayerLines | InternalLayerStates> {
-  // P7-8: `<set>~<column>` is a derived index, served from the set's manifest.
-  // Checked first because the separator cannot occur in a dataset slug, so
-  // this can never shadow one.
-  if (isDerivedLayerSlug(slug)) return derivedLayerValues(slug)
+  // `<owner>~<column>` is a value that lives inside something else. Two kinds
+  // share the shape, and the OWNER says which: a working set's derived index
+  // (P7-8), or one of a dataset file's other measures (P9-0). Routing on the
+  // owner's kind rather than on the separator is what lets them coexist.
+  if (isDerivedLayerSlug(slug)) {
+    const split = splitDerivedLayerSlug(slug)
+    const owner = split ? await getCatalogEntry(split.set) : null
+    if (owner && owner.kind !== WORKING_SET_KIND) return measureValues(owner, split!.column)
+    return derivedLayerValues(slug)
+  }
   const entry = await getCatalogEntry(slug)
   if (!entry || entry.status !== 'published') throw new TabularError(404, 'not found')
   const parsed = parseLayerBlock(isPlainObject(entry.meta) ? entry.meta : {})
