@@ -248,7 +248,22 @@ ArcGIS hosts 403 urllib's default user agent — send a real `User-Agent`.
 
 ## 6. Deploy order
 
-**Set flags → restore/push data → merge → reindex.**
+**Set flags → restore/push data → merge → DEPLOY THE API → reindex.**
+
+The API step is the one that gets forgotten, and it is invisible when you do:
+**the `blo-map-api` Railway service has no GitHub connection**, so a merge to
+`main` deploys the **frontend only**. On 2026-10-07 production was found running
+API code from **2026-09-22** — two weeks and two phases behind the frontend —
+because every merge since had only ever rebuilt Netlify.
+
+```bash
+cd server && railway up --service blo-map-api --detach   # from server/, not the root
+railway status                                            # confirm a new deployment appeared
+```
+
+`railway up` honours neither `.gitignore` nor `.railwayignore`: from the repo
+root it packs ~389 MB and Cloudflare 413s it. `server/` is ~6 MB. Details and
+the 401-vs-404 trap are in `DEPLOY.md` → "Deploying the API is MANUAL".
 
 1. **`LIBRARY_REMEDIATE=0` on Railway** before the API redeploys (§3).
 2. **Push data and verify `status` is clean.** A deploy re-syncs prod's mirror

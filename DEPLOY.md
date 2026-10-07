@@ -322,6 +322,68 @@ whether production login works.**
 
 ---
 
+### Deploying the API is MANUAL — merging to `main` does not do it
+
+**The `blo-map-api` service has no GitHub connection.** Its `source.repo` is
+`null`, so nothing about a push or a merge reaches it. Netlify *is* connected to
+`main`, so a merge ships the **frontend only** and the API silently stays where
+it was.
+
+This is how production ran **two-week-old API code** while the frontend was
+current: phase 6 and phase 7 merged on 2026-10-06, Netlify rebuilt, and the API
+kept serving the 2026-09-22 build. `/api/working-sets` 404'd because it had
+never been deployed.
+
+```bash
+cd server            # NOT the repo root — see below
+railway up --service blo-map-api --detach
+```
+
+**Upload from `server/`, not the repo root.** `railway up` honours **neither
+`.gitignore` nor `.railwayignore`** — from the root it packs ~389 MB (mostly
+`.git` at 292 MB, plus untracked `source-data/` and `venv/`) and Cloudflare
+rejects it:
+
+```
+Failed to upload code. File too large (389622112 bytes)
+413 Payload Too Large
+```
+
+Adding a `.railwayignore` changes nothing; the upload grew by exactly the size
+of the file. `server/` is ~6 MB of tracked content and uploads instantly. Root
+Directory is **not** set on the service, which is why `server/` is the correct
+context — if someone sets it to `server` later, this flips back to the root and
+the ignore problem returns.
+
+Check what is actually deployed before trusting it:
+
+```bash
+railway status            # "Recent Deployments" with timestamps — a gap means a gap
+```
+
+#### A 401 does NOT prove a route exists
+
+This is how the staleness was missed for a day. Probing `/api/working-sets`
+without credentials returned **401**, which reads as "exists, auth-gated". It
+was not: guards answer before routing, so a missing route and a protected route
+are indistinguishable without a valid credential.
+
+Use the site token and look for **Express's own 404 body**:
+
+```bash
+TOK=$(curl -s -X POST $API/api/auth -H 'Content-Type: application/json' \
+        -d "{\"password\":\"$STAGING_PASSWORD\"}" | jq -r .token)
+curl -s -H "Authorization: Bearer $TOK" $API/api/working-sets
+#  {"error":"unauthorized"}      → exists, needs a session cookie
+#  Cannot GET /api/working-sets  → NOT DEPLOYED  (server: railway-hikari)
+#  <title>Error</title> via Netlify → the proxy forwarded a Railway 404
+```
+
+`server: railway-hikari` on an HTML 404 is Express. `server: Netlify` on one is
+the proxy relaying it.
+
+---
+
 ## 2. Frontend (Netlify)
 
 Build settings are already in `netlify.toml` (build `npm run build`, publish `dist`, SPA redirect, security + cache headers). Point the prod Netlify site at the **`main`** branch.
