@@ -197,53 +197,96 @@ What IS legitimate on screen is **progress** when something takes a few
 seconds — that is feedback, not a cost disclosure, and the place report's
 streaming progress (P6-16) is the house pattern.
 
-## F. A wide table is a set someone else authored
+## F. Measure and layer are different things — and the split is the set/view split
 
-Nick, 2026-10-07: *"CEJST sounds like it's basically a working set that someone
-else authored elsewhere — with 28 columns."* That is the right reading, and it
-suggests the bridge is a concept rather than a field.
+Nick, 2026-10-07: *"CEJST is basically a working set that someone else authored
+elsewhere — with 28 columns"*, and *"separate measure and layer — that
+separation maps between working set and view."*
 
-CEJST is one file, 3,234 county rows, ~22 measures: the disadvantaged share,
-eight burden categories, the redlining share, twelve indicator percentiles.
-That is not "a dataset with a layer" — it is **a curated bundle of measures
-over one geography**, which is exactly what a working set is. Somebody at CEQ
-did the curation; we imported the result.
+That is the organising idea of this phase.
 
-### The three nouns, if we get them right
+### The four nouns
 
-- **Measure** — one number per geography. The atom. (Today: a "layer", which is
-  overloaded, since it also means the drawn thing.)
-- **Dataset** — a file. May carry many measures. CEJST carries ~22.
-- **Working set** — a named selection of measures, plus derived columns and
-  framing. The thing you open, toggle, re-weight and fork.
+| noun | is | lives on | example |
+|---|---|---|---|
+| **measure** | one number per geography, and what it means | a **working set** | "share of population in a disadvantaged tract", % , 0–100, lower is better |
+| **dataset** | a file; may carry many measures | the library | the CEJST county table, ~22 measures |
+| **layer** | a measure **as drawn** — colour, width, order, on/off | a **view** | that measure, orange, visible, on top |
+| **view** | framing: viewport, which layers are on, how they look | presents one set | "Redevelopment dashboard, fit to the 11 sites" |
 
-Then everything is the same shape:
+So: **a set holds measures; a view draws some of them as layers.** One set,
+many views — which is P7-1's premise, now with a reason the two objects are
+genuinely different rather than merely separate.
+
+### This split is already latent in the code
+
+`layerKeysOf`, the staleness fingerprint, hashes exactly:
+
+```js
+['geometry', 'file', 'latKey', 'lngKey', 'pathKey', 'geoKey', 'valueKey', 'labelKey']
+```
+
+— *where the data is and how to read it* — and deliberately excludes `color`,
+`width`, `name` and `popupFields`. P7-8 called those "cosmetics" when it
+refused to let a legend edit move a published index. **That is the measure/
+layer boundary, drawn already, for a different reason.** Making it explicit
+does not invent a distinction; it names one the code already enforces.
+
+Today's `LayerBlock` conflates the two, which is why the working set stores
+`layers: ["internal-transmission-345kv"]` — presentation data on a data object.
+
+Three groups, precisely:
+
+1. **Where the data is** — `geometry`, `file`, the key columns. Fingerprinted.
+2. **What the number means** — `unit`, `direction`, `range`. Changes the score,
+   not the bytes. **(1) + (2) = the measure.**
+3. **How it looks** — `color`, `width`, `name`, `popupFields`. **= the layer.**
+
+### What this buys: the view is the sandbox, the set is the record
+
+Re-weighting is **exploration**, and it belongs in a view: instant,
+client-side, free, nothing saved, nothing to clean up. The moment the answer is
+worth keeping, you **save it to the set**, where it becomes a measure other
+people can draw, cite and build on.
+
+That is exactly Nick's "anyone can make their own index and test how
+re-weighting changes the analysis", and it falls straight out of the split
+rather than needing to be designed:
+
+- open the index (a set) in a view
+- drag weights — the map moves, no request, no cost
+- like it? **Save as a measure** on a set. Now it is a layer anyone can draw.
+- compare it against the one you forked from (P9-6)
+
+### Then every index is the same shape
 
 | | measures from | composite |
 |---|---|---|
 | BLO Livability Index | the registry | `BLO_PRESET` |
-| CEJST | its own 22 columns | CEQ's disadvantaged flag |
-| a user's index | anywhere in the library | theirs |
+| CEJST | its own ~22 columns | CEQ's disadvantaged flag |
+| yours | anywhere in the library | yours |
 
-### What that implies
+### Vocabulary decision (settled)
 
-A dataset should **declare its measures** — the plumbing previously called
-`meta.layers[]`, probably better named `measures`. And a dataset that declares
-several should be **openable as a set**, without anyone hand-assembling one.
-Whether that is an auto-projected set or just "the dataset page gains the set
-surface" is an implementation choice; the concept is that **there is one thing
-you open and play with, and it is called a working set.**
+**"Measure" and "layer" are separate words with separate jobs**, and the
+manifest says `measures`. `layer` stops meaning "a column of numbers" and means
+only "a measure being drawn". A dataset declaring several measures is
+**openable as a set**, so an imported wide table needs no hand-assembly.
 
-This also explains why `meta.layers[]` felt like a blocker in phase 8 and only
-half-explained itself: it is not a manifest convenience, it is **the mechanism
-by which imported analysis becomes ingredients.** Without it the library offers
-roughly fifteen ingredients; with it, hundreds.
-
-**Open:** whether "measure" replaces "layer" in the vocabulary, or whether
-layer keeps both jobs. Worth deciding before writing it, because the name ends
-up in the manifest and manifests are hand-edited.
+This is what P8's `meta.layers[]` was reaching for and could not explain: it is
+not a manifest convenience, it is **the mechanism by which imported analysis
+becomes ingredients.** Without it the library offers roughly fifteen; with it,
+hundreds.
 
 ## Tickets
+
+### P9-0 [FEATURE] A dataset declares its `measures`
+Per §F. One file, many measures; a wide table becomes openable as a set. The
+mechanism by which imported analysis becomes ingredients — CEJST goes from 1
+usable measure to ~22, the library from ~15 to hundreds. Vocabulary is settled:
+`measures` in the manifest, `layer` reserved for a measure being drawn.
+**Size: M.** Blocks P9-6 in practice — forking an index is thin without things
+to fork with.
 
 ### P9-1 [BUG] A layer is drawn as itself — fix `useShowOnMap`'s binary split
 Replace points-vs-scorable with a dispatch on the layer's declared geometry
@@ -286,13 +329,6 @@ client-side over county-scale data, no request. No cost disclosure anywhere in
 the UI — progress only, and only where it is slow enough to need it.
 **Size: M.** Independent of the map work — can run in parallel.
 
-### P9-0 [FEATURE] A dataset declares its measures
-Per §F. One file, many measures; a wide table becomes openable as a set. This
-is what turns imported analysis into ingredients — CEJST goes from 1 usable
-measure to ~22, and the library from ~15 to hundreds. Decide the vocabulary
-first (§F, open). **Size: M.** Blocks P9-6 in practice: forking an index is
-thin without things to fork with.
-
 ### P9-8 [BUG] Carried UX fixes from the audit
 Entry pages stop printing raw JSON and the nine mis-nested manifests are fixed
 (§3); gap flags lose warning weight and "needs a look" splits by reason (§4);
@@ -305,9 +341,9 @@ location" (§10). **Size: M.** Independent.
 ## Sequencing
 
 ```
-P9-1 ─► P9-2 ─────────────────┐
-                              ├─► P9-6
-P9-4 ─► P9-5 ─────────────────┘
+P9-1 ─► P9-2 ──────────────────────────┐
+                                       ├─► P9-6  fork + compare
+P9-0 ─► P9-4 ─► P9-5 ──────────────────┘
 P9-3   P9-7   P9-8   (parallel, independent)
 ```
 
@@ -315,7 +351,9 @@ P9-3   P9-7   P9-8   (parallel, independent)
 change and no data migration, and make the set surface honest before anything
 is built on top of it.
 
----
+**Then P9-0**, because it decides what the vocabulary is before measures get
+written into hand-edited manifests, and because it is what gives P9-6 anything
+to fork with.
 
 ## Answered (Nick, 2026-10-07)
 
@@ -327,16 +365,19 @@ is built on top of it.
 3. **Internal publishing only, for now.** A logged-in user can publish an
    authored, modified index; nothing public-facing yet.
 4. **Where an analysis runs is not the reader's concern** (§E).
+5. **Measure and layer are separate words**, and that separation is the
+   working-set/view separation (§F). A set holds measures; a view draws some of
+   them as layers.
 
 ## Still open
 
-- **`meta.layers[]` — how much does it gate?** A manifest declares ONE drawable
-  column today, so the CEJST file contributes 1 ingredient out of 28 (the eight
-  burden categories, the redlining share and twelve percentiles are all
-  invisible to the map and unusable in an index). "Anyone can build an index
-  from the datasets available" is a thin offer while the library exposes ~15
-  ingredients instead of hundreds. It does not block P9-1 or P9-2; it probably
-  should land before P9-6, or forking an index has little to fork with.
-- **What happens to the old index values at the v3 cutover** — kept beside the
-  new ones for comparison, or archived? P9-6's compare-two-indices makes the
-  first option nearly free.
+- **How far does the measure/layer rename reach?** `LayerBlock` conflates both
+  today (§F). The manifest gains `measures`; whether the internal layer
+  manifest, `MapLayerState` and `LayerControls` are renamed with it, or keep
+  saying "layer" because at that point they genuinely mean the drawn thing, is
+  a judgement to make while writing P9-0 rather than before.
+- **Does a measure need a stable id across datasets?** If CEJST's
+  `pct_pop_energy` and a future EJScreen equivalent are both "energy burden",
+  comparing two indices built on different sources needs either a shared id or
+  an explicit mapping. Not a blocker; it is the question that arrives the first
+  time someone forks an index onto different data.
