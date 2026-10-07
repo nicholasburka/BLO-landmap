@@ -744,6 +744,47 @@ export async function fetchViewsOfWorkingSet(slug: string): Promise<ViewRef[]> {
   return viewRefsFrom(entries, v => v.meta.workingSet === slug)
 }
 
+/**
+ * P8-3: the datasets a working set holds, as rows a page can show.
+ *
+ * The set's manifest carries member SLUGS; a reader wants names, kinds and
+ * whether each is published. The server already returns exactly this on
+ * `GET /api/working-sets/:slug`, but the entry page is a catalog page and the
+ * catalog is already loaded — so this resolves them from the same shared
+ * fetch and costs no request, like `fetchViewsOfWorkingSet` above.
+ *
+ * `missing` is kept separate rather than folded away, for P6-23's reason: a
+ * count may not disagree with the list it opens, and "this set names something
+ * the library no longer has" is a thing to go and fix, not a row to drop.
+ */
+export interface WorkingSetMemberRow {
+  slug: string
+  title: string
+  kind: string
+  status: string
+}
+
+export async function fetchMembersOfWorkingSet(
+  slugs: readonly string[],
+): Promise<{ members: WorkingSetMemberRow[]; missing: string[] }> {
+  if (!slugs.length) return { members: [], missing: [] }
+  const entries = await fetchCatalog({ archived: true })
+  const bySlug = new Map(entries.map(e => [e.slug, e]))
+  const members: WorkingSetMemberRow[] = []
+  const missing: string[] = []
+  // The set's own order, not the catalog's: the order a person chose when they
+  // built the set is information, and sorting it away discards it.
+  for (const slug of slugs) {
+    const e = bySlug.get(slug)
+    if (!e) {
+      missing.push(slug)
+      continue
+    }
+    members.push({ slug, title: e.title || slug, kind: e.kind, status: e.status })
+  }
+  return { members, missing }
+}
+
 /** Wiki pages that link or embed the entry (built at reindex, see P5-37). */
 export function mentionedBy(entry: Pick<CatalogEntry, 'meta'>): CatalogRef[] {
   const raw = entry.meta?.mentionedBy

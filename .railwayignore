@@ -1,0 +1,39 @@
+# `railway up` uploads the working directory and does NOT honour .gitignore,
+# so without this the context is ~396 MB and Cloudflare rejects it with 413.
+# The API builds from Root Directory = server, so it needs server/src,
+# server/package*.json and server/tsconfig*.json — nothing else here.
+#
+# Added 2026-10-07 after a 413 blocked the first API deploy since 2026-09-22.
+# NOTE: this service has NO GitHub connection (source.repo is null), so every
+# API deploy is a manual `railway up`. Merging to main deploys the FRONTEND
+# only, via Netlify.
+
+.git
+node_modules
+server/node_modules
+
+# build output — Railway builds from source
+dist
+dist-e2e
+dist-ssr
+server/dist
+
+# the local bucket mirror: 411 MB, and the server re-syncs it from B2 on boot
+server/library-data
+library-data
+
+# frontend-only assets; the API never reads them
+public/datasets
+
+# the big ones — source-data alone is 1.7 GB of raw inputs that the
+# preprocessing scripts consume at BUILD time on a laptop, never at runtime
+source-data
+venv
+screenshots
+
+# local scratch
+.playwright-mcp
+library-staging
+coverage
+test-results
+playwright-report

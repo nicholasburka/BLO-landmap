@@ -43,6 +43,8 @@ vi.mock('@/lib/libraryCatalog', async importOriginal => {
     fetchCatalogEntry: vi.fn(),
     fetchCatalog: vi.fn(),
     fetchViewsUsingLayer: vi.fn(),
+    fetchViewsOfWorkingSet: vi.fn(),
+    fetchMembersOfWorkingSet: vi.fn(),
     fileCatalogEntry: vi.fn(),
     refetchLink: vi.fn(),
     // P5-59
@@ -58,6 +60,8 @@ import {
   fetchCatalog,
   fetchCatalogEntry,
   fetchViewsUsingLayer,
+  fetchViewsOfWorkingSet,
+  fetchMembersOfWorkingSet,
   fileCatalogEntry,
   refetchLink,
   fetchSourceProposal,
@@ -137,6 +141,12 @@ beforeEach(() => {
   mockedMapHref.mockReset()
   mockedMapHref.mockResolvedValue('/?layers=internal-organizations&fit=bbox%3A-90.31%2C34.99%2C-89.6%2C35.35')
   roleRef.value = { username: 'dev', role: 'admin' }
+  // P8-3: both resolve off the shared catalog, so an un-stubbed mock returning
+  // undefined would blow up the v-for rather than render an empty block.
+  vi.mocked(fetchViewsOfWorkingSet).mockReset()
+  vi.mocked(fetchViewsOfWorkingSet).mockResolvedValue([])
+  vi.mocked(fetchMembersOfWorkingSet).mockReset()
+  vi.mocked(fetchMembersOfWorkingSet).mockResolvedValue({ members: [], missing: [] })
   // Most entries hold no extraction; the ones that do say so per test.
   mockedText.mockRejectedValue(new Error('No text was found in this file.'))
   mockedEntry.mockResolvedValue(entry())
@@ -1590,6 +1600,66 @@ describe('a working set, read at its own URL (P7-1)', () => {
     expect(w.get('[data-testid="working-set-kind"]').text()).toContain('made by maria')
     expect(w.get('[data-testid="working-set-purpose"]').text()).toBe('Which parcels can be redeveloped')
     expect(w.get('[data-testid="working-set-holds"]').text()).toBe('3 datasets · 1 layer')
+  })
+
+  /**
+   * P8-3. The set's manifest holds member SLUGS and this page used to render
+   * only their count — so the one fact a reader arrives for, WHAT is in the
+   * set, sat behind a link labelled "Its datasets, and what is still missing".
+   */
+  it('lists the member datasets by name, not just a count', async () => {
+    mockedEntry.mockResolvedValue(SET)
+    vi.mocked(fetchMembersOfWorkingSet).mockResolvedValue({
+      members: [
+        { slug: 'memphis-sites', title: 'Memphis sites', kind: 'dataset', status: 'published' },
+        { slug: 'epa-superfund-npl', title: 'Superfund NPL', kind: 'dataset', status: 'needs-review' },
+      ],
+      missing: [],
+    })
+    const w = await mountAt('/library/memphis-redevelopment')
+    await flushPromises()
+    const rows = w.get('[data-testid="working-set-members"]')
+    expect(rows.text()).toContain('Memphis sites')
+    expect(rows.text()).toContain('Superfund NPL')
+    expect(rows.find('a').attributes('href')).toBe('/library/memphis-sites')
+    // an unpublished member says so — it is why a layer may not draw
+    expect(rows.text()).toContain('needs-review')
+  })
+
+  it('does not restate the composed description the card already shows', async () => {
+    mockedEntry.mockResolvedValue(SET)
+    const w = await mountAt('/library/memphis-redevelopment')
+    await flushPromises()
+    // `describeWorkingSet()` is for one-line contexts — cards, ⌘K, search.
+    // Every part of it is already on this page.
+    expect(w.find('.entry-description').exists()).toBe(false)
+    expect(w.get('[data-testid="working-set-purpose"]').text()).toBe('Which parcels can be redeveloped')
+  })
+
+  it('says nothing about missing datasets when none are missing', async () => {
+    mockedEntry.mockResolvedValue(SET)
+    vi.mocked(fetchMembersOfWorkingSet).mockResolvedValue({ members: [], missing: [] })
+    const w = await mountAt('/library/memphis-redevelopment')
+    await flushPromises()
+    expect(w.find('[data-testid="working-set-missing"]').exists()).toBe(false)
+  })
+
+  it('names the missing ones when the library has lost them (P6-23)', async () => {
+    mockedEntry.mockResolvedValue(SET)
+    vi.mocked(fetchMembersOfWorkingSet).mockResolvedValue({
+      members: [{ slug: 'memphis-sites', title: 'Memphis sites', kind: 'dataset', status: 'published' }],
+      missing: ['epa-brownfields'],
+    })
+    const w = await mountAt('/library/memphis-redevelopment')
+    await flushPromises()
+    expect(w.get('[data-testid="working-set-missing"]').text()).toContain('epa-brownfields')
+  })
+
+  it('does not print the bucket directory as a topic', async () => {
+    mockedEntry.mockResolvedValue(SET)
+    const w = await mountAt('/library/memphis-redevelopment')
+    await flushPromises()
+    expect(w.find('.category').exists()).toBe(false)
   })
 
   it('names the anchor and the view it was promoted from', async () => {

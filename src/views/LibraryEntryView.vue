@@ -19,6 +19,8 @@ import {
   entryUrl,
   fetchViewsUsingLayer,
   fetchViewsOfWorkingSet,
+  fetchMembersOfWorkingSet,
+  type WorkingSetMemberRow,
   mentionedBy,
   linkOf,
   sourceOf,
@@ -238,15 +240,28 @@ watch(
  * saying, not an empty list to hide. Costs no request (the shared catalog).
  */
 const setViews = ref<ViewRef[]>([])
+/** P8-3: the member datasets, named. The manifest holds slugs; a reader wants
+ *  to see WHAT is in the set without clicking through to another page. */
+const setMembers = ref<WorkingSetMemberRow[]>([])
+const setMissing = ref<string[]>([])
 watch(
   () => (entry.value?.kind === 'working-set' ? entry.value.slug : ''),
   async slug => {
     setViews.value = []
+    setMembers.value = []
+    setMissing.value = []
     if (!slug) return
     try {
       setViews.value = await fetchViewsOfWorkingSet(slug)
     } catch {
       /* the block just lists no views */
+    }
+    try {
+      const resolved = await fetchMembersOfWorkingSet(workingSetBlock.value?.datasets ?? [])
+      setMembers.value = resolved.members
+      setMissing.value = resolved.missing
+    } catch {
+      /* fall back to the counts alone */
     }
   },
   { immediate: true },
@@ -379,6 +394,17 @@ const workingSetBlock = computed(() => {
     derived: Array.isArray(meta.derived) ? meta.derived.length : 0,
   }
 })
+
+/** P8-3: a set's layers, named rather than keyed. An internal layer's id is
+ *  `internal-<slug>`, and the slug is the entry it came from — so the name is
+ *  the member's title when we have it, and the bare slug when we do not. */
+const setLayers = computed(() =>
+  (workingSetBlock.value?.layers ?? []).map(id => {
+    const slug = id.replace(/^internal-/, '')
+    const member = setMembers.value.find(m => m.slug === slug)
+    return { id, slug, name: getPublicLayer(id)?.name ?? member?.title ?? slug }
+  }),
+)
 
 /** What the view holds, in the server's own words. A map snapshot's
  *  description opens with "Map view", which the kind line already said. */
@@ -951,7 +977,9 @@ async function reloadEntry(): Promise<void> {
                id only shows when the taxonomy has never heard of it. -->
           <span v-if="topicLabelOf(entry)" class="category" data-testid="entry-topic">{{ topicLabelOf(entry) }}</span>
           <span v-if="purposeLabelOf(entry)" class="purpose" data-testid="entry-purpose">{{ purposeLabelOf(entry) }}</span>
-          <span v-else-if="!topicLabelOf(entry) && entry.category" class="category">{{ entry.category }}</span>
+          <!-- `working-sets` is the bucket directory, not a topic, and the kind
+               chip beside the title already says what this is. -->
+          <span v-else-if="!topicLabelOf(entry) && entry.category && entry.kind !== 'working-set'" class="category">{{ entry.category }}</span>
           <span v-if="publisher" class="publisher" data-testid="entry-organization">{{ publisher }}</span>
           <!-- P6-21: a tag opens a search for it. It used to point at
                `/library?tag=`, which has been retired since P6-5: the redirect
@@ -1101,9 +1129,29 @@ async function reloadEntry(): Promise<void> {
           <RouterLink :to="`/place?set=${entry.slug}`" class="file-btn view-open" data-testid="working-set-place">
             Check a place in this set →
           </RouterLink>
+          <!-- P8-3: WHAT is in the set, on the page. The manifest holds slugs
+               and this page used to render only their count, putting the one
+               fact a reader came for behind a link. -->
+          <ul v-if="setMembers.length" class="set-members" data-testid="working-set-members">
+            <li v-for="m in setMembers" :key="m.slug">
+              <RouterLink :to="`/library/${m.slug}`">{{ m.title }}</RouterLink>
+              <span class="set-member-kind">{{ m.kind }}</span>
+              <span v-if="m.status !== 'published'" class="set-member-status">{{ m.status }}</span>
+            </li>
+          </ul>
+          <p v-if="setLayers.length" class="view-holds" data-testid="working-set-layers">
+            Layers: <template v-for="(l, i) in setLayers" :key="l.id"><span v-if="i"> · </span>{{ l.name }}</template>
+          </p>
+          <!-- Only when there IS something missing: P6-23's rule is that a count
+               may not disagree with its list, and a standing "what is missing"
+               link reads as a warning on a set with nothing wrong with it. -->
+          <p v-if="setMissing.length" class="view-holds set-missing" data-testid="working-set-missing">
+            {{ setMissing.length }} named {{ setMissing.length === 1 ? 'dataset is' : 'datasets are' }} no longer in the library:
+            {{ setMissing.join(', ') }}
+          </p>
           <p class="view-embed">
             <RouterLink :to="`/datasets?workingSet=${entry.slug}`" data-testid="working-set-datasets">
-              Its datasets, and what is still missing
+              Browse these datasets →
             </RouterLink>
           </p>
         </div>
@@ -1175,7 +1223,11 @@ async function reloadEntry(): Promise<void> {
           <span class="answers-lead">Answers:</span> {{ whatItAnswers }}
         </p>
 
-        <p v-if="description" class="entry-description">{{ description }}</p>
+        <!-- P8-3: `describeWorkingSet()` composes "Working set · <purpose> ·
+             N datasets · M layers" for places where ONE line is all there is —
+             cards, ⌘K rows, search_library. On this page every part of it is
+             already shown above, so rendering it here says everything twice. -->
+        <p v-if="description && entry.kind !== 'working-set'" class="entry-description">{{ description }}</p>
 
         <!-- P5-70: the first words of the document itself, so the Overview of
              a document is the document rather than a list of links to it. -->
@@ -2358,6 +2410,30 @@ h2 {
 }
 
 .tab-lede,
+.set-members {
+  list-style: none;
+  margin: 0.35rem 0 0.6rem;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+.set-members li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.set-member-kind,
+.set-member-status {
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+.set-member-status {
+  color: #92400e;
+}
+.set-missing {
+  color: #92400e;
+}
+
 .entry-description {
   font-size: 14px;
   line-height: 1.5;

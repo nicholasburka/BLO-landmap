@@ -248,7 +248,22 @@ ArcGIS hosts 403 urllib's default user agent — send a real `User-Agent`.
 
 ## 6. Deploy order
 
-**Set flags → restore/push data → merge → reindex.**
+**Set flags → restore/push data → merge → DEPLOY THE API → reindex.**
+
+The API step is the one that gets forgotten, and it is invisible when you do:
+**the `blo-map-api` Railway service has no GitHub connection**, so a merge to
+`main` deploys the **frontend only**. On 2026-10-07 production was found running
+API code from **2026-09-22** — two weeks and two phases behind the frontend —
+because every merge since had only ever rebuilt Netlify.
+
+```bash
+cd server && railway up --service blo-map-api --detach   # from server/, not the root
+railway status                                            # confirm a new deployment appeared
+```
+
+`railway up` honours neither `.gitignore` nor `.railwayignore`: from the repo
+root it packs ~389 MB and Cloudflare 413s it. `server/` is ~6 MB. Details and
+the 401-vs-404 trap are in `DEPLOY.md` → "Deploying the API is MANUAL".
 
 1. **`LIBRARY_REMEDIATE=0` on Railway** before the API redeploys (§3).
 2. **Push data and verify `status` is clean.** A deploy re-syncs prod's mirror
@@ -389,7 +404,13 @@ POST /api/views
 `state` is required and must be an object; `results` must be an array. `type` is
 one of `map | table | compare`.
 
-**The easier path is the other direction:** frame the map, save a view, then
+**Create the VIEW first.** Slug is unique across the whole catalog, not per
+kind, so a set and its view cannot share a name — the second one created gets
+`-2`. Set-first therefore hands the ugly slug to the **view**, which is the URL
+people open and share, while the set's slug is only ever read inside manifests.
+Exactly backwards. (P8-1.)
+
+**The right path, and the easier one:** frame the map, save a view, then
 `POST /api/working-sets/from-view/<view-slug>` promotes it. The UI is built
 around this, and the framing already exists when you promote.
 
