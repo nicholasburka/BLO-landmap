@@ -404,7 +404,13 @@ POST /api/views
 `state` is required and must be an object; `results` must be an array. `type` is
 one of `map | table | compare`.
 
-**The easier path is the other direction:** frame the map, save a view, then
+**Create the VIEW first.** Slug is unique across the whole catalog, not per
+kind, so a set and its view cannot share a name — the second one created gets
+`-2`. Set-first therefore hands the ugly slug to the **view**, which is the URL
+people open and share, while the set's slug is only ever read inside manifests.
+Exactly backwards. (P8-1.)
+
+**The right path, and the easier one:** frame the map, save a view, then
 `POST /api/working-sets/from-view/<view-slug>` promotes it. The UI is built
 around this, and the framing already exists when you promote.
 
