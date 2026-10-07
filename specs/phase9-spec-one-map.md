@@ -307,11 +307,23 @@ declarative — "these layers are on" — and the canvas should reconcile when i
 can draw, rather than callers guessing when that is.
 **Size: S.** Blocks the visible half of P9-1.
 
-### P9-2 [FEATURE] The working set's map gets the public map's controls
-Give `MapPane` (or the workspace around it) `LayerControls` and the legend, so
-a set's layers can be toggled and read. These are the public map's components,
-passed the same `MapLayerState` the workspace already holds. Fit the viewport
-to the set. **Size: M.** Depends on P9-1.
+### P9-2 [FEATURE] The working set's map gets layer-by-layer display and toggling — DONE
+`SetLayerList` names every layer the set holds, with its own colour, its
+geometry and a checkbox, and toggles through the **same state the canvas draws
+from** (`layers.toggle.points` / `.internal`).
+
+Deliberately NOT `LayerControls`: that component carries fourteen emits and
+the public map's categories, weights, filters and contamination with it. What
+is worth reusing is the state and the toggle semantics, not the panel's
+markup — a set's map should offer the set's layers and nothing else.
+
+A layer the set names but the library has lost is **listed and labelled**, not
+dropped (P6-23: a count may not disagree with the list it opens).
+
+**Framing was investigated and left alone.** The subset already wins over a
+layer's extent in the ordinary case, and the set's nine counties genuinely
+span Arizona to Virginia — so a near-national view IS the correct fit here. An
+earlier draft of this ticket called that a regression; it was not.
 
 ### P9-3 [FEATURE] Proximity and the index, on the analysis surface
 Put both in `/analysis`'s grid and on the set, set-scoped. Each card states

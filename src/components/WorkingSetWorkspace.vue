@@ -40,6 +40,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import DatasetView from '@/views/DatasetView.vue'
 import MapPane from '@/components/MapPane.vue'
+import SetLayerList from '@/components/SetLayerList.vue'
 import { useShowOnMap } from '@/composables/useShowOnMap'
 import { contextCell } from '@/lib/countyJoin'
 import { friendlyError } from '@/lib/errors'
@@ -177,6 +178,10 @@ const drawnIndex = ref('')
 /** The layers the SET names: it is the data, and what to draw is a question
  *  about the data. The view contributes the framing around them. */
 const drawsLayers = computed(() => (set.value?.layers.length ?? 0) > 0 || !!drawnIndex.value)
+
+/** The layers the set names, in its own order — what the list offers to
+ *  toggle. A drawn index stands alone, the way it draws alone. */
+const setLayerIds = computed(() => (drawnIndex.value ? [drawnIndex.value] : (set.value?.layers ?? [])))
 
 const map = useShowOnMap({
   layers: () => (drawnIndex.value ? [drawnIndex.value] : (set.value?.layers ?? [])),
@@ -509,6 +514,17 @@ onMounted(async () => {
             label="This working set on the map"
             @close="show('data')"
             @county-click="clickedGeoId = $event"
+          />
+          <!-- P9-2: once a set's layers actually draw (P9-1, P9-1b) the map is
+               two dense national networks and thousands of clustered points
+               with nothing to say what they are. This names them, carries each
+               one's own colour so the list reads against the map, and toggles
+               through the same state the canvas draws from. -->
+          <SetLayerList
+            v-if="map.isOpen.value && setLayerIds.length"
+            class="workspace-layers"
+            :layers="map.state.layers"
+            :ids="setLayerIds"
           />
           <!-- A map beside a page wants a desktop (P6-14). On a phone the deep
                link is still how this view is shared, and still works. -->
