@@ -2,6 +2,36 @@
   command = "npm run build"
   publish = "dist"
 
+# API proxy (2026-10-07) — this is what makes internal LOGIN work.
+#
+# The session is an httpOnly cookie, and a cookie is first-party only when the
+# API and the site share a registrable domain. With the browser talking to
+# `blo-map-api-production.up.railway.app` directly, the cookie was third-party:
+# Chrome and Safari dropped it, so login returned 200, flashed, and bounced
+# back to /login with a wall of 401s and nothing wrong in the server logs.
+#
+# Proxying /api/* through this domain means the browser only ever speaks to
+# map.blacklandownership.com, so the cookie is first-party and SameSite=Lax
+# works everywhere — with no DNS change and no Railway custom domain.
+#
+# MUST stay ABOVE the SPA catch-all: Netlify matches redirects in order, and
+# /* would otherwise swallow /api/* into index.html.
+#
+# Requires, or it does nothing:
+#   Netlify  VITE_API_URL=https://map.blacklandownership.com   (inlined at BUILD
+#            time — use "Clear cache and deploy site")
+#   Railway  TRUST_PROXY_HOPS=2        (Netlify is now a second hop; must match
+#            reality or per-IP limits are spoofable)
+#   Railway  SESSION_COOKIE_SAMESITE=lax
+#
+# Leave OAUTH_ISSUER pointing at the railway.app host: OAuth clients (MCP)
+# connect to the API directly and are unaffected by this proxy.
+[[redirects]]
+  from = "/api/*"
+  to = "https://blo-map-api-production.up.railway.app/api/:splat"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

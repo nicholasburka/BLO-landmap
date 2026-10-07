@@ -228,7 +228,28 @@ immediate bounce to `/login`, and a wall of 401s. **Nothing in the server logs l
 wrong**, because from the server's side these are ordinary unauthenticated requests.
 That is what makes this expensive to diagnose.
 
-**Fix: serve the API from a subdomain of the site.** Then both are
+**Fix A (no DNS, preferred when the subdomain is stuck): proxy the API through
+the site.** `netlify.toml` rewrites `/api/*` to the Railway host with
+`status = 200`, so the browser only ever talks to the site's own origin and the
+cookie is first-party. It must sit **above** the SPA catch-all, or `/*` swallows
+it into `index.html`.
+
+```toml
+[[redirects]]
+  from = "/api/*"
+  to = "https://blo-map-api-production.up.railway.app/api/:splat"
+  status = 200
+  force = true
+```
+
+Then: Netlify `VITE_API_URL=https://map.blacklandownership.com`, Railway
+`SESSION_COOKIE_SAMESITE=lax` and **`TRUST_PROXY_HOPS=2`** — Netlify is now a
+second hop, and this must match reality or per-IP limits are spoofable. Leave
+`OAUTH_ISSUER` on the railway.app host; OAuth/MCP clients reach the API directly
+and the proxy does not affect them. Costs a little latency and Netlify
+bandwidth; needs no DNS and no custom domain.
+
+**Fix B: serve the API from a subdomain of the site.** Then both are
 `*.blacklandownership.com`, the cookie is first-party, and `lax` works everywhere.
 
 ```bash
@@ -252,6 +273,23 @@ railway variables --service blo-map-api \
   the API's own hostname.
 - **It does not have to be `api`.** Any subdomain of the site works — `kb.`,
   `backend.`, anything. Pick whatever is free.
+
+#### A registered-but-unverified custom domain looks broken in a specific way
+
+`railway domain --service <svc> --json` lists what the service already holds. If the
+hostname is **already there**, `railway domain <host>` answers *"Domain is not
+available"* — it is refusing to re-add, not reporting a conflict elsewhere. That is
+not a problem to solve; read the required CNAME off the dashboard instead.
+
+Until Railway **verifies** the DNS and issues a certificate, its edge answers
+`{"status":"error","code":404,"message":"Application not found"}` for that hostname
+even when you force the right Host header, while the `*.up.railway.app` name on the
+same IP returns 200. So a 404 there means *unverified*, not *wrong target* — and the
+cert will be the generic `*.up.railway.app` wildcard, which fails verification with
+*"no alternative certificate subject name matches"*. Both symptoms are expected for
+a pending domain and neither tells you the CNAME is wrong. Verify a candidate target
+with `curl -sk --resolve <host>:443:<ip>` before changing DNS on the strength of a
+guess.
 
 #### "Domain is not available" from `railway domain`
 
