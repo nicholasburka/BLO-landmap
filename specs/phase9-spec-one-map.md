@@ -471,7 +471,40 @@ exists, natural bounds where `unit` says so. **Acceptance is byte-identical
 output** — all 3,144 county scores match `combined_scores_v2.json` exactly and
 the public snapshots pass unedited. **Size: M.** Blocks P9-5.
 
-### P9-5 [FEATURE] The livability index as a set definition
+### P9-5 [FEATURE] The livability index as a set definition — PARITY PROVEN
+**3,144 of 3,144 county scores reproduced exactly**, max delta 0.0000.
+`src/config/bloIndexV2.ts` is `calculate_blo_v2_scores.cjs` written as data,
+and `server/src/services/compositeParity.test.ts` asserts the reproduction
+against the published file's own `raw` values — so it tests the arithmetic,
+a data refresh cannot break it, and a change to the scorer will.
+
+The configuration that does it, and all three parts were needed:
+
+1. **`missing: 'ignore'`.** Under `penalise` only 1,360 of 3,144 reproduce.
+   The test asserts the wrong rule FAILS, so the right one is proving
+   something.
+2. **A MIX of spans, not a policy.** Five terms have natural bounds (0-1,
+   0-100) and six are money, years and counts taking the data's own spread.
+   All-pinned gave 1/3144; all-observed gave 6/3144.
+3. **The script's weights exactly.** `BLO_PRESET` says it mapped percentages
+   "roughly"; every one is exactly ×40, and weights are relative, so it is
+   the same formula.
+
+**A correction to §C.** The registry's ranges are NOT the script's observed
+values rounded: `life_expectancy` is 65–87 there against 69–89.5 in the data,
+`avg_weekly_wage` 300–3000 against 601–4514. Close enough to look like
+roundings, far enough to change the answer — which is why the definition pins
+its own spans rather than borrowing the registry's.
+
+**The spans are pinned, not recomputed, on purpose.** Recomputing would mean
+every data refresh silently moved every historical score and two vintages of
+the index would not be comparable. These are the spans the published numbers
+were made with: a property of THIS index, not of today's files.
+
+**Remaining:** the set object and the frozen export (§D) — creating the
+working set whose composite is this definition, and the build step that
+writes its values into the public bundle. The hard part, proving the numbers
+survive the move, is done.
 One definition, one scorer. `BLO_PRESET` becomes a composite definition;
 `usePersonalizedScore` and `composite.ts` stop being two implementations of one
 idea. Acceptance: identical scores, public snapshots unedited, public map works
