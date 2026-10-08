@@ -256,6 +256,24 @@ describe('the index', () => {
     expect(scale!.max).toBe(100)
   })
 
+  /**
+   * P9-4. The two calls a researcher makes, both stored with the result, so
+   * a number can be read back as "this index, under these rules".
+   */
+  it('stores the missing-data rule it was run under', async () => {
+    const run = await build({ label: 'Strict', missing: 'ignore' })
+    expect(run.missing).toBe('ignore')
+  })
+
+  it('defaults the rule rather than leaving it unsaid', async () => {
+    const run = await build()
+    expect(run.missing).toBe('penalise')
+  })
+
+  it('refuses a rule it does not know, in words a person can act on', async () => {
+    await expect(build({ label: 'Odd', missing: 'sideways' })).rejects.toThrow(/penalise|ignore/)
+  })
+
   it('declares what it measures, in a method a column header can show', async () => {
     const run = await build()
     expect(run.method).toContain('Black voter registration ×6 higher is better')

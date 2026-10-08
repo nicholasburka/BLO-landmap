@@ -186,6 +186,71 @@ describe('a declared range beats the observed one (P9-4)', () => {
   })
 })
 
+describe('a researcher chooses how missing data counts (P9-4)', () => {
+  /**
+   * Two defensible answers, and the published index and the server had picked
+   * different ones without anybody deciding.
+   *
+   * `calculate_blo_v2_scores.cjs` divides by the weight it HAS, so a county
+   * missing life expectancy is scored on the rest. `computeComposite` divided
+   * by the full declared weight, so the same county is dragged down as though
+   * it had scored zero. Roughly two thirds of US counties are missing at
+   * least one of the eleven, so this is not a rounding difference.
+   *
+   * Neither is wrong. "We know little about this county, so it should not
+   * rank top" is a real position; so is "score it on what we have". A
+   * researcher comparing the two wants both, so it is a setting.
+   */
+  // Every term needs real spread (a flat term is refused, and rightly), and
+  // `y` is absent from term b — that absence is the whole subject here.
+  const partial: CompositeTermValues[] = [
+    term('a', 1, 'higher_better', { x: 0, y: 10 }),
+    term('b', 1, 'higher_better', { x: 0, z: 10 }),
+  ]
+
+  it('penalises a county for what it is missing, when asked to', () => {
+    // y tops term a (weight 1 of 2 declared) and has nothing for b.
+    expect(computeComposite(partial, { missing: 'penalise' }).values['y']).toBe(50)
+  })
+
+  it('scores a county on the data it has, when asked to', () => {
+    // Same county, divided by the 1 weight actually available.
+    expect(computeComposite(partial, { missing: 'ignore' }).values['y']).toBe(100)
+  })
+
+  it('agrees about a county that has everything', () => {
+    // x is at the bottom of both terms either way — the rules only differ
+    // where something is absent.
+    expect(computeComposite(partial, { missing: 'penalise' }).values['x']).toBe(0)
+    expect(computeComposite(partial, { missing: 'ignore' }).values['x']).toBe(0)
+  })
+
+  it('defaults to penalise, which is what it did before this was a choice', () => {
+    expect(computeComposite(partial).values['y']).toBe(50)
+  })
+
+  it('records which rule produced the numbers', () => {
+    const r = computeComposite(partial, { missing: 'ignore' })
+    expect(r.missing).toBe('ignore')
+  })
+})
+
+describe('a term can be told to observe its own spread (P9-4)', () => {
+  /** Contamination is the live case: the published script scaled it against
+   *  the observed spread of site counts, while the registry pins 0-500. */
+  it('ignores a pinned range when the term says observe', () => {
+    const t: CompositeTermValues = {
+      layer: 'contamination', weight: 1, direction: 'higher_better',
+      values: { '01001': 10, '01003': 20 },
+      declaredRange: { min: 0, max: 500 },
+      scale: 'observed',
+    }
+    const r = computeComposite([t, term('b', 1, 'higher_better', { '01001': 1, '01003': 2 })])
+    const c = r.scales.find(x => x.layer === 'contamination')!
+    expect(c).toMatchObject({ scale: 'observed', min: 10, max: 20 })
+  })
+})
+
 describe('canonicalTerms / sameTerms — readable field equality', () => {
   it('sorts by layer id, so the same formula typed in another order is the same formula', () => {
     const typed = [
@@ -208,6 +273,41 @@ describe('canonicalTerms / sameTerms — readable field equality', () => {
     expect(sameTerms(base, [{ ...base[0], direction: 'lower_better' }, base[1]])).toBe(false)
     expect(sameTerms(base, [{ ...base[0], layer: 'c' }, base[1]])).toBe(false)
     expect(sameTerms(base, [base[0]])).toBe(false)
+  })
+})
+
+describe('the scale choice survives being saved (P9-4)', () => {
+  it('canonicalTerms keeps it — a definition that lost it would re-run differently', () => {
+    const c = canonicalTerms([
+      { layer: 'contamination', weight: 1, direction: 'lower_better', scale: 'observed' },
+      { layer: 'pct_Black', weight: 1, direction: 'higher_better' },
+    ])
+    expect(c.find(t => t.layer === 'contamination')?.scale).toBe('observed')
+    // Absent stays absent, so a term stored before this field existed is
+    // still byte-identical.
+    expect('scale' in (c.find(t => t.layer === 'pct_Black') as object)).toBe(false)
+  })
+
+  it('two formulas differing only in scale are not the same formula', () => {
+    const a = [{ layer: 'x', weight: 1, direction: 'higher_better' as const }]
+    const b = [{ layer: 'x', weight: 1, direction: 'higher_better' as const, scale: 'observed' as const }]
+    expect(sameTerms(a, b)).toBe(false)
+  })
+
+  it('reads the scale off a definition, and refuses one it does not know', () => {
+    const ok = readCompositeTerms([
+      { layer: 'a', weight: 1, direction: 'higher_better', scale: 'observed' },
+      { layer: 'b', weight: 1, direction: 'higher_better' },
+    ])
+    expect('error' in ok).toBe(false)
+    if ('error' in ok) return
+    expect(ok.terms.find(t => t.layer === 'a')?.scale).toBe('observed')
+
+    const bad = readCompositeTerms([
+      { layer: 'a', weight: 1, direction: 'higher_better', scale: 'sideways' },
+      { layer: 'b', weight: 1, direction: 'higher_better' },
+    ])
+    expect('error' in bad).toBe(true)
   })
 })
 

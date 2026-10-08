@@ -80,6 +80,7 @@ import {
   type CompositeScale,
   type CompositeTerm,
   type CompositeTermValues,
+  type MissingRule,
 } from './composite.js'
 import { isPublicLayerId, publicLayerBytes, publicLayerRecord, readPublicCountyLayer } from './publicLayerValues.js'
 
@@ -104,6 +105,8 @@ export interface CompositeInput {
   terms?: unknown
   /** Column id; derived from the label when absent. */
   id?: string
+  /** P9-4: 'penalise' (default) or 'ignore'. See CompositeOptions. */
+  missing?: string
   recompute?: boolean
   by?: string
   byId?: number | null
@@ -115,6 +118,9 @@ export interface CompositeAnalysis {
   type: 'composite'
   /** The saved formula, canonical (sorted by layer id). */
   terms: CompositeTerm[]
+  /** P9-4: which missing-data rule produced the stored values. Part of the
+   *  definition, because a re-run under the other rule is a different number. */
+  missing?: 'penalise' | 'ignore'
   /** What each term's normalisation actually used. Provenance, not input:
    *  recomputed from the data every run, never read back as a parameter. */
   scales: CompositeScale[]
@@ -133,6 +139,8 @@ export interface CompositeRun {
   label: string
   terms: CompositeTerm[]
   scales: CompositeScale[]
+  /** P9-4: the missing-data rule these numbers were produced under. */
+  missing: 'penalise' | 'ignore'
   reused: boolean
   served: 'stored' | 'computed'
   freshness: InputVerdict
@@ -452,6 +460,9 @@ export async function runWorkingSetComposite(input: CompositeInput): Promise<Com
           label: column?.label ?? label,
           terms: stored.terms,
           scales: Array.isArray(stored.scales) ? stored.scales : [],
+          // A result stored before this field existed was produced under the
+          // old behaviour, which is `penalise`.
+          missing: stored.missing === 'ignore' ? 'ignore' : 'penalise',
           reused: true,
           served: 'stored',
           // 'unknown' is served too: recomputing a result whose inputs cannot
@@ -473,12 +484,24 @@ export async function runWorkingSetComposite(input: CompositeInput): Promise<Com
   const refusal = compositeRefusal(terms.length, await bytesOfTerms(terms))
   if (refusal) throw new CompositeError(413, refusal)
 
+  // P9-4: how a county missing a layer counts is a RESEARCH choice, not a
+  // constant — so it is part of the definition and travels with the result.
+  const askedMissing = typeof input.missing === 'string' ? input.missing.trim() : ''
+  if (askedMissing && askedMissing !== 'penalise' && askedMissing !== 'ignore') {
+    throw new CompositeError(
+      400,
+      `“${askedMissing}” is not a rule for missing data — it is “penalise” (count an absent layer as ` +
+        `the worst case) or “ignore” (score a county on the data it has).`,
+    )
+  }
+  const missing: MissingRule = askedMissing === 'ignore' ? 'ignore' : 'penalise'
+
   const resolved: ResolvedTerm[] = []
   for (const term of terms) resolved.push(await resolveTerm(term))
 
   let result
   try {
-    result = computeComposite(resolved)
+    result = computeComposite(resolved, { missing })
   } catch (err) {
     // The maths refuses a flat or empty term. That is a 400 about the
     // definition, not a 500 about the server.
@@ -492,6 +515,7 @@ export async function runWorkingSetComposite(input: CompositeInput): Promise<Com
   const analysis: CompositeAnalysis = {
     type: 'composite',
     terms: canonicalTerms(terms),
+    missing: result.missing,
     scales: result.scales,
     columns: [id],
     counties: result.stats.counties,
@@ -527,6 +551,7 @@ export async function runWorkingSetComposite(input: CompositeInput): Promise<Com
   return {
     set: set.slug,
     column: id,
+    missing,
     label,
     terms: analysis.terms,
     scales: result.scales,

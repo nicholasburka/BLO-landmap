@@ -403,7 +403,38 @@ line of plain text under a heading, while the four library-wide tools get
 cards. That is the "working sets styled as a footnote" finding and belongs
 with a visual pass, not here.
 
-### P9-4 [BUG] One scorer, not two — PARTLY DONE
+### P9-4 [BUG] Two research calls become settings, not constants — DONE
+The two places the published index and the server disagreed turned out to be
+**questions a researcher should answer per index**, not bugs to settle once
+(Nick, 2026-10-08).
+
+**How a county missing a layer counts.** `calculate_blo_v2_scores.cjs`
+divides by the weight it HAS, scoring a county on its available data;
+`computeComposite` divided by the FULL declared weight, so an absent layer
+drags the county down as though it scored zero. Roughly two thirds of US
+counties are missing at least one of the eleven BLO terms, so the two answers
+are far apart — and both are defensible. Now `missing: 'penalise' | 'ignore'`,
+defaulting to `penalise` (the prior behaviour), stored with the result and
+surfaced on the run, so a number reads back as *this index, under these
+rules*.
+
+**Which span a term scales against.** Per-term `scale: 'pinned' | 'observed'`.
+Contamination is the live case: the published script scaled it against the
+observed spread of site counts while the registry pins 0–500. Absent means
+"pinned if the layer pins one", so nothing changes for a term that says
+nothing. `scale` is part of the FORMULA — `canonicalTerms` carries it and
+`sameTerms` compares it, because a definition that lost it would re-run
+against a different denominator and quietly produce different numbers.
+
+**Still not one module.** The API deploys from `server/` and cannot import
+from `../src`, so the Lens and `composite.ts` remain two implementations of
+one algorithm — the boundary that made P7-5 hand-write its great-circle maths.
+
+**And the reproduction is now a configuration, not a migration.** Matching the
+published index means running it with `missing: 'ignore'` and contamination
+at `scale: 'observed'`. Worth doing as the proof, and no longer a blocker:
+nothing has to change for the published numbers to be reproducible, because
+the rules that produced them are now expressible.
 **Done: the two now agree.** A composite term may carry a pinned range, and
 `spanOf` prefers it over the observed span. Registry terms take their range
 from the registry — the same literals `calculate_blo_v2_scores.cjs` computed
