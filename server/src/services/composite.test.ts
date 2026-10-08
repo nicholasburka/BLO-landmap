@@ -276,6 +276,61 @@ describe('canonicalTerms / sameTerms — readable field equality', () => {
   })
 })
 
+describe('a term may declare the span it is scored against (P9-5)', () => {
+  /**
+   * The published index needs this. Its six unbounded terms were scored
+   * against spans the registry does not hold — life expectancy 69-89.5 where
+   * the registry pins 65-87 — so "use the layer's range" and "use today's
+   * spread" both give the wrong answer. The definition has to be able to say
+   * the number.
+   *
+   * It is also the honest shape for a PUBLISHED index: a span recomputed on
+   * every refresh silently moves every historical score, and two vintages
+   * stop being comparable.
+   */
+  it('a range on the term beats the layer\'s own', () => {
+    const t: CompositeTermValues = {
+      layer: 'life_expectancy', weight: 1, direction: 'higher_better',
+      values: { a: 69, b: 89.5 },
+      declaredRange: { min: 65, max: 87 },   // what the layer pins
+      range: { min: 69, max: 89.5 },          // what THIS index was built on
+    }
+    const r = computeComposite([t, term('b', 1, 'higher_better', { a: 0, b: 1 })])
+    const s = r.scales.find(x => x.layer === 'life_expectancy')!
+    expect(s).toMatchObject({ min: 69, max: 89.5, scale: 'pinned' })
+  })
+
+  it('reads a range off a definition and refuses a backwards one', () => {
+    const ok = readCompositeTerms([
+      { layer: 'a', weight: 1, direction: 'higher_better', range: { min: 69, max: 89.5 } },
+      { layer: 'b', weight: 1, direction: 'higher_better' },
+    ])
+    expect('error' in ok).toBe(false)
+    if ('error' in ok) return
+    expect(ok.terms.find(t => t.layer === 'a')?.range).toEqual({ min: 69, max: 89.5 })
+
+    const bad = readCompositeTerms([
+      { layer: 'a', weight: 1, direction: 'higher_better', range: { min: 100, max: 0 } },
+      { layer: 'b', weight: 1, direction: 'higher_better' },
+    ])
+    expect('error' in bad).toBe(true)
+  })
+
+  it('keeps it through canonicalTerms, and two spans are two formulas', () => {
+    const c = canonicalTerms([
+      { layer: 'a', weight: 1, direction: 'higher_better', range: { min: 0, max: 10 } },
+      { layer: 'b', weight: 1, direction: 'higher_better' },
+    ])
+    expect(c.find(t => t.layer === 'a')?.range).toEqual({ min: 0, max: 10 })
+    expect(
+      sameTerms(
+        [{ layer: 'a', weight: 1, direction: 'higher_better', range: { min: 0, max: 10 } }],
+        [{ layer: 'a', weight: 1, direction: 'higher_better', range: { min: 0, max: 20 } }],
+      ),
+    ).toBe(false)
+  })
+})
+
 describe('the scale choice survives being saved (P9-4)', () => {
   it('canonicalTerms keeps it — a definition that lost it would re-run differently', () => {
     const c = canonicalTerms([

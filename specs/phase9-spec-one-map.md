@@ -501,7 +501,35 @@ every data refresh silently moved every historical score and two vintages of
 the index would not be comparable. These are the spans the published numbers
 were made with: a property of THIS index, not of today's files.
 
-**Remaining:** the set object and the frozen export (§D) — creating the
+**The index exists internally as a real working set.** `blo-livability-index-v2`
+holds the eleven registry layers, its composite carries the full definition
+(weights, directions, per-term spans, `missing: 'ignore'`), and
+`/views/livability-index-play-with-it` opens it. The public bundle is
+deliberately untouched (Nick, 2026-10-08) — the published map keeps the
+compiled index, and this is the copy you can re-weight and fork.
+
+**Recomputing it live does NOT give the published numbers, and the reason is
+not the formula.** Median delta 0.0024 on a 0–5 scale, worst 0.528. Two causes,
+both verified rather than assumed:
+
+1. **Absent contamination means ZERO in the script, MISSING in the service.**
+   `contamination ? contamination.total : 0` — a county with no EPA record
+   scores that term at its best. The service drops it from the divisor
+   instead. The file covers 2,482 of 3,144 counties, so **662 counties**
+   diverge, and that is where every large delta is.
+2. **The data was corrected after publication**, not refetched: commit
+   `68a77fd "Data: fix 10x population inflation in diversity CSV"`. `pct_Black`
+   for 01001 is 21.406 in the published scores and 20.990 today. That accounts
+   for the small median delta across the rest.
+
+So the published `combined_scores_v2.json` is a snapshot of a formula **and**
+of data that has since been fixed. The parity test pins the formula by feeding
+the published file's own inputs; recomputing live is a different and arguably
+better number. **Decision needed: adopt (1) as a modelling rule — "no EPA
+record means no known sites" — and regenerate, or keep the published values as
+a cited vintage.**
+
+**Remaining:** the frozen export (§D) — creating the
 working set whose composite is this definition, and the build step that
 writes its values into the public bundle. The hard part, proving the numbers
 survive the move, is done.

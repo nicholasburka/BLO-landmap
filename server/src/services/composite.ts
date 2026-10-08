@@ -59,6 +59,17 @@ export type CompositeDirection = 'higher_better' | 'lower_better'
 export interface CompositeTerm {
   /** P9-4: force this term's scale. Absent = pinned when the layer pins one. */
   scale?: 'pinned' | 'observed'
+  /**
+   * P9-5: the span THIS index scores the term against, overriding whatever
+   * the layer pins.
+   *
+   * The published BLO index needs it: its unbounded terms were scored against
+   * spans the registry does not hold — life expectancy 69-89.5 where the
+   * registry pins 65-87 — so neither "the layer's range" nor "today's spread"
+   * reproduces it. It is also the honest shape for any published index, since
+   * a span recomputed on each refresh silently moves every historical score.
+   */
+  range?: { min: number; max: number }
   /** A public registry layer id (`pct_Black`) or an internal one
    *  (`internal-<slug>`). The caller resolves it; this module only names it. */
   layer: string
@@ -213,6 +224,7 @@ export function canonicalTerms(terms: readonly CompositeTerm[]): CompositeTerm[]
       weight: t.weight,
       direction: t.direction,
       ...(t.scale ? { scale: t.scale } : {}),
+      ...(t.range ? { range: { min: t.range.min, max: t.range.max } } : {}),
     }))
     .sort((a, b) => a.layer.localeCompare(b.layer))
 }
@@ -228,7 +240,9 @@ export function sameTerms(a: readonly CompositeTerm[], b: readonly CompositeTerm
       term.layer === right[i].layer &&
       term.weight === right[i].weight &&
       term.direction === right[i].direction &&
-      (term.scale ?? 'pinned') === (right[i].scale ?? 'pinned'),
+      (term.scale ?? 'pinned') === (right[i].scale ?? 'pinned') &&
+      (term.range?.min ?? null) === (right[i].range?.min ?? null) &&
+      (term.range?.max ?? null) === (right[i].range?.max ?? null),
   )
 }
 
@@ -290,11 +304,24 @@ export function readCompositeTerms(raw: unknown): { terms: CompositeTerm[] } | {
     if (scale && scale !== 'pinned' && scale !== 'observed') {
       return { error: `“${layer}” has an unknown scale “${scale}” — it is “pinned” or “observed”.` }
     }
+    let range: { min: number; max: number } | undefined
+    if (row.range !== undefined && row.range !== null) {
+      const r = row.range as Record<string, unknown>
+      const min = typeof r.min === 'number' ? r.min : Number.NaN
+      const max = typeof r.max === 'number' ? r.max : Number.NaN
+      if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) {
+        return {
+          error: `“${layer}” has a range that cannot be scored against — it needs a min below a max.`,
+        }
+      }
+      range = { min, max }
+    }
     terms.push({
       layer,
       weight,
       direction: direction as CompositeDirection,
       ...(scale ? { scale: scale as 'pinned' | 'observed' } : {}),
+      ...(range ? { range } : {}),
     })
   }
   return { terms: canonicalTerms(terms) }
@@ -383,7 +410,7 @@ export function computeComposite(
   const ordered = [...terms].sort((a, b) => a.layer.localeCompare(b.layer))
   const scales: CompositeScale[] = []
   for (const term of ordered) {
-    const { min, max, counties, scale } = spanOf(term.values, term.declaredRange, term.scale)
+    const { min, max, counties, scale } = spanOf(term.values, term.range ?? term.declaredRange, term.scale)
     if (!counties) {
       throw new CompositeMathError(
         `“${term.layer}” has no county values, so it cannot be part of an index. ` +
