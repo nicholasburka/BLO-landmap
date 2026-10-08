@@ -84,9 +84,13 @@ const isBusy = (field: NeedsALookField, action: VerifyAction) => busy.value === 
     <p v-for="field in fields" :key="field.field" class="field-line" :data-field="field.field" :data-state="field.state" data-testid="needs-a-look-field">
       <span class="field-label">{{ field.label }}</span>
 
-      <!-- Missing: nothing could fill it, so there is nothing to keep. -->
+      <!-- Missing: nothing could fill it, so there is nothing to keep.
+           P9-8: "nothing could fill this" was the SYSTEM describing its own
+           effort. The reader's question is "is there an organization?" and
+           the answer is "no"; the machinery that went looking is not their
+           concern. Three of these opened every entry page. -->
       <template v-if="field.state === 'missing'">
-        <span class="gap">nothing could fill this</span>
+        <span class="gap">not set</span>
       </template>
 
       <!-- Unverified: a model's reading, with the sentence it came from. -->
@@ -108,7 +112,11 @@ const isBusy = (field: NeedsALookField, action: VerifyAction) => busy.value === 
         >
           {{ isBusy(field, 'keep') ? 'Keeping…' : 'Keep' }}
         </button>
-        <button type="button" class="act" data-testid="needs-a-look-edit" :disabled="!!busy" @click="startEdit(field)">Edit</button>
+        <!-- "Add" for a blank, "Edit" for a value: the same button, named for
+             what pressing it actually does. -->
+        <button type="button" class="act" data-testid="needs-a-look-edit" :disabled="!!busy" @click="startEdit(field)">
+          {{ field.state === 'missing' ? 'Add' : 'Edit' }}
+        </button>
         <button
           v-if="field.state === 'unverified'"
           type="button"

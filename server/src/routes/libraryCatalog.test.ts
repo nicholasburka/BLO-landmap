@@ -821,7 +821,7 @@ describe('PATCH /api/library/catalog/:slug with organization and shape (P6-8a)',
     expect(badOrg.body.error).toMatch(/publishers.*acme-corp/)
     const badShape = await patch(auth, slug, { shape: 'table' })
     expect(badShape.status).toBe(400)
-    expect(badShape.body.error).toMatch(/areas, points, statistics, records.*table/)
+    expect(badShape.body.error).toMatch(/areas, points, statistics, lines, records.*table/)
     const entry = await request(app).get(`/api/library/catalog/${slug}`).set('Cookie', auth.cookie)
     expect(entry.body.entry.meta.organization).toBeUndefined()
     expect(entry.body.entry.meta.shape).toBeUndefined()

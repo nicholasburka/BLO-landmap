@@ -200,6 +200,11 @@
       "description": "Values aggregated by area: the public map layers, survey estimates, an index."
     },
     {
+      "id": "lines",
+      "label": "Lines and networks",
+      "description": "Infrastructure that runs between places: transmission lines, pipelines, rail, roads."
+    },
+    {
       "id": "records",
       "label": "Records without a location",
       "description": "A directory, a survey extract, a table with no coordinates and no area codes."

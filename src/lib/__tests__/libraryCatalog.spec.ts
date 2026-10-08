@@ -970,11 +970,12 @@ describe('organization and shape on a row (P6-1, P6-2)', () => {
     expect(shapeLabelOf(page)).toBe('')
   })
 
-  it('offers the four shapes in reading order, for a filter row', () => {
+  it('offers the five shapes in reading order, for a filter row', () => {
     expect(SHAPE_CHOICES).toEqual([
       { id: 'areas', label: 'Areas and boundaries' },
       { id: 'points', label: 'Sites and points' },
       { id: 'statistics', label: 'Statistics by county or tract' },
+      { id: 'lines', label: 'Lines and networks' },
       { id: 'records', label: 'Records without a location' },
     ])
   })

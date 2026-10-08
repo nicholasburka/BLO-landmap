@@ -195,8 +195,13 @@ export interface Shape {
  * about the same fourteen subjects in two different shapes, and the answer
  * used to require opening every entry.
  *
- * Four cuts, in plain words, because the reader is a researcher and not a GIS
- * analyst. Derived once at reindex from what an entry already carries — its
+ * Five cuts, in plain words, because the reader is a researcher and not a GIS
+ * analyst. `lines` is the fifth and was added by P9-8: a transmission corridor
+ * is drawn geometry but it is not an area, and with four cuts it fell through
+ * every branch to `records` — so the map drew 3,477 LineStrings while the
+ * entry page called them "Records without a location". Folding them into
+ * `areas` instead would have been a second lie, to anyone filtering for
+ * parcels and flood zones. Derived once at reindex from what an entry already carries — its
  * layer block, a source's `placeQuery.by`, a held table's columns — and
  * overridable with `shape:` in the manifest when the derivation reads it
  * wrong.
@@ -216,6 +221,11 @@ export const SHAPES: Shape[] = [
     id: 'statistics',
     label: 'Statistics by county or tract',
     description: 'Values aggregated by area: the public map layers, survey estimates, an index.',
+  },
+  {
+    id: 'lines',
+    label: 'Lines and networks',
+    description: 'Infrastructure that runs between places: transmission lines, pipelines, rail, roads.',
   },
   {
     id: 'records',

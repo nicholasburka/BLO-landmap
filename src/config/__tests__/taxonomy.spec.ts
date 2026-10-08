@@ -56,12 +56,16 @@ describe('taxonomy — shape', () => {
     expect(PURPOSE_IDS).toEqual(['strategy', 'research', 'outreach', 'ideas'])
   })
 
-  it('carries the four dataset shapes, in reading order and in plain words', () => {
-    expect(SHAPE_IDS).toEqual(['areas', 'points', 'statistics', 'records'])
+  it('carries the five dataset shapes, in reading order and in plain words', () => {
+    // P9-8 added `lines`: a transmission corridor is drawn geometry and not an
+    // area, and with four cuts it fell through to `records` — so the map drew
+    // 3,477 LineStrings while the entry page said "Records without a location".
+    expect(SHAPE_IDS).toEqual(['areas', 'points', 'statistics', 'lines', 'records'])
     expect(SHAPES.map(s => s.label)).toEqual([
       'Areas and boundaries',
       'Sites and points',
       'Statistics by county or tract',
+      'Lines and networks',
       'Records without a location',
     ])
     for (const shape of SHAPES) {

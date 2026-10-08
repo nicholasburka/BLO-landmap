@@ -557,8 +557,11 @@ const noteBody = computed(() =>
     : '',
 )
 
+/** Indented, because the only place this renders now is inside the manifest
+ *  disclosure — where somebody has opened it on purpose and a readable shape
+ *  is worth the lines. */
 function metaValue(value: unknown): string {
-  return typeof value === 'string' ? value : JSON.stringify(value)
+  return typeof value === 'string' ? value : JSON.stringify(value, null, 2)
 }
 
 /** Path relative to the entry's folder — the full key is noise here. */
@@ -1002,11 +1005,6 @@ async function reloadEntry(): Promise<void> {
           </span>
         </div>
 
-        <!-- P6-33/P6-34: what needs a look on this entry, with Keep / Edit /
-             Clear — the same component the needs-a-look list uses, so the two
-             surfaces cannot drift in what they offer. -->
-        <NeedsALookNote v-if="entry" :entry="entry" @changed="reloadEntry" />
-
         <!-- P6-8: a title the assistant proposed and nobody has accepted.
              Grey and badged, because it is not this entry's name yet — the
              filing form below is where it becomes one. -->
@@ -1014,26 +1012,6 @@ async function reloadEntry(): Promise<void> {
           {{ suggestedTitle }}
           <span class="badge suggested-badge" data-testid="suggested-badge">suggested</span>
         </p>
-
-        <!-- P5-82: what this entry is ready to be used as, in one line. -->
-        <p v-if="readinessText" class="readiness-line" data-testid="readiness">{{ readinessText }}</p>
-
-        <!-- P5-83: read, but not summarised — said plainly, with the one
-             action that can change it. -->
-        <p v-if="modelPassLine" class="model-pass-line" data-testid="model-pass">
-          {{ modelPassLine }}
-          <button
-            v-if="canLookAgain"
-            type="button"
-            class="retry-btn"
-            data-testid="look-again"
-            :disabled="refetching"
-            @click="lookAgain"
-          >
-            {{ refetching ? 'Looking…' : 'Look again' }}
-          </button>
-        </p>
-        <p v-if="lookAgainNote" class="link-hint" data-testid="look-again-note">{{ lookAgainNote }}</p>
 
         <!-- P5-35: supersession banners -->
         <p v-if="entry.status === 'archived'" class="supersede-banner archived" data-testid="superseded-banner">
@@ -1397,12 +1375,27 @@ async function reloadEntry(): Promise<void> {
           </dl>
         </div>
 
-        <dl v-if="extraMeta.length" class="meta-list">
-          <template v-for="[key, value] in extraMeta" :key="key">
-            <dt>{{ key }}</dt>
-            <dd>{{ metaValue(value) }}</dd>
-          </template>
-        </dl>
+        <!-- P9-8: everything the page has no words for, behind a disclosure.
+             It used to print inline, so a manifest key this page did not know
+             was dumped at the reader as JSON — a library of hand-editable
+             manifests will ALWAYS carry keys the page has not learned yet, and
+             rendering them raw teaches people the page is broken. Shut by
+             default, because it is for the one person who wants it. -->
+        <details v-if="extraMeta.length" class="manifest-rest" data-testid="entry-manifest-rest">
+          <summary>
+            Manifest —
+            <span class="manifest-count">
+              {{ extraMeta.length }} {{ extraMeta.length === 1 ? 'field' : 'fields' }} this page has no words for
+            </span>
+          </summary>
+          <dl class="meta-list">
+            <template v-for="[key, value] in extraMeta" :key="key">
+              <dt>{{ key }}</dt>
+              <dd v-if="typeof value === 'string'">{{ value }}</dd>
+              <dd v-else><pre class="manifest-json">{{ metaValue(value) }}</pre></dd>
+            </template>
+          </dl>
+        </details>
 
         <form v-if="filingFormOpen" class="filing-form" @submit.prevent="submitFiling">
           <h2>{{ entry.kind === 'source' ? 'Edit this source' : 'File this entry' }}</h2>
@@ -1602,6 +1595,41 @@ async function reloadEntry(): Promise<void> {
             <p class="total">Total: {{ formatBytes(visibleBytes) }}</p>
           </template>
         </section>
+
+        <!-- P9-8: provenance and readiness, BELOW the content.
+             Every entry page used to open with three rows of "nothing could
+             fill this" and a line of pipeline telemetry — the system
+             describing its own effort before the reader reached the thing
+             they came for. The reader's question is "is there an
+             organization?", and the machinery that tried to find one is not
+             their concern. The Edit affordances are kept exactly as they
+             were: they were the good part. -->
+        <footer class="entry-housekeeping" data-testid="entry-housekeeping">
+          <!-- P6-33/P6-34: what needs a look on this entry, with Keep / Edit /
+               Clear — the same component the needs-a-look list uses, so the
+               two surfaces cannot drift in what they offer. -->
+          <NeedsALookNote v-if="entry" :entry="entry" @changed="reloadEntry" />
+
+          <!-- P5-82: what this entry is ready to be used as, in one line. -->
+          <p v-if="readinessText" class="readiness-line" data-testid="readiness">{{ readinessText }}</p>
+
+          <!-- P5-83: read, but not summarised — said plainly, with the one
+               action that can change it. -->
+          <p v-if="modelPassLine" class="model-pass-line" data-testid="model-pass">
+            {{ modelPassLine }}
+            <button
+              v-if="canLookAgain"
+              type="button"
+              class="retry-btn"
+              data-testid="look-again"
+              :disabled="refetching"
+              @click="lookAgain"
+            >
+              {{ refetching ? 'Looking…' : 'Look again' }}
+            </button>
+          </p>
+          <p v-if="lookAgainNote" class="link-hint" data-testid="look-again-note">{{ lookAgainNote }}</p>
+        </footer>
       </article>
     </div>
   </div>
@@ -1950,6 +1978,39 @@ async function reloadEntry(): Promise<void> {
 
 .filing-note.error {
   color: #b3261e;
+}
+
+/* P9-8: the manifest disclosure. Quiet — it is a reference, not a finding. */
+.manifest-rest {
+  margin: 16px 0 0;
+  font-size: 12px;
+}
+
+.manifest-rest > summary {
+  cursor: pointer;
+  color: var(--blo-stone);
+}
+
+.manifest-count {
+  color: var(--blo-stone);
+}
+
+.manifest-json {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 11px;
+  color: var(--blo-stone);
+}
+
+/* P9-8: the housekeeping footer — what needs a look, what this is ready for,
+   whether a model has read it. Separated from the content by a rule rather
+   than by colour: it is a different KIND of information, not a worse one. */
+.entry-housekeeping {
+  display: block;
+  margin-top: 28px;
+  padding-top: 14px;
+  border-top: 1px solid var(--blo-sand, #e7e2da);
 }
 
 .meta-list {

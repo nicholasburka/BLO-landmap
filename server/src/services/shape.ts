@@ -10,8 +10,8 @@ import { SHAPE_IDS, isShape } from './taxonomy.js'
  * Read in this order, and stop at the first answer:
  *
  *  1. the manifest said so — `shape: areas` wins over everything;
- *  2. it is a map layer — a layer block's `geometry` already says `point` or
- *     `county`, which is exactly this question in the map's words;
+ *  2. it is a map layer — a layer block's `geometry` already says `point`,
+ *     `line` or `county`, which is exactly this question in the map's words;
  *  3. it is a source — `placeQuery.by` says what you can ask it FOR, which is
  *     the same thing as what its rows ARE (parcels, points, counties), and an
  *     access note naming polygons or boundaries says areas outright;
@@ -23,11 +23,12 @@ import { SHAPE_IDS, isShape } from './taxonomy.js'
  * without a bucket and reusable by the push CLI over a local tree.
  */
 
-export type ShapeId = 'areas' | 'points' | 'statistics' | 'records'
+export type ShapeId = 'areas' | 'points' | 'statistics' | 'lines' | 'records'
 
 export const AREAS: ShapeId = 'areas'
 export const POINTS: ShapeId = 'points'
 export const STATISTICS: ShapeId = 'statistics'
+export const LINES: ShapeId = 'lines'
 export const RECORDS: ShapeId = 'records'
 
 /** Public map layers are county values, every one of them (P6-2, spec B.9). */
@@ -262,6 +263,11 @@ export function shapeFromManifest(input: ShapeInput): ShapeId | null {
   const geometry = layerGeometry(input.meta)
   if (geometry === 'point') return POINTS
   if (geometry === 'county') return STATISTICS
+  // P9-8: a declared line geometry has already answered this question. It used
+  // to fall past every branch to the file sniffer, which saw a GeoJSON with no
+  // lat/lng columns and said `records` — so `transmission-345kv`, 3,477
+  // LineStrings the map draws, was chipped "Records without a location".
+  if (geometry === 'line') return LINES
   // P7-9: a state layer draws a boundary, which is what `areas` means.
   // `statistics` is for values keyed by an area code, and a state layer's
   // content is prose — the permitting rules, not a number per state.

@@ -96,7 +96,9 @@ describe('kb helpers (UX pass)', () => {
       // and `no-summary` used to be four. Seven entries have no topic and `c1`
       // additionally has no publisher and no coverage — so the four old rows
       // would have read 7 / 1 / 1 / 0 and implied ten jobs. There are seven.
-      { key: 'needs-a-look', label: 'Needs a look', count: 7, href: '/docs?attention=needs-a-look' },
+      // P9-8 hangs the reasons off this row; they get their own test below, so
+      // this one stays about which rows exist and what they link to.
+      { key: 'needs-a-look', label: 'Needs a look', count: 7, href: '/docs?attention=needs-a-look', breakdown: expect.any(Array) },
     ])
   })
 
@@ -375,13 +377,40 @@ describe('kb helpers (UX pass)', () => {
     expect(noSummary([link({})])).toBe(0)
     // P6-33: it reaches the panel through the one row, and names itself there.
     const read = link({ suggested: { error: 'unavailable', at: 'T' } })
-    expect(attentionItems([read]).at(-1)).toEqual({
+    expect(attentionItems([read]).at(-1)).toMatchObject({
       key: 'needs-a-look',
       label: 'Needs a look',
       count: 1,
       href: '/docs?attention=needs-a-look',
     })
     expect(needsALookNote(read)).toBe('no summary')
+  })
+
+  it('says what the one row is MADE of, biggest reason first (P9-8)', () => {
+    // "66 — Needs a look" against a 97-entry library is not a queue, it is the
+    // background: a reader cannot start on it, so they start on nothing. The
+    // rules were always there, each with its own deep link — they were just
+    // never shown.
+    const rows = [
+      e({ slug: 'a', kind: 'dataset', status: 'published', category: '' }),
+      e({ slug: 'b', kind: 'dataset', status: 'published', category: '' }),
+      e({ slug: 'c', kind: 'dataset', status: 'published', category: 'land' }),
+    ]
+    const rolled = attentionItems(rows).find(item => item.key === 'needs-a-look')
+    expect(rolled).toBeDefined()
+    const reasons = rolled!.breakdown ?? []
+    expect(reasons.length).toBeGreaterThan(1)
+    // Biggest first, so the morning's work is at the top.
+    expect([...reasons].sort((x, y) => y.count - x.count)).toEqual(reasons)
+    // Each reason opens its own list, and only reasons with rows are offered.
+    for (const reason of reasons) {
+      expect(reason.count).toBeGreaterThan(0)
+      expect(reason.href).toContain(`attention=${reason.key}`)
+    }
+    // They OVERLAP — one entry can be missing two things — so they are not
+    // summed and must not be presented as if they were.
+    expect(reasons.reduce((sum, r) => sum + r.count, 0)).toBeGreaterThan(rolled!.count)
+    expect(reasons.map(r => r.key)).toContain('uncategorised')
   })
 
   it('formats relative times', () => {

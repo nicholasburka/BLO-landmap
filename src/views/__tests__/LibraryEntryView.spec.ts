@@ -906,6 +906,29 @@ describe('a source page reads first (P5-67)', () => {
     expect(w.get('[data-testid="source-publisher"]').text()).toBe('Publisher US EPA · Superfund / CERCLIS')
   })
 
+  it('puts the housekeeping BELOW the content, not three failures above it (P9-8)', async () => {
+    // Every entry page used to open with "Organization — nothing could fill
+    // this / Answers — nothing could fill this / Published — nothing could
+    // fill this" and a line of pipeline telemetry, before the title's meaning
+    // or anything a reader came for. That is the system describing its own
+    // effort; the reader's question is "is there an organization?".
+    mockedEntry.mockResolvedValue(sourceEntry())
+    const w = await mountAt('/library/epa-npl')
+    const html = w.get('article').html()
+    const at = (needle: string) => {
+      const i = html.indexOf(needle)
+      expect(i, needle).toBeGreaterThan(-1)
+      return i
+    }
+    expect(at('data-testid="tab-overview"')).toBeLessThan(at('data-testid="entry-housekeeping"'))
+    // And it is genuinely after the content, not merely after the panel tag:
+    // the publisher line is the last thing the overview says.
+    expect(at('data-testid="source-publisher"')).toBeLessThan(at('data-testid="entry-housekeeping"'))
+    // What needs a look travels with it — the Edit affordances were the good
+    // part and are kept, just not above the thing the reader came for.
+    expect(at('data-testid="needs-a-look"')).toBeGreaterThan(at('data-testid="entry-housekeeping"'))
+  })
+
   it('filing an incoming link AS a source leaves the form — and its answer — up', async () => {
     mockedEntry.mockResolvedValue(
       entry({ slug: 'abc-uuid', kind: 'incoming', title: 'epa.gov', status: 'needs-cataloging', category: '', tags: [], meta: { mentionedBy: [] }, files: [] }),
@@ -1381,6 +1404,31 @@ describe('an entry speaks the browser’s vocabulary (P6-24)', () => {
     expect(extra).not.toContain('shape')
     // Anything nobody has given a first-class home still shows.
     expect(extra).toContain('rowCount')
+  })
+
+  it('puts unknown manifest keys behind a disclosure instead of at the reader (P9-8)', async () => {
+    // A library of hand-editable manifests will always carry keys this page
+    // has not learned. Printing them inline dumped JSON at the reader —
+    // `meta {"description":"…","whatItAnswers":"…"}` on nine staged entries —
+    // which teaches people the page is broken.
+    mockedEntry.mockResolvedValue(
+      blo({
+        meta: {
+          description: 'Who we know.',
+          mentionedBy: [],
+          rowCount: 412,
+          somethingNew: { nested: ['a', 'b'] },
+        },
+      }),
+    )
+    const w = await mountAt('/library/organizations')
+    const rest = w.get('[data-testid="entry-manifest-rest"]')
+    // Shut by default: it is for the one person who wants it.
+    expect(rest.attributes('open')).toBeUndefined()
+    expect(rest.text()).toContain('Manifest')
+    expect(rest.text()).toContain('somethingNew')
+    // The JSON lives inside it, never in the flow of the page.
+    expect(w.findAll('.tab-panel > .meta-list dd').map(d => d.text()).join(' ')).not.toContain('nested')
   })
 
   it('keeps the source prose as provenance, and stops calling it the publisher', async () => {
