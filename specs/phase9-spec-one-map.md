@@ -575,7 +575,43 @@ rather than quietly reissuing.
 **Size: S** to fix, and the regeneration is a decision about publishing, not
 a technical problem.
 
-### P9-6 [FEATURE] Fork an index and compare
+### P9-6 [FEATURE] Fork an index and compare — COMPARISON DONE
+**Forking needs no new mechanism.** A set holds up to 24 derived columns
+(`DERIVED_COLUMNS_MAX`), so two indices over the same ingredients with
+different weights are simply two columns on one set. P9-4 and P9-5 made the
+definition carry everything that distinguishes them — weights, directions,
+per-term spans, the missing-data rule — so a fork is a second `POST
+/composite` with a changed definition, and `sameTerms` already refuses to
+confuse the two.
+
+**`src/lib/indexCompare.ts` answers the actual question**, which is not "are
+the numbers different" (they always are) but **did the ordering change, and
+for whom**:
+
+- **Spearman rank correlation**, with proper tie handling — tied counties
+  share the average rank, and without that the statistic is quietly wrong for
+  any index built from banded layers, which is most of them.
+- **`n` always**, because two indices agreeing across four counties is not
+  evidence. Null rather than a number when it would be meaningless: too few
+  shared counties, or one side with no spread to order.
+- **The movers**, furthest first, with both ranks — the counties a re-weighting
+  actually moved.
+- Ranks are computed **within the shared set**, so an index covering more
+  ground is not thereby better correlated.
+
+Pure and client-side: 3,144 counties costs no request and no money (§E).
+
+**Proved on the real pair** — the published index against the corrected one:
+`n=3144, Spearman 0.9683`. Close agreement on order, with individual counties
+moving **over a thousand places**: 48311 McMullen TX 702 → 1775, 48109
+Culberson TX 1450 → 455, 16033 Clark ID, 02066 and 02164 in Alaska. All tiny,
+sparse-data counties — exactly where P9-9's contamination-as-zero and the
+diversity fix bite hardest. The statistic says "these broadly agree"; the
+movers say "and here is who it does not agree about", which is the pair a
+researcher needs.
+
+**Remaining:** the UI — a weight editor on a set's view, and somewhere to show
+a comparison. The arithmetic and the storage are done.
 Open the index, change weights, see the map move, save as a new set. Then
 compare two indices: rank movement, biggest movers, correlation. This is the
 payoff — the reason for the whole phase. **Size: L.** Depends on P9-5.
