@@ -36,10 +36,13 @@
     </ul>
 
     <p class="w-save">
+      <!-- A placeholder is not a label: it disappears the moment anyone types
+           and screen readers treat it inconsistently. -->
       <input
         type="text"
         class="w-name-input"
         data-testid="weight-name"
+        aria-label="Name for this version of the index"
         placeholder="Name this version…"
         :value="label"
         @input="label = ($event.target as HTMLInputElement).value"
@@ -49,6 +52,7 @@
         class="w-btn"
         data-testid="weight-save"
         :disabled="!canSave"
+        :aria-describedby="whyNotSaveable ? 'weight-save-why' : undefined"
         @click="$emit('save', { label: label.trim(), terms: active })"
       >
         Save as an index
@@ -60,7 +64,17 @@
     <!-- Why the button is off, rather than a grey button and a shrug. Seen on
          the real page: eleven terms weighed, a changed formula, Save disabled,
          and the only hint a placeholder in the box beside it. -->
-    <p v-if="whyNotSaveable" class="w-note" data-testid="weight-save-why">{{ whyNotSaveable }}</p>
+    <!-- `role="status"`, so dragging the last term out of a formula announces
+         why Save went away instead of silently greying it. -->
+    <p
+      v-if="whyNotSaveable"
+      id="weight-save-why"
+      class="w-note"
+      role="status"
+      data-testid="weight-save-why"
+    >
+      {{ whyNotSaveable }}
+    </p>
   </section>
 </template>
 

@@ -799,6 +799,42 @@ treatment the server suite got: find the mechanism, prove it with twenty
 consecutive clean runs, do not paper it with a retry.
 **Size: M.**
 
+### P9-6c [FEATURE] Say what changed, in numbers
+From the browser audit of P9-6a (`specs/ux-audit-p9-6a.md`). Three findings,
+one theme: the feature shows a *picture* of a change and never the change.
+
+**"Moved furthest" shows the same artifact every time.** Both saved
+comparisons returned the same eight rows — American Samoa, Guam, the Northern
+Marianas, Puerto Rico — each moving ~3,150 places. They are missing most of the
+eleven layers, and under `missing: 'penalise'` any re-weighting swings them the
+length of the table. So the card's payoff answers "which counties have the
+least data", dressed as "what did your re-weighting do". It will do this for
+every index anyone ever builds.
+
+The call is a research one, which is why this is a ticket: rank movers only
+among counties complete in BOTH indices, or keep them and mark them, or offer
+the choice the way P9-4 made `missing` a setting. Whichever — a reader must not
+be handed a sparse-data artifact as a finding. (The county-lookup file has no
+territories at all, so these rows cannot even be NAMED; that stops mattering
+the moment they stop dominating.)
+
+**The map moves less than the promise.** Dropping a whole term repaints 10.5%
+of the canvas at a maximum channel delta of 20/255 — real, correct, nearly
+invisible. Meanwhile the numbers are emphatic: the audit's two saves shifted
+scores by a mean of 10.8 points and a max of 95.3. A live readout beside the
+sliders — how many counties moved, how far, which moved most — would carry the
+feedback the colours cannot. It is also free: the values are already in hand,
+which is the whole premise of §E.
+
+**Opening the editor is silent for a second.** `openEditor` awaits the layer
+manifest so terms can be named rather than showing ids; on a cold pane that is
+over a second in which the button says "Close the weights" and nothing appears.
+Long enough to press it twice and close it again — which happened during the
+audit. Disable it while it resolves, or render the rows at once and let the
+names arrive.
+
+**Size: M.** Depends on nothing.
+
 ### P9-7 [FEATURE] The free-analysis set
 Rank, distribution, correlation, coverage, point-in-county rollup (§E). All
 client-side over county-scale data, no request. No cost disclosure anywhere in
@@ -819,13 +855,23 @@ location" (§10). **Size: M.** Independent.
 ```
 DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 ─ P9-6a ─ P9-6b
 
-next:  P9-8   carried audit fixes          (independent)
+next:  P9-6c  say what changed, in numbers  ← from the browser audit
+       P9-8   carried audit fixes          (independent)
        P9-7   free analyses                (independent)
        P9-9   contamination                (deferred by Nick)
 ```
 
-**P9-6a is done**, so the payoff is reachable: open a set's map interface, press
-"Weigh it differently" on an index, drag, and the choropleth is your formula.
+**P9-6a is done** and reviewed in a browser (`specs/ux-audit-p9-6a.md`): open a
+set's map interface, press "Weigh it differently" on an index, drag, and the
+choropleth is your formula. P9-6c is what that review found once it worked.
+
+**One thing for a person, not a ticket.** The `livability-index-play-with-it`
+view says "Its composite reproduces `combined_scores_v2.json` exactly". It does
+not — ρ = 0.968 over the 3,144 shared counties, 4 of them at an identical rank
+— and that is *by decision*, because P9-4 and P9-5 kept the drift that makes
+the internal copy the more correct one. The sentence predates those decisions.
+It is a view description in the library, so it wants an edit by a person, not a
+code change.
 
 ## Answered (Nick, 2026-10-07)
 

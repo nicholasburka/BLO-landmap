@@ -34,7 +34,7 @@
         <p class="ic-movers-title">Moved furthest:</p>
         <ul class="ic-movers" data-testid="index-movers">
           <li v-for="m in result.movers" :key="m.geoId">
-            <span class="ic-geo">{{ m.geoId }}</span>
+            <span class="ic-geo">{{ placeName(m.geoId) }}</span>
             <span class="ic-move">#{{ m.from }} → #{{ m.to }}</span>
             <span class="ic-delta">{{ m.delta }} {{ m.delta === 1 ? 'place' : 'places' }}</span>
           </li>
@@ -45,11 +45,41 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { compareIndices } from '@/lib/indexCompare'
+import { getCountyByGeoId, initCountyLookup } from '@/lib/countyLookup'
 import type { DerivedColumn } from '@/lib/workingSets'
 
 const props = defineProps<{ columns: DerivedColumn[] }>()
+
+/**
+ * County NAMES for the movers, not GEOIDs.
+ *
+ * "Moved furthest: 72003 #13 → #3166" names nothing a reader knows. The lookup
+ * is a static file the map page has usually already paid for, and it is cached
+ * for the session — so this costs nothing here and turns the list into
+ * sentences about places. A geoid with no match still prints, because a row
+ * that cannot be named is still a row that moved.
+ */
+const namesReady = ref(false)
+onMounted(async () => {
+  try {
+    await initCountyLookup()
+    namesReady.value = true
+  } catch {
+    // No lookup, no names — the geoids below stand on their own.
+  }
+})
+
+function placeName(geoId: string): string {
+  if (!namesReady.value) return geoId
+  try {
+    const county = getCountyByGeoId(geoId)
+    return county ? `${county.name}, ${county.stateAbbr}` : geoId
+  } catch {
+    return geoId
+  }
+}
 
 /** Only an index can be compared to an index. A proximity column is a
  *  distance, and "did the ranking change" is not a question about it. */

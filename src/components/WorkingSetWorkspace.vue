@@ -48,6 +48,7 @@ import { LAYER_REGISTRY } from '@/config/layerRegistry'
 import { contextCell } from '@/lib/countyJoin'
 import { friendlyError } from '@/lib/errors'
 import { clearIndexDraft, readIndexDraft, writeIndexDraft } from '@/lib/indexDraft'
+import { invalidateInternalManifest } from '@/lib/internalLayers'
 import {
   SET_INTERFACE_KEY,
   interfaceForViewType,
@@ -478,6 +479,11 @@ async function saveIndex(input: { label: string; terms: WeightTerm[] }): Promise
     const stored = await fetchWorkingSetColumns(set.value.slug)
     columns.value = stored.columns
     unreadable.value = stored.unreadable
+    // The saved index IS a new county layer, and the manifest in hand was
+    // fetched before it existed — so the layer list called the thing the map
+    // had just started drawing "not in the library any more".
+    invalidateInternalManifest()
+    await map.state.loadInternalLayers()
     // Same race as `discardDraft`, and worse here: a pending write landing
     // after the save would make the next visit announce an unsaved version of
     // a formula that is now saved.
@@ -826,7 +832,9 @@ onMounted(async () => {
             <!-- P9-6a: the preview replaced the saved index on the canvas, so
                  the thing naming the map's layers has to say so. A reader must
                  never mistake a preview for the record. -->
-            <p v-if="previewQuery" class="preview-note" data-testid="map-preview-note">
+            <!-- A live region: somebody dragging a slider must be told the map
+                 is now showing something unsaved, not only shown it. -->
+            <p v-if="previewQuery" class="preview-note" role="status" data-testid="map-preview-note">
               Showing an unsaved version of
               {{ editingColumn ? '“' + editingColumn.label + '”' : 'this index' }}, weighed below.
             </p>
@@ -841,7 +849,7 @@ onMounted(async () => {
                  switch is handled by seeding from the live formula instead
                  (`editorTerms`), not by placing it where nobody can use it. -->
             <template v-if="editing && editorTerms.length">
-              <p v-if="draftRestored" class="draft-note" data-testid="index-draft-restored">
+              <p v-if="draftRestored" class="draft-note" role="status" data-testid="index-draft-restored">
                 These weights are an unsaved version from last time.
                 <button type="button" class="link-btn" data-testid="index-draft-discard" @click="discardDraft">
                   Use the saved index instead

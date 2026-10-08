@@ -1172,6 +1172,57 @@ describe('a composite index on the map interface', () => {
       expect(readIndexDraft('memphis-redevelopment', 'political-efficacy')).toBeNull()
     })
 
+    it('tells the layer list the new index exists, rather than calling it lost', async () => {
+      // Seen after a real save: the map drew the new index and the list under
+      // it said "internal-…~heavier-on-black-progress — not in the library any
+      // more", because the manifest in hand had been fetched before the layer
+      // existed. A saved index IS a new county layer.
+      mockedComposite.mockResolvedValue(SAVED)
+      const w = await mountAt(mapView())
+      await settleMap()
+      const readsBefore = mockedManifest.mock.calls.length
+
+      mockedManifest.mockResolvedValue([
+        manifestEntry(),
+        VOTES,
+        {
+          ...manifestEntry(),
+          id: 'internal-memphis-redevelopment~political-efficacy',
+          slug: 'memphis-redevelopment~political-efficacy',
+          name: 'Political efficacy',
+        },
+        {
+          ...manifestEntry(),
+          id: SAVED.layerId,
+          slug: 'memphis-redevelopment~political-efficacy-v2',
+          name: 'Efficacy, housing-weighted',
+        },
+      ])
+      mockedColumns.mockResolvedValue(
+        columnsBody({
+          columns: [
+            INDEX,
+            { ...INDEX, id: 'political-efficacy-v2', label: SAVED.label, layerId: SAVED.layerId },
+          ],
+        }),
+      )
+
+      await openWeights(w)
+      await slider(w, 1).setValue('9')
+      await w.get('[data-testid="weight-name"]').setValue('Efficacy, housing-weighted')
+      await w.get('[data-testid="weight-save"]').trigger('click')
+      await flushPromises()
+      await settleMap()
+
+      // The manifest was asked for again…
+      expect(mockedManifest.mock.calls.length).toBeGreaterThan(readsBefore)
+      // …so the layer the map is now drawing is named, not mourned.
+      expect(w.find('[data-testid="set-layer-missing"]').exists()).toBe(false)
+      expect(w.findAll('[data-testid="set-layer"]').map(r => r.text())).toEqual([
+        expect.stringContaining('Efficacy, housing-weighted'),
+      ])
+    })
+
     it('keeps the formula on screen when the save fails', async () => {
       // Losing five minutes of dragging to a 500 would be the worst possible
       // moment to discard it.
