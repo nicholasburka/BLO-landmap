@@ -155,6 +155,32 @@ export function countPointsByCounty(
 }
 
 /**
+ * Which county contains this point — the other direction (P9-11).
+ *
+ * A geocoded address gives coordinates; what makes it "in the context of the
+ * data" is the county GEOID, because every layer in a set is keyed on one.
+ * Same machinery as the rollup, so an address and a rolled-up point agree
+ * about which county they are in, and no second network call is needed to
+ * ask anybody.
+ *
+ * The index is cached against the county array it was built from: 3,144
+ * shapes is real work, and a reader typing an address will ask several times
+ * against the same geometry.
+ */
+const indexCache = new WeakMap<object, Map<string, Shape[]>>()
+
+export function countyAt(lng: number, lat: number, counties: readonly CountyFeature[]): string | null {
+  if (!Number.isFinite(lng) || !Number.isFinite(lat) || !counties.length) return null
+  let grid = indexCache.get(counties as object)
+  if (!grid) {
+    grid = indexCounties(counties)
+    indexCache.set(counties as object, grid)
+  }
+  const candidates = grid.get(`${Math.floor(lng)}:${Math.floor(lat)}`) ?? []
+  return candidates.find(shape => inShape(lng, lat, shape))?.geoId ?? null
+}
+
+/**
  * What the rollup did, including what it could not place.
  *
  * The shortfall is never folded into a tidier number (P6-23): a point in no

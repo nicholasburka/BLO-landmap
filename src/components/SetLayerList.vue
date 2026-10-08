@@ -3,7 +3,9 @@
        one working set. Reuses the STATE and the toggle semantics rather than
        `LayerControls`' markup, which carries the public categories, weights,
        filters and contamination along with it. -->
-  <ul class="set-layers" data-testid="set-layer-list">
+  <div class="set-layers-panel blo-panel blo-panel--reference" data-testid="set-layer-list-panel">
+    <p class="set-layers-head">{{ heading }}</p>
+    <ul class="set-layers" data-testid="set-layer-list">
     <li v-for="row in rows" :key="row.id" class="set-layer" data-testid="set-layer">
       <label v-if="row.known" class="set-layer-label" :class="{ fixed: readonly || row.fixed }">
         <!-- P9-6a: no checkbox while a formula is being previewed. Unchecking a
@@ -24,7 +26,8 @@
         {{ row.id }} — not in the library any more
       </span>
     </li>
-  </ul>
+    </ul>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -56,6 +59,10 @@ const props = defineProps<{
 
 /** The default swatch for a layer whose manifest declares no colour. */
 const FALLBACK = '#6b7280'
+
+/** What this panel is, in two words. It floats over the canvas now, so it
+ *  cannot rely on the thing above it to say what it is. */
+const heading = 'On this map'
 
 type PublicCategory = 'demographic' | 'economic' | 'housing' | 'equity' | 'transportation'
 
@@ -166,6 +173,22 @@ function toggle(row: Row): void {
 </script>
 
 <style scoped>
+/* P9-10: over the canvas, in the tier the public map's Lens wears. The list
+   itself is unchanged — what moved is where it sits, because a control for
+   the map belongs ON the map and not below the fold under it. */
+.set-layers-panel {
+  padding: 8px 10px;
+}
+
+.set-layers-head {
+  margin: 0 0 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blo-stone, #6b6560);
+}
+
 .set-layers {
   list-style: none;
   margin: 0;

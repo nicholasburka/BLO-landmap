@@ -41,14 +41,17 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import DatasetView from '@/views/DatasetView.vue'
 import MapPane from '@/components/MapPane.vue'
 import SetLayerList from '@/components/SetLayerList.vue'
+import MapAddressSearch from '@/components/MapAddressSearch.vue'
 import IndexCompareCard from '@/components/IndexCompareCard.vue'
 import LayerAnalysisCard from '@/components/LayerAnalysisCard.vue'
 import IndexWeightEditor from '@/components/IndexWeightEditor.vue'
 import { useShowOnMap } from '@/composables/useShowOnMap'
+import type { MapFitRequest } from '@/components/MapCanvas.vue'
 import { LAYER_REGISTRY } from '@/config/layerRegistry'
 import { contextCell } from '@/lib/countyJoin'
+import { getCountyByGeoId, initCountyLookup } from '@/lib/countyLookup'
 import { compareIndices, shiftLineOf } from '@/lib/indexCompare'
-import { countPointsByCounty, rollupLine } from '@/lib/pointRollup'
+import { countPointsByCounty, countyAt, rollupLine } from '@/lib/pointRollup'
 import { computeScores, rawLayerValues } from '@/composables/usePersonalizedScore'
 import { friendlyError } from '@/lib/errors'
 import { clearIndexDraft, readIndexDraft, writeIndexDraft } from '@/lib/indexDraft'
@@ -401,6 +404,75 @@ function analysisValues(layerId: string): { values: Record<string, number>; note
   // `counted`: every point was placed, so a county that does not appear has
   // none of the thing — which is not the same as a measurement nobody took.
   return { values: rolled.values, note: rollupLine(rolled), counted: true }
+}
+
+/**
+ * P9-11: where an address landed, and what this set holds there.
+ *
+ * The county comes from US, not from the geocoder: P9-7's point-in-polygon
+ * over geometry the map has already downloaded. That costs no second call and
+ * does not depend on Mapbox's `district` context being a county name we can
+ * match to a GEOID — it IS the GEOID, which is what every layer is keyed on.
+ */
+function resolveAddress(center: [number, number]): {
+  geoId: string | null
+  countyLabel: string
+  values: { id: string; name: string; value: number | null }[]
+} {
+  const [lng, lat] = center
+  const geoId = countyAt(lng, lat, map.state.data.countiesData.value?.features ?? [])
+  if (!geoId) return { geoId: null, countyLabel: '', values: [] }
+  // The lookup first: the geometry's properties carry NAME but not reliably a
+  // state, and "Shelby" on its own is a county in nine states.
+  const known = lookupCounty(geoId)
+  const county = map.state.data.countiesData.value?.features.find(f => f.properties?.GEOID === geoId)
+  const label = known ? `${known.name}, ${known.stateAbbr}` : String(county?.properties?.NAME ?? geoId)
+  return {
+    geoId,
+    countyLabel: label,
+    // The SET's layers, including its own derived columns: the question is
+    // what this working set says about this place, not what the library does.
+    values: [
+      ...analysableLayers.value
+        .filter(layer => !layer.id.startsWith(ROLLUP_PREFIX))
+        .map(layer => ({
+          id: layer.id,
+          name: layer.name,
+          value: analysisValues(layer.id).values[geoId] ?? null,
+        })),
+      ...columns.value.map(column => ({
+        id: column.id,
+        name: column.label,
+        value: column.values[geoId] ?? null,
+      })),
+    ],
+  }
+}
+
+/** The county lookup is a static file the map page has usually already paid
+ *  for, and the only place a state abbreviation lives. Missing is fine — the
+ *  geometry's own NAME stands in. */
+function lookupCounty(geoId: string): { name: string; stateAbbr: string } | null {
+  try {
+    return getCountyByGeoId(geoId) ?? null
+  } catch {
+    return null
+  }
+}
+
+/** Where the map should fly when an address is chosen. */
+const addressFit = ref<MapFitRequest | null>(null)
+
+function onAddressFound(place: { center: [number, number]; geoId: string | null }): void {
+  addressFit.value = { center: place.center, zoom: 9, duration: 800 }
+  // The derived-column readouts already answer "what about here?" for a
+  // clicked county; an address is the same question asked another way.
+  clickedGeoId.value = place.geoId
+}
+
+function onAddressCleared(): void {
+  addressFit.value = null
+  clickedGeoId.value = null
 }
 
 /** One query, scored against the data this map already holds. */
@@ -813,6 +885,9 @@ function seedTableState(): void {
 }
 
 onMounted(async () => {
+  // P9-11: so an address can be named by the county it lands in. Cached for
+  // the session and shared with the analyses; a failure costs only the name.
+  void initCountyLookup().catch(() => {})
   const slug = props.view.workingSet ?? ''
   try {
     // Both at once: the set's members and its stored columns are two reads of
@@ -930,13 +1005,32 @@ onMounted(async () => {
               :layers="map.state.layers"
               :query="map.state.query"
               :data="map.state.data"
-              :fit="map.fit.value"
+              :fit="addressFit ?? map.fit.value"
               :title="set.name"
               :note="paneNote"
               label="This working set on the map"
               @close="show('data')"
               @county-click="clickedGeoId = $event"
-            />
+            >
+              <!-- P9-10: the layer list floats ON the map, the way the public
+                   map keeps its Lens over the canvas. It used to sit below,
+                   so changing what the map drew meant scrolling away from
+                   the map. -->
+              <template #overlay>
+                <SetLayerList
+                  v-if="setLayerIds.length"
+                  :layers="map.state.layers"
+                  :ids="setLayerIds"
+                  :readonly="!!previewQuery"
+                />
+                <!-- P9-11: a place, and what this set holds there. -->
+                <MapAddressSearch
+                  :resolve="resolveAddress"
+                  @found="onAddressFound"
+                  @cleared="onAddressCleared"
+                />
+              </template>
+            </MapPane>
             <!-- P9-2: once a set's layers actually draw (P9-1, P9-1b) the map
                  is two dense national networks and thousands of clustered
                  points with nothing to say what they are. This names them,
@@ -983,13 +1077,6 @@ onMounted(async () => {
               <p v-if="savingIndex" class="state-note" data-testid="index-saving">Saving this version…</p>
               <p v-if="indexError" class="state-note error" data-testid="index-save-error">{{ indexError }}</p>
             </template>
-            <SetLayerList
-              v-if="setLayerIds.length"
-              class="workspace-layers"
-              :layers="map.state.layers"
-              :ids="setLayerIds"
-              :readonly="!!previewQuery"
-            />
             <!-- P9-7: four questions about the set's own layers, answered
                  here over numbers the page already holds. -->
             <LayerAnalysisCard

@@ -544,7 +544,7 @@ One definition, one scorer. `BLO_PRESET` becomes a composite definition;
 idea. Acceptance: identical scores, public snapshots unedited, public map works
 logged out. **Size: L.** Depends on P9-4 and §D.
 
-### P9-10 [FEATURE] The set's layers float over its map
+### P9-10 [FEATURE] The set's layers float over its map — DONE
 Nick: *"can we reuse the layer toggles that sit on top of the map and have
 nice styling?"* Mostly yes, and two of the pieces are already built.
 
@@ -565,7 +565,23 @@ already gets right: the map must stay reachable on a narrow window (P6-14's
 breakpoint), and the preview banner must stay where a reader sees it.
 **Size: S.** Independent.
 
-### P9-11 [FEATURE] Find an address inside the set's data
+**Done.** `MapPane` gained an `overlay` slot — empty by default, so no other
+host changes — and `SetLayerList` wears `.blo-panel--reference` with an "ON
+THIS MAP" heading, since floating over a canvas means it can no longer rely on
+whatever sits above it to say what it is. `pointer-events: none` on the
+wrapper keeps the uncovered canvas draggable.
+
+**The `LayerRow` half was NOT done, and should not be.** It looked like the
+point of the ticket when I wrote it, and it is not: `LayerRow` is a checkbox,
+a label and a slot, while a set's row is a colour swatch *before* the name, a
+geometry word, and three states — toggleable, named-but-fixed, and lost. Using
+it would mean adding a leading slot and a no-checkbox mode to `LayerRow` to
+serve one caller, and `SetLayerList` has ONE row template, so nothing is
+deduplicated. P9-2b was worth doing because it removed twelve copies; this
+would generalise a component for a case it was not built for and make both
+worse.
+
+### P9-11 [FEATURE] Find an address inside the set's data — DONE
 Nick: *"a search bar to find individual addresses within the context of the
 data."*
 
@@ -600,6 +616,27 @@ Then: fly there, mark it, and say what THIS SET's layers hold for that county
 — which is the whole difference between a map search and a search "within the
 context of the data".
 **Size: M.** Independent.
+
+**Done.** Typing a street address lists suggestions, and choosing one flies
+the map, names the county, and prints every one of the set's layers AND its
+derived index columns at that county. Verified on the xAI supercomputer site
+from the redevelopment set: `3231 Paul R Lowry Road` → Shelby County, TN →
+all eleven layers plus all three indices.
+
+**The monitoring plan changed, and the ticket was wrong about it.** Routing
+through our API needs a Mapbox token the SERVER does not have — it lives in
+the root `.env` for the client bundle, and `server/.env` has none. Adding one
+is Nick's to do, not mine. So the call goes browser→Mapbox, which is what
+`PromptInput` already does for its place strip, and the authoritative number
+is Mapbox's own usage dashboard — which is where the billing is anyway, and
+which an in-app counter could only ever estimate.
+
+What IS in the code is restraint, which is the half that actually reduces the
+bill: nothing below four characters, 350ms after the last keystroke, and a
+session cache so backspacing through a query and retyping it costs nothing.
+Three tests hold those. **If in-app counting is wanted later, it is one
+`MAPBOX_ACCESS_TOKEN` in `server/.env` plus a thin route** — `recordUsage`
+already keys on path.
 
 ### P9-9 [BUG] A county with no EPA record scores as if it had no contamination
 **Affects the PUBLISHED index.** Deferred by Nick on 2026-10-08 — noted now,
@@ -1037,10 +1074,9 @@ were the good part.
 
 ```
 DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 ─ P9-6a ─ P9-6b ─ P9-6c ─ P9-7 ─ P9-8
+      P9-10 ─ P9-11
 
-next:  P9-10  layers float over the map     (independent)
-       P9-11  find an address in the data  (independent)
-       P9-9   contamination                (deferred by Nick)
+next:  P9-9   contamination                (deferred by Nick)
 ```
 
 **P9-6a is done** and reviewed in a browser (`specs/ux-audit-p9-6a.md`): open a

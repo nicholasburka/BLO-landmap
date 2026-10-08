@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { countPointsByCounty, rollupLine } from '@/lib/pointRollup'
+import { countPointsByCounty, countyAt, rollupLine } from '@/lib/pointRollup'
 import type { CountyFeature } from '@/types/mapTypes'
 
 /**
@@ -104,6 +104,17 @@ describe('counting points by county', () => {
     const r = countPointsByCounty([line, at(0.5, 0.5)], [WEST])
     expect(r.placed).toBe(1)
     expect(r.unplaced).toBe(1)
+  })
+
+  it('finds the county a single point is in (P9-11)', () => {
+    // The other direction, for an address search: a geocoder gives
+    // coordinates, and the GEOID is what every layer is keyed on.
+    expect(countyAt(0.5, 0.5, [WEST, EAST])).toBe('west')
+    expect(countyAt(1.5, 0.5, [WEST, EAST])).toBe('east')
+    expect(countyAt(80, 80, [WEST, EAST])).toBeNull()
+    // A bad coordinate is nowhere, not an exception.
+    expect(countyAt(NaN, 0.5, [WEST, EAST])).toBeNull()
+    expect(countyAt(0.5, 0.5, [])).toBeNull()
   })
 
   it('says plainly when there was nothing to count', () => {
