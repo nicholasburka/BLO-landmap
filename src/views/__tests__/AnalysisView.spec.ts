@@ -690,7 +690,7 @@ describe('the proximity tool on a set', () => {
   })
 })
 
-// --- P7-8: Build an index ----------------------------------------------------
+// --- P7-8: Create a combined ranking -----------------------------------------
 
 describe('the index tool on a set', () => {
   /** A set naming two county layers that can be weighed — one held, one from
@@ -747,7 +747,9 @@ describe('the index tool on a set', () => {
 
   it('offers the tool on a set naming at least two county layers', async () => {
     const w = await mountIt()
-    expect(w.get('[data-testid="set-index"]').text()).toBe('Build an index')
+    // P9-6a: "Build an index" read like a commitment; this is the start of an
+    // experiment whose weights are draggable the moment it exists.
+    expect(w.get('[data-testid="set-index"]').text()).toBe('Create a combined ranking (index)')
   })
 
   it('does NOT offer it on a set with only one county layer — that is the layer', async () => {

@@ -37,7 +37,7 @@
  *
  * P7-5 adds the first of spec §F.5's tool cards that **operate on a working
  * set rather than on the whole library**: *Measure proximity* and, since P7-8,
- * *Build an index*. Each sits on the
+ * *Create a combined ranking*. Each sits on the
  * set's own row because that is what it is scoped to — a set is what an
  * analysis runs against — and what it writes is a derived column on that set,
  * which the map pane and the data table both then show without a second
@@ -260,8 +260,14 @@ async function measure(): Promise<void> {
 }
 
 /**
- * P7-8: *Build an index* — spec §F.5's second set-scoped tool card, and §F.3's
- * whole feature.
+ * P7-8: *Create a combined ranking* — spec §F.5's second set-scoped tool card,
+ * and §F.3's whole feature.
+ *
+ * P9-6a renamed it from "Build an index" (Nick, 2026-10-08). "Build" and
+ * "index" together read like a commitment — a thing you had better get right
+ * first time — when what this actually is is the start of an experiment whose
+ * weights are draggable the moment it exists. The word "index" stays in
+ * parentheses because it is what the result is called everywhere else.
  *
  * One form, reused by whichever set's row is open, the same way the proximity
  * form is: two sets are never being indexed at once.
@@ -449,13 +455,13 @@ function whoAndWhen(analysis: Analysis): string {
               <template v-if="indexableLayers(row.set).length >= 2">
                 ·
                 <button type="button" class="set-tool" data-testid="set-index" @click="openIndex(row.set)">
-                  {{ indexFor === row.set.slug ? 'Close' : 'Build an index' }}
+                  {{ indexFor === row.set.slug ? 'Close' : 'Create a combined ranking (index)' }}
                 </button>
               </template>
               <template v-else>
                 ·
                 <span class="set-tool-why" data-testid="set-index-why">
-                  Build an index — needs two or more county layers to weigh against each other
+                  Create a combined ranking — needs two or more county layers to weigh against each other
                 </span>
               </template>
             </p>
@@ -467,8 +473,10 @@ function whoAndWhen(analysis: Analysis): string {
               @submit.prevent="buildIndex"
             >
               <p class="proximity-lede">
-                A weighted score per county over this set's layers — written onto the set as a column the map and the
-                table both read, and drawn as a layer of its own.
+                One score per county over this set's layers, so they can be ranked together — written onto the set
+                as a column the map and the table both read, and drawn as a layer of its own. Nothing here is
+                final: the weights can be dragged around afterwards on the set's map, and every version you like
+                can be kept beside this one.
               </p>
               <div class="proximity-row">
                 <label class="proximity-label" :for="`index-name-${row.set.slug}`">Call it</label>
@@ -527,7 +535,7 @@ function whoAndWhen(analysis: Analysis): string {
                   :disabled="indexFormula.length < 2 || !indexName.trim() || indexing"
                   data-testid="index-submit"
                 >
-                  {{ indexing ? 'Building…' : 'Build' }}
+                  {{ indexing ? 'Creating…' : 'Create' }}
                 </button>
                 <span class="index-hint" data-testid="index-hint">
                   {{

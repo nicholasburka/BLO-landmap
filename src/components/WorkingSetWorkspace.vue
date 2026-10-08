@@ -291,7 +291,7 @@ const editingColumn = computed(() => columns.value.find(column => column.id === 
  * It is NOT offered sliders. Equal weights over a set's candidate layers is a
  * real formula wearing the clothes of a neutral starting point, and a reader
  * cannot tell the difference. So there is exactly one way to make a first
- * formula — "Build an index" on the Analysis page — and this says where it is
+ * formula — "Create a combined ranking" on the Analysis page — and this says where it is
  * rather than leaving a capability to be discovered. Said only when the set
  * could actually carry one: a reason a reader cannot act on is worse than
  * silence.
@@ -321,8 +321,8 @@ function layerName(layerId: string): string {
  * manifest that somebody may since have edited. A set with no index is not
  * offered this at all: equal weights over its candidate layers would be a real
  * formula presented as a neutral starting point, which it is not. That path is
- * "Build an index" on the Analysis page, so there is exactly one way to make a
- * first formula.
+ * "Create a combined ranking" on the Analysis page, so there is exactly one way
+ * to make a first formula.
  *
  * Awaits the manifest before seeding, so the rows open with names rather than
  * with ids that fill in a moment later. It is cached and shared; when the pane
@@ -893,9 +893,9 @@ onMounted(async () => {
         <!-- P9-6a: where a first formula comes from, for a set that has the
              layers to weigh but nothing weighing them yet. -->
         <p v-if="couldWeigh" class="state-note" data-testid="index-none-yet">
-          This set has layers to weigh against each other but no index yet.
-          <RouterLink to="/analysis">Build one on the Analysis page</RouterLink>, then its weights can be
-          changed here.
+          This set has layers that could be ranked together, but nothing ranking them yet.
+          <RouterLink to="/analysis">Create a combined ranking on the Analysis page</RouterLink> — then its
+          weights can be dragged around here.
         </p>
         <p v-if="unreadable.length" class="state-note warn" data-testid="derived-unreadable">
           {{ unreadable.length === 1 ? 'One derived column' : `${unreadable.length} derived columns` }} could not be
