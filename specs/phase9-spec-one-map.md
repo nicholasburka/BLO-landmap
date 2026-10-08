@@ -522,12 +522,18 @@ both verified rather than assumed:
    for 01001 is 21.406 in the published scores and 20.990 today. That accounts
    for the small median delta across the rest.
 
-So the published `combined_scores_v2.json` is a snapshot of a formula **and**
-of data that has since been fixed. The parity test pins the formula by feeding
-the published file's own inputs; recomputing live is a different and arguably
-better number. **Decision needed: adopt (1) as a modelling rule — "no EPA
-record means no known sites" — and regenerate, or keep the published values as
-a cited vintage.**
+**Both differences are improvements, so the internal set keeps them** (Nick,
+2026-10-08). Counting an absent EPA record as zero sites is wrong, not a
+convention; and the corrected diversity data is simply better data. The
+internal working set is therefore **the more correct index**, and the
+published `combined_scores_v2.json` is a vintage carrying a known defect.
+
+The parity test stays exactly as it is. It feeds the published file's **own**
+inputs, so it pins the FORMULA and is unaffected by either improvement — which
+is what makes it safe to improve the data without losing the ability to detect
+a change in the arithmetic.
+
+Patching the public index is deferred, tracked as **P9-9**.
 
 **Remaining:** the frozen export (§D) — creating the
 working set whose composite is this definition, and the build step that
@@ -537,6 +543,37 @@ One definition, one scorer. `BLO_PRESET` becomes a composite definition;
 `usePersonalizedScore` and `composite.ts` stop being two implementations of one
 idea. Acceptance: identical scores, public snapshots unedited, public map works
 logged out. **Size: L.** Depends on P9-4 and §D.
+
+### P9-9 [BUG] A county with no EPA record scores as if it had no contamination
+**Affects the PUBLISHED index.** Deferred by Nick on 2026-10-08 — noted now,
+fixed later.
+
+`calculate_blo_v2_scores.cjs:151` reads
+
+```js
+contamination: contamination ? contamination.total : 0,
+```
+
+so a county absent from the contamination file is scored as **zero sites**,
+which on a `lower_better` term is the best possible value. The file covers
+**2,482 of 3,144 counties**, so **662 counties** are being credited with a
+clean environmental record they have not been shown to have.
+
+Absence of an EPA record is not absence of contamination. This is the same
+class of error as the RE-Powering reporting bias in
+`library-staging/download/FINDINGS.md` — Wisconsin has 33,779 brownfield
+records and Tennessee 421, which measures state reporting rather than
+contamination — and it bites harder here, because the missing value is
+silently replaced with the most favourable one rather than left out.
+
+**Do:** treat an absent record as missing, which is what the composite path
+already does, and regenerate the published scores. Expect county-level moves:
+the live recomputation differs by up to 0.53 on a 0–5 scale, concentrated on
+exactly these counties. Worth saying publicly which counties moved and why,
+rather than quietly reissuing.
+
+**Size: S** to fix, and the regeneration is a decision about publishing, not
+a technical problem.
 
 ### P9-6 [FEATURE] Fork an index and compare
 Open the index, change weights, see the map move, save as a new set. Then
