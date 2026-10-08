@@ -30,7 +30,7 @@ describe('computeComposite — the Lens, generalised', () => {
     const result = computeComposite([term('a', 1, 'higher_better', { '01001': 0, '01003': 5, '01005': 10 })])
     expect(result.values).toEqual({ '01001': 0, '01003': 50, '01005': 100 })
     expect(result.scales).toEqual([
-      { layer: 'a', weight: 1, direction: 'higher_better', min: 0, max: 10, counties: 3 },
+      { layer: 'a', weight: 1, direction: 'higher_better', min: 0, max: 10, counties: 3, scale: 'observed' },
     ])
   })
 
@@ -128,6 +128,61 @@ describe('computeComposite — the Lens, generalised', () => {
     const other = computeComposite([c, a, b])
     expect(other.values).toEqual(one.values)
     expect(other.scales.map(s => s.layer)).toEqual(['aaa', 'bbb', 'ccc'])
+  })
+})
+
+describe('a declared range beats the observed one (P9-4)', () => {
+  /**
+   * P7-8 scaled every term against its observed min and max. The Lens scales
+   * a registry layer against `LAYER_REGISTRY[id].range`, a literal — so the
+   * same weights produced two different numbers, and "the index is a working
+   * set" would have silently moved published scores.
+   *
+   * Tracing `calculate_blo_v2_scores.cjs` settled which is right: it computes
+   * observed min/max for most terms and declares bounds only where the
+   * measure HAS natural ones — percentages 0-100, the diversity index 0-1. So
+   * the registry's ranges are not declarations competing with observation,
+   * they ARE observation, recorded and tidied. One concept: a range is
+   * derived by default and PINNED where someone decided it.
+   */
+  it('uses a pinned range instead of the observed span', () => {
+    // Observed span is 30-55; pinned says a percentage runs 0-100.
+    const t: CompositeTermValues = {
+      layer: 'pct', weight: 1, direction: 'higher_better',
+      values: { '01001': 30, '01003': 55 },
+      declaredRange: { min: 0, max: 100 },
+    }
+    const r = computeComposite([t])
+    // Observed scaling would have made these 0 and 100 — a dramatic gradient
+    // manufactured from a narrow real range.
+    expect(r.values).toEqual({ '01001': 30, '01003': 55 })
+    expect(r.scales[0]).toMatchObject({ min: 0, max: 100, scale: 'pinned' })
+  })
+
+  it('falls back to the observed span when nothing is pinned', () => {
+    const r = computeComposite([term('a', 1, 'higher_better', { '01001': 30, '01003': 55 })])
+    expect(r.values).toEqual({ '01001': 0, '01003': 100 })
+    expect(r.scales[0]).toMatchObject({ min: 30, max: 55, scale: 'observed' })
+  })
+
+  it('clamps a value outside its pinned range rather than scoring past the ends', () => {
+    const t: CompositeTermValues = {
+      layer: 'pct', weight: 1, direction: 'higher_better',
+      values: { '01001': -5, '01003': 150 },
+      declaredRange: { min: 0, max: 100 },
+    }
+    const r = computeComposite([t])
+    expect(r.values).toEqual({ '01001': 0, '01003': 100 })
+  })
+
+  it('ignores a pinned range that says nothing (min === max)', () => {
+    const t: CompositeTermValues = {
+      layer: 'flat', weight: 1, direction: 'higher_better',
+      values: { '01001': 2, '01003': 8 },
+      declaredRange: { min: 5, max: 5 },
+    }
+    const r = computeComposite([t])
+    expect(r.scales[0]).toMatchObject({ scale: 'observed' })
   })
 })
 

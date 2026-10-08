@@ -403,7 +403,37 @@ line of plain text under a heading, while the four library-wide tools get
 cards. That is the "working sets styled as a footnote" finding and belongs
 with a visual pass, not here.
 
-### P9-4 [BUG] One scorer, not two
+### P9-4 [BUG] One scorer, not two — PARTLY DONE
+**Done: the two now agree.** A composite term may carry a pinned range, and
+`spanOf` prefers it over the observed span. Registry terms take their range
+from the registry — the same literals `calculate_blo_v2_scores.cjs` computed
+and rounded — so the server and the Lens produce the same number from the same
+weights. Held layers take theirs from the manifest's `layer` block, or from
+the matching `measures` entry (P9-0), and fall back to observed when nothing
+is pinned. A pinned `min === max` says nothing and is ignored rather than
+dividing by zero. Each scale records **which span it used**, because "what
+does 100 mean" has a different answer for a pinned term and an observed one.
+
+**It also unblocked measures as ingredients.** P7-8 refused every
+`<owner>~<column>` id as "an index over an index" — correct for a working
+set's derived column, wrong for one of a file's measures, which is a plain
+column with an ordinary staleness story. The refusal now asks the owner's
+kind, the same way `readInternalLayerValues` routes. Without this, P9-0 made
+CEJST's nine burden categories layers that no index could use.
+
+**Not done: there is still one implementation per side.** The API deploys from
+`server/` and cannot import from `../src`, so "one scorer" cannot mean one
+module without a shared package — the same boundary that made P7-5 hand-write
+its great-circle maths rather than use turf. What exists now is one *algorithm*
+agreeing across two implementations, proved by a test that a registry term
+scales against the registry's pinned 0–100.
+
+**Still owed, and it is the real acceptance test:** reproduce all 3,144
+`combined_scores_v2.json` values through the server path. Two known obstacles —
+`BLO_PRESET` includes `contamination`, which the Lens computes from a
+contamination count map rather than a registry layer; and the missing-data
+divisor needs checking term by term. Until that runs, "the scores do not
+shift" is argued from the ranges being the same literals, not demonstrated.
 `usePersonalizedScore` and `composite.ts` compute the same thing twice. Unify
 on one, honouring each layer's range (§C): derived by default, pinned where one
 exists, natural bounds where `unit` says so. **Acceptance is byte-identical

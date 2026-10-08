@@ -66,6 +66,23 @@ export interface CompositeTerm {
 
 /** A term with the layer's county numbers attached, as the service reads them. */
 export interface CompositeTermValues extends CompositeTerm {
+  /**
+   * P9-4: the range this measure is SCALED against, when one is pinned.
+   *
+   * A range is derived from the data by default and pinned where somebody
+   * decided it. Pinning earns its place twice over: a floating range silently
+   * moves every historical score and makes two indices incomparable, because
+   * they were scaled against different denominators; and natural bounds beat
+   * observation outright — a percentage runs 0-100 whether or not any county
+   * reaches either end, and observed-scaling one that really spans 30-55%
+   * manufactures a dramatic gradient from a narrow real range.
+   *
+   * This is also what makes the Lens and this function agree. The Lens scales
+   * a registry layer against `LAYER_REGISTRY[id].range`, and those literals
+   * are not rival declarations — `calculate_blo_v2_scores.cjs` computed them
+   * from the data and rounded them. Same concept, written down.
+   */
+  declaredRange?: { min: number; max: number } | null
   /** GEOID → value. */
   values: Record<string, number>
 }
@@ -77,6 +94,8 @@ export interface CompositeScale extends CompositeTerm {
   max: number
   /** How many counties carried a usable number for this term. */
   counties: number
+  /** Which span the 0-100 was measured against (P9-4). */
+  scale: 'pinned' | 'observed'
 }
 
 export interface CompositeStats {
@@ -254,6 +273,27 @@ export function readCompositeTerms(raw: unknown): { terms: CompositeTerm[] } | {
   return { terms: canonicalTerms(terms) }
 }
 
+/**
+ * The span a term is scaled against: its pinned range when it has a usable
+ * one, otherwise its own min and max over the counties carrying a number.
+ *
+ * A pinned min === max says nothing — it cannot divide — so it is ignored
+ * rather than turned into a division by zero.
+ */
+function spanOf(
+  values: Record<string, number>,
+  pinned: { min: number; max: number } | null | undefined,
+): { min: number; max: number; counties: number; scale: 'pinned' | 'observed' } {
+  const observed = scaleOf(values)
+  const usable =
+    pinned &&
+    Number.isFinite(pinned.min) &&
+    Number.isFinite(pinned.max) &&
+    pinned.max !== pinned.min
+  if (!usable) return { ...observed, scale: 'observed' }
+  return { min: pinned.min, max: pinned.max, counties: observed.counties, scale: 'pinned' }
+}
+
 /** A term's own min and max over the counties that carry a usable number. */
 function scaleOf(values: Record<string, number>): { min: number; max: number; counties: number } {
   let min = Number.POSITIVE_INFINITY
@@ -290,7 +330,7 @@ export function computeComposite(terms: readonly CompositeTermValues[]): Composi
   const ordered = [...terms].sort((a, b) => a.layer.localeCompare(b.layer))
   const scales: CompositeScale[] = []
   for (const term of ordered) {
-    const { min, max, counties } = scaleOf(term.values)
+    const { min, max, counties, scale } = spanOf(term.values, term.declaredRange)
     if (!counties) {
       throw new CompositeMathError(
         `“${term.layer}” has no county values, so it cannot be part of an index. ` +
@@ -303,7 +343,10 @@ export function computeComposite(terms: readonly CompositeTermValues[]): Composi
           `and would only scale the whole index down. Remove it, or use a layer with some spread.`,
       )
     }
-    scales.push({ layer: term.layer, weight: term.weight, direction: term.direction, min, max, counties })
+    // `scale` travels with the number: "what does 100 mean" has a different
+    // answer for a pinned term and an observed one, and a reader comparing
+    // two indices needs to know which they are looking at.
+    scales.push({ layer: term.layer, weight: term.weight, direction: term.direction, min, max, counties, scale })
   }
 
   const totalWeight = ordered.reduce((sum, term) => sum + term.weight, 0)
