@@ -544,6 +544,63 @@ One definition, one scorer. `BLO_PRESET` becomes a composite definition;
 idea. Acceptance: identical scores, public snapshots unedited, public map works
 logged out. **Size: L.** Depends on P9-4 and §D.
 
+### P9-10 [FEATURE] The set's layers float over its map
+Nick: *"can we reuse the layer toggles that sit on top of the map and have
+nice styling?"* Mostly yes, and two of the pieces are already built.
+
+The "nice styling" is a shared tier — `.blo-panel` / `.blo-panel--reference`
+in `base.css` (translucent cream, blur, shadow) — which the public map's
+`Lens` wears as a floating aside. `SetLayerList` currently sits BELOW the
+canvas as a bare list; it moves on top of it in that tier.
+
+What is NOT reused is `LayerControls`: twenty-odd props of public categories,
+weights, filters and contamination. P9-2 wrote `SetLayerList` instead for
+exactly that reason and the reasoning still holds. What IS reused is
+**`LayerRow`** — P9-2b extracted it as the shared row shell and
+`LayerControls` uses it twelve times; `SetLayerList` has its own hand-written
+row and does not, which is the drift P9-2b existed to stop.
+
+Floating a panel over the canvas has to not break the two things the pane
+already gets right: the map must stay reachable on a narrow window (P6-14's
+breakpoint), and the preview banner must stay where a reader sees it.
+**Size: S.** Independent.
+
+### P9-11 [FEATURE] Find an address inside the set's data
+Nick: *"a search bar to find individual addresses within the context of the
+data."*
+
+**Nothing on the public map can be reused for this, because it does not have
+one.** Phase 4c deleted it — *"the dedicated geocoder input is gone"* — and
+the `MapboxGeocoder` instance still constructed in `Map.vue` is kept only so
+`usePropertyListings` can call `.clear()`; its DOM is never rendered and its
+types are `country,region,postcode,district,place`. The Ask input's place
+strip is `district,region,place`. Neither does street addresses.
+
+**Mapbox for the suggestions** (Nick, 2026-10-08): the free Census geocoder
+cannot do partial input, and type-ahead is the point. `types=address,…`,
+debounced.
+
+**But the county comes from us, not from them.** A geocoded address gives
+coordinates; what makes it "in the context of the data" is the county GEOID,
+which every layer in the set is keyed on. P9-7 already built a tested
+point-in-polygon with a degree-grid index for the rollup, and the county
+geometry is already downloaded — so the containing county is found in the
+browser for free, with no second call and no reliance on Mapbox's `district`
+context being a county we can match.
+
+**Monitoring is part of the ticket, not a note to remember.** Nick: *"we
+should just remember to monitor that cost."* Remembering is not a mechanism,
+so the suggestions go through our own API rather than browser→Mapbox direct:
+`recordUsage` already keys on `path` and feeds the internal dashboard's daily
+aggregates, so the per-keystroke volume becomes a number somebody can look at
+and a path somebody can rate-limit. A direct call from the browser would be
+invisible.
+
+Then: fly there, mark it, and say what THIS SET's layers hold for that county
+— which is the whole difference between a map search and a search "within the
+context of the data".
+**Size: M.** Independent.
+
 ### P9-9 [BUG] A county with no EPA record scores as if it had no contamination
 **Affects the PUBLISHED index.** Deferred by Nick on 2026-10-08 — noted now,
 fixed later.
@@ -981,7 +1038,9 @@ were the good part.
 ```
 DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 ─ P9-6a ─ P9-6b ─ P9-6c ─ P9-7 ─ P9-8
 
-next:  P9-9   contamination                (deferred by Nick)
+next:  P9-10  layers float over the map     (independent)
+       P9-11  find an address in the data  (independent)
+       P9-9   contamination                (deferred by Nick)
 ```
 
 **P9-6a is done** and reviewed in a browser (`specs/ux-audit-p9-6a.md`): open a
