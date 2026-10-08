@@ -627,6 +627,56 @@ Open the index, change weights, see the map move, save as a new set. Then
 compare two indices: rank movement, biggest movers, correlation. This is the
 payoff — the reason for the whole phase. **Size: L.** Depends on P9-5.
 
+### P9-6a [FEATURE] Wire the weight editor into the set's view
+`IndexWeightEditor` is built and tested (8 cases) but connected to nothing.
+Connecting it is not one step, and the questions below are why this is a
+ticket rather than a loose end.
+
+**Where the terms come from.** A set with an index already has a formula —
+the `analysis.terms` on its derived column — and that is what to edit. A set
+with county layers and no index yet has candidates but no formula: offer its
+indexable layers at an equal starting weight, or require an index first?
+Equal weights is a real formula and a bad default, because it looks
+considered and is not. Leaning toward: edit an existing index, and send a set
+without one to "Build an index" (P9-3's path), so there is exactly one way to
+make the first formula.
+
+**What the map shows while dragging.** The editor emits a scoring query; the
+canvas can draw it immediately. But the set's SAVED index is also a layer,
+and both on at once is two choropleths arguing. Proposal: dragging replaces
+the drawn index with the live preview, and the layer list says so — "showing
+an unsaved version" — because a reader must never mistake a preview for the
+record.
+
+**What a save does.** `POST /composite` with the formula, then the new column
+has to appear in `columns` without a page reload, and probably become the
+drawn layer. Whether it also becomes the compared-against default in
+`IndexCompareCard` is a smaller call that follows.
+
+**What happens on leaving.** An unsaved preview is lost, which is correct —
+but silently losing a formula somebody spent five minutes on is not. Either
+warn, or do not let the preview outlive the page in a way that feels like
+state.
+
+**Size: M.** Depends on nothing; everything it needs is built.
+
+### P9-6b [BUG] The client test suite has its own contention flake
+`App.spec.ts`'s "gives an internal user a Help button beside Search" failed
+on two separate full runs today, passed alone twice each time, and passed on
+the immediately following full run. It is not new and it is not P9's.
+
+P7-11 proved the SERVER suite's flakes were detached writers outliving the
+test that armed them, and fixed them to 20/20. The client suite has never had
+that treatment. The known leads are in `project-natl-map-test-gotchas`: the
+jsdom suite makes real network calls to `localhost:3001`, so behaviour
+depends on whether a dev server is up.
+
+A suite that fails one run in three teaches people to re-run rather than to
+read, which is how a real failure gets waved through. Worth the same
+treatment the server suite got: find the mechanism, prove it with twenty
+consecutive clean runs, do not paper it with a retry.
+**Size: M.**
+
 ### P9-7 [FEATURE] The free-analysis set
 Rank, distribution, correlation, coverage, point-in-county rollup (§E). All
 client-side over county-scale data, no request. No cost disclosure anywhere in
@@ -645,19 +695,17 @@ location" (§10). **Size: M.** Independent.
 ## Sequencing
 
 ```
-P9-1 ─► P9-2 ──────────────────────────┐
-                                       ├─► P9-6  fork + compare
-P9-0 ─► P9-4 ─► P9-5 ──────────────────┘
-P9-3   P9-7   P9-8   (parallel, independent)
+DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 (maths + compare UI)
+
+next:  P9-6a  wire the weight editor      ← the payoff becomes usable
+       P9-8   carried audit fixes          (independent)
+       P9-7   free analyses                (independent)
+       P9-6b  client suite flake           (independent, and quietly expensive)
+       P9-9   contamination                (deferred by Nick)
 ```
 
-**P9-1 and P9-2 first.** They fix the blocking audit finding, need no server
-change and no data migration, and make the set surface honest before anything
-is built on top of it.
-
-**Then P9-0**, because it decides what the vocabulary is before measures get
-written into hand-edited manifests, and because it is what gives P9-6 anything
-to fork with.
+**P9-6a first.** Everything it needs is built and tested; until it is wired,
+the weight editor exists and nobody can reach it.
 
 ## Answered (Nick, 2026-10-07)
 
