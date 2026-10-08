@@ -2,7 +2,7 @@ import 'dotenv/config'
 import { createApp } from './app.js'
 import { requireAuthEnv } from './middleware/auth.js'
 import { initUsageStore } from './services/usageStore.js'
-import { isLibraryEnabled, initLibraryDb } from './services/libraryDb.js'
+import { isLibraryEnabled, initLibraryDb, usingInMemoryLibraryStore } from './services/libraryDb.js'
 import { pruneExpiredSessions } from './services/internalSessions.js'
 import { pruneOAuth } from './services/oauthStore.js'
 import { isBucketEnabled, initLibraryBucket, syncMirror } from './services/libraryBucket.js'
@@ -19,11 +19,11 @@ if (!process.env.ANTHROPIC_API_KEY) {
 const app = createApp()
 const port = process.env.PORT || 3001
 
-// With the in-memory dev store (LIBRARY_DEV_PGMEM=1), the CLI can't reach
-// this process's database — seed a known dev account instead so login can
-// be exercised locally. Guarded twice (flag + non-production).
+// With the in-memory dev store, the CLI can't reach this process's database —
+// seed a known dev account instead so login can be exercised locally. The
+// guard is `usingInMemoryLibraryStore`, NOT the flag: see its comment.
 async function seedDevUser(): Promise<void> {
-  if (process.env.LIBRARY_DEV_PGMEM !== '1' || process.env.NODE_ENV === 'production') return
+  if (!usingInMemoryLibraryStore()) return
   const { createUser } = await import('./cli/users.js')
   await createUser('dev-admin', 'admin', 'dev-password-123')
   console.warn('[library] dev store seeded: user "dev-admin" / password "dev-password-123"')
