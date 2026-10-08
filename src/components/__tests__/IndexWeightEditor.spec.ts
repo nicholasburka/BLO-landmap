@@ -15,6 +15,29 @@ const TERMS = [
   { layer: 'poverty_by_race', name: 'Poverty', weight: 4, direction: 'lower_better' as const },
 ]
 
+
+describe('why it will not save yet (P9-6a)', () => {
+  // A grey button and no sentence is the state the real page was in: eleven
+  // terms weighed, a changed formula, Save off, and the only hint a
+  // placeholder in the box beside it.
+  it('names the missing name', async () => {
+    const w = mount(IndexWeightEditor, { props: { terms: TERMS } })
+    expect(w.get('[data-testid="weight-save-why"]').text()).toContain('Give this version a name')
+    await w.get('[data-testid="weight-name"]').setValue('Housing-weighted')
+    expect(w.find('[data-testid="weight-save-why"]').exists()).toBe(false)
+    expect((w.get('[data-testid="weight-save"]').element as HTMLButtonElement).disabled).toBe(false)
+  })
+
+  it('names the layer count first, because a name cannot rescue an index of one', async () => {
+    const w = mount(IndexWeightEditor, { props: { terms: TERMS } })
+    await w.get('[data-testid="weight-name"]').setValue('Housing-weighted')
+    const sliders = w.findAll('input[type="range"]')
+    await sliders[0].setValue('0')
+    expect(w.get('[data-testid="weight-save-why"]').text()).toContain('at least two layers')
+    expect((w.get('[data-testid="weight-save"]').element as HTMLButtonElement).disabled).toBe(true)
+  })
+})
+
 describe('IndexWeightEditor (P9-6)', () => {
   it('lists every term by name, with its weight', () => {
     const w = mount(IndexWeightEditor, { props: { terms: TERMS } })

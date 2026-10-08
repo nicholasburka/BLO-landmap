@@ -658,14 +658,65 @@ version beside the old one, and autosaves what you have not saved yet.
    canvas, so switching to the data interface — which tears the pane down —
    does not take a part-finished drag with it.
 
-**Two things found on the way.** `SetLayerList` had no branch for a PUBLIC
-registry layer, so a set naming one (which `indexableLayersOf` explicitly
-offers as an index term) read "not in the library any more" — a choropleth the
-national map draws every day being called missing. And the debounced autosave
-could land *after* a save or a discard cleared the draft, which would make the
-next visit announce an unsaved version of a formula that is now saved; both
-paths cancel the pending write. The second was caught by the full-suite run and
-not by the file alone — see P9-6b.
+**Reviewed in a real browser (2026-10-08), against the real
+`blo-livability-index-v2` set — eleven public layers, the published formula.**
+Six things the tests could not have told us, all now fixed and covered:
+
+- **The editor was 1,500px below the map it repaints.** It had been placed with
+  the derived columns, which it is *about*; on a 900px window you could see the
+  control or the consequence, never both, which is the entire feature. It now
+  sits directly under the canvas, above the layer list, and a remount restores
+  the live formula (`editorTerms` is a computed, not a one-shot seed) so an
+  interface switch still costs nothing. Measured after: 385px of map and the
+  whole editor on screen together.
+- **The slider rows were unreadable at width.** A `1fr` name column put 1,100px
+  of blank between "Life Expectancy" and the slider weighing it. Capped at 44rem.
+- **The map pane never came back.** Pre-existing (P6-14): `useMapPane` closes on
+  narrowing and nothing reopened it, so a window narrowed and widened again left
+  "There is not room for a map here" on a 1,440px screen, recoverable only by
+  reload. The same defect the other way round — open the page narrow, widen it,
+  no map ever. One flag now: somebody wants this open and the width is the only
+  thing stopping it. A reader who pressed X still stays closed.
+- **"Weigh it differently" was a dead control below 1,024px** — it relabelled
+  itself "Close the weights" and opened nothing, since the editor lives in the
+  pane. Now it says why, P9-3's rule.
+- **A draft equal to the saved formula announced itself as unsaved work.** Reset
+  put the published weights back, the autosave stored them, and reopening said
+  "an unsaved version from last time" over sliders on exactly the saved index.
+  `PageEditor`'s rule ported: a draft identical to what is saved is not a draft.
+- **`index-none-yet` lied on the redevelopment set.** One county layer and five
+  point/line layers counted as two, because `registerInternalLayers` injects
+  internal county layers into `LAYER_REGISTRY` and the count used both sources —
+  so a reader was pointed at a control that would refuse them.
+
+**And one correction to the entry above.** Reading the code, `applyQueryState`
+appeared to drop a `health`-category layer entirely, which would have meant the
+published index's own map silently scored ten terms of eleven. The browser says
+otherwise: dragging `life_expectancy` from ×10 to ×1 repainted 17% of the
+canvas. The registry's `category` field and the `*_LAYERS` config arrays
+disagree — `life_expectancy` is filed `health` and lives in
+`DEMOGRAPHIC_LAYERS` — and only the arrays decide anything, because that is
+what `applyQueryState` searches. `SetLayerList` now resolves toggleability from
+the arrays. The first fix below had keyed on the registry and would have taken
+a working checkbox away.
+
+**Three things found before that.**
+
+- `SetLayerList` had no branch for a PUBLIC registry layer, so a set naming one
+  — which `indexableLayersOf` explicitly offers as an index term — read "not in
+  the library any more". A choropleth the national map draws every day, called
+  missing.
+- The debounced autosave could land *after* a save or a discard cleared the
+  draft, which would make the next visit announce an unsaved version of a
+  formula that is now saved. Both paths cancel the pending write. Caught by the
+  full-suite run and not by the file alone — see P9-6b.
+- **The layer list and the sliders could disagree about the same map.** During a
+  preview the list named the formula's terms *with checkboxes*, and `scoringQuery`
+  is built from the selected-layer arrays — so unchecking a term dropped it from
+  the score while its slider still read 6. Measured before fixing: two terms
+  became one, slider unchanged. The list is now read-only while a preview owns
+  the canvas; a term leaves a formula by being dragged to zero, which the editor
+  labels "out". One control per decision.
 
 **Where the terms come from.** A set with an index already has a formula —
 the `analysis.terms` on its derived column — and that is what to edit. A set
@@ -695,7 +746,7 @@ state.
 
 **Size: M.** Depends on nothing; everything it needs is built.
 
-### P9-6b [BUG] The client test suite has its own contention flake
+### P9-6b [BUG] The client test suite has its own contention flake — DONE
 `App.spec.ts`'s "gives an internal user a Help button beside Search" failed
 on two separate full runs today, passed alone twice each time, and passed on
 the immediately following full run. It is not new and it is not P9's.
@@ -706,17 +757,41 @@ that treatment. The known leads are in `project-natl-map-test-gotchas`: the
 jsdom suite makes real network calls to `localhost:3001`, so behaviour
 depends on whether a dev server is up.
 
-**P9-6a found the same mechanism in this suite, which is evidence the lead is
-the right one.** `WorkingSetWorkspace.spec` mounted forty-odd components and
-unmounted none, so a debounced write armed in one test landed in the next one's
-freshly cleared `localStorage` — two tests that passed alone failed in the full
-run, with assertions that made no sense in isolation ("a draft was restored"
-when none was written). The fix was an `afterEach` that unmounts what the file
-mounted, which runs the components' own cleanup. **App.spec's failure is not
-yet explained** — it unmounts already, and its symptom is auth state
-(`search-trigger` alone instead of the internal trio), which points at the
-`/api/me` call rather than at a timer. Worth checking whether a mount whose
-`/api/me` is still in flight can resolve into a later test.
+**Two mechanisms, and the recorded lead was not either of them.**
+
+**1. A wall-clock race against a dynamic import** — this is App.spec's. It does
+not call `localhost:3001` at all: it mocks `useAuth` outright, and the symptom
+*proved* auth was fine. `search-trigger` is synchronous and gated on
+`internalUser`, and it was **present**; only the two testids belonging to the
+async `InternalHeaderTools` were missing. `mountApp` waited for that component
+by polling the clock — forty ten-millisecond turns, then give up and assert. So
+"an internal user has no Help button" was really a claim about how fast Vite
+transformed a module: plenty of time idle, not always enough under load. It now
+awaits the same specifier `App.vue` defers on and then settles on microtasks
+only, which is `settleMap`'s pattern. A slow machine makes it slower rather
+than wrong, and a genuinely broken header fails every time.
+
+**2. Detached work — P7-11's finding, on the client.** `WorkingSetWorkspace.spec`
+was one of **twenty-seven** spec files that mounted components and unmounted
+none, so the `onBeforeUnmount` cleanup every debounce in this codebase relies on
+never ran: `GlobalSearch`, `DatasetView`, `EmbedPicker`, `PageEditor`,
+`WorkingSetWorkspace`, and `PlaceView`'s one-second interval. P9-6a's 500ms
+autosave armed in one test landed in the next one's freshly cleared
+`localStorage`, which read as "a draft was restored" with no draft written.
+Fixed with `enableAutoUnmount` in a new `setupFiles` entry
+(`src/testing/vitestSetup.ts`) — globally, because twenty-seven `afterEach`es
+each have to be remembered and the next spec written would have been the
+twenty-eighth.
+
+**Auto-unmount immediately found a latent gap.** jsdom implements no object
+URLs, and `CompareView` and `PlaceView` both release theirs on unmount — so
+about thirty tests broke the moment anything actually unmounted. Filled in the
+same setup file: a `typeof URL.revokeObjectURL === 'function'` guard inside a
+component would be production code bending around a test runner.
+
+**Verified by 20/20 consecutive clean full runs**, the bar P7-11 set. Nothing
+was papered with a retry, and no test was weakened: the suite is 2,318 passing
+across 107 files, the same count as before.
 
 A suite that fails one run in three teaches people to re-run rather than to
 read, which is how a real failure gets waved through. Worth the same
@@ -742,10 +817,9 @@ location" (§10). **Size: M.** Independent.
 ## Sequencing
 
 ```
-DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 ─ P9-6a (the editor, wired)
+DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 ─ P9-6a ─ P9-6b
 
-next:  P9-6b  the client suite's flake   ← a lead, now with evidence
-       P9-8   carried audit fixes          (independent)
+next:  P9-8   carried audit fixes          (independent)
        P9-7   free analyses                (independent)
        P9-9   contamination                (deferred by Nick)
 ```

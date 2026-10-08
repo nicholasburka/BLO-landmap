@@ -246,17 +246,15 @@ let router: Router
 let network: CountyDataFetchStub
 
 /**
- * Everything this file has mounted, so `afterEach` can tear it down.
- *
  * P9-6a arms a debounced write on a slider drag, and P7-11's lesson is that
  * detached work outliving the test that armed it is what a flaky suite is made
  * of: a 500ms autosave from one test landing in the next one's freshly cleared
- * storage reads as "this draft was restored" with no draft in sight. Unmounting
- * runs the component's own `clearTimeout`, which is the same thing a reader
- * navigating away does.
+ * storage reads as "this draft was restored" with no draft in sight.
+ *
+ * What unmounts these is `enableAutoUnmount` in `src/testing/vitestSetup.ts` —
+ * global, because this file was one of twenty-seven that never unmounted and
+ * the next one written would have been twenty-eight.
  */
-const mounted: VueWrapper[] = []
-
 async function mountAt(view: SavedView, path = '/views/memphis-map') {
   router = createRouter({
     history: createMemoryHistory(),
@@ -273,7 +271,6 @@ async function mountAt(view: SavedView, path = '/views/memphis-map') {
   await router.push(path)
   await router.isReady()
   const wrapper = mount(WorkingSetWorkspace, { props: { view }, global: { plugins: [router] } })
-  mounted.push(wrapper)
   await flushPromises()
   return wrapper
 }
@@ -335,7 +332,6 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  while (mounted.length) mounted.pop()?.unmount()
   vi.useRealTimers()
   vi.unstubAllGlobals()
   restoreViewport()
@@ -1001,6 +997,18 @@ describe('a composite index on the map interface', () => {
       expect(measured.find('[data-testid="derived-weigh"]').exists()).toBe(false)
     })
 
+    it('says why instead of offering a control that opens nothing, on a narrow window', async () => {
+      // The editor lives in the map pane, beside the choropleth it repaints,
+      // and the pane wants a desktop. Measured at 820px before the fix: the
+      // button was there, clicking it relabelled itself "Close the weights",
+      // and nothing appeared.
+      stubViewportWidth(820)
+      const w = await mountAt(mapView())
+      await settleMap()
+      expect(w.find('[data-testid="derived-weigh"]').exists()).toBe(false)
+      expect(w.get('[data-testid="derived-weigh-why"]').text()).toContain('needs a wider window')
+    })
+
     it('opens on the SAVED formula, naming each term instead of printing its id', async () => {
       const w = await mountAt(mapView())
       await settleMap()
@@ -1067,6 +1075,28 @@ describe('a composite index on the map interface', () => {
       expect(w.find('[data-testid="set-layer-missing"]').exists()).toBe(false)
     })
 
+    it('stops offering to toggle a term while its weight is on a slider', async () => {
+      // Unchecking a previewed term drops it from the scoring query while its
+      // slider still shows a weight — measured: scoring went from two terms to
+      // one with the slider still reading 6. The sliders would lie about what
+      // the map is. A term leaves a formula by being dragged to zero, which the
+      // editor labels "out": one control per decision.
+      const w = await mountAt(mapView())
+      await settleMap()
+      expect(w.findAll('[data-testid="set-layer"] input[type="checkbox"]')).toHaveLength(1)
+
+      await openWeights(w)
+      await slider(w, 1).setValue('9')
+      await settleMap()
+      expect(w.findAll('[data-testid="set-layer"]')).toHaveLength(2)
+      expect(w.findAll('[data-testid="set-layer"] input[type="checkbox"]')).toHaveLength(0)
+
+      // And the toggles come back the moment the preview does not own the map.
+      await w.get('[data-testid="derived-weigh"]').trigger('click')
+      await settleMap()
+      expect(w.findAll('[data-testid="set-layer"] input[type="checkbox"]')).toHaveLength(1)
+    })
+
     it('takes a term dragged to zero OUT of the formula it draws', async () => {
       const w = await mountAt(mapView())
       await settleMap()
@@ -1087,13 +1117,17 @@ describe('a composite index on the map interface', () => {
       await openWeights(w)
       await slider(w, 1).setValue('9')
       await settleMap()
+      // A term dragged OUT is the subtle half: it is absent from the live
+      // formula (zero means out), so a naive restore snaps it back to its
+      // saved weight.
+      await slider(w, 0).setValue('0')
+      await settleMap()
       await switchTo(w, 'data')
       await switchTo(w, 'map')
       expect((slider(w, 1).element as HTMLInputElement).value).toBe('9')
-      expect(w.findComponent(MapPane).props('query').weights.value).toEqual({
-        'internal-votes': 6,
-        poverty_by_race: 9,
-      })
+      expect((slider(w, 0).element as HTMLInputElement).value).toBe('0')
+      // And the map came back drawing the same formula the sliders show.
+      expect(w.findComponent(MapPane).props('query').weights.value).toEqual({ poverty_by_race: 9 })
     })
 
     it('saves a VERSION — a new column, drawn, with the old one kept', async () => {
@@ -1183,6 +1217,31 @@ describe('a composite index on the map interface', () => {
       ])
     })
 
+    it('does not call a formula unsaved when it matches the saved one', async () => {
+      // Seen on the real page: Reset put the published weights back, the
+      // autosave stored them, and reopening announced "an unsaved version from
+      // last time" above sliders sitting on exactly the saved index.
+      // `PageEditor`'s rule — a draft identical to what is saved is not a draft.
+      vi.useFakeTimers()
+      const w = await mountAt(mapView())
+      await settleMap()
+      await openWeights(w)
+      await slider(w, 1).setValue('9')
+      vi.advanceTimersByTime(600)
+      expect(readIndexDraft('memphis-redevelopment', 'political-efficacy')).not.toBeNull()
+
+      // Back to where it started.
+      await slider(w, 1).setValue('4')
+      vi.advanceTimersByTime(600)
+      vi.useRealTimers()
+      expect(readIndexDraft('memphis-redevelopment', 'political-efficacy')).toBeNull()
+
+      const back = await mountAt(mapView())
+      await settleMap()
+      await openWeights(back)
+      expect(back.find('[data-testid="index-draft-restored"]').exists()).toBe(false)
+    })
+
     it('throws the restored draft away on request, back to what the set holds', async () => {
       localStorage.setItem(
         indexDraftKey('memphis-redevelopment', 'political-efficacy'),
@@ -1214,6 +1273,31 @@ describe('a composite index on the map interface', () => {
       expect(note.get('a').text()).toContain('Create a combined ranking')
       expect(note.get('a').attributes('href')).toBe('/analysis')
       expect(w.find('[data-testid="index-weight-editor"]').exists()).toBe(false)
+    })
+
+    it('says nothing of the sort to a set whose other layers are points and lines', async () => {
+      // Seen on the redevelopment set: one county layer and five point/line
+      // layers read as "layers that could be ranked together", because
+      // `registerInternalLayers` puts internal COUNTY layers into
+      // `LAYER_REGISTRY` too and the count used both sources. The reader was
+      // pointed at a control that would refuse them for having fewer than two.
+      mockedSet.mockResolvedValue(
+        detail({ layers: ['internal-sites', 'internal-pipelines'], derivedCount: 0 }),
+      )
+      mockedColumns.mockResolvedValue(columnsBody())
+      mockedManifest.mockResolvedValue([
+        manifestEntry(),
+        {
+          ...manifestEntry(),
+          id: 'internal-pipelines',
+          slug: 'pipelines',
+          name: 'Pipelines',
+          geometry: 'line',
+        },
+      ])
+      const w = await mountAt(mapView())
+      await settleMap()
+      expect(w.find('[data-testid="index-none-yet"]').exists()).toBe(false)
     })
 
     it('says nothing of the sort to a set that already has one', async () => {

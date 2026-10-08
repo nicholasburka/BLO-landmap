@@ -266,14 +266,34 @@ watch(columns, list => {
 // --- P9-6a: weighing an index differently ----------------------------------
 
 /**
- * The formula the editor starts from, resolved once when it opens.
+ * The formula the editor shows: the saved one, with whatever has been dragged
+ * since laid over it.
  *
- * Deliberately NOT a computed over `previewTerms`: the editor copies its props
- * into local state, so feeding its own output back through them would make a
- * round trip out of every slider drag — and a term dragged to zero, which the
- * live formula leaves out, would spring back to its saved weight.
+ * It has to be a COMPUTED rather than a one-shot seed, because the editor now
+ * lives inside the map pane (where the thing it repaints is) and the pane is
+ * `v-if`'d — so switching to the data interface and back unmounts and remounts
+ * it. Reading the live formula means it comes back as it was left instead of
+ * snapping to what is saved.
+ *
+ * The round trip this creates is harmless and the one trap in it is handled: a
+ * term dragged to ZERO is absent from the live formula (zero means out), so
+ * "absent while a formula is live" reads as 0 rather than falling back to the
+ * saved weight and springing the slider back under the cursor.
  */
-const editorSeed = ref<WeightTerm[]>([])
+const editorBase = ref<CompositeTerm[]>([])
+
+const editorTerms = computed<WeightTerm[]>(() => {
+  const live = previewTerms.value
+  return editorBase.value.map(row => {
+    const term = live?.find(x => x.layer === row.layer)
+    return {
+      layer: row.layer,
+      name: layerName(row.layer),
+      weight: live ? (term ? term.weight : 0) : row.weight,
+      direction: term ? term.direction : row.direction,
+    }
+  })
+})
 
 /** Shown when the sliders opened on an autosaved draft rather than on the
  *  saved formula, because weights nobody can account for are worse than none. */
@@ -298,10 +318,15 @@ const editingColumn = computed(() => columns.value.find(column => column.id === 
  */
 const couldWeigh = computed(() => {
   if (columns.value.some(column => column.rerun?.type === 'composite')) return false
-  const ids = new Set(set.value?.layers ?? [])
-  const county = map.state.layers.internalDefinitions.value.filter(def => ids.has(def.id)).length
-  const registry = [...ids].filter(id => !!LAYER_REGISTRY[id]).length
-  return county + registry >= 2
+  // ONE source, because `registerInternalLayers` injects every internal COUNTY
+  // layer into `LAYER_REGISTRY` as well. Counting the manifest and the registry
+  // separately counted each of those twice, which told the redevelopment set —
+  // one county layer and five point and line layers — that it had "layers that
+  // could be ranked together", and sent the reader to a control that would
+  // refuse them for having fewer than two. A point layer has features, not
+  // values; nothing in the registry has features, so this is the whole test.
+  const indexable = (set.value?.layers ?? []).filter(id => !!LAYER_REGISTRY[id])
+  return indexable.length >= 2
 })
 
 /** A layer id is not a thing to put beside a slider. Internal names come off
@@ -340,17 +365,12 @@ async function openEditor(column: DerivedColumn): Promise<void> {
   // A draft is only usable if it is still about this formula's layers; a set
   // edited since is a reason to start from what is saved.
   const draft = readIndexDraft(set.value.slug, column.id)
-  const usable = draft && draft.every(term => saved.some(row => row.layer === term.layer)) ? draft : null
-  editorSeed.value = saved.map(row => {
-    const term = usable?.find(x => x.layer === row.layer)
-    return {
-      layer: row.layer,
-      name: layerName(row.layer),
-      // A saved term the draft does not mention was dragged OUT of it.
-      weight: usable ? (term ? term.weight : 0) : row.weight,
-      direction: term ? term.direction : row.direction,
-    }
-  })
+  const known = draft && draft.every(term => saved.some(row => row.layer === term.layer))
+  // A draft worth announcing is one that still fits this formula's layers AND
+  // actually differs from it. One left behind by a Reset is neither.
+  const usable = known && draft && !sameFormula(draft, saved) ? draft : null
+  if (draft && !usable) clearIndexDraft(set.value.slug, column.id)
+  editorBase.value = saved.map(row => ({ ...row }))
   draftRestored.value = !!usable
   // A restored draft draws at once: sliders saying one thing while the map
   // shows another is the single worst state this feature could be in.
@@ -360,10 +380,30 @@ async function openEditor(column: DerivedColumn): Promise<void> {
 
 function closeEditor(): void {
   editing.value = ''
-  editorSeed.value = []
+  editorBase.value = []
   previewTerms.value = null
   draftRestored.value = false
   indexError.value = ''
+}
+
+/**
+ * Two formulas that would score every county identically.
+ *
+ * Used to keep a draft that merely *equals* the saved index from announcing
+ * itself as unsaved work — `PageEditor`'s rule ("a draft identical to the saved
+ * page is not a draft"), which this did not have until the real page showed
+ * "These weights are an unsaved version from last time" above sliders sitting
+ * on exactly the published weights. Order is not part of a formula, so both
+ * sides are compared by layer.
+ */
+function sameFormula(a: readonly CompositeTerm[], b: readonly CompositeTerm[]): boolean {
+  const live = a.filter(term => term.weight > 0)
+  const saved = b.filter(term => term.weight > 0)
+  if (live.length !== saved.length) return false
+  return live.every(term => {
+    const other = saved.find(x => x.layer === term.layer)
+    return !!other && other.weight === term.weight && other.direction === term.direction
+  })
 }
 
 /** The live formula, on every drag. Nothing is written to the set. */
@@ -388,8 +428,12 @@ watch([previewTerms, editing], ([terms, columnId]) => {
   if (!slug || !columnId) return
   clearTimeout(autosave)
   autosave = setTimeout(() => {
-    if (terms && terms.length) writeIndexDraft(slug, columnId, terms)
-    else clearIndexDraft(slug, columnId)
+    // Dragging a weight back to where it started is not unsaved work.
+    if (terms && terms.length && !sameFormula(terms, editorBase.value)) {
+      writeIndexDraft(slug, columnId, terms)
+    } else {
+      clearIndexDraft(slug, columnId)
+    }
   }, AUTOSAVE_MS)
 })
 
@@ -402,12 +446,7 @@ function discardDraft(): void {
   // haunting the next time somebody opens the sliders.
   clearTimeout(autosave)
   clearIndexDraft(set.value.slug, column.id)
-  editorSeed.value = column.rerun.terms.map(row => ({
-    layer: row.layer,
-    name: layerName(row.layer),
-    weight: row.weight,
-    direction: row.direction,
-  }))
+  editorBase.value = column.rerun.terms.map(row => ({ ...row }))
   draftRestored.value = false
   previewTerms.value = null
 }
@@ -537,7 +576,14 @@ const mapColumns = computed(() =>
       drawing: !!column.layerId && drawnIndex.value === column.layerId,
       // P9-6a: a formula is editable, a measurement is not — there is nothing
       // in "miles to the nearest line" to weigh against anything.
-      canWeigh: column.rerun?.type === 'composite',
+      //
+      // And only where the editor can actually appear. It lives in the map
+      // pane, beside the choropleth it repaints, and the pane wants a desktop
+      // — so on a narrower window this button opened nothing and relabelled
+      // itself "Close the weights", which is a dead control wearing the
+      // clothes of a working one. P9-3's rule: say why instead.
+      isIndex: column.rerun?.type === 'composite',
+      canWeigh: column.rerun?.type === 'composite' && map.canOpen.value,
       weighing: editing.value === column.id,
       column,
     }
@@ -784,11 +830,33 @@ onMounted(async () => {
               Showing an unsaved version of
               {{ editingColumn ? '“' + editingColumn.label + '”' : 'this index' }}, weighed below.
             </p>
+            <!-- P9-6a: the active control, so it sits closest to the canvas
+                 it repaints — above the layer list, not below it.
+                 It was first placed down with the derived columns, which it is
+                 *about*, and seeing it rendered killed that idea: on a 900px
+                 window the sliders were 1,500px below the map, so you could see
+                 the control or the consequence, never both — which is the whole
+                 feature. Even directly under the list it was 370px adrift,
+                 because eleven layer rows sit between. Surviving an interface
+                 switch is handled by seeding from the live formula instead
+                 (`editorTerms`), not by placing it where nobody can use it. -->
+            <template v-if="editing && editorTerms.length">
+              <p v-if="draftRestored" class="draft-note" data-testid="index-draft-restored">
+                These weights are an unsaved version from last time.
+                <button type="button" class="link-btn" data-testid="index-draft-discard" @click="discardDraft">
+                  Use the saved index instead
+                </button>
+              </p>
+              <IndexWeightEditor :terms="editorTerms" @score="onScore" @save="saveIndex" />
+              <p v-if="savingIndex" class="state-note" data-testid="index-saving">Saving this version…</p>
+              <p v-if="indexError" class="state-note error" data-testid="index-save-error">{{ indexError }}</p>
+            </template>
             <SetLayerList
               v-if="setLayerIds.length"
               class="workspace-layers"
               :layers="map.state.layers"
               :ids="setLayerIds"
+              :readonly="!!previewQuery"
             />
             <!-- P9-6: when a set holds more than one index, the useful question
                  is not what either says but what re-weighting did to the order.
@@ -866,6 +934,9 @@ onMounted(async () => {
               >
                 {{ column.weighing ? 'Close the weights' : 'Weigh it differently' }}
               </button>
+              <span v-else-if="column.isIndex" class="derived-why" data-testid="derived-weigh-why">
+                Weigh it differently — needs a wider window, so the map can show what the weights do
+              </span>
               <span class="derived-provenance" data-testid="derived-provenance">{{ column.provenance }}</span>
               <span v-if="column.method" class="derived-method" data-testid="derived-method">{{ column.method }}</span>
             </li>
@@ -875,20 +946,6 @@ onMounted(async () => {
             Stored on the set, not recomputed to draw this. The table sorts these same numbers.
           </p>
 
-          <!-- P9-6a. Here rather than beside the canvas on purpose: switching
-               to the data interface tears the pane down, and a formula
-               somebody is part-way through dragging must not go with it. -->
-          <template v-if="editing && editorSeed.length">
-            <p v-if="draftRestored" class="draft-note" data-testid="index-draft-restored">
-              These weights are an unsaved version from last time.
-              <button type="button" class="link-btn" data-testid="index-draft-discard" @click="discardDraft">
-                Use the saved index instead
-              </button>
-            </p>
-            <IndexWeightEditor :terms="editorSeed" @score="onScore" @save="saveIndex" />
-            <p v-if="savingIndex" class="state-note" data-testid="index-saving">Saving this version…</p>
-            <p v-if="indexError" class="state-note error" data-testid="index-save-error">{{ indexError }}</p>
-          </template>
         </section>
         <!-- P9-6a: where a first formula comes from, for a set that has the
              layers to weigh but nothing weighing them yet. -->
@@ -1074,25 +1131,31 @@ onMounted(async () => {
   color: var(--blo-stone);
 }
 
+/* P9-3's shape: a reason reads as a reason, not as a button somebody greyed. */
+.derived-why {
+  font-size: 12px;
+  color: var(--blo-stone);
+}
+
 .derived-note {
   margin: 8px 0 0;
   font-size: 12px;
   color: var(--blo-stone);
 }
 
-/* P9-6a. The preview note and the restored-draft note carry the same orange as
-   a stale column, because the state is the same kind of state: a number on
-   screen that nobody has committed to. Quiet grey would make them decorative,
-   which is exactly the mistake — a reader who misses these is reading an
-   unsaved formula as the set's record. */
+/* P9-6a. The preview note and the restored-draft note carry the same orange a
+   stale column's badge does — `--blo-orange-deep`, not a new hex — because the
+   state is the same kind of state: a number on screen that nobody has committed
+   to. Quiet grey would make them decorative, which is exactly the mistake; a
+   reader who misses these is reading an unsaved formula as the set's record. */
 .preview-note,
 .draft-note {
   margin: 8px 0 0;
   padding: 6px 8px;
-  border-left: 3px solid #d97706;
-  background: #fffbeb;
+  border-left: 3px solid var(--blo-orange-deep, #e65100);
+  background: var(--blo-orange-soft, rgba(255, 107, 28, 0.1));
   font-size: 12px;
-  color: #92400e;
+  color: var(--blo-orange-deep, #e65100);
 }
 
 .link-btn {

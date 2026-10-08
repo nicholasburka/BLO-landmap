@@ -57,9 +57,10 @@
         Reset
       </button>
     </p>
-    <p v-if="active.length < 2" class="w-note">
-      An index needs at least two layers — over one it is that layer rescaled.
-    </p>
+    <!-- Why the button is off, rather than a grey button and a shrug. Seen on
+         the real page: eleven terms weighed, a changed formula, Save disabled,
+         and the only hint a placeholder in the box beside it. -->
+    <p v-if="whyNotSaveable" class="w-note" data-testid="weight-save-why">{{ whyNotSaveable }}</p>
   </section>
 </template>
 
@@ -92,6 +93,14 @@ const active = computed(() => edited.value.filter(t => t.weight > 0))
 
 const canSave = computed(() => !!label.value.trim() && active.value.length >= 2)
 
+/** What is standing between this formula and being saved, if anything. The
+ *  count comes first: a name cannot rescue an index of one. */
+const whyNotSaveable = computed(() => {
+  if (active.value.length < 2) return 'An index needs at least two layers — over one it is that layer rescaled.'
+  if (!label.value.trim()) return 'Give this version a name and it can be saved beside the one it came from.'
+  return ''
+})
+
 function publish(): void {
   emit('score', active.value.map(t => ({ layerId: t.layer, weight: t.weight, direction: t.direction })))
 }
@@ -118,6 +127,11 @@ function reset(): void {
 
 <style scoped>
 .weights {
+  /* Capped, and not because of taste. Rendered full-width on a 1,440px window
+     the grid's `1fr` name column put 1,100px of empty space between "Life
+     Expectancy" and the slider that weighs it, so the label and its control
+     could not be read as one row. A formula is a narrow thing. */
+  max-width: 44rem;
   margin: 1rem 0;
   padding-top: 0.75rem;
   border-top: 1px solid #e7e2da;
@@ -126,7 +140,7 @@ function reset(): void {
 .w-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
 .w-row {
   display: grid;
-  grid-template-columns: minmax(8rem, 1fr) 7rem 2.5rem auto;
+  grid-template-columns: minmax(8rem, 14rem) minmax(6rem, 1fr) 2.5rem auto;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.86rem;
