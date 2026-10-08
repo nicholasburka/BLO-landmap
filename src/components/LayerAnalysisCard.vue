@@ -31,7 +31,12 @@
       <p class="a-line" data-testid="analysis-coverage">{{ coverageText }}</p>
       <p class="a-line" data-testid="analysis-spread">{{ spreadText }}</p>
 
-      <SummaryChart :spec="chart" />
+      <!-- Capped: `SummaryChart`'s viewBox is 320 wide and it scales to its
+           container, so in a 704px column every label renders at 2.2× and the
+           bar counts come out bigger than the page's own headings. -->
+      <div class="a-chart">
+        <SummaryChart :spec="chart" />
+      </div>
 
       <p v-if="spread.outliers.length" class="a-line" data-testid="analysis-outliers">
         Out on their own:
@@ -248,6 +253,25 @@ const scatter = computed(() => {
 .a-title { margin: 0 0 0.5rem; font-size: 0.95rem; }
 .a-pick { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem; margin: 0 0 0.6rem; }
 .a-label { font-size: 0.82rem; color: #6b6560; }
+
+/* A bare <select> inherits nothing: it renders in the UA's own Arial at
+   13.3px among the app's type, and the native dropdown it opens is sized from
+   that. Saying `font: inherit` is what makes it look like it belongs here. */
+.a-pick select {
+  font: inherit;
+  font-size: 0.82rem;
+  max-width: 100%;
+  padding: 2px 4px;
+  border: 1px solid var(--blo-cream-divider, #e0d9ca);
+  border-radius: 6px;
+  background: #fff;
+}
+
+/* The chart draws from a 320-wide viewBox and scales to whatever box it is
+   given, so the box is what keeps its text the size of everything else. */
+.a-chart {
+  max-width: 26rem;
+}
 .a-line { margin: 0.3rem 0; font-size: 0.86rem; }
 .a-note { margin: 0.3rem 0; font-size: 0.86rem; color: #6b6560; }
 .a-outlier { white-space: nowrap; }

@@ -1094,6 +1094,15 @@ onMounted(async () => {
           <p v-else class="state-note" data-testid="map-too-narrow">
             There is not room for a map here.
             <RouterLink :to="`/?view=${view.slug}`">Open it on the full map</RouterLink>.
+            <!-- P9-10/P9-11: the layer list, the address search, the free
+                 analyses and the comparison all live with the map and all
+                 read the county data it loads, so they go when it goes. They
+                 were vanishing in silence, which reads as a broken page
+                 rather than a narrow one. -->
+            <span class="state-note-aside" data-testid="map-too-narrow-tools">
+              Its layers, address search and analyses are there too — they read the
+              same county data the map loads.
+            </span>
           </p>
         </template>
         <p v-else-if="!drawsLayers" class="state-note" data-testid="map-no-layers">
@@ -1366,6 +1375,13 @@ onMounted(async () => {
 
 /* P9-3's shape: a reason reads as a reason, not as a button somebody greyed. */
 .derived-why {
+  font-size: 12px;
+  color: var(--blo-stone);
+}
+
+.state-note-aside {
+  display: block;
+  margin-top: 2px;
   font-size: 12px;
   color: var(--blo-stone);
 }

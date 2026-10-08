@@ -82,6 +82,18 @@ const verdict = computed(() => {
 </script>
 
 <style scoped>
+/* Same as the analysis card: a bare <select> renders in the UA's Arial among
+   the app's type, and sizes its native dropdown from that. */
+.ic-pick select {
+  font: inherit;
+  font-size: 0.86rem;
+  max-width: 100%;
+  padding: 2px 4px;
+  border: 1px solid var(--blo-cream-divider, #e0d9ca);
+  border-radius: 6px;
+  background: #fff;
+}
+
 .index-compare {
   margin: 1rem 0;
   padding: 0.75rem 0 0;
