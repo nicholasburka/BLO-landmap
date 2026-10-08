@@ -88,6 +88,16 @@ const emit = defineEmits<{
    *  Nothing is stored. */
   score: [terms: { layerId: string; weight: number; direction: WeightTerm['direction'] }[]]
   save: [input: { label: string; terms: WeightTerm[] }]
+  /**
+   * Put it back to the saved formula.
+   *
+   * The HOST has to do it, because the host owns what "saved" means: once it
+   * feeds the live formula back through `terms` (so the editor survives being
+   * unmounted), resetting to `props.terms` resets to what is on screen
+   * already — which is nothing at all. Caught in a browser: Reset left a
+   * dragged weight exactly where it was.
+   */
+  reset: []
 }>()
 
 /** Matches the server's `COMPOSITE_WEIGHT_MAX`; weights are relative anyway. */
@@ -134,8 +144,16 @@ function setDirection(layer: string, direction: string): void {
 }
 
 function reset(): void {
+  emit('reset')
+  // Standalone (no host listening), the props ARE the saved formula and this
+  // is the whole reset. With a host, its reply through `terms` lands next and
+  // the watcher above copies that instead.
+  //
+  // Deliberately no `publish()`: it would emit the formula that is on screen
+  // at this instant — the one being reset away from — and a host that stores
+  // that has just undone the reset it was asked for. Measured: the sliders
+  // sprang straight back to the dragged values.
   edited.value = props.terms.map(x => ({ ...x }))
-  publish()
 }
 </script>
 

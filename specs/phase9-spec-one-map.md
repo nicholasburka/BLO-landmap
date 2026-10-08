@@ -799,7 +799,7 @@ treatment the server suite got: find the mechanism, prove it with twenty
 consecutive clean runs, do not paper it with a retry.
 **Size: M.**
 
-### P9-6c [FEATURE] Say what changed, in numbers
+### P9-6c [FEATURE] Say what changed, in numbers — DONE
 From the browser audit of P9-6a (`specs/ux-audit-p9-6a.md`). Three findings,
 one theme: the feature shows a *picture* of a change and never the change.
 
@@ -835,6 +835,39 @@ names arrive.
 
 **Size: M.** Depends on nothing.
 
+**Done (Nick, 2026-10-08): "the comparison card just needs to show how much
+data shifted and by how much."** So the movers list is gone rather than fixed,
+which deletes the artifact instead of filtering it. `IndexComparison.movers`
+became `IndexComparison.shift` — `{ moved, median, far, farThreshold }` — and
+`shiftLineOf` turns it into one sentence. The county-name lookup added an hour
+earlier went with it: it existed to make the movers readable and there is
+nothing left to name.
+
+The first draft of that sentence led with "3,215 of 3,215 counties changed
+place", which is what a real comparison printed — of course it did, move one
+county and everything below it shifts by one, so that count is always about
+`n`. It leads with the median instead: *"Half of these 3,215 counties moved
+more than 307 places. 1,559 moved more than a tenth of the table."*
+
+The same sentence now runs live under the map while you drag, which is the
+answer to the invisible-repaint problem: a one-point nudge reads 15 places, two
+terms pushed to ×10 reads 85.
+
+**Two bugs that only a browser would have shown**, both found verifying it:
+
+- **The live baseline was measuring the wrong thing.** Comparing the preview
+  against the STORED column compares two different scoring engines — the
+  server's composite and the client's — and that gap swamps the edit: with
+  nothing changed it read "half the counties moved 305 places". The baseline is
+  now the saved formula run through the SAME engine (`computeScores` is
+  exported for it, and `MapState` exposes the data maps), so identical weights
+  read "No county changed place between them", as they must.
+- **Reset had stopped working.** Making `editorTerms` a computed over the live
+  formula — so the editor survives being unmounted — meant the editor's own
+  reset copied `props.terms` and reset to what was already on screen. Worse,
+  it then published that formula back, undoing the host's clear. Reset is now
+  the host's job (`@reset`), and the editor no longer republishes on it.
+
 ### P9-7 [FEATURE] The free-analysis set
 Rank, distribution, correlation, coverage, point-in-county rollup (§E). All
 client-side over county-scale data, no request. No cost disclosure anywhere in
@@ -853,10 +886,9 @@ location" (§10). **Size: M.** Independent.
 ## Sequencing
 
 ```
-DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 ─ P9-6a ─ P9-6b
+DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 ─ P9-6a ─ P9-6b ─ P9-6c
 
-next:  P9-6c  say what changed, in numbers  ← from the browser audit
-       P9-8   carried audit fixes          (independent)
+next:  P9-8   carried audit fixes          (independent)
        P9-7   free analyses                (independent)
        P9-9   contamination                (deferred by Nick)
 ```

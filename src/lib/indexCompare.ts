@@ -14,15 +14,31 @@
  * by side (P5-55). This puts two INDICES side by side.
  */
 
-/** A county whose rank moved between the two indices. */
-export interface IndexMover {
-  geoId: string
-  /** Rank in the first index, 1 = highest. */
-  from: number
-  /** Rank in the second. */
-  to: number
-  /** How far it moved, in places. Always positive. */
-  delta: number
+/**
+ * How much the order moved, as counts rather than as a list of counties.
+ *
+ * It used to be a list — the twenty counties that moved furthest — and in a
+ * browser that list was the same eight US territories every single time,
+ * whatever anyone re-weighted. They are missing most of an index's layers, so
+ * under `missing: 'penalise'` any change to the weights swings them the length
+ * of the table. The card's payoff was answering "which counties have the least
+ * data" dressed as "what did your re-weighting do".
+ *
+ * Counts cannot do that. "How many moved, and how far" is the question
+ * (Nick, 2026-10-08), and it is robust to a handful of sparse outliers in a
+ * way that "here are the biggest movers" can never be.
+ */
+export interface IndexShift {
+  /** Counties whose rank changed at all. */
+  moved: number
+  /** Places moved by the MEDIAN county that moved — not the mean, which a few
+   *  table-length swings would own. 0 when nothing moved. */
+  median: number
+  /** How many moved further than `farThreshold`. */
+  far: number
+  /** A tenth of the table, rounded up: "a long way" has to scale with how many
+   *  counties there are to move past. */
+  farThreshold: number
 }
 
 export interface IndexComparison {
@@ -37,18 +53,15 @@ export interface IndexComparison {
   spearman: number | null
   /** Why `spearman` is null, in a sentence a reader can act on. Empty when it is not. */
   note: string
-  /** The counties that moved most, furthest first. */
-  movers: IndexMover[]
+  /** How much the order moved. Null when there were too few counties to say. */
+  shift: IndexShift | null
 }
 
 export interface CompareOptions {
-  /** How many movers to return. Default 20 — a list, not a dataset. */
-  movers?: number
   /** Below this many shared counties, a correlation is not reported. */
   minCounties?: number
 }
 
-const DEFAULT_MOVERS = 20
 const DEFAULT_MIN_COUNTIES = 3
 
 function usable(v: unknown): v is number {
@@ -116,7 +129,6 @@ export function compareIndices(
   two: Record<string, number>,
   options: CompareOptions = {},
 ): IndexComparison {
-  const limit = options.movers ?? DEFAULT_MOVERS
   const min = options.minCounties ?? DEFAULT_MIN_COUNTIES
 
   const shared = Object.keys(one).filter(g => usable(one[g]) && usable(two[g]))
@@ -129,7 +141,7 @@ export function compareIndices(
       note:
         `Only ${n} ${n === 1 ? 'county is' : 'counties are'} in both indices — too few to say ` +
         `whether they agree.`,
-      movers: [],
+      shift: null,
     }
   }
 
@@ -144,16 +156,11 @@ export function compareIndices(
   const ys = shared.map(g => rankTwo[g])
   const r = pearson(xs, ys)
 
-  const movers: IndexMover[] = shared
-    .map(geoId => ({
-      geoId,
-      from: rankOne[geoId],
-      to: rankTwo[geoId],
-      delta: Math.abs(rankOne[geoId] - rankTwo[geoId]),
-    }))
-    .filter(m => m.delta > 0)
-    .sort((a, b) => b.delta - a.delta || a.geoId.localeCompare(b.geoId))
-    .slice(0, limit)
+  const deltas = shared
+    .map(geoId => Math.abs(rankOne[geoId] - rankTwo[geoId]))
+    .filter(d => d > 0)
+    .sort((a, b) => a - b)
+  const farThreshold = Math.ceil(n / 10)
 
   return {
     n,
@@ -162,6 +169,44 @@ export function compareIndices(
       r === null
         ? 'One of these indices gives every county the same value, so there is no order to compare.'
         : '',
-    movers,
+    shift: {
+      moved: deltas.length,
+      median: deltas.length ? median(deltas) : 0,
+      far: deltas.filter(d => d > farThreshold).length,
+      farThreshold,
+    },
   }
+}
+
+/**
+ * "1,842 of 3,215 counties changed place, half of them by 12 or fewer."
+ *
+ * One sentence, because the question a reader has after re-weighting an index
+ * is how much of the map this moved and by how much — not which eight places
+ * moved most, which is a different and (for sparse counties) misleading
+ * question.
+ */
+export function shiftLineOf(result: Pick<IndexComparison, 'n' | 'shift'>): string {
+  const shift = result.shift
+  if (!shift) return ''
+  if (!shift.moved) return 'No county changed place between them.'
+  const places = (k: number) => `${k.toLocaleString()} ${k === 1 ? 'place' : 'places'}`
+  const n = result.n.toLocaleString()
+
+  // NOT "how many counties changed place at all", which was the first draft and
+  // read "3,215 of 3,215" on a real comparison — of course it did: move one
+  // county and everything below it shifts by one, so that count is always
+  // about `n` and tells a reader nothing. How FAR the middle county moved is
+  // the number that separates a nudge from a reordering.
+  if (shift.moved === 1) return `One county moved, by ${places(shift.median)}.`
+  const line = `Half of these ${n} counties moved more than ${places(shift.median)}.`
+  if (!shift.far) return line
+  return `${line} ${shift.far.toLocaleString()} moved more than a tenth of the table.`
+}
+
+/** The middle of a SORTED list; the mean of the middle two when it is even. */
+function median(sorted: readonly number[]): number {
+  const mid = Math.floor(sorted.length / 2)
+  const value = sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
+  return Math.round(value * 10) / 10
 }

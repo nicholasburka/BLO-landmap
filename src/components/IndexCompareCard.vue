@@ -27,62 +27,20 @@
         across {{ result.n.toLocaleString() }} {{ result.n === 1 ? 'county' : 'counties' }}
         they both cover.
       </p>
-      <p v-if="!result.movers.length" class="ic-note">
-        No county changed place between them.
-      </p>
-      <template v-else>
-        <p class="ic-movers-title">Moved furthest:</p>
-        <ul class="ic-movers" data-testid="index-movers">
-          <li v-for="m in result.movers" :key="m.geoId">
-            <span class="ic-geo">{{ placeName(m.geoId) }}</span>
-            <span class="ic-move">#{{ m.from }} → #{{ m.to }}</span>
-            <span class="ic-delta">{{ m.delta }} {{ m.delta === 1 ? 'place' : 'places' }}</span>
-          </li>
-        </ul>
-      </template>
+      <!-- How much moved and how far, never WHICH counties moved furthest.
+           That list was the same eight sparse-data territories every time. -->
+      <p class="ic-shift" data-testid="index-shift">{{ shiftLine }}</p>
     </template>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { compareIndices } from '@/lib/indexCompare'
-import { getCountyByGeoId, initCountyLookup } from '@/lib/countyLookup'
+import { computed, ref, watch } from 'vue'
+import { compareIndices, shiftLineOf } from '@/lib/indexCompare'
 import type { DerivedColumn } from '@/lib/workingSets'
 
 const props = defineProps<{ columns: DerivedColumn[] }>()
 
-/**
- * County NAMES for the movers, not GEOIDs.
- *
- * "Moved furthest: 72003 #13 → #3166" names nothing a reader knows. The lookup
- * is a static file the map page has usually already paid for, and it is cached
- * for the session — so this costs nothing here and turns the list into
- * sentences about places. A geoid with no match still prints, because a row
- * that cannot be named is still a row that moved.
- */
-const namesReady = ref(false)
-onMounted(async () => {
-  try {
-    await initCountyLookup()
-    namesReady.value = true
-  } catch {
-    // No lookup, no names — the geoids below stand on their own.
-  }
-})
-
-function placeName(geoId: string): string {
-  if (!namesReady.value) return geoId
-  try {
-    const county = getCountyByGeoId(geoId)
-    return county ? `${county.name}, ${county.stateAbbr}` : geoId
-  } catch {
-    return geoId
-  }
-}
-
-/** Only an index can be compared to an index. A proximity column is a
- *  distance, and "did the ranking change" is not a question about it. */
 const indices = computed(() => props.columns.filter(c => c.type === 'composite'))
 
 const leftId = ref('')
@@ -102,9 +60,11 @@ watch(
 const result = computed(() => {
   const a = indices.value.find(c => c.id === leftId.value)
   const b = indices.value.find(c => c.id === rightId.value)
-  if (!a || !b) return { n: 0, spearman: null, note: 'Pick two indices.', movers: [] }
-  return compareIndices(a.values, b.values, { movers: 8 })
+  if (!a || !b) return { n: 0, spearman: null, note: 'Pick two indices.', shift: null }
+  return compareIndices(a.values, b.values)
 })
+
+const shiftLine = computed(() => shiftLineOf(result.value))
 
 /**
  * The statistic in words. A correlation is a number most readers cannot place,
@@ -151,33 +111,5 @@ const verdict = computed(() => {
   color: #6b6560;
   font-size: 0.86rem;
 }
-.ic-movers-title {
-  margin: 0.4rem 0 0.2rem;
-  font-size: 0.86rem;
-  color: #6b6560;
-}
-.ic-movers {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.15rem;
-  font-size: 0.86rem;
-}
-.ic-movers li {
-  display: flex;
-  gap: 0.6rem;
-  align-items: baseline;
-}
-.ic-geo {
-  font-variant-numeric: tabular-nums;
-}
-.ic-move {
-  color: #6b6560;
-  font-variant-numeric: tabular-nums;
-}
-.ic-delta {
-  color: #92400e;
-  font-size: 0.8rem;
-}
+.ic-shift { margin: 0.3rem 0 0; font-size: 0.86rem; }
 </style>

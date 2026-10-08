@@ -46,6 +46,8 @@ import IndexWeightEditor from '@/components/IndexWeightEditor.vue'
 import { useShowOnMap } from '@/composables/useShowOnMap'
 import { LAYER_REGISTRY } from '@/config/layerRegistry'
 import { contextCell } from '@/lib/countyJoin'
+import { compareIndices, shiftLineOf } from '@/lib/indexCompare'
+import { computeScores } from '@/composables/usePersonalizedScore'
 import { friendlyError } from '@/lib/errors'
 import { clearIndexDraft, readIndexDraft, writeIndexDraft } from '@/lib/indexDraft'
 import { invalidateInternalManifest } from '@/lib/internalLayers'
@@ -303,7 +305,53 @@ const draftRestored = ref(false)
 const savingIndex = ref(false)
 const indexError = ref('')
 
+/** P9-6c: the column whose editor is being opened. `openEditor` awaits the
+ *  layer manifest so the rows can carry names instead of ids, and on a cold
+ *  pane that is over a second — long enough to press the button twice and
+ *  close what never opened, which is what happened in the audit. */
+const openingEditor = ref('')
+
 const editingColumn = computed(() => columns.value.find(column => column.id === editing.value) ?? null)
+
+/**
+ * What the drag just did, in counties (P9-6c).
+ *
+ * The canvas answers this badly through no fault of its own: dropping a whole
+ * term out of an eleven-term index repaints about a tenth of the map at a
+ * maximum channel delta of 20 out of 255 — a real change nobody can see. The
+ * numbers are emphatic where the colours are not, and they are already here:
+ * the live scores are in the scoring engine and the saved ones are on the
+ * column, so this costs a rank sort and nothing else (§E).
+ *
+ * Ranks, not scores, because the live engine and the stored composite are not
+ * on the same scale — and "how far did counties move" is a question about
+ * order anyway.
+ */
+const previewShift = computed(() => {
+  const base = editorBase.value
+  const live = previewQuery.value
+  if (!base.length || !live) return ''
+  // The baseline is the SAVED formula run through this same engine — not the
+  // stored column, which the server computed with its own normalisation and
+  // missing-data rule. Comparing against that measured the gap between two
+  // engines and read "half the counties moved 305 places" with nothing
+  // changed. Here, identical weights give an identical ranking, as they must.
+  const saved = scoresOf(
+    base.map(term => ({ layerId: term.layer, weight: term.weight, direction: term.direction })),
+  )
+  const now = scoresOf(live)
+  if (!Object.keys(saved).length || !Object.keys(now).length) return ''
+  return shiftLineOf(compareIndices(saved, now))
+})
+
+/** One query, scored against the data this map already holds. */
+function scoresOf(query: ScoringQueryLayer[]): Record<string, number> {
+  const out: Record<string, number> = {}
+  for (const [geoId, county] of computeScores(query, map.state.scoringData, [])) {
+    if (county.score !== null && !county.filteredOut) out[geoId] = county.score
+  }
+  return out
+}
 
 /**
  * A set that could carry an index but has none yet (P9-3's rule, P9-6a's
@@ -359,10 +407,15 @@ async function openEditor(column: DerivedColumn): Promise<void> {
     closeEditor()
     return
   }
-  if (column.rerun?.type !== 'composite' || !set.value) return
+  if (openingEditor.value || column.rerun?.type !== 'composite' || !set.value) return
   const saved = column.rerun.terms
   indexError.value = ''
-  await map.state.loadInternalLayers()
+  openingEditor.value = column.id
+  try {
+    await map.state.loadInternalLayers()
+  } finally {
+    openingEditor.value = ''
+  }
   // A draft is only usable if it is still about this formula's layers; a set
   // edited since is a reason to start from what is saved.
   const draft = readIndexDraft(set.value.slug, column.id)
@@ -591,6 +644,7 @@ const mapColumns = computed(() =>
       isIndex: column.rerun?.type === 'composite',
       canWeigh: column.rerun?.type === 'composite' && map.canOpen.value,
       weighing: editing.value === column.id,
+      opening: openingEditor.value === column.id,
       column,
     }
   }),
@@ -837,6 +891,12 @@ onMounted(async () => {
             <p v-if="previewQuery" class="preview-note" role="status" data-testid="map-preview-note">
               Showing an unsaved version of
               {{ editingColumn ? '“' + editingColumn.label + '”' : 'this index' }}, weighed below.
+              <!-- P9-6c: the colours shift by about 20/255 when a whole term
+                   leaves the formula. The count is what a reader can actually
+                   perceive, so it goes beside the claim, not in a panel. -->
+              <span v-if="previewShift" class="preview-shift" data-testid="map-preview-shift">
+                {{ previewShift }}
+              </span>
             </p>
             <!-- P9-6a: the active control, so it sits closest to the canvas
                  it repaints — above the layer list, not below it.
@@ -855,7 +915,12 @@ onMounted(async () => {
                   Use the saved index instead
                 </button>
               </p>
-              <IndexWeightEditor :terms="editorTerms" @score="onScore" @save="saveIndex" />
+              <IndexWeightEditor
+                :terms="editorTerms"
+                @score="onScore"
+                @reset="previewTerms = null"
+                @save="saveIndex"
+              />
               <p v-if="savingIndex" class="state-note" data-testid="index-saving">Saving this version…</p>
               <p v-if="indexError" class="state-note error" data-testid="index-save-error">{{ indexError }}</p>
             </template>
@@ -938,9 +1003,16 @@ onMounted(async () => {
                 class="derived-rerun"
                 data-testid="derived-weigh"
                 :aria-pressed="column.weighing"
+                :disabled="column.opening"
                 @click="openEditor(column.column)"
               >
-                {{ column.weighing ? 'Close the weights' : 'Weigh it differently' }}
+                {{
+                  column.opening
+                    ? 'Opening…'
+                    : column.weighing
+                      ? 'Close the weights'
+                      : 'Weigh it differently'
+                }}
               </button>
               <span v-else-if="column.isIndex" class="derived-why" data-testid="derived-weigh-why">
                 Weigh it differently — needs a wider window, so the map can show what the weights do
@@ -1156,6 +1228,12 @@ onMounted(async () => {
    state is the same kind of state: a number on screen that nobody has committed
    to. Quiet grey would make them decorative, which is exactly the mistake; a
    reader who misses these is reading an unsaved formula as the set's record. */
+.preview-shift {
+  display: block;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
 .preview-note,
 .draft-note {
   margin: 8px 0 0;

@@ -45,17 +45,21 @@ describe('IndexCompareCard (P9-6)', () => {
     expect(text).toContain('1')
   })
 
-  it('lists the counties that moved, with both ranks', () => {
+  it('says how much moved and how far, not which counties', () => {
+    // P9-6c: the list of biggest movers was the same eight sparse-data
+    // territories for every comparison anyone ran, so it answered "which
+    // counties have the least data" while looking like "what did your
+    // re-weighting do".
     const w = mount(IndexCompareCard, { props: { columns: SWAPPED } })
-    const movers = w.get('[data-testid="index-movers"]').text()
-    expect(movers).toContain('01001')
-    expect(movers).toContain('01007')
+    const shift = w.get('[data-testid="index-shift"]').text()
+    expect(shift).toMatch(/moved more than/i)
+    expect(shift).toMatch(/\d/)
+    expect(w.get('[data-testid="index-compare"]').text()).not.toContain('01001')
   })
 
-  it('says plainly when nothing moved, rather than showing an empty list', () => {
+  it('says plainly when nothing moved', () => {
     const w = mount(IndexCompareCard, { props: { columns: SAME_ORDER } })
-    expect(w.find('[data-testid="index-movers"]').exists()).toBe(false)
-    expect(w.get('[data-testid="index-compare"]').text()).toMatch(/no county|nothing moved/i)
+    expect(w.get('[data-testid="index-shift"]').text()).toMatch(/no county|nothing moved/i)
   })
 
   it('lets a reader pick which two', async () => {

@@ -354,6 +354,11 @@ export function useMapState(init: MapStateInit = {}) {
     filteredOutCountyIds,
   } = usePersonalizedScore(scoringQuery, dataMaps, activeFilters)
 
+  /** The county numbers this map scores from. Exposed so a page can score a
+   *  DIFFERENT query against the same data without disturbing this one — the
+   *  weight editor's baseline (P9-6c). */
+  const scoringData = dataMaps
+
   /** Ranked counties after the explicit subset and the display limit. */
   const limitedRankedCounties = computed(() => {
     const subset = only.value ? new Set(only.value) : null
@@ -895,6 +900,7 @@ export function useMapState(init: MapStateInit = {}) {
     data,
     layers,
     query,
+    scoringData,
     // Reading
     getCountyName,
     getStateName,

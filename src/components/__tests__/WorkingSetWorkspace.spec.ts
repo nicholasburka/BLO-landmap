@@ -1097,6 +1097,96 @@ describe('a composite index on the map interface', () => {
       expect(w.findAll('[data-testid="set-layer"] input[type="checkbox"]')).toHaveLength(1)
     })
 
+    it('says how many counties the drag moved, because the colours barely do', async () => {
+      // P9-6c: dropping a whole term out of an eleven-term index repaints
+      // about a tenth of the canvas at a maximum channel delta of 20/255 — a
+      // real change almost nobody can see. The count is perceptible.
+      // Three counties with numbers on both sides: below that `compareIndices`
+      // correctly refuses to report a shift at all, which is its own rule and
+      // not this one.
+      network = stubCountyDataFetch({
+        'http://localhost:3001/api/layers/internal/memphis-sites': {
+          id: 'internal-sites',
+          slug: 'memphis-sites',
+          geometry: 'county',
+          values: { '47157': 2, '28033': 1, '13121': 3 },
+          range: { min: 0, max: 10 },
+        },
+        'http://localhost:3001/api/layers/internal/votes': {
+          id: 'internal-votes',
+          slug: 'votes',
+          geometry: 'county',
+          values: { '47157': 61, '28033': 44, '13121': 52 },
+          range: { min: 0, max: 100 },
+        },
+      })
+      mockedColumns.mockResolvedValue(
+        columnsBody({
+          columns: [{ ...INDEX, values: { '47157': 71.4, '28033': 38, '13121': 55 } }],
+        }),
+      )
+      const w = await mountAt(mapView())
+      await settleMap()
+      await openWeights(w)
+      expect(w.find('[data-testid="map-preview-shift"]').exists()).toBe(false)
+
+      await slider(w, 1).setValue('9')
+      await settleMap()
+      const shift = w.find('[data-testid="map-preview-shift"]')
+      expect(shift.exists()).toBe(true)
+      expect(shift.text()).toMatch(/moved more than|No county changed place/i)
+    })
+
+    it('puts the saved formula back on Reset, and clears the preview with it', async () => {
+      // Caught in a browser: Reset left a dragged weight exactly where it was,
+      // because the editor's own reset copies `props.terms` and those are now
+      // the LIVE formula (the host feeds it back so the editor survives being
+      // unmounted). Only the host knows what "saved" means.
+      const w = await mountAt(mapView())
+      await settleMap()
+      await openWeights(w)
+      await slider(w, 1).setValue('9')
+      await slider(w, 0).setValue('0')
+      await settleMap()
+      expect(w.find('[data-testid="map-preview-note"]').exists()).toBe(true)
+
+      await w.get('[data-testid="weight-reset"]').trigger('click')
+      await settleMap()
+      expect([slider(w, 0), slider(w, 1)].map(i => (i.element as HTMLInputElement).value)).toEqual([
+        '6',
+        '4',
+      ])
+      // Back to the saved index on the map, so the unsaved-version banner goes.
+      expect(w.find('[data-testid="map-preview-note"]').exists()).toBe(false)
+    })
+
+    it('says it is opening, rather than going quiet for a second', async () => {
+      // `openEditor` awaits the layer manifest so rows carry names not ids. On
+      // a cold pane that was over a second of a button reading "Close the
+      // weights" with nothing under it — long enough to press it twice and
+      // close what never opened, which is what happened in the audit.
+      let release!: () => void
+      mockedManifest.mockImplementationOnce(
+        () => new Promise(resolve => { release = () => resolve([manifestEntry(), VOTES]) }),
+      )
+      const w = await mountAt(mapView())
+      await settleMap()
+      mockedManifest.mockImplementationOnce(
+        () => new Promise(resolve => { release = () => resolve([manifestEntry(), VOTES]) }),
+      )
+      await w.get('[data-testid="derived-weigh"]').trigger('click')
+      await flushPromises()
+
+      const button = w.get('[data-testid="derived-weigh"]')
+      expect(button.text()).toBe('Opening…')
+      expect(button.attributes('disabled')).toBeDefined()
+
+      release()
+      await flushPromises()
+      await settleMap()
+      expect(w.get('[data-testid="derived-weigh"]').text()).toBe('Close the weights')
+    })
+
     it('takes a term dragged to zero OUT of the formula it draws', async () => {
       const w = await mountAt(mapView())
       await settleMap()

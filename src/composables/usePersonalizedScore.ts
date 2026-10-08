@@ -163,7 +163,17 @@ function getAllGeoIds(dataMaps: DataMaps): Set<string> {
  * Score all counties against a scoring query, optionally applying filters.
  * Filtered-out counties get score=null and filteredOut=true.
  */
-function computeScores(
+/**
+ * Score every county against one query, with no reactivity and no map.
+ *
+ * Exported for P9-6c: the weight editor needs the SAVED formula's scores to
+ * say how far a drag moved things, and the only honest baseline is one this
+ * same function produced. Comparing a live score against the server-side
+ * stored composite measured the difference between two scoring engines, which
+ * swamped the edit — it read "half the counties moved 305 places" when nothing
+ * had been changed at all.
+ */
+export function computeScores(
   query: ScoringQuery,
   dataMaps: DataMaps,
   filters: ScoringFilter[] = []

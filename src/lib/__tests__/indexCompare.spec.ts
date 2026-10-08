@@ -33,7 +33,7 @@ describe('compareIndices', () => {
     const r = compareIndices(a, b)
     expect(r.spearman).toBe(1)
     expect(r.n).toBe(3)
-    expect(r.movers).toEqual([])
+    expect(r.shift).toEqual({ moved: 0, median: 0, far: 0, farThreshold: 1 })
   })
 
   it('reports perfect disagreement when the order is reversed', () => {
@@ -48,30 +48,48 @@ describe('compareIndices', () => {
     expect(r.n).toBe(2) // only x and y are in both
   })
 
-  it('names the biggest movers, worst first, with both ranks', () => {
+  it('counts how many moved and how far, rather than naming which', () => {
     //      a   b   c   d
     // one: 4   3   2   1   (d best)
-    // two: 1   3   2   4   (a best) → a and d swap ends
+    // two: 1   3   2   4   (a best) → a and d swap ends, b and c sit still
     const r = compareIndices(
       { a: 1, b: 2, c: 3, d: 4 },
       { a: 4, b: 2, c: 3, d: 1 },
     )
-    expect(r.movers[0].geoId).toBe('a')
-    expect(r.movers[0].from).toBe(4)
-    expect(r.movers[0].to).toBe(1)
-    expect(r.movers[0].delta).toBe(3)
-    expect(r.movers.map(m => m.geoId)).toContain('d')
+    expect(r.shift).toEqual({ moved: 2, median: 3, far: 2, farThreshold: 1 })
   })
 
-  it('caps the movers list rather than handing back three thousand rows', () => {
+  /**
+   * The reason this is counts and not a list (P9-6c).
+   *
+   * In a browser, "the twenty counties that moved furthest" was the same eight
+   * US territories every single time, whatever was re-weighted: they are
+   * missing most of an index's layers, so under `penalise` any change swings
+   * them the length of the table. Here, three such counties swing end to end
+   * while two hundred real ones shuffle by a place or two — and the median is
+   * the small number, which is the honest summary.
+   */
+  it('is not owned by a handful of counties that swing end to end', () => {
     const one: Record<string, number> = {}
     const two: Record<string, number> = {}
-    for (let i = 0; i < 500; i++) {
-      one[String(i)] = i
-      two[String(i)] = 500 - i
+    for (let i = 0; i < 200; i++) {
+      one[`real-${i}`] = i
+      // Neighbours swap: everybody real moves exactly one place.
+      two[`real-${i}`] = i % 2 ? i - 1 : i + 1
     }
-    const r = compareIndices(one, two, { movers: 10 })
-    expect(r.movers).toHaveLength(10)
+    for (let i = 0; i < 3; i++) {
+      one[`sparse-${i}`] = 1000 + i // top of the table
+      two[`sparse-${i}`] = -1000 + i // bottom of it
+    }
+    const r = compareIndices(one, two)
+    expect(r.shift!.moved).toBe(203)
+    // 4, not 1: three counties crossing from the top of the table to the
+    // bottom push everyone else up three places, on top of the one-place swap.
+    // The number that matters is that it is FOUR and not four hundred — a mean
+    // over these deltas is 34, which would read as "the whole map moved".
+    expect(r.shift!.median).toBe(4)
+    expect(r.shift!.far).toBe(3)
+    expect(r.shift!.farThreshold).toBe(21)
   })
 
   it('refuses to correlate when almost nothing overlaps, instead of printing a number', () => {
