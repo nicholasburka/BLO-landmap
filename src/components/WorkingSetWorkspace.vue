@@ -41,6 +41,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import DatasetView from '@/views/DatasetView.vue'
 import MapPane from '@/components/MapPane.vue'
 import SetLayerList from '@/components/SetLayerList.vue'
+import IndexCompareCard from '@/components/IndexCompareCard.vue'
 import { useShowOnMap } from '@/composables/useShowOnMap'
 import { contextCell } from '@/lib/countyJoin'
 import { friendlyError } from '@/lib/errors'
@@ -501,31 +502,41 @@ onMounted(async () => {
            hold a WebGL context. -->
       <section v-show="iface === 'map'" class="interface" data-testid="interface-map">
         <template v-if="readyToDraw">
-          <MapPane
-            v-if="map.isOpen.value"
-            class="workspace-pane"
-            testid="set-map-pane"
-            :layers="map.state.layers"
-            :query="map.state.query"
-            :data="map.state.data"
-            :fit="map.fit.value"
-            :title="set.name"
-            :note="paneNote"
-            label="This working set on the map"
-            @close="show('data')"
-            @county-click="clickedGeoId = $event"
-          />
-          <!-- P9-2: once a set's layers actually draw (P9-1, P9-1b) the map is
-               two dense national networks and thousands of clustered points
-               with nothing to say what they are. This names them, carries each
-               one's own colour so the list reads against the map, and toggles
-               through the same state the canvas draws from. -->
-          <SetLayerList
-            v-if="map.isOpen.value && setLayerIds.length"
-            class="workspace-layers"
-            :layers="map.state.layers"
-            :ids="setLayerIds"
-          />
+          <!-- The pane and everything that reads against it are ONE branch.
+               They were siblings until P9-6, which left the `v-else` below
+               pairing with whatever happened to precede it rather than with
+               the pane — so "there is not room for a map" could show on a
+               desktop whenever the set named no layers. -->
+          <template v-if="map.isOpen.value">
+            <MapPane
+              class="workspace-pane"
+              testid="set-map-pane"
+              :layers="map.state.layers"
+              :query="map.state.query"
+              :data="map.state.data"
+              :fit="map.fit.value"
+              :title="set.name"
+              :note="paneNote"
+              label="This working set on the map"
+              @close="show('data')"
+              @county-click="clickedGeoId = $event"
+            />
+            <!-- P9-2: once a set's layers actually draw (P9-1, P9-1b) the map
+                 is two dense national networks and thousands of clustered
+                 points with nothing to say what they are. This names them,
+                 carries each one's own colour so the list reads against the
+                 map, and toggles through the same state the canvas draws from. -->
+            <SetLayerList
+              v-if="setLayerIds.length"
+              class="workspace-layers"
+              :layers="map.state.layers"
+              :ids="setLayerIds"
+            />
+            <!-- P9-6: when a set holds more than one index, the useful question
+                 is not what either says but what re-weighting did to the order.
+                 Both columns' values are already here, so this costs nothing. -->
+            <IndexCompareCard :columns="columns" />
+          </template>
           <!-- A map beside a page wants a desktop (P6-14). On a phone the deep
                link is still how this view is shared, and still works. -->
           <p v-else class="state-note" data-testid="map-too-narrow">

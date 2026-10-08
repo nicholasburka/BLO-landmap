@@ -610,8 +610,19 @@ diversity fix bite hardest. The statistic says "these broadly agree"; the
 movers say "and here is who it does not agree about", which is the pair a
 researcher needs.
 
-**Remaining:** the UI — a weight editor on a set's view, and somewhere to show
-a comparison. The arithmetic and the storage are done.
+**`IndexCompareCard` shows it on the set's view**, when the set holds two or
+more index columns. Both columns' values are already in memory, so it fetches
+nothing and recomputes on every change of selection.
+
+Never a bare coefficient: the words, the number and the count it is over, or
+nothing. *"Almost the same ranking — 0.97 across 3,144 counties they both
+cover"*, then the counties that moved furthest with both their ranks. A
+correlation is a number most readers cannot place, and the judgement is the
+point.
+
+**Remaining:** a weight editor — changing weights in the view and saving the
+result as a second index. Today a fork is a second `POST /composite` with a
+changed definition, which is right but not yet reachable from the page.
 Open the index, change weights, see the map move, save as a new set. Then
 compare two indices: rank movement, biggest movers, correlation. This is the
 payoff — the reason for the whole phase. **Size: L.** Depends on P9-5.

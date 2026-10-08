@@ -490,6 +490,21 @@ describe('the filtered subset reaching the map (query.only, P6-10)', () => {
     expect(w.get('[data-testid="set-map-pane-note"]').text()).toBe('Every county in these layers')
   })
 
+  /**
+   * P9-6 regression. "There is not room for a map here" belongs to the PANE
+   * being closed — a phone. It is a `v-else`, and between P9-2 and P9-6 it
+   * sat after `SetLayerList`'s `v-if` instead of the pane's, so on a desktop
+   * a set with no drawable layers would claim there was no room. None of the
+   * other 45 tests here noticed, because none paired a wide viewport with an
+   * open pane and checked what was NOT said.
+   */
+  it('does not claim there is no room when the pane is open', async () => {
+    const w = await mountAt(mapView())
+    await settleMap()
+    expect(w.findComponent(MapPane).exists()).toBe(true)
+    expect(w.find('[data-testid="map-too-narrow"]').exists()).toBe(false)
+  })
+
   it('says so rather than drawing a blank map when the set names no layers', async () => {
     mockedSet.mockResolvedValue(detail({ layers: [] }))
     const w = await mountAt(mapView())
