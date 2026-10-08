@@ -789,9 +789,17 @@ about thirty tests broke the moment anything actually unmounted. Filled in the
 same setup file: a `typeof URL.revokeObjectURL === 'function'` guard inside a
 component would be production code bending around a test runner.
 
-**Verified by 20/20 consecutive clean full runs**, the bar P7-11 set. Nothing
-was papered with a retry, and no test was weakened: the suite is 2,318 passing
-across 107 files, the same count as before.
+**Verified by 20/20 consecutive clean full runs**, the bar P7-11 set — 2,333
+tests, 107 files, every run. Nothing was papered with a retry and no test was
+weakened; the count went UP, because the fixes came with cases.
+
+One earlier attempt at those twenty was thrown away rather than reported: run 5
+failed, and the log showed `Test timed out in 5000ms` alongside 23 unhandled
+`[vitest-worker]: Timeout calling "onTaskUpdate"` errors — vitest's own RPC
+starving, not an assertion. It happened in the window where the SERVER suite
+was running concurrently, which `docs/TESTING.md` says not to do. Contention
+causes false failures, so a run under it proves nothing either way. The clean
+twenty were run with nothing else on the machine.
 
 A suite that fails one run in three teaches people to re-run rather than to
 read, which is how a real failure gets waved through. Worth the same
