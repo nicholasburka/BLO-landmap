@@ -31,6 +31,19 @@ describe('coverage', () => {
     expect(coverageLine(c)).toBe('2 counties of 3 have a number — 67%, so 1 county is blank.')
   })
 
+  it('tells blank apart from zero, because they are different claims', () => {
+    // P9-9 is open because something once treated these as the same. A
+    // MEASURED layer with no value never had one collected there; a COUNTED
+    // one — points rolled into counties — placed every point, so a county
+    // that does not appear has none of the thing.
+    const c = coverageOf({ '01001': 3 }, ['01001', '01003', '01005'])
+    expect(coverageLine(c, 'measured')).toContain('2 counties are blank')
+    expect(coverageLine(c, 'counted')).toBe(
+      '1 county of 3 has at least one — the other 2 counties have none.',
+    )
+    expect(coverageLine(c, 'counted')).not.toContain('blank')
+  })
+
   it('says so plainly when nothing is missing', () => {
     expect(coverageLine(coverageOf({ a: 1, b: 2 }, ['a', 'b']))).toBe('Every one of 2 counties has a number.')
   })

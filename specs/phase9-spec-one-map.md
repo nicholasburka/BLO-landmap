@@ -876,11 +876,57 @@ terms pushed to ×10 reads 85.
   it then published that formula back, undoing the host's clear. Reset is now
   the host's job (`@reset`), and the editor no longer republishes on it.
 
-### P9-7 [FEATURE] The free-analysis set
+### P9-7 [FEATURE] The free-analysis set — DONE
 Rank, distribution, correlation, coverage, point-in-county rollup (§E). All
 client-side over county-scale data, no request. No cost disclosure anywhere in
 the UI — progress only, and only where it is slow enough to need it.
 **Size: M.** Independent of the map work — can run in parallel.
+
+**Done 2026-10-08.** `lib/layerStats` is the maths, `LayerAnalysisCard` the
+surface, and it sits on the set's map interface beside the layers it is about.
+Nothing is fetched, so there is no progress bar and no loading state — the
+answer lands in the frame that asked. A test greps the rendered card for
+"cost", "free", "server" and "browser" and fails if any appears.
+
+Shared maths moved to `lib/stats` (`pearson`, `quantile`, `median`):
+`indexCompare` held the only Pearson and grew a median of its own in P9-6c.
+`usePersonalizedScore` gained `rawLayerValues`, because these describe a layer
+in its own units — a rate in percent, a wage in dollars — which is exactly
+what `computeScores` throws away.
+
+**Judgements worth keeping:**
+
+- **Coverage is measured against the counties the map could draw**, not the
+  layer's own keys, which can only report 100%. Diversity Index reads 98% —
+  3,144 of 3,215 — and an index built on a layer covering a third of the
+  country is an index about that third.
+- **Outliers are the 1.5×IQR rule, not "the top ten"**, so a layer with none
+  says none. The same mistake P9-6c removed from the index comparison.
+- **A correlation is never a bare r** (§E). The count and the scatter come
+  back *with* the number and the card draws one mark per shared county. Black
+  poverty rate against Black median income: −0.53 over 1,849 counties.
+- **Ties are counted, because a list lies by omission.** "Highest: Marion
+  County, AR — 100" was one of SIXTY-SEVEN counties at exactly 100, the Black
+  poverty rate capping out wherever the Black population is tiny.
+- **A point layer is offered as a COUNT, a line layer as nothing.** Counting
+  how many transmission lines are "in" a county is a question about length and
+  crossings rather than containment, and a wrong answer dressed as a count is
+  worse than no answer.
+- **Blank and zero are different claims** — the distinction P9-9 exists for. A
+  measured layer with no value never had one collected; a counted one placed
+  every point, so a county that does not appear has none of the thing.
+  `coverageLine` takes the kind and says "the other 3,095 counties have none"
+  rather than "3,095 are blank".
+
+**Verified against real data.** 560 coal mines into 134 counties, led by Pike
+County KY (29), McDowell WV (27) and Logan WV (25) — the Appalachian
+coalfield, which is the answer validating itself.
+
+**One bug worth recording.** The first wiring had the host write its rollup
+note into a `ref` from inside the card's value getter — a reactive write during
+a computed — which hung the page hard enough to wedge the browser. `valuesFor`
+now returns `{ values, note, counted }` in one call: a function that answers
+the whole question has nowhere to put a side effect.
 
 ### P9-8 [BUG] Carried UX fixes from the audit — DONE
 Entry pages stop printing raw JSON and the nine mis-nested manifests are fixed
@@ -933,10 +979,9 @@ were the good part.
 ## Sequencing
 
 ```
-DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 ─ P9-6a ─ P9-6b ─ P9-6c ─ P9-8
+DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 ─ P9-6a ─ P9-6b ─ P9-6c ─ P9-7 ─ P9-8
 
-next:  P9-7   free analyses                (independent)
-       P9-9   contamination                (deferred by Nick)
+next:  P9-9   contamination                (deferred by Nick)
 ```
 
 **P9-6a is done** and reviewed in a browser (`specs/ux-audit-p9-6a.md`): open a

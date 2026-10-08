@@ -56,14 +56,34 @@ export function coverageOf(values: LayerValues, universe: readonly string[] = []
   return { withValue, total, share: total ? withValue / total : 0 }
 }
 
-export function coverageLine(coverage: Coverage): string {
+/**
+ * Where a layer's numbers are, in a sentence.
+ *
+ * `kind` is the difference between **blank and zero**, which this codebase
+ * has been bitten by before (P9-9 is open because something treated them as
+ * the same). A MEASURED layer with no value for a county is missing data: the
+ * rate was never collected there, and an index weighing it is weighing a gap.
+ * A COUNTED layer — points rolled into counties — has no such gap: every
+ * point was placed, so a county that does not appear has none of the thing,
+ * and calling that "blank" would invent a data problem that is not there.
+ */
+export function coverageLine(coverage: Coverage, kind: 'measured' | 'counted' = 'measured'): string {
   if (!coverage.total) return 'No counties to measure.'
-  const pct = Math.round(coverage.share * 100)
   const counties = (k: number) => `${k.toLocaleString()} ${k === 1 ? 'county' : 'counties'}`
-  if (coverage.withValue === coverage.total) return `Every one of ${counties(coverage.total)} has a number.`
-  const missing = coverage.total - coverage.withValue
-  const blank = `${counties(missing)} ${missing === 1 ? 'is' : 'are'} blank`
-  return `${counties(coverage.withValue)} of ${coverage.total.toLocaleString()} have a number — ${pct}%, so ${blank}.`
+  const rest = coverage.total - coverage.withValue
+
+  if (kind === 'counted') {
+    if (!rest) return `Every one of ${counties(coverage.total)} has at least one.`
+    const has = coverage.withValue === 1 ? 'has' : 'have'
+    const none = rest === 1 ? 'has' : 'have'
+    return `${counties(coverage.withValue)} of ${coverage.total.toLocaleString()} ${has} at least one — the other ${counties(rest)} ${none} none.`
+  }
+
+  const pct = Math.round(coverage.share * 100)
+  if (!rest) return `Every one of ${counties(coverage.total)} has a number.`
+  const blank = `${counties(rest)} ${rest === 1 ? 'is' : 'are'} blank`
+  const have = coverage.withValue === 1 ? 'has' : 'have'
+  return `${counties(coverage.withValue)} of ${coverage.total.toLocaleString()} ${have} a number — ${pct}%, so ${blank}.`
 }
 
 // --- Distribution -----------------------------------------------------------

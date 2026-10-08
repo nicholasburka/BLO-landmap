@@ -31,7 +31,7 @@ function mountCard(over: Partial<Record<string, unknown>> = {}) {
   return mount(LayerAnalysisCard, {
     props: {
       choices: CHOICES,
-      valuesFor: (id: string) => DATA[id] ?? {},
+      valuesFor: (id: string) => ({ values: DATA[id] ?? {} }),
       universe: Object.keys(DATA.poverty),
       ...over,
     },
@@ -87,19 +87,33 @@ describe('the free analyses', () => {
     for (let i = 0; i < 20; i++) tied[`m${i}`] = i
     const w = mountCard({
       choices: [{ id: 'capped', name: 'Capped rate' }],
-      valuesFor: () => tied,
+      valuesFor: () => ({ values: tied }),
       universe: Object.keys(tied),
     })
     expect(w.get('[data-testid="analysis-tie-top"]').text()).toBe('30 counties are tied at 100.')
   })
 
   it('says so plainly when a layer has no numbers here', () => {
-    const w = mountCard({ choices: [{ id: 'empty', name: 'Nothing yet' }], valuesFor: () => ({}) })
+    const w = mountCard({ choices: [{ id: 'empty', name: 'Nothing yet' }], valuesFor: () => ({ values: {} }) })
     expect(w.get('[data-testid="analysis-empty"]').text()).toContain('no numbers on this map yet')
     expect(w.find('[data-testid="analysis-spread"]').exists()).toBe(false)
   })
 
   it('is not there at all for a set with no county layers', () => {
     expect(mountCard({ choices: [] }).find('[data-testid="layer-analysis"]').exists()).toBe(false)
+  })
+
+  it('says what the host did to get the numbers, beside them', () => {
+    // A point-in-county rollup's unplaced points belong next to its counts,
+    // not nowhere (P6-23). The host returns the sentence with the values, in
+    // one call — an earlier draft had it write the note into a ref from
+    // inside this getter, which is a reactive write during a computed and
+    // hung the page.
+    const w = mountCard({
+      choices: [{ id: 'sites', name: 'Sites — counted by county' }],
+      valuesFor: () => ({ values: { a: 2, b: 1, c: 1 }, note: '4 points in 3 counties · 1 point fell in no county' }),
+      universe: ['a', 'b', 'c'],
+    })
+    expect(w.get('[data-testid="analysis-note"]').text()).toBe('4 points in 3 counties · 1 point fell in no county')
   })
 })

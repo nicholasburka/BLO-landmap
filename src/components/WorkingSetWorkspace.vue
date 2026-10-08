@@ -48,6 +48,7 @@ import { useShowOnMap } from '@/composables/useShowOnMap'
 import { LAYER_REGISTRY } from '@/config/layerRegistry'
 import { contextCell } from '@/lib/countyJoin'
 import { compareIndices, shiftLineOf } from '@/lib/indexCompare'
+import { countPointsByCounty, rollupLine } from '@/lib/pointRollup'
 import { computeScores, rawLayerValues } from '@/composables/usePersonalizedScore'
 import { friendlyError } from '@/lib/errors'
 import { clearIndexDraft, readIndexDraft, writeIndexDraft } from '@/lib/indexDraft'
@@ -345,32 +346,61 @@ const previewShift = computed(() => {
   return shiftLineOf(compareIndices(saved, now))
 })
 
+/** P9-7: a point layer offered as a COUNT per county. The prefix marks it so
+ *  `analysisValues` knows to roll it up rather than look it up. */
+const ROLLUP_PREFIX = 'rollup:'
+
 /**
- * P9-7: the set's own county layers, named, for the free analyses.
+ * P9-7: the set's own layers, named, for the free analyses.
  *
  * The SET's layers rather than whatever is drawn: a reader asking how
  * contamination spreads out does not want the question to depend on which
- * checkbox is ticked. A point or line layer is left out — it has features,
- * not values, and there is nothing to take a median of.
+ * checkbox is ticked.
+ *
+ * A county layer is offered as itself. A POINT layer is offered as "counted
+ * by county" — a point layer answers *where things are* and a county layer
+ * answers *how many are here*, and only the second is a thing an index can
+ * weigh. That is the CEJST rollup, generalised. A line layer is offered as
+ * neither: counting how many transmission lines are "in" a county is a
+ * question about length and crossings, not containment, and a wrong answer
+ * dressed as a count is worse than no answer.
  */
-const analysableLayers = computed(() =>
-  (set.value?.layers ?? [])
-    .filter(id => !!LAYER_REGISTRY[id])
-    .map(id => ({ id, name: layerName(id) })),
-)
+const analysableLayers = computed(() => {
+  const ids = set.value?.layers ?? []
+  const county = ids.filter(id => !!LAYER_REGISTRY[id]).map(id => ({ id, name: layerName(id) }))
+  const points = map.state.layers.pointDefinitions.value
+    .filter(def => ids.includes(def.id) && def.geometry === 'point')
+    .map(def => ({ id: `${ROLLUP_PREFIX}${def.id}`, name: `${def.name} — counted by county` }))
+  return [...county, ...points]
+})
+
+
 
 /** Every county the map could draw, so coverage is measured against the
  *  country and not against the layer's own keys. */
 const analysisUniverse = computed(() => {
   const ids = new Set<string>()
   for (const layer of analysableLayers.value) {
+    if (layer.id.startsWith(ROLLUP_PREFIX)) continue
     for (const geoId of Object.keys(rawLayerValues(layer.id, map.state.scoringData))) ids.add(geoId)
   }
   return [...ids]
 })
 
-function analysisValues(layerId: string): Record<string, number> {
-  return rawLayerValues(layerId, map.state.scoringData)
+function analysisValues(layerId: string): { values: Record<string, number>; note?: string; counted?: boolean } {
+  if (!layerId.startsWith(ROLLUP_PREFIX)) {
+    return { values: rawLayerValues(layerId, map.state.scoringData) }
+  }
+  const pointLayer = layerId.slice(ROLLUP_PREFIX.length)
+  const collection = map.state.layers.pointData.value[pointLayer]
+  const counties = map.state.data.countiesData.value?.features ?? []
+  if (!collection?.features?.length || !counties.length) {
+    return { values: {}, note: 'Switch this layer on to count it — its points are not loaded yet.' }
+  }
+  const rolled = countPointsByCounty(collection.features, counties)
+  // `counted`: every point was placed, so a county that does not appear has
+  // none of the thing — which is not the same as a measurement nobody took.
+  return { values: rolled.values, note: rollupLine(rolled), counted: true }
 }
 
 /** One query, scored against the data this map already holds. */

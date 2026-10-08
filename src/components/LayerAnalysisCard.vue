@@ -23,6 +23,9 @@
     </p>
 
     <template v-else>
+      <!-- What the host did to get these numbers, when it did anything —
+           a rollup's unplaced points belong beside its counts, not nowhere. -->
+      <p v-if="note" class="a-note" data-testid="analysis-note">{{ note }}</p>
       <!-- Coverage first: an index built on a layer covering a third of the
            country is an index about that third, and nothing else says so. -->
       <p class="a-line" data-testid="analysis-coverage">{{ coverageText }}</p>
@@ -127,8 +130,16 @@ import {
 const props = defineProps<{
   /** The layers this set offers, in the order it names them. */
   choices: { id: string; name: string }[]
-  /** One layer's numbers, fetched by the host from the map it already has. */
-  valuesFor: (layerId: string) => LayerValues
+  /**
+   * One layer's numbers, from the map the host already has — plus anything
+   * the host needs said about how it got them.
+   *
+   * One call returning both, deliberately: the first draft had the host write
+   * its rollup note into a `ref` from inside this getter, which is a reactive
+   * write during a computed and hung the page outright. A function that
+   * answers the whole question has nowhere to put a side effect.
+   */
+  valuesFor: (layerId: string) => { values: LayerValues; note?: string; counted?: boolean }
   /** The counties the map is drawing — what coverage is measured against. */
   universe: string[]
 }>()
@@ -178,9 +189,15 @@ const nameOf = (id: string) => props.choices.find(c => c.id === id)?.name ?? id
 const pickedName = computed(() => nameOf(pick.value))
 const againstName = computed(() => nameOf(against.value))
 
-const values = computed<LayerValues>(() => (pick.value ? props.valuesFor(pick.value) : {}))
+const answer = computed(() => (pick.value ? props.valuesFor(pick.value) : { values: {} }))
+const values = computed<LayerValues>(() => answer.value.values)
+const note = computed(() => answer.value.note ?? '')
 const spread = computed(() => spreadOf(values.value))
-const coverageText = computed(() => coverageLine(coverageOf(values.value, props.universe)))
+// Blank and zero are different claims: a county with no coal mines is not a
+// county whose coal mines nobody counted.
+const coverageText = computed(() =>
+  coverageLine(coverageOf(values.value, props.universe), answer.value.counted ? 'counted' : 'measured'),
+)
 const spreadText = computed(() => (spread.value ? spreadLine(spread.value) : ''))
 const chart = computed(() => spreadChart(spread.value!, pickedName.value))
 const ends = computed(() => topAndBottom(values.value, 5))
@@ -191,7 +208,7 @@ const bottomTie = computed(() =>
 
 const correlation = computed(() => {
   if (!against.value || !pick.value) return null
-  return correlationOf(values.value, props.valuesFor(against.value))
+  return correlationOf(values.value, props.valuesFor(against.value).values)
 })
 const verdict = computed(() => (correlation.value?.r === null || !correlation.value ? '' : correlationVerdict(correlation.value.r)))
 
