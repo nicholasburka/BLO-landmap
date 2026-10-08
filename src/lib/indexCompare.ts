@@ -14,6 +14,8 @@
  * by side (P5-55). This puts two INDICES side by side.
  */
 
+import { median, pearson } from '@/lib/stats'
+
 /**
  * How much the order moved, as counts rather than as a list of counties.
  *
@@ -92,25 +94,6 @@ export function rankOf(values: Record<string, number>): Record<string, number> {
   return ranks
 }
 
-/** Pearson over two equal-length series; the rank version IS Spearman. */
-function pearson(xs: number[], ys: number[]): number | null {
-  const n = xs.length
-  const mx = xs.reduce((s, v) => s + v, 0) / n
-  const my = ys.reduce((s, v) => s + v, 0) / n
-  let num = 0
-  let dx = 0
-  let dy = 0
-  for (let i = 0; i < n; i++) {
-    const a = xs[i] - mx
-    const b = ys[i] - my
-    num += a * b
-    dx += a * a
-    dy += b * b
-  }
-  if (dx === 0 || dy === 0) return null
-  return num / Math.sqrt(dx * dy)
-}
-
 /** Round away the floating-point fuzz that makes a perfect 1 read as 0.9999999. */
 function tidy(r: number): number {
   const rounded = Math.round(r * 1e10) / 1e10
@@ -171,7 +154,9 @@ export function compareIndices(
         : '',
     shift: {
       moved: deltas.length,
-      median: deltas.length ? median(deltas) : 0,
+      // One decimal: half a place is a real answer for an even count, and
+      // more than that is fuzz.
+      median: deltas.length ? Math.round(median(deltas) * 10) / 10 : 0,
       far: deltas.filter(d => d > farThreshold).length,
       farThreshold,
     },
@@ -204,9 +189,3 @@ export function shiftLineOf(result: Pick<IndexComparison, 'n' | 'shift'>): strin
   return `${line} ${shift.far.toLocaleString()} moved more than a tenth of the table.`
 }
 
-/** The middle of a SORTED list; the mean of the middle two when it is even. */
-function median(sorted: readonly number[]): number {
-  const mid = Math.floor(sorted.length / 2)
-  const value = sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
-  return Math.round(value * 10) / 10
-}

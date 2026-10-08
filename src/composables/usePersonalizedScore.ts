@@ -144,6 +144,26 @@ function passesFilter(
 /**
  * Collect all unique GEOIDs across all data maps.
  */
+/**
+ * One layer's RAW numbers, county by county (P9-7).
+ *
+ * The free analyses describe a layer in its own units — a poverty rate in
+ * percent, a wage in dollars — so they need the values before normalisation,
+ * which is the one thing `computeScores` deliberately throws away. Same
+ * accessor the scorer uses, so a layer cannot describe itself one way and
+ * score another.
+ */
+export function rawLayerValues(layerId: string, dataMaps: DataMaps): Record<string, number> {
+  const def = LAYER_REGISTRY[layerId]
+  if (!def && !layerId.startsWith('internal-')) return {}
+  const out: Record<string, number> = {}
+  for (const geoId of getAllGeoIds(dataMaps)) {
+    const value = getRawValue(geoId, layerId, def?.dataKey ?? '', dataMaps)
+    if (typeof value === 'number' && Number.isFinite(value)) out[geoId] = value
+  }
+  return out
+}
+
 function getAllGeoIds(dataMaps: DataMaps): Set<string> {
   const ids = new Set<string>()
   for (const id of Object.keys(dataMaps.diversityData.value)) ids.add(id)

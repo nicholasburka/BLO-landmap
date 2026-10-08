@@ -42,12 +42,13 @@ import DatasetView from '@/views/DatasetView.vue'
 import MapPane from '@/components/MapPane.vue'
 import SetLayerList from '@/components/SetLayerList.vue'
 import IndexCompareCard from '@/components/IndexCompareCard.vue'
+import LayerAnalysisCard from '@/components/LayerAnalysisCard.vue'
 import IndexWeightEditor from '@/components/IndexWeightEditor.vue'
 import { useShowOnMap } from '@/composables/useShowOnMap'
 import { LAYER_REGISTRY } from '@/config/layerRegistry'
 import { contextCell } from '@/lib/countyJoin'
 import { compareIndices, shiftLineOf } from '@/lib/indexCompare'
-import { computeScores } from '@/composables/usePersonalizedScore'
+import { computeScores, rawLayerValues } from '@/composables/usePersonalizedScore'
 import { friendlyError } from '@/lib/errors'
 import { clearIndexDraft, readIndexDraft, writeIndexDraft } from '@/lib/indexDraft'
 import { invalidateInternalManifest } from '@/lib/internalLayers'
@@ -343,6 +344,34 @@ const previewShift = computed(() => {
   if (!Object.keys(saved).length || !Object.keys(now).length) return ''
   return shiftLineOf(compareIndices(saved, now))
 })
+
+/**
+ * P9-7: the set's own county layers, named, for the free analyses.
+ *
+ * The SET's layers rather than whatever is drawn: a reader asking how
+ * contamination spreads out does not want the question to depend on which
+ * checkbox is ticked. A point or line layer is left out — it has features,
+ * not values, and there is nothing to take a median of.
+ */
+const analysableLayers = computed(() =>
+  (set.value?.layers ?? [])
+    .filter(id => !!LAYER_REGISTRY[id])
+    .map(id => ({ id, name: layerName(id) })),
+)
+
+/** Every county the map could draw, so coverage is measured against the
+ *  country and not against the layer's own keys. */
+const analysisUniverse = computed(() => {
+  const ids = new Set<string>()
+  for (const layer of analysableLayers.value) {
+    for (const geoId of Object.keys(rawLayerValues(layer.id, map.state.scoringData))) ids.add(geoId)
+  }
+  return [...ids]
+})
+
+function analysisValues(layerId: string): Record<string, number> {
+  return rawLayerValues(layerId, map.state.scoringData)
+}
 
 /** One query, scored against the data this map already holds. */
 function scoresOf(query: ScoringQueryLayer[]): Record<string, number> {
@@ -930,6 +959,13 @@ onMounted(async () => {
               :layers="map.state.layers"
               :ids="setLayerIds"
               :readonly="!!previewQuery"
+            />
+            <!-- P9-7: four questions about the set's own layers, answered
+                 here over numbers the page already holds. -->
+            <LayerAnalysisCard
+              :choices="analysableLayers"
+              :values-for="analysisValues"
+              :universe="analysisUniverse"
             />
             <!-- P9-6: when a set holds more than one index, the useful question
                  is not what either says but what re-weighting did to the order.
