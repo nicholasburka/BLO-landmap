@@ -36,15 +36,18 @@
  * CSV — pointed at the set's anchor by a prop. The map half is P6-14's
  * `useShowOnMap` + `MapPane`, which is six lines. `MapCanvas` is untouched.
  */
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import DatasetView from '@/views/DatasetView.vue'
 import MapPane from '@/components/MapPane.vue'
 import SetLayerList from '@/components/SetLayerList.vue'
 import IndexCompareCard from '@/components/IndexCompareCard.vue'
+import IndexWeightEditor from '@/components/IndexWeightEditor.vue'
 import { useShowOnMap } from '@/composables/useShowOnMap'
+import { LAYER_REGISTRY } from '@/config/layerRegistry'
 import { contextCell } from '@/lib/countyJoin'
 import { friendlyError } from '@/lib/errors'
+import { clearIndexDraft, readIndexDraft, writeIndexDraft } from '@/lib/indexDraft'
 import {
   SET_INTERFACE_KEY,
   interfaceForViewType,
@@ -63,12 +66,16 @@ import {
   fetchWorkingSet,
   fetchWorkingSetColumns,
   rerunDerivedColumn,
+  runComposite,
   workingSetDatasetsHref,
   workingSetHref,
   workingSetPlaceHref,
+  type CompositeTerm,
   type DerivedColumn,
+  type WeightTerm,
   type WorkingSetDetail,
 } from '@/lib/workingSets'
+import type { ScoringQueryLayer } from '@/types/mapTypes'
 
 const props = defineProps<{
   /** The view whose framing this is. Its `workingSet` is what gets loaded. */
@@ -77,6 +84,10 @@ const props = defineProps<{
 
 const route = useRoute()
 const router = useRouter()
+
+/** How long after the last slider change the draft is written (P9-6a). The
+ *  same pause `PageEditor` leaves before autosaving page text. */
+const AUTOSAVE_MS = 500
 
 const set = ref<WorkingSetDetail | null>(null)
 const columns = ref<DerivedColumn[]>([])
@@ -164,6 +175,28 @@ function onShown(payload: { geoIds: string[]; rows: number; total: number; loadi
 // --- The map half (P6-14, six lines of it) ---------------------------------
 
 /**
+ * P9-6a: the formula being tried out, or null.
+ *
+ * The weight editor is a sandbox and this is the sandbox's contents: a live
+ * formula that exists only on this page until somebody names a version and
+ * saves it. Held HERE rather than in the editor because the map has to draw it
+ * and the autosave has to keep it — the editor owns the sliders, the page owns
+ * what they currently mean.
+ */
+const previewTerms = ref<CompositeTerm[] | null>(null)
+
+/** Which index's formula is open for editing, by column id. '' is none. */
+const editing = ref('')
+
+/** The preview as the canvas takes it. Null whenever there is nothing to
+ *  preview, which is the state every page but this one is always in. */
+const previewQuery = computed<ScoringQueryLayer[] | null>(() => {
+  const terms = previewTerms.value
+  if (!terms || !terms.length) return null
+  return terms.map(term => ({ layerId: term.layer, weight: term.weight, direction: term.direction }))
+})
+
+/**
  * P7-8: the derived index the map is drawing instead of the set's own layers,
  * or `''` for the set's layers.
  *
@@ -178,14 +211,35 @@ const drawnIndex = ref('')
 
 /** The layers the SET names: it is the data, and what to draw is a question
  *  about the data. The view contributes the framing around them. */
-const drawsLayers = computed(() => (set.value?.layers.length ?? 0) > 0 || !!drawnIndex.value)
+const drawsLayers = computed(
+  () => (set.value?.layers.length ?? 0) > 0 || !!drawnIndex.value || !!previewQuery.value,
+)
+
+/**
+ * What the map is drawing, in one list — and it is a list of ONE thing at a
+ * time by design.
+ *
+ * A preview beats a drawn index beats the set's own layers, because each of
+ * those is a different claim about what the choropleth means and two of them
+ * at once is two choropleths arguing. P9-6a's rule: dragging a weight replaces
+ * the saved index on the map, and the layer list below says that it has.
+ */
+const drawnLayerIds = computed(() => {
+  const preview = previewQuery.value
+  if (preview) return preview.map(term => term.layerId)
+  if (drawnIndex.value) return [drawnIndex.value]
+  return set.value?.layers ?? []
+})
 
 /** The layers the set names, in its own order — what the list offers to
  *  toggle. A drawn index stands alone, the way it draws alone. */
-const setLayerIds = computed(() => (drawnIndex.value ? [drawnIndex.value] : (set.value?.layers ?? [])))
+const setLayerIds = computed(() => drawnLayerIds.value)
 
 const map = useShowOnMap({
-  layers: () => (drawnIndex.value ? [drawnIndex.value] : (set.value?.layers ?? [])),
+  layers: () => drawnLayerIds.value,
+  // Equal weight unless a formula is being tried out, which is the one case a
+  // page here has an opinion about how much each layer counts.
+  weights: () => previewQuery.value,
   only: () => shown.value.geoIds,
 })
 
@@ -206,7 +260,200 @@ function drawIndex(layerId: string): void {
  *  longer there. */
 watch(columns, list => {
   if (drawnIndex.value && !list.some(column => column.layerId === drawnIndex.value)) drawnIndex.value = ''
+  if (editing.value && !list.some(column => column.id === editing.value)) closeEditor()
 })
+
+// --- P9-6a: weighing an index differently ----------------------------------
+
+/**
+ * The formula the editor starts from, resolved once when it opens.
+ *
+ * Deliberately NOT a computed over `previewTerms`: the editor copies its props
+ * into local state, so feeding its own output back through them would make a
+ * round trip out of every slider drag — and a term dragged to zero, which the
+ * live formula leaves out, would spring back to its saved weight.
+ */
+const editorSeed = ref<WeightTerm[]>([])
+
+/** Shown when the sliders opened on an autosaved draft rather than on the
+ *  saved formula, because weights nobody can account for are worse than none. */
+const draftRestored = ref(false)
+
+const savingIndex = ref(false)
+const indexError = ref('')
+
+const editingColumn = computed(() => columns.value.find(column => column.id === editing.value) ?? null)
+
+/**
+ * A set that could carry an index but has none yet (P9-3's rule, P9-6a's
+ * first question).
+ *
+ * It is NOT offered sliders. Equal weights over a set's candidate layers is a
+ * real formula wearing the clothes of a neutral starting point, and a reader
+ * cannot tell the difference. So there is exactly one way to make a first
+ * formula — "Build an index" on the Analysis page — and this says where it is
+ * rather than leaving a capability to be discovered. Said only when the set
+ * could actually carry one: a reason a reader cannot act on is worse than
+ * silence.
+ */
+const couldWeigh = computed(() => {
+  if (columns.value.some(column => column.rerun?.type === 'composite')) return false
+  const ids = new Set(set.value?.layers ?? [])
+  const county = map.state.layers.internalDefinitions.value.filter(def => ids.has(def.id)).length
+  const registry = [...ids].filter(id => !!LAYER_REGISTRY[id]).length
+  return county + registry >= 2
+})
+
+/** A layer id is not a thing to put beside a slider. Internal names come off
+ *  the manifest the pane already loaded, public ones off the static registry,
+ *  so naming a term costs no request. */
+function layerName(layerId: string): string {
+  const internal = map.state.layers.internalDefinitions.value.find(def => def.id === layerId)
+  if (internal) return internal.name
+  return LAYER_REGISTRY[layerId]?.name || layerId
+}
+
+/**
+ * Open (or close) the weight editor on one index's formula.
+ *
+ * The terms come from the column's own stored formula — the same record a
+ * re-run reads — so nothing is retyped and nothing is inferred from a layer
+ * manifest that somebody may since have edited. A set with no index is not
+ * offered this at all: equal weights over its candidate layers would be a real
+ * formula presented as a neutral starting point, which it is not. That path is
+ * "Build an index" on the Analysis page, so there is exactly one way to make a
+ * first formula.
+ *
+ * Awaits the manifest before seeding, so the rows open with names rather than
+ * with ids that fill in a moment later. It is cached and shared; when the pane
+ * is already open this costs nothing.
+ */
+async function openEditor(column: DerivedColumn): Promise<void> {
+  if (editing.value === column.id) {
+    closeEditor()
+    return
+  }
+  if (column.rerun?.type !== 'composite' || !set.value) return
+  const saved = column.rerun.terms
+  indexError.value = ''
+  await map.state.loadInternalLayers()
+  // A draft is only usable if it is still about this formula's layers; a set
+  // edited since is a reason to start from what is saved.
+  const draft = readIndexDraft(set.value.slug, column.id)
+  const usable = draft && draft.every(term => saved.some(row => row.layer === term.layer)) ? draft : null
+  editorSeed.value = saved.map(row => {
+    const term = usable?.find(x => x.layer === row.layer)
+    return {
+      layer: row.layer,
+      name: layerName(row.layer),
+      // A saved term the draft does not mention was dragged OUT of it.
+      weight: usable ? (term ? term.weight : 0) : row.weight,
+      direction: term ? term.direction : row.direction,
+    }
+  })
+  draftRestored.value = !!usable
+  // A restored draft draws at once: sliders saying one thing while the map
+  // shows another is the single worst state this feature could be in.
+  previewTerms.value = usable
+  editing.value = column.id
+}
+
+function closeEditor(): void {
+  editing.value = ''
+  editorSeed.value = []
+  previewTerms.value = null
+  draftRestored.value = false
+  indexError.value = ''
+}
+
+/** The live formula, on every drag. Nothing is written to the set. */
+function onScore(terms: ScoringQueryLayer[]): void {
+  previewTerms.value = terms.map(term => ({
+    layer: term.layerId,
+    weight: term.weight,
+    direction: term.direction === 'lower_better' ? 'lower_better' : 'higher_better',
+  }))
+}
+
+/**
+ * Autosave, so a formula somebody spent five minutes on does not die with a
+ * clicked link (`PageEditor`'s answer to unfinished page text). Debounced:
+ * dragging a slider fires a change per pixel and none of them is worth a
+ * synchronous write.
+ */
+let autosave: ReturnType<typeof setTimeout> | undefined
+onBeforeUnmount(() => clearTimeout(autosave))
+watch([previewTerms, editing], ([terms, columnId]) => {
+  const slug = set.value?.slug
+  if (!slug || !columnId) return
+  clearTimeout(autosave)
+  autosave = setTimeout(() => {
+    if (terms && terms.length) writeIndexDraft(slug, columnId, terms)
+    else clearIndexDraft(slug, columnId)
+  }, AUTOSAVE_MS)
+})
+
+/** Throw the restored draft away and go back to what the set holds. */
+function discardDraft(): void {
+  const column = editingColumn.value
+  if (!set.value || column?.rerun?.type !== 'composite') return
+  // The last drag may still have a write pending. Without this it lands after
+  // the clear and the draft is back, which is how a discarded version comes
+  // haunting the next time somebody opens the sliders.
+  clearTimeout(autosave)
+  clearIndexDraft(set.value.slug, column.id)
+  editorSeed.value = column.rerun.terms.map(row => ({
+    layer: row.layer,
+    name: layerName(row.layer),
+    weight: row.weight,
+    direction: row.direction,
+  }))
+  draftRestored.value = false
+  previewTerms.value = null
+}
+
+/**
+ * Save the previewed formula as a new index on the set.
+ *
+ * A version, never an overwrite: no `id` is sent, so the set gains a column
+ * and keeps the one it had — which is the whole point of being able to compare
+ * two versions (`IndexCompareCard`). The columns are then read again rather
+ * than patched in place, for the reason a re-run does the same: one source of
+ * truth re-read beats several patched by hand. The new column becomes what the
+ * map draws, because somebody who just saved a version is looking at it.
+ */
+async function saveIndex(input: { label: string; terms: WeightTerm[] }): Promise<void> {
+  if (savingIndex.value || !set.value) return
+  const columnId = editing.value
+  savingIndex.value = true
+  indexError.value = ''
+  try {
+    const run = await runComposite(set.value.slug, {
+      label: input.label,
+      terms: input.terms.map(term => ({
+        layer: term.layer,
+        weight: term.weight,
+        direction: term.direction,
+      })),
+    })
+    const stored = await fetchWorkingSetColumns(set.value.slug)
+    columns.value = stored.columns
+    unreadable.value = stored.unreadable
+    // Same race as `discardDraft`, and worse here: a pending write landing
+    // after the save would make the next visit announce an unsaved version of
+    // a formula that is now saved.
+    clearTimeout(autosave)
+    clearIndexDraft(set.value.slug, columnId)
+    closeEditor()
+    if (run.layerId) drawnIndex.value = run.layerId
+  } catch (err) {
+    // A 413 is the on-demand ceiling and its sentence names the local batch
+    // pass, so it is shown rather than reworded.
+    indexError.value = friendlyError(err, 'That index could not be saved.')
+  } finally {
+    savingIndex.value = false
+  }
+}
 
 /**
  * The pane follows the interface. Opening it is what loads the county files,
@@ -288,6 +535,10 @@ const mapColumns = computed(() =>
       // no control is offered that cannot do what it says.
       layerId: column.layerId,
       drawing: !!column.layerId && drawnIndex.value === column.layerId,
+      // P9-6a: a formula is editable, a measurement is not — there is nothing
+      // in "miles to the nearest line" to weigh against anything.
+      canWeigh: column.rerun?.type === 'composite',
+      weighing: editing.value === column.id,
       column,
     }
   }),
@@ -526,6 +777,13 @@ onMounted(async () => {
                  points with nothing to say what they are. This names them,
                  carries each one's own colour so the list reads against the
                  map, and toggles through the same state the canvas draws from. -->
+            <!-- P9-6a: the preview replaced the saved index on the canvas, so
+                 the thing naming the map's layers has to say so. A reader must
+                 never mistake a preview for the record. -->
+            <p v-if="previewQuery" class="preview-note" data-testid="map-preview-note">
+              Showing an unsaved version of
+              {{ editingColumn ? '“' + editingColumn.label + '”' : 'this index' }}, weighed below.
+            </p>
             <SetLayerList
               v-if="setLayerIds.length"
               class="workspace-layers"
@@ -595,6 +853,19 @@ onMounted(async () => {
               >
                 {{ column.drawing ? 'Show the set’s layers' : 'Draw on the map' }}
               </button>
+              <!-- P9-6a: offered where the formula is READ, for the same reason
+                   the re-run is — the terms are in the stored record, so there
+                   is nothing for a reader to retype. -->
+              <button
+                v-if="column.canWeigh"
+                type="button"
+                class="derived-rerun"
+                data-testid="derived-weigh"
+                :aria-pressed="column.weighing"
+                @click="openEditor(column.column)"
+              >
+                {{ column.weighing ? 'Close the weights' : 'Weigh it differently' }}
+              </button>
               <span class="derived-provenance" data-testid="derived-provenance">{{ column.provenance }}</span>
               <span v-if="column.method" class="derived-method" data-testid="derived-method">{{ column.method }}</span>
             </li>
@@ -603,7 +874,29 @@ onMounted(async () => {
           <p class="derived-note">
             Stored on the set, not recomputed to draw this. The table sorts these same numbers.
           </p>
+
+          <!-- P9-6a. Here rather than beside the canvas on purpose: switching
+               to the data interface tears the pane down, and a formula
+               somebody is part-way through dragging must not go with it. -->
+          <template v-if="editing && editorSeed.length">
+            <p v-if="draftRestored" class="draft-note" data-testid="index-draft-restored">
+              These weights are an unsaved version from last time.
+              <button type="button" class="link-btn" data-testid="index-draft-discard" @click="discardDraft">
+                Use the saved index instead
+              </button>
+            </p>
+            <IndexWeightEditor :terms="editorSeed" @score="onScore" @save="saveIndex" />
+            <p v-if="savingIndex" class="state-note" data-testid="index-saving">Saving this version…</p>
+            <p v-if="indexError" class="state-note error" data-testid="index-save-error">{{ indexError }}</p>
+          </template>
         </section>
+        <!-- P9-6a: where a first formula comes from, for a set that has the
+             layers to weigh but nothing weighing them yet. -->
+        <p v-if="couldWeigh" class="state-note" data-testid="index-none-yet">
+          This set has layers to weigh against each other but no index yet.
+          <RouterLink to="/analysis">Build one on the Analysis page</RouterLink>, then its weights can be
+          changed here.
+        </p>
         <p v-if="unreadable.length" class="state-note warn" data-testid="derived-unreadable">
           {{ unreadable.length === 1 ? 'One derived column' : `${unreadable.length} derived columns` }} could not be
           read: {{ unreadable.join(', ') }}.
@@ -785,6 +1078,31 @@ onMounted(async () => {
   margin: 8px 0 0;
   font-size: 12px;
   color: var(--blo-stone);
+}
+
+/* P9-6a. The preview note and the restored-draft note carry the same orange as
+   a stale column, because the state is the same kind of state: a number on
+   screen that nobody has committed to. Quiet grey would make them decorative,
+   which is exactly the mistake — a reader who misses these is reading an
+   unsaved formula as the set's record. */
+.preview-note,
+.draft-note {
+  margin: 8px 0 0;
+  padding: 6px 8px;
+  border-left: 3px solid #d97706;
+  background: #fffbeb;
+  font-size: 12px;
+  color: #92400e;
+}
+
+.link-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 /* P7-6: a column whose inputs have moved must never look like one whose have

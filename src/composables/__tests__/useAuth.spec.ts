@@ -165,6 +165,8 @@ describe('logoutInternal', () => {
     localStorage.setItem('blo.dataset.hidden.organizations.data.csv', '["EIN"]')
     localStorage.setItem('blo:draft:tn-strategy', '# Unsaved page text') // P5-49 editor draft
     localStorage.setItem('blo:shortlist', '["47157"]') // P5-55 pending comparison shortlist
+    // P9-6a: an unsaved index formula names internal layers by id.
+    localStorage.setItem('blo:index-draft:memphis:efficacy', '[{"layer":"internal-votes","weight":6}]')
     localStorage.setItem('blo:welcome-dismissed', '1') // public preference — must survive
     await auth.logoutInternal()
     expect(localStorage.getItem('blo:conversation')).toBeNull()
@@ -172,6 +174,8 @@ describe('logoutInternal', () => {
     expect(localStorage.getItem('blo:draft:tn-strategy')).toBeNull()
     // Which counties someone is weighing is research too (P5-55).
     expect(localStorage.getItem('blo:shortlist')).toBeNull()
+    // So is which factors they weighed, and how much (P9-6a).
+    expect(localStorage.getItem('blo:index-draft:memphis:efficacy')).toBeNull()
     expect(localStorage.getItem('blo:welcome-dismissed')).toBe('1')
     expect(hook).toHaveBeenCalledTimes(1)
   })

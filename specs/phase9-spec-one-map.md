@@ -627,10 +627,45 @@ Open the index, change weights, see the map move, save as a new set. Then
 compare two indices: rank movement, biggest movers, correlation. This is the
 payoff — the reason for the whole phase. **Size: L.** Depends on P9-5.
 
-### P9-6a [FEATURE] Wire the weight editor into the set's view
+### P9-6a [FEATURE] Wire the weight editor into the set's view — DONE
 `IndexWeightEditor` is built and tested (8 cases) but connected to nothing.
 Connecting it is not one step, and the questions below are why this is a
 ticket rather than a loose end.
+
+**Answered (Nick, 2026-10-08), and shipped.** The editor opens from the derived
+column it is about, draws its formula on the canvas while you drag, saves a new
+version beside the old one, and autosaves what you have not saved yet.
+
+1. **Terms come from a saved formula** — the column's own `rerun.terms`, the
+   same record a re-run reads. A set with the layers but no index is *not*
+   offered sliders: equal weights over its candidates is a real formula wearing
+   the clothes of a neutral start, and a reader cannot tell the difference.
+   `index-none-yet` says where a first one is built instead (P9-3's rule).
+2. **The preview replaces the drawn index.** `useShowOnMap` gained a `weights`
+   getter — the geometry dispatch still decides *which* ids are scorable, the
+   page only says how much each counts — and `map-preview-note` says "showing
+   an unsaved version of X" beside the layer list. One choropleth at a time.
+3. **A save is a version, never an overwrite.** No `id` goes with it, so the
+   set gains a column, the new one becomes what the map draws, and
+   `IndexCompareCard` can immediately answer what re-weighting did to the
+   order. A failed save keeps the formula on screen.
+4. **An unsaved formula survives a page leave**, autosaved under
+   `blo:index-draft:<set>:<column>` — `PageEditor`'s answer to unfinished page
+   text, restored with a note and a "use the saved index instead" button rather
+   than a `window.confirm`, which is not house style (`ChatThreadList`). The
+   prefix is one `useAuth` wipes at logout: a formula names internal layers
+   (P5-19). The editor also sits with the derived columns rather than beside the
+   canvas, so switching to the data interface — which tears the pane down —
+   does not take a part-finished drag with it.
+
+**Two things found on the way.** `SetLayerList` had no branch for a PUBLIC
+registry layer, so a set naming one (which `indexableLayersOf` explicitly
+offers as an index term) read "not in the library any more" — a choropleth the
+national map draws every day being called missing. And the debounced autosave
+could land *after* a save or a discard cleared the draft, which would make the
+next visit announce an unsaved version of a formula that is now saved; both
+paths cancel the pending write. The second was caught by the full-suite run and
+not by the file alone — see P9-6b.
 
 **Where the terms come from.** A set with an index already has a formula —
 the `analysis.terms` on its derived column — and that is what to edit. A set
@@ -671,6 +706,18 @@ that treatment. The known leads are in `project-natl-map-test-gotchas`: the
 jsdom suite makes real network calls to `localhost:3001`, so behaviour
 depends on whether a dev server is up.
 
+**P9-6a found the same mechanism in this suite, which is evidence the lead is
+the right one.** `WorkingSetWorkspace.spec` mounted forty-odd components and
+unmounted none, so a debounced write armed in one test landed in the next one's
+freshly cleared `localStorage` — two tests that passed alone failed in the full
+run, with assertions that made no sense in isolation ("a draft was restored"
+when none was written). The fix was an `afterEach` that unmounts what the file
+mounted, which runs the components' own cleanup. **App.spec's failure is not
+yet explained** — it unmounts already, and its symptom is auth state
+(`search-trigger` alone instead of the internal trio), which points at the
+`/api/me` call rather than at a timer. Worth checking whether a mount whose
+`/api/me` is still in flight can resolve into a later test.
+
 A suite that fails one run in three teaches people to re-run rather than to
 read, which is how a real failure gets waved through. Worth the same
 treatment the server suite got: find the mechanism, prove it with twenty
@@ -695,17 +742,16 @@ location" (§10). **Size: M.** Independent.
 ## Sequencing
 
 ```
-DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 (maths + compare UI)
+DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 ─ P9-6a (the editor, wired)
 
-next:  P9-6a  wire the weight editor      ← the payoff becomes usable
+next:  P9-6b  the client suite's flake   ← a lead, now with evidence
        P9-8   carried audit fixes          (independent)
        P9-7   free analyses                (independent)
-       P9-6b  client suite flake           (independent, and quietly expensive)
        P9-9   contamination                (deferred by Nick)
 ```
 
-**P9-6a first.** Everything it needs is built and tested; until it is wired,
-the weight editor exists and nobody can reach it.
+**P9-6a is done**, so the payoff is reachable: open a set's map interface, press
+"Weigh it differently" on an index, drag, and the choropleth is your formula.
 
 ## Answered (Nick, 2026-10-07)
 

@@ -65,18 +65,13 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-
-export interface WeightTerm {
-  layer: string
-  name: string
-  weight: number
-  direction: 'higher_better' | 'lower_better'
-}
+import type { WeightTerm } from '@/lib/workingSets'
 
 const props = defineProps<{ terms: WeightTerm[] }>()
 const emit = defineEmits<{
-  /** The live formula, on every change. Nothing is stored. */
-  score: [terms: { layerId: string; weight: number; direction: string }[]]
+  /** The live formula, on every change, in the shape a scoring query takes.
+   *  Nothing is stored. */
+  score: [terms: { layerId: string; weight: number; direction: WeightTerm['direction'] }[]]
   save: [input: { label: string; terms: WeightTerm[] }]
 }>()
 
