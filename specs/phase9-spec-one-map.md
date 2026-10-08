@@ -623,20 +623,29 @@ derived index columns at that county. Verified on the xAI supercomputer site
 from the redevelopment set: `3231 Paul R Lowry Road` → Shelby County, TN →
 all eleven layers plus all three indices.
 
-**The monitoring plan changed, and the ticket was wrong about it.** Routing
-through our API needs a Mapbox token the SERVER does not have — it lives in
-the root `.env` for the client bundle, and `server/.env` has none. Adding one
-is Nick's to do, not mine. So the call goes browser→Mapbox, which is what
-`PromptInput` already does for its place strip, and the authoritative number
-is Mapbox's own usage dashboard — which is where the billing is anyway, and
-which an in-app counter could only ever estimate.
+**Monitoring, after Nick gave the server the token (2026-10-08).** Suggestions
+go through `GET /api/geocode/suggest`: internal-only, rate-limited, and
+`recordUsage`d on every call including the failed ones, because a call that
+failed is a call that may still have been billed. Geocoding is now a line on
+the internal dashboard and a path somebody can throttle.
 
-What IS in the code is restraint, which is the half that actually reduces the
-bill: nothing below four characters, 350ms after the last keystroke, and a
-session cache so backspacing through a query and retyping it costs nothing.
-Three tests hold those. **If in-app counting is wanted later, it is one
-`MAPBOX_ACCESS_TOKEN` in `server/.env` plus a thin route** — `recordUsage`
-already keys on path.
+**The token was COPIED, not moved.** `mapbox-gl` draws the tiles in the
+browser and needs `VITE_MAPBOX_ACCESS_TOKEN`; remove it from the root `.env`
+and every map in the app goes blank. So the same public `pk.` token now sits
+in both places, and **the proxy buys counting, not secrecy** — it is in the
+client bundle either way. What the proxy does protect is *our server*: an
+unauthenticated passthrough to a metered API is an invitation to spend
+somebody else's money, so the route is behind `requireInternalUser`.
+
+Restraint still does the heavy lifting on the bill: nothing under four
+characters (held on BOTH sides — a client is not a guarantee), 350ms after the
+last keystroke, and a session cache so retyping a query is free.
+
+**Prod needs the variable set in Railway**, which does not read `server/.env`.
+Until it is, the route answers `{ hits: [], unavailable: true }` and the box
+says "Address search is not switched on for this server" — not "Nothing
+found", which would be a lie about the address rather than the truth about the
+deploy.
 
 ### P9-9 [BUG] A county with no EPA record scores as if it had no contamination
 **Affects the PUBLISHED index.** Deferred by Nick on 2026-10-08 — noted now,

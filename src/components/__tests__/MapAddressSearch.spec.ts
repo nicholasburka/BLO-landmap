@@ -11,7 +11,7 @@ import { clearAddressCache } from '@/lib/addressSearch'
  * comes from the host, because that is the set's business.
  */
 
-const HIT = { place_name: '3231 Paul R Lowry Rd, Memphis, Tennessee', center: [-90.1, 35.07] }
+const HIT = { name: '3231 Paul R Lowry Rd, Memphis, Tennessee', center: [-90.1, 35.07] }
 
 interface Resolved {
   geoId: string | null
@@ -35,7 +35,7 @@ beforeEach(() => {
   clearAddressCache()
   vi.stubGlobal(
     'fetch',
-    vi.fn(async () => ({ ok: true, json: async () => ({ features: [HIT] }) }) as unknown as Response),
+    vi.fn(async () => ({ ok: true, json: async () => ({ hits: [HIT] }) }) as unknown as Response),
   )
   vi.useFakeTimers()
 })
@@ -62,7 +62,7 @@ describe('the address box', () => {
   it('suggests, and says what the set holds where you land', async () => {
     const w = mount(MapAddressSearch, { props: { resolve: resolver() } })
     await type(w, '3231 Paul R Lowry')
-    expect(w.findAll('[data-testid="address-hit"]').map(h => h.text())).toEqual([HIT.place_name])
+    expect(w.findAll('[data-testid="address-hit"]').map(h => h.text())).toEqual([HIT.name])
 
     await w.get('[data-testid="address-hit"]').trigger('click')
     expect(w.get('[data-testid="address-county"]').text()).toBe('Shelby County, TN')
@@ -97,11 +97,22 @@ describe('the address box', () => {
   it('says when it found nothing, rather than sitting silent', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => ({ ok: true, json: async () => ({ features: [] }) }) as unknown as Response),
+      vi.fn(async () => ({ ok: true, json: async () => ({ hits: [] }) }) as unknown as Response),
     )
     const w = mount(MapAddressSearch, { props: { resolve: resolver() } })
     await type(w, 'not a place at all')
     expect(w.get('[data-testid="address-none"]').text()).toContain('Nothing found')
+  })
+
+  it('says "not switched on" rather than "not found" when the server has no token', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: true, json: async () => ({ hits: [], unavailable: true }) }) as unknown as Response),
+    )
+    const w = mount(MapAddressSearch, { props: { resolve: resolver() } })
+    await type(w, 'anywhere at all')
+    expect(w.get('[data-testid="address-unavailable"]').text()).toContain('not switched on')
+    expect(w.find('[data-testid="address-none"]').exists()).toBe(false)
   })
 
   it('is drivable from the keyboard', async () => {

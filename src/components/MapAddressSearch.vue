@@ -35,6 +35,11 @@
     </ul>
 
     <p v-if="searching" class="addr-note" data-testid="address-searching">Looking…</p>
+    <!-- Not configured is not the same as not found: one is about the deploy
+         and the other about the address. -->
+    <p v-else-if="unavailable" class="addr-note" data-testid="address-unavailable">
+      Address search is not switched on for this server.
+    </p>
     <p v-else-if="noneFound" class="addr-note" data-testid="address-none">Nothing found for that.</p>
 
     <!-- What the set says about where you landed. -->
@@ -93,6 +98,7 @@ const hits = ref<AddressHit[]>([])
 const active = ref(0)
 const searching = ref(false)
 const noneFound = ref(false)
+const unavailable = ref(false)
 const found = ref<{ name: string; geoId: string | null } | null>(null)
 
 const countyLabel = ref('')
@@ -105,6 +111,7 @@ function onInput(value: string): void {
   query.value = value
   found.value = null
   noneFound.value = false
+  unavailable.value = false
   active.value = 0
   clearTimeout(timer)
   inFlight?.abort()
@@ -125,11 +132,12 @@ function onInput(value: string): void {
   searching.value = true
   timer = setTimeout(async () => {
     inFlight = new AbortController()
-    const results = await suggestAddresses(value, inFlight.signal)
+    const answer = await suggestAddresses(value, inFlight.signal)
     // A later keystroke has already moved on; this answer is stale.
     if (query.value !== value) return
-    hits.value = results
-    noneFound.value = results.length === 0
+    hits.value = answer.hits
+    unavailable.value = answer.unavailable
+    noneFound.value = !answer.unavailable && answer.hits.length === 0
     searching.value = false
   }, DEBOUNCE_MS)
 }
@@ -156,6 +164,7 @@ function clear(): void {
   hits.value = []
   found.value = null
   noneFound.value = false
+  unavailable.value = false
   emit('cleared')
 }
 

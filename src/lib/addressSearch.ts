@@ -14,13 +14,14 @@
  *  - every answer is cached for the session, so backspacing through a query
  *    and retyping it costs nothing.
  *
- * Called straight from the browser, which is what `PromptInput` already does
- * for its place strip — the token is public and in the bundle for the map
- * tiles regardless. The authoritative number is therefore Mapbox's own usage
- * dashboard, which is also where the billing is; an in-app counter would need
- * a server-side token and would still only be an estimate of it.
+ * Routed through OUR API rather than called from the browser (Nick gave the
+ * token to the server, 2026-10-08). That buys no secrecy — the same public
+ * token is in the client bundle for the map tiles and always will be — it
+ * buys a PATH: `recordUsage` keys on one, so geocoding is a line on the
+ * internal dashboard and something the rate limiter can hold down, and our
+ * server cannot be used as an open geocoder by a stranger.
  */
-import { MAPBOX_ACCESS_TOKEN } from '@/config/constants'
+import { internalFetch } from '@/lib/apiBase'
 
 export interface AddressHit {
   /** What Mapbox calls it: "1600 Pennsylvania Ave NW, Washington, DC 20500". */
@@ -47,43 +48,52 @@ export function cachedAddresses(query: string): AddressHit[] | null {
   return cache.get(key(query)) ?? null
 }
 
+export interface Suggestions {
+  hits: AddressHit[]
+  /**
+   * The search is not configured — no token on the server — as opposed to
+   * finding nothing. Railway does not read `server/.env`, so this is what a
+   * prod box looks like until someone sets the variable there, and "Nothing
+   * found" would be a lie about the address instead of the truth about the
+   * deploy.
+   */
+  unavailable: boolean
+}
+
 /**
  * Addresses matching a partial query.
  *
- * `types` leads with `address` — the whole reason this is not the Census
- * geocoder — and keeps `place` and `postcode` so "Memphis" and "38109" still
- * work. Returns [] rather than throwing: a search box that explodes on a
- * flaky network is worse than one that finds nothing.
+ * The server asks Mapbox with `types` leading on `address` — the whole reason
+ * this is not the Census geocoder — keeping `place` and `postcode` so
+ * "Memphis" and "38109" still work. Never throws: a search box that breaks
+ * the page because a geocoder hiccuped is worse than one that finds nothing.
  */
-export async function suggestAddresses(query: string, signal?: AbortSignal): Promise<AddressHit[]> {
+export async function suggestAddresses(query: string, signal?: AbortSignal): Promise<Suggestions> {
   const normalised = key(query)
-  if (normalised.length < MIN_QUERY) return []
+  if (normalised.length < MIN_QUERY) return { hits: [], unavailable: false }
   const known = cache.get(normalised)
-  if (known) return known
-  if (!MAPBOX_ACCESS_TOKEN) return []
-
-  const url =
-    `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(normalised)}.json` +
-    `?access_token=${MAPBOX_ACCESS_TOKEN}` +
-    `&country=us&types=address,place,postcode&limit=5&autocomplete=true`
+  if (known) return { hits: known, unavailable: false }
 
   try {
-    const response = await fetch(url, { signal })
-    if (!response.ok) return []
-    const body = (await response.json()) as { features?: unknown[] }
+    const response = await internalFetch(`/api/geocode/suggest?q=${encodeURIComponent(normalised)}`, { signal })
+    if (!response.ok) return { hits: [], unavailable: false }
+    const body = (await response.json()) as { hits?: unknown; unavailable?: unknown }
+    if (body.unavailable === true) return { hits: [], unavailable: true }
     const hits: AddressHit[] = []
-    for (const raw of body.features ?? []) {
-      const feature = raw as { place_name?: unknown; center?: unknown }
-      const name = typeof feature.place_name === 'string' ? feature.place_name : ''
-      const center = Array.isArray(feature.center) ? feature.center : []
-      const [lng, lat] = center as number[]
+    for (const raw of Array.isArray(body.hits) ? body.hits : []) {
+      const hit = (raw ?? {}) as { name?: unknown; center?: unknown }
+      const name = typeof hit.name === 'string' ? hit.name : ''
+      const center = Array.isArray(hit.center) ? (hit.center as unknown[]) : []
+      const lng = typeof center[0] === 'number' ? center[0] : NaN
+      const lat = typeof center[1] === 'number' ? center[1] : NaN
       if (name && Number.isFinite(lng) && Number.isFinite(lat)) hits.push({ name, center: [lng, lat] })
     }
+    // Only a real answer is cached; a failure must not become a permanent
+    // "nothing here" for the rest of the session.
     cache.set(normalised, hits)
-    return hits
+    return { hits, unavailable: false }
   } catch {
-    // Aborted, offline, rate-limited: no suggestions, no crash.
-    return []
+    return { hits: [], unavailable: false }
   }
 }
 
