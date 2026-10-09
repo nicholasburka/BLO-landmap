@@ -647,6 +647,62 @@ says "Address search is not switched on for this server" — not "Nothing
 found", which would be a lie about the address rather than the truth about the
 deploy.
 
+### P9-12 [FEATURE] "Show on map" builds a set instead of leaving the page — DONE
+Nick, 2026-10-08: *"the analysis → map shouldn't just open the public map,
+instead it should open the map pane with all displayable datasets listed but
+untoggled by default, so the user can play with all possible datasets, and
+dynamically create a working set/view."*
+
+Today the tool card on `/analysis` is `href: '/'` — it navigates away to the
+public map, and whatever the reader turns on there is lost to this page. The
+card's own hint admits it: *"Opens the map, where the layer picker is."*
+
+Instead it opens the pane **in place**, listing everything drawable — internal
+county layers, internal point and line layers, and the public registry's —
+**all off**, because a picker that pre-selects has made the choice the reader
+came to make. They toggle, they look, and when the combination is worth
+keeping they name it and it becomes a working set, which is the object the
+rest of phase 9 already knows how to weigh, compare and map.
+
+That is the missing direction. P9-0…P9-11 all assume a set EXISTS; the only
+ways to get one are the API and a promotion flow. This is the one where
+playing with the data produces the set, rather than requiring it first.
+
+Below the pane's breakpoint the existing link to `/` stands, as it does
+everywhere else (P6-14).
+**Size: M.** Independent.
+
+**Done.** `ExploreMapPane` on `/analysis`: 38 layers offered on the real
+library, none of them on, toggling draws, and a named selection becomes a set
+with a link straight into it. The tool's `href: '/'` survives as the
+narrow-window fallback and as something to right-click.
+
+**It does NOT use `useShowOnMap`, and the reason is worth keeping.** That
+composable exists to push a PAGE's selection into a map. Here the map's
+selection *is* the page's, so feeding it back through the composable made a
+cycle: its `apply()` rewrites the very arrays the getter reads. Vue caught it
+as "maximum recursive updates exceeded" — and the throw **aborted the rest of
+the mount hooks**, including `useMediaQuery`'s, so `canOpen` stayed false and
+the pane insisted there was no room for a map on a 1,440px window. The symptom
+pointed at the breakpoint; the cause was a render loop three layers away. It
+drives `useMapState` + `useMapPane` directly now, exactly as the public map
+does, and there is no loop to be clever about.
+
+Two things that cost time and are worth writing down. A first attempt at a
+"stable identity" getter did not help, because the dependencies themselves
+genuinely change on every `apply()` — the fix for a cycle is removing it, not
+memoising it. And the error only ever surfaced as a **`pageerror`**, not a
+console error, so a check that listened for console errors alone reported the
+page as clean while it was looping.
+
+`useMapState` starts on the public map's default layer, which is right for `/`
+and wrong here, so everything is cleared on mount: a picker that arrives
+pre-selected has made the choice the reader opened it to make.
+
+**Not exercised live:** pressing "Make the set" writes a real working set to
+the shared bucket and there is still no delete (P8-2), so the write path is
+covered by tests rather than by a set nobody asked for.
+
 ### P9-9 [BUG] A county with no EPA record scores as if it had no contamination
 **Affects the PUBLISHED index.** Deferred by Nick on 2026-10-08 — noted now,
 fixed later.
@@ -1083,7 +1139,7 @@ were the good part.
 
 ```
 DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 ─ P9-6a ─ P9-6b ─ P9-6c ─ P9-7 ─ P9-8
-      P9-10 ─ P9-11
+      P9-10 ─ P9-11 ─ P9-12
 
 next:  P9-9   contamination                (deferred by Nick)
 ```

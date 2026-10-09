@@ -14,10 +14,11 @@
  *    datasets browser narrowed to the tables we actually hold — pick one and
  *    its Data tab is the explorer. The card says so, rather than leaving the
  *    reader on a list wondering.
- *  - *Show on map* opens the public map itself (`/`), which is where the
- *    layer picker lives. A saved view would be a shortcut to one particular
- *    answer; the tool card is for the person who has not chosen a layer yet,
- *    and the saved views they might want are in the list right below.
+ *  - *Show on map* opens a pane on THIS page (P9-12), listing every layer we
+ *    can draw with all of them off, and turns whatever the reader switches on
+ *    into a working set. It used to navigate to `/`, which meant the
+ *    combination somebody built was lost to this page the moment they built
+ *    it. The link to `/` survives as the narrow-window fallback.
  *
  * **Recent analyses** merges the two places an analysis is kept — saved views
  * (catalog documents) and cached place reports (the server's index) — into
@@ -46,6 +47,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import KbNav from '@/components/KbNav.vue'
+import ExploreMapPane from '@/components/ExploreMapPane.vue'
 import { recentAnalyses, type Analysis } from '@/lib/analyses'
 import { fetchPlaceReports, type PlaceReportRow } from '@/lib/placeReport'
 import { fetchViews, type SavedViewSummary } from '@/lib/views'
@@ -86,6 +88,9 @@ interface Tool {
   href: string
   /** What pressing Start actually lands on, when that needs saying. */
   hint?: string
+  /** P9-12: Start opens a pane on this page instead of navigating. `href`
+   *  stays the fallback below the pane's breakpoint. */
+  opensPane?: boolean
 }
 
 const TOOLS: Tool[] = [
@@ -111,15 +116,21 @@ const TOOLS: Tool[] = [
   {
     id: 'map',
     name: 'Show on map',
-    description: 'Draw a layer over the counties and read it where it lands.',
+    description: 'Draw any of our layers over the counties, together, and keep the combination.',
+    // P9-12: opens the pane HERE rather than navigating to `/`. The href is
+    // kept as the narrow-window fallback and as a real link to right-click.
     href: '/',
-    hint: 'Opens the map, where the layer picker is.',
+    hint: 'Opens a map on this page with every layer we can draw, all off.',
+    opensPane: true,
   },
 ]
 
 /** How many rows "recent" means. Long enough to be a memory, short enough to
  *  read without scrolling past the tools. */
 const RECENT_LIMIT = 12
+
+/** P9-12: whether the in-page map is open. */
+const exploring = ref(false)
 
 const views = ref<SavedViewSummary[]>([])
 const reports = ref<PlaceReportRow[]>([])
@@ -379,9 +390,23 @@ function whoAndWhen(analysis: Analysis): string {
           <h2 class="tool-name">{{ tool.name }}</h2>
           <p class="tool-description">{{ tool.description }}</p>
           <p v-if="tool.hint" class="tool-hint" data-testid="tool-hint">{{ tool.hint }}</p>
-          <RouterLink :to="tool.href" class="tool-start" data-testid="tool-start">Start</RouterLink>
+          <!-- P9-12: the map tool opens in place, because what a reader turns
+               on is the thing worth keeping and navigating away loses it. -->
+          <button
+            v-if="tool.opensPane"
+            type="button"
+            class="tool-start"
+            data-testid="tool-start"
+            :aria-expanded="exploring"
+            @click="exploring = !exploring"
+          >
+            {{ exploring ? 'Close' : 'Start' }}
+          </button>
+          <RouterLink v-else :to="tool.href" class="tool-start" data-testid="tool-start">Start</RouterLink>
         </li>
       </ul>
+
+      <ExploreMapPane v-if="exploring" @close="exploring = false" />
 
       <!-- P7-1: what an analysis runs AGAINST, above the record of what has
            been run. -->

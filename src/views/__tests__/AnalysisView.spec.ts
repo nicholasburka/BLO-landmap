@@ -201,13 +201,30 @@ describe('the tool cards (P6-4)', () => {
     // Not a route of its own: the explorer is a tab on an entry, so this
     // opens the browser narrowed to the tables we hold.
     expect(hrefOf('explore')).toBe('/datasets?readiness=held')
-    expect(hrefOf('map')).toBe('/')
+    // P9-12: the map tool is a BUTTON now — it opens a pane on this page,
+    // because navigating to `/` lost whatever combination a reader built.
+    expect(hrefOf('map')).toBeUndefined()
+    expect(w.get('[data-tool="map"] [data-testid="tool-start"]').element.tagName).toBe('BUTTON')
+  })
+
+  it('opens the map on this page, with everything off and nothing to keep yet', async () => {
+    const w = await mountIt()
+    expect(w.find('[data-testid="explore-map"]').exists()).toBe(false)
+    await w.get('[data-tool="map"] [data-testid="tool-start"]').trigger('click')
+    expect(w.find('[data-testid="explore-map"]').exists()).toBe(true)
+    // Nothing is selected, so there is nothing to name yet — a picker that
+    // pre-selects has made the choice the reader came to make.
+    expect(w.find('[data-testid="explore-chosen"]').exists()).toBe(false)
+    // And it closes again from the same control.
+    expect(w.get('[data-tool="map"] [data-testid="tool-start"]').text()).toBe('Close')
+    await w.get('[data-tool="map"] [data-testid="tool-start"]').trigger('click')
+    expect(w.find('[data-testid="explore-map"]').exists()).toBe(false)
   })
 
   it('says where the two that are not pages of their own actually land', async () => {
     const w = await mountIt()
     expect(w.get('[data-tool="explore"] [data-testid="tool-hint"]').text()).toContain('Data tab')
-    expect(w.get('[data-tool="map"] [data-testid="tool-hint"]').text()).toContain('layer picker')
+    expect(w.get('[data-tool="map"] [data-testid="tool-hint"]').text()).toContain('every layer we can draw')
     expect(w.find('[data-tool="place"] [data-testid="tool-hint"]').exists()).toBe(false)
   })
 })
