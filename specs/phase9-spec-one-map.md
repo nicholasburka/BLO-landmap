@@ -703,6 +703,58 @@ pre-selected has made the choice the reader opened it to make.
 the shared bucket and there is still no delete (P8-2), so the write path is
 covered by tests rather than by a set nobody asked for.
 
+### P9-13 [BUG] One vocabulary for what a control does
+From the navigation audit (`specs/ux-audit-navigation.md`), which enumerated
+every control on five surfaces rather than eyeballing them. The pages are
+individually fine; the SYSTEM has no shared vocabulary for "what will this do
+to me", so the same shape means four different things.
+
+**Rule 1 — a control's shape says what it will do.** Three kinds: **Go** (a
+link; the URL changes), **Show** (quiet button; changes this screen, free and
+reversible), **Write** (solid button; changes something stored, for
+everybody). Today six buttons share the class `derived-rerun` and cover all
+three: "Draw on the map" (Show), "Weigh it differently" (Show) and "Run
+again" (**Write** — it recomputes on the server and rewrites the column) are
+visually identical, while "Save as an index" is a *different* Write with a
+different look. A reader cannot tell which press is free. The class is named
+after the rarest of the three, which is how it happened: every new control
+reached for the nearest existing style, mine included.
+
+**Rule 2 — name the destination, not the gesture.** `/analysis` has four
+controls labelled "Start" sharing one class: three navigate (two to tools,
+one to a filtered list) and one — added by P9-12 — expands a pane in place. I
+gave it the same class so it would look consistent, which is backwards. The
+hint text under each card exists only because the label cannot say where it
+goes; replace the labels and delete the hints.
+
+**Rule 3 — one label, one destination.** "Redevelopment dashboard" appears
+twice on `/kb` and twice on `/analysis`, once pointing at the set and once at
+its view. The set/view split is the spine of this phase (§F) and navigation
+is the one surface hiding it.
+
+**Size: S.** Rules 2 and 3 are copy; rule 1 is a styling change plus two class
+renames.
+
+### P9-14 [FEATURE] Make the new analyses findable
+The same audit's structural half. Everything built in P9-6a…P9-12 lives four
+levels deep — `/analysis` → a set's view → Map interface → scroll past the
+map — and nothing anywhere points at it. The six tool cards on `/analysis`,
+which are the page's answer to "what can I run?", list none of re-weighting,
+correlation, distribution, coverage, rollup or address lookup, because those
+were built as parts of a set's page rather than as tools.
+
+Two parts:
+
+- **A contents strip on the workspace**, naming what is on the page and
+  jumping to it — Layers · Weigh the index · Look at a layer · Compare
+  versions · Find an address. Converts five hidden features into five visible
+  ones for about ten lines.
+- **The tool cards should list the tools**, including the ones that need a
+  set. P9-3 already solved precisely this — *a gated capability says why*
+  rather than vanishing — and the same treatment belongs on the cards.
+
+**Size: M.** Depends on nothing, but reads better after P9-13.
+
 ### P9-9 [BUG] A county with no EPA record scores as if it had no contamination
 **Affects the PUBLISHED index.** Deferred by Nick on 2026-10-08 — noted now,
 fixed later.
@@ -1141,7 +1193,9 @@ were the good part.
 DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 ─ P9-6a ─ P9-6b ─ P9-6c ─ P9-7 ─ P9-8
       P9-10 ─ P9-11 ─ P9-12
 
-next:  P9-9   contamination                (deferred by Nick)
+next:  P9-13  one vocabulary for controls  ← from the navigation audit
+       P9-14  make the analyses findable   (reads better after P9-13)
+       P9-9   contamination                (deferred by Nick)
 ```
 
 **P9-6a is done** and reviewed in a browser (`specs/ux-audit-p9-6a.md`): open a
