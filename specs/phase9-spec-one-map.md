@@ -780,6 +780,60 @@ answer to "how do I weigh an index" is "open a set", and the sets are listed
 directly below, so the card says that rather than offering a control that
 would have to refuse.
 
+### P9-15 [BUG] Prominence should follow consequence
+From the coherence review (`specs/ux-review-coherence.md`), which measured
+every control's computed appearance across nine surfaces rather than judging
+by eye.
+
+**The two heaviest controls in the product are the two with the least
+consequence.** "Open the place report" and "Browse the tables we hold" are
+solid black, 13px/600, 6×18px — and they navigate. "Save as an index" and
+"Run again" write to the shared library and recompute on the server, and they
+are green at 12px/600, 2×8px: about a third of the visual weight.
+
+This is one day old and it is mine. P9-13 gave *Write* a solid green
+treatment, correct in isolation, without reconciling it against the solid
+black `tool-start` that was already there — so the product has **two primary
+looks and the heavier one means less**.
+
+One primary look, belonging to the most consequential control on the page:
+`tool-start` becomes a bordered link-button, `.blo-act--write` keeps the fill
+and grows to the size `tool-start` had.
+
+**Also in scope, because it is the same sweep:** one type scale. A page title
+is 28/400, 27.2/500, 25.6/500 or **22/400** depending which of four page
+families you are on, with no difference in importance to justify it — and the
+workspace, the deepest page in the product, has the smallest title and an
+`h3` (15.2px) larger than the `h2`s above it (14px, 13px).
+**Size: S.**
+
+### P9-16 [BUG] The deepest pages are the only ones you cannot navigate from
+Seven of nine surfaces carry the global nav — Datasets · Docs · Analysis ·
+Search · Chat · New. **A library entry and a working set's workspace do
+not**, and those are the two pages a researcher spends the most time on. From
+a workspace there is no way to reach Datasets, Docs, Search, Chat or New
+without going back to `/analysis` first.
+
+The contextual back link (`← Analysis` / `← Datasets`, by where you came
+from) is good and stays. It is one step of history, not navigation.
+
+`KbNav` on both, under the back link. **Size: S.**
+
+### P9-17 [CHORE] Prune the button tail
+24 distinct button appearances across nine pages. The top three account for
+94 uses and the remaining 21 for about 30, most appearing on a single page —
+so this is a long tail, not a system. The workspace alone has seven looks and
+four panel treatments, because five features landed there in a week and each
+brought its own styling.
+
+Sweep the tail into `.blo-act` / `.blo-act--write` / chip, including the
+unstyled `<select>` still sitting on `/new` at Chrome's 13.3333px default —
+the same defect fixed in the analysis card yesterday, which is the argument
+for a shared vocabulary doing this work instead of one fix per component.
+
+**Last on purpose:** doing it before P9-15 settles the rules would re-create
+the tail in a different shape. **Size: M.**
+
 ### P9-9 [BUG] A county with no EPA record scores as if it had no contamination
 **Affects the PUBLISHED index.** Deferred by Nick on 2026-10-08 — noted now,
 fixed later.
@@ -1218,7 +1272,10 @@ were the good part.
 DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 ─ P9-6a ─ P9-6b ─ P9-6c ─ P9-7 ─ P9-8
       P9-10 ─ P9-11 ─ P9-12 ─ P9-13 ─ P9-14
 
-next:  P9-9   contamination                (deferred by Nick)
+next:  P9-15  prominence follows consequence  ← from the coherence review
+       P9-16  global nav on the deep pages
+       P9-17  prune the button tail          (after P9-15)
+       P9-9   contamination                  (deferred by Nick)
 ```
 
 **P9-6a is done** and reviewed in a browser (`specs/ux-audit-p9-6a.md`): open a
