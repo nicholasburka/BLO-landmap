@@ -9,6 +9,7 @@ import { isSiteLayerId, siteLayerName } from '@/config/siteLayers'
 import { friendlyError } from '@/lib/errors'
 import { annotateAgain } from '@/lib/bulkDrop'
 import { useRoute, useRouter } from 'vue-router'
+import KbNav from '@/components/KbNav.vue'
 import DatasetView from './DatasetView.vue'
 import {
   fetchCatalogEntry,
@@ -938,6 +939,11 @@ async function reloadEntry(): Promise<void> {
 <template>
   <div class="entry-view">
     <div class="entry-panel">
+      <!-- P9-16: the global nav belongs here too. An entry page is where a
+           researcher spends their time, and it was one of only two surfaces
+           in the app you could not navigate FROM — the back link is one step
+           of history, not a way to Datasets, Docs, Search, Chat or New. -->
+      <KbNav />
       <RouterLink :to="browserHome.to" class="back-link">← {{ browserHome.label }}</RouterLink>
 
       <p v-if="loading" class="state-note">Loading entry…</p>
@@ -954,7 +960,7 @@ async function reloadEntry(): Promise<void> {
           <button
             v-if="primaryFile"
             type="button"
-            class="edit-btn"
+            class="blo-act edit-btn"
             data-testid="read-entry"
             @click="openView(primaryFile)"
           >
@@ -963,7 +969,7 @@ async function reloadEntry(): Promise<void> {
           <button
             v-if="entry.kind === 'source' && !filingFormOpen"
             type="button"
-            class="edit-btn"
+            class="blo-act edit-btn"
             data-testid="edit-source"
             @click="openFilingForm"
           >
@@ -1060,7 +1066,7 @@ async function reloadEntry(): Promise<void> {
           <p v-if="savedView.type === 'table' && savedView.dataset" class="view-holds" data-testid="view-dataset">
             Table: <RouterLink :to="`/library/${savedView.dataset}`">{{ savedView.dataset }}</RouterLink>
           </p>
-          <RouterLink :to="`/views/${entry.slug}`" class="file-btn view-open" data-testid="view-open">
+          <RouterLink :to="`/views/${entry.slug}`" class="blo-act blo-act--lg view-open" data-testid="view-open">
             Open this view →
           </RouterLink>
           <p class="view-embed" data-testid="view-embed">
@@ -1104,7 +1110,7 @@ async function reloadEntry(): Promise<void> {
             </template>
             <template v-else>No views of it yet — open the map, press Save view, and point it at this set.</template>
           </p>
-          <RouterLink :to="`/place?set=${entry.slug}`" class="file-btn view-open" data-testid="working-set-place">
+          <RouterLink :to="`/place?set=${entry.slug}`" class="blo-act blo-act--lg view-open" data-testid="working-set-place">
             Check a place in this set →
           </RouterLink>
           <!-- P8-3: WHAT is in the set, on the page. The manifest holds slugs
@@ -1157,7 +1163,7 @@ async function reloadEntry(): Promise<void> {
             <button
               v-if="canRetryFetch"
               type="button"
-              class="retry-btn"
+              class="blo-act"
               data-testid="fetch-retry"
               :disabled="refetching"
               @click="tryFetchAgain"
@@ -1266,7 +1272,7 @@ async function reloadEntry(): Promise<void> {
             <button
               v-if="showFetchForPlace"
               type="button"
-              class="file-btn fetch-btn"
+              class="blo-act"
               :aria-expanded="placeOpen"
               data-testid="fetch-for-place"
               @click="togglePlacePanel"
@@ -1330,7 +1336,7 @@ async function reloadEntry(): Promise<void> {
 
         <div v-if="entry.kind === 'note'" class="note-block">
           <p class="note-body">{{ noteBody }}</p>
-          <button v-if="!editOpen" type="button" class="edit-btn" @click="editOpen = true">
+          <button v-if="!editOpen" type="button" class="blo-act edit-btn" @click="editOpen = true">
             Edit
           </button>
         </div>
@@ -1348,15 +1354,15 @@ async function reloadEntry(): Promise<void> {
           <TaxonomyFields v-model:category="editCategory" v-model:tags="editTags" :disabled="filing" />
           <label class="status-label">
             Status
-            <select v-model="editStatus" aria-label="Status">
+            <select v-model="editStatus" class="blo-select" aria-label="Status">
               <option v-for="s in editStatusOptions" :key="s" :value="s">{{ s }}</option>
             </select>
           </label>
           <div class="edit-actions">
-            <button type="submit" class="file-btn" :disabled="filing">
+            <button type="submit" class="blo-act blo-act--write blo-act--lg" :disabled="filing">
               {{ filing ? 'Saving…' : 'Save' }}
             </button>
-            <button type="button" class="cancel-btn" :disabled="filing" @click="editOpen = false">
+            <button type="button" class="blo-act cancel-btn" :disabled="filing" @click="editOpen = false">
               Cancel
             </button>
           </div>
@@ -1430,7 +1436,7 @@ async function reloadEntry(): Promise<void> {
                 <dd data-testid="suggested-shape">{{ shapeLabel(suggestion.shape) }}</dd>
               </template>
             </dl>
-            <button type="button" class="file-btn apply-btn" data-testid="apply-suggestion" @click="applySuggestion">
+            <button type="button" class="blo-act apply-btn" data-testid="apply-suggestion" @click="applySuggestion">
               Apply suggestion
             </button>
             <p class="suggestion-why" data-testid="suggestion-why">
@@ -1457,13 +1463,13 @@ async function reloadEntry(): Promise<void> {
           </label>
           <SourceFields v-if="filingIsSource" v-model="filingSourceForm" :disabled="filing" :inferred="filingInferred" />
           <div class="edit-actions">
-            <button type="submit" class="file-btn" :disabled="filing">
+            <button type="submit" class="blo-act blo-act--write blo-act--lg" :disabled="filing">
               {{ filing ? 'Saving…' : entry.kind === 'source' ? 'Save' : entry.status === 'needs-cataloging' ? 'File' : 'Re-file' }}
             </button>
             <button
               v-if="entry.kind === 'source'"
               type="button"
-              class="cancel-btn"
+              class="blo-act cancel-btn"
               :disabled="filing"
               data-testid="cancel-source-edit"
               @click="closeFilingForm"
@@ -1523,7 +1529,7 @@ async function reloadEntry(): Promise<void> {
             Internal {{ layerSummary?.geometry ?? 'county' }} layer on the map (logged-in users only).
             <template v-if="layerSummary?.description"> {{ layerSummary.description }}</template>
           </p>
-          <RouterLink v-if="layerId" :to="mapHref" class="file-btn map-btn" data-testid="map-open">Show on map →</RouterLink>
+          <RouterLink v-if="layerId" :to="mapHref" class="blo-act blo-act--lg map-btn" data-testid="map-open">Show on map →</RouterLink>
           <h3>Saved views using this layer</h3>
           <ul v-if="views.length" class="ref-list" data-testid="layer-views">
             <li v-for="v in views" :key="v.slug">
@@ -1620,7 +1626,7 @@ async function reloadEntry(): Promise<void> {
             <button
               v-if="canLookAgain"
               type="button"
-              class="retry-btn"
+              class="blo-act"
               data-testid="look-again"
               :disabled="refetching"
               @click="lookAgain"
@@ -1704,10 +1710,11 @@ async function reloadEntry(): Promise<void> {
   gap: 10px;
 }
 
+/* P9-15: 1.7rem like every other page title, not 1.6. */
 .title-row h1 {
   margin: 0;
   font-family: var(--blo-font-display);
-  font-size: 1.6rem;
+  font-size: 1.7rem;
   font-weight: 500;
   color: var(--blo-ink);
 }
@@ -1880,17 +1887,10 @@ async function reloadEntry(): Promise<void> {
   overflow-wrap: anywhere;
 }
 
+/* Layout only; `.blo-act` carries the look. */
 .edit-btn,
 .cancel-btn {
   margin-top: 10px;
-  padding: 4px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--blo-ink);
-  background: transparent;
-  border: 1px solid var(--blo-cream-divider);
-  border-radius: 6px;
-  cursor: pointer;
 }
 
 .cancel-btn {
@@ -1911,15 +1911,7 @@ async function reloadEntry(): Promise<void> {
   color: var(--blo-stone);
 }
 
-.status-label select {
-  padding: 6px 10px;
-  font-size: 14px;
-  font-family: inherit;
-  color: var(--blo-ink);
-  background: #ffffff;
-  border: 1px solid var(--blo-cream-divider);
-  border-radius: 6px;
-}
+
 
 .edit-actions {
   display: flex;
@@ -1954,21 +1946,7 @@ async function reloadEntry(): Promise<void> {
   resize: vertical;
 }
 
-.file-btn {
-  padding: 6px 18px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #ffffff;
-  background: var(--blo-ink);
-  border: 1px solid var(--blo-ink);
-  border-radius: 6px;
-  cursor: pointer;
-}
 
-.file-btn:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
 
 .filing-note {
   margin: 0;
@@ -2214,25 +2192,8 @@ h2 {
   color: #8a3b2f;
 }
 
-.retry-btn {
-  padding: 2px 10px;
-  font: inherit;
-  font-size: 12px;
-  color: var(--blo-green-deep);
-  background: none;
-  border: 1px solid var(--blo-cream-divider);
-  border-radius: 999px;
-  cursor: pointer;
-}
 
-.retry-btn:hover:not(:disabled) {
-  background: var(--blo-cream);
-}
 
-.retry-btn:disabled {
-  cursor: default;
-  opacity: 0.6;
-}
 
 /* --- Suggested filing (P5-47) ---
    Deliberately set apart from the form fields below it: what the assistant
@@ -2391,9 +2352,6 @@ h2 {
   flex: 1 1 260px;
 }
 
-.fetch-btn {
-  cursor: not-allowed;
-}
 
 .link-btn {
   padding: 0;
@@ -2764,11 +2722,10 @@ h2 {
   /* Forms stack full width; 16 px keeps iOS from zooming on focus. */
   .filing-form input,
   .filing-form textarea,
+  /* Width is layout and stays; the 44px and the 16px are `.blo-select`. */
   .status-label select {
     width: 100%;
     box-sizing: border-box;
-    min-height: 44px;
-    font-size: 16px;
   }
 
   .status-label {
@@ -2790,10 +2747,8 @@ h2 {
     margin-top: 10px;
   }
 
-  .file-btn,
-  .edit-btn,
-  .cancel-btn,
-  .retry-btn,
+  /* `.blo-act` carries this now, in base.css, for every page. What is left
+     here is the two looks on this page that are not part of the vocabulary. */
   .link-btn,
   .browse-link {
     display: inline-flex;
@@ -2808,8 +2763,7 @@ h2 {
     flex-wrap: wrap;
   }
 
-  .edit-actions .file-btn,
-  .edit-actions .cancel-btn {
+  .edit-actions .blo-act {
     flex: 1 1 140px;
   }
 

@@ -780,7 +780,7 @@ answer to "how do I weigh an index" is "open a set", and the sets are listed
 directly below, so the card says that rather than offering a control that
 would have to refuse.
 
-### P9-15 [BUG] Prominence should follow consequence
+### P9-15 [BUG] Prominence should follow consequence — DONE 2026-10-09
 From the coherence review (`specs/ux-review-coherence.md`), which measured
 every control's computed appearance across nine surfaces rather than judging
 by eye.
@@ -807,7 +807,7 @@ workspace, the deepest page in the product, has the smallest title and an
 `h3` (15.2px) larger than the `h2`s above it (14px, 13px).
 **Size: S.**
 
-### P9-16 [BUG] The deepest pages are the only ones you cannot navigate from
+### P9-16 [BUG] The deepest pages are the only ones you cannot navigate from — DONE 2026-10-09
 Seven of nine surfaces carry the global nav — Datasets · Docs · Analysis ·
 Search · Chat · New. **A library entry and a working set's workspace do
 not**, and those are the two pages a researcher spends the most time on. From
@@ -819,7 +819,7 @@ from) is good and stays. It is one step of history, not navigation.
 
 `KbNav` on both, under the back link. **Size: S.**
 
-### P9-17 [CHORE] Prune the button tail
+### P9-17 [CHORE] Prune the button tail — DONE 2026-10-09
 24 distinct button appearances across nine pages. The top three account for
 94 uses and the remaining 21 for about 30, most appearing on a single page —
 so this is a long tail, not a system. The workspace alone has seven looks and
@@ -833,6 +833,48 @@ for a shared vocabulary doing this work instead of one fix per component.
 
 **Last on purpose:** doing it before P9-15 settles the rules would re-create
 the tail in a different shape. **Size: M.**
+
+**Done.** 41 controls across nine components now take the vocabulary, and
+`base.css` gained `.blo-select`, `.blo-act--lg`, an `a.blo-act` case and one
+phone rule. What is left outside it is deliberate: `link-btn` (19 uses, one of
+the three established looks), `tab-btn`, `/new`'s two full-width chooser
+targets, the chip tier, and two buttons that are *meant* to look like the
+thing they name (a file's own name, a quick-action strip of links).
+
+**Two claims in the paragraph above were wrong, and measuring is what showed
+it.** There was no unstyled `<select>` on `/new` — `/new` has no select at
+all. What existed was **six near-identical copies of the same select rule at
+five sizes** (0.78, 0.82, 0.86rem, 13px, 14px), three of them written as
+`.some-wrapper select` descendant rules, which is why every new panel holding
+a dropdown quietly needed another copy. I also recorded the promote panel's
+select as having no rule at all; it was styled, grouped with the text input
+beside it, where a per-class grep could not see it. The defect was real and
+the count was larger than ticketed; the location and the mechanism were both
+wrong in the ticket.
+
+**Three more solid-ink fills turned up that P9-15 had not found** — and two of
+them were `RouterLink`s. `.file-btn` dressed "Open this view →", "Check a
+place in this set →" and "Show on map →" in the same solid black that P9-15
+had just taken off `tool-start`, and `.promote-btn` gave it to three writes on
+`/analysis`. So the rule P9-15 wrote into `base.css` ("fill means
+consequence") was false in four more places on the day it was written. It is
+true now: measured in Chrome, `/analysis` has exactly two filled controls
+(Create, Measure — both writes) and a library entry has exactly one (Ask).
+
+**Two touch-target rules were quietly scoped to the page that happened to need
+them first.** The library entry's `@media (max-width: 640px)` block named six
+button classes and set them to 44px; `AskBox` did the same for one. Every
+control added on any other page missed both. They are `.blo-act` and
+`.blo-select` rules in `base.css` now. Verified at 375px: no horizontal
+overflow, every vocabulary control ≥44px.
+
+**One thing deliberately kept dense.** `NeedsALookNote`'s `.act` buttons were
+a byte-for-byte copy of `.blo-act` but for the padding — same green, same
+border, same 4px radius — and they sit *inside a sentence* ("Publisher —
+unknown · Keep Edit Clear"), with a deliberate 32px phone target rather than
+44px. They take `.blo-act` for the look and keep their own density; the scoped
+`.act[data-v-…]` outranks the global class, which is what makes that work, and
+32px still clears WCAG 2.5.8's 24px floor. Confirmed in Chrome at 375px.
 
 ### P9-9 [BUG] A county with no EPA record scores as if it had no contamination
 **Affects the PUBLISHED index.** Deferred by Nick on 2026-10-08 — noted now,
@@ -1270,12 +1312,15 @@ were the good part.
 
 ```
 DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 ─ P9-6a ─ P9-6b ─ P9-6c ─ P9-7 ─ P9-8
-      P9-10 ─ P9-11 ─ P9-12 ─ P9-13 ─ P9-14
+      P9-10 ─ P9-11 ─ P9-12 ─ P9-13 ─ P9-14 ─ P9-15 ─ P9-16 ─ P9-17
 
-next:  P9-15  prominence follows consequence  ← from the coherence review
-       P9-16  global nav on the deep pages
-       P9-17  prune the button tail          (after P9-15)
-       P9-9   contamination                  (deferred by Nick)
+next:  P9-9   contamination                  (deferred by Nick)
+
+       The three coherence tickets are done, so the control vocabulary in
+       base.css is now the whole of it: `.blo-act` (Show), `.blo-act--write`
+       (Write), `.blo-act--lg` (page-level), `.blo-select`, `a.blo-act` (a Go
+       that needs a press-sized box), and the chip. Anything new that wants a
+       look of its own is a decision, not a default.
 ```
 
 **P9-6a is done** and reviewed in a browser (`specs/ux-audit-p9-6a.md`): open a

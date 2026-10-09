@@ -449,14 +449,14 @@ function whoAndWhen(analysis: Analysis): string {
           <button
             v-else-if="tool.opensPane"
             type="button"
-            class="tool-start"
+            class="blo-act blo-act--lg tool-start"
             data-testid="tool-start"
             :aria-expanded="exploring"
             @click="exploring = !exploring"
           >
             {{ exploring ? 'Close the map' : tool.start }}
           </button>
-          <RouterLink v-else :to="tool.href" class="tool-start" data-testid="tool-start">{{ tool.start }}</RouterLink>
+          <RouterLink v-else :to="tool.href" class="blo-act blo-act--lg tool-start" data-testid="tool-start">{{ tool.start }}</RouterLink>
         </li>
       </ul>
 
@@ -518,7 +518,7 @@ function whoAndWhen(analysis: Analysis): string {
                 <button
                   v-if="row.set.sites"
                   type="button"
-                  class="set-tool"
+                  class="blo-act"
                   data-testid="set-proximity"
                   @click="openProximity(row.set)"
                 >
@@ -533,7 +533,7 @@ function whoAndWhen(analysis: Analysis): string {
                    the missing half instead of disappearing. -->
               <template v-if="indexableLayers(row.set).length >= 2">
                 ·
-                <button type="button" class="set-tool" data-testid="set-index" @click="openIndex(row.set)">
+                <button type="button" class="blo-act" data-testid="set-index" @click="openIndex(row.set)">
                   {{ indexFor === row.set.slug ? 'Close' : 'Create a combined ranking (index)' }}
                 </button>
               </template>
@@ -597,7 +597,7 @@ function whoAndWhen(analysis: Analysis): string {
                          manifest field somebody can edit later. -->
                     <select
                       v-model="indexTerms[layer.id].direction"
-                      class="index-direction"
+                      class="blo-select"
                       :aria-label="`Which end of ${layer.name} is better`"
                       :data-testid="`index-direction-${layer.id}`"
                     >
@@ -610,7 +610,7 @@ function whoAndWhen(analysis: Analysis): string {
               <div class="proximity-row">
                 <button
                   type="submit"
-                  class="promote-btn"
+                  class="blo-act blo-act--write blo-act--lg"
                   :disabled="indexFormula.length < 2 || !indexName.trim() || indexing"
                   data-testid="index-submit"
                 >
@@ -671,7 +671,7 @@ function whoAndWhen(analysis: Analysis): string {
               </p>
               <div class="proximity-row">
                 <label class="proximity-label" :for="`prox-to-${row.set.slug}`">Measure to</label>
-                <select :id="`prox-to-${row.set.slug}`" v-model="proximityTo" data-testid="proximity-to">
+                <select :id="`prox-to-${row.set.slug}`" v-model="proximityTo" class="blo-select" data-testid="proximity-to">
                   <option v-for="layer in measurableLayers(row.set)" :key="layer.id" :value="layer.id">
                     {{ layer.name }}
                   </option>
@@ -688,7 +688,7 @@ function whoAndWhen(analysis: Analysis): string {
                   placeholder="miles"
                   data-testid="proximity-within"
                 />
-                <button type="submit" class="promote-btn" :disabled="!proximityTo || measuring" data-testid="proximity-submit">
+                <button type="submit" class="blo-act blo-act--write blo-act--lg" :disabled="!proximityTo || measuring" data-testid="proximity-submit">
                   {{ measuring ? 'Measuring…' : 'Measure' }}
                 </button>
               </div>
@@ -733,7 +733,7 @@ function whoAndWhen(analysis: Analysis): string {
         <form v-if="adHocViews.length" class="promote" data-testid="promote-form" @submit.prevent="promote">
           <label class="promote-label" for="promote-view">Make a working set from a saved view</label>
           <div class="promote-row">
-            <select id="promote-view" v-model="promoteFrom" class="promote-select" data-testid="promote-view">
+            <select id="promote-view" v-model="promoteFrom" class="blo-select promote-select" data-testid="promote-view">
               <option value="">Choose a view…</option>
               <option v-for="view in adHocViews" :key="view.slug" :value="view.slug">{{ view.name }}</option>
             </select>
@@ -744,7 +744,7 @@ function whoAndWhen(analysis: Analysis): string {
               placeholder="Name it (or keep the view's name)"
               data-testid="promote-name"
             />
-            <button type="submit" class="promote-btn" :disabled="!promoteFrom || promoting" data-testid="promote-submit">
+            <button type="submit" class="blo-act blo-act--write blo-act--lg" :disabled="!promoteFrom || promoting" data-testid="promote-submit">
               {{ promoting ? 'Making…' : 'Make a working set' }}
             </button>
           </div>
@@ -905,10 +905,15 @@ function whoAndWhen(analysis: Analysis): string {
   gap: 6px;
 }
 
+/* Layout only. `.promote-name` is a text input and keeps its own look; the
+   select beside it takes `.blo-select`, which is the same look by design. */
 .promote-select,
 .promote-name {
   flex: 1 1 180px;
   min-width: 0;
+}
+
+.promote-name {
   padding: 6px 8px;
   font-family: inherit;
   font-size: 13px;
@@ -916,22 +921,6 @@ function whoAndWhen(analysis: Analysis): string {
   background: #ffffff;
   border: 1px solid var(--blo-cream-divider);
   border-radius: 6px;
-}
-
-.promote-btn {
-  padding: 6px 12px;
-  font-family: inherit;
-  font-size: 13px;
-  color: #ffffff;
-  background: var(--blo-ink);
-  border: 1px solid var(--blo-ink);
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.promote-btn:disabled {
-  opacity: 0.45;
-  cursor: default;
 }
 
 .promote-note {
@@ -978,17 +967,14 @@ function whoAndWhen(analysis: Analysis): string {
   color: var(--blo-stone);
 }
 
+/* P9-15: bordered, not filled. This goes somewhere; it does not DO anything,
+   and a solid fill outranking every write in the product was the single
+   clearest thing the coherence review found. `.blo-act .blo-act--lg` carries
+   the look; what stays here is only this card's layout. */
 .tool-start {
   align-self: flex-start;
   margin-top: 8px;
-  padding: 6px 18px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #ffffff;
   text-decoration: none;
-  background: var(--blo-ink);
-  border: 1px solid var(--blo-ink);
-  border-radius: 6px;
 }
 
 .recent-heading {
@@ -1141,18 +1127,6 @@ a.analysis-row:hover {
   font-size: 0.86rem;
 }
 
-.set-tool {
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  color: var(--blo-green, #2f6b4f);
-  text-decoration: underline;
-  cursor: pointer;
-}
-.set-tool:hover {
-  text-decoration: none;
-}
 .proximity {
   margin: 10px 0 0;
   padding: 12px 14px;
@@ -1175,15 +1149,6 @@ a.analysis-row:hover {
 .proximity-label {
   font-size: 13px;
   color: #4a4a44;
-}
-.proximity-row select {
-  padding: 6px 8px;
-  font: inherit;
-  font-size: 13px;
-  border: 1px solid rgba(0, 0, 0, 0.18);
-  border-radius: 6px;
-  background: #fff;
-  max-width: 260px;
 }
 .index-name {
   flex: 1 1 14rem;
@@ -1230,10 +1195,6 @@ a.analysis-row:hover {
   border-radius: 4px;
 }
 
-.index-direction {
-  padding: 0.25rem 0.4rem;
-  font: inherit;
-}
 
 .index-hint {
   font-size: 0.82rem;

@@ -5,7 +5,7 @@
        and nothing is written until a reader asks for it. The view is the
        sandbox; the set is the record. -->
   <section class="weights" data-testid="index-weight-editor">
-    <h3 class="w-title">Weigh it differently</h3>
+    <h2 class="w-title">Weigh it differently</h2>
 
     <ul class="w-rows">
       <li v-for="t in rows" :key="t.layer" class="w-row" data-testid="weight-row">
@@ -23,7 +23,7 @@
           {{ t.weight === 0 ? 'out' : t.weight }}
         </span>
         <select
-          class="w-dir"
+          class="blo-select"
           data-testid="weight-direction"
           :value="t.direction"
           :aria-label="`Direction for ${t.name}`"
@@ -49,7 +49,7 @@
       />
       <button
         type="button"
-        class="blo-act blo-act--write"
+        class="blo-act blo-act--write blo-act--lg"
         data-testid="weight-save"
         :disabled="!canSave"
         :aria-describedby="whyNotSaveable ? 'weight-save-why' : undefined"
@@ -180,7 +180,6 @@ function reset(): void {
 .w-name { overflow-wrap: anywhere; }
 .w-weight { font-variant-numeric: tabular-nums; color: #6b6560; }
 .w-weight.off { color: #92400e; font-size: 0.78rem; }
-.w-dir { font-size: 0.78rem; }
 .w-save { display: flex; gap: 0.5rem; align-items: center; margin: 0.7rem 0 0; flex-wrap: wrap; }
 .w-name-input { flex: 1 1 10rem; min-width: 0; }
 .w-note { margin: 0.4rem 0 0; color: #6b6560; font-size: 0.82rem; }

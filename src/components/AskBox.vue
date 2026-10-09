@@ -58,7 +58,12 @@ function submit(): void {
       autocomplete="off"
       data-testid="ask-input"
     />
-    <button type="submit" class="ask-submit" :disabled="!question.trim()" data-testid="ask-submit">Ask</button>
+    <button
+      type="submit"
+      class="blo-act blo-act--write blo-act--lg ask-submit"
+      :disabled="!question.trim()"
+      data-testid="ask-submit"
+    >Ask</button>
   </form>
 </template>
 
@@ -85,21 +90,14 @@ function submit(): void {
   outline-offset: -1px;
 }
 
+/* P9-17: the look is `.blo-act--write` — the same green it already used, now
+   at the one size a page-level write takes. It was `font: inherit`, so it
+   rendered at a different size on each of the four pages that host this box.
+   The padding stays, because it is what keeps the button the same height as
+   the input beside it. */
 .ask-submit {
   flex: 0 0 auto;
   padding: 10px 20px;
-  font: inherit;
-  font-weight: 600;
-  color: #fff;
-  background: var(--blo-green-deep, #1f7a2e);
-  border: 0;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.ask-submit:disabled {
-  background: var(--blo-stone-soft, #9a948e);
-  cursor: default;
 }
 
 /* P5-60: the box people type a whole question into needs a real height, and

@@ -40,7 +40,7 @@
               placeholder="Sites and what bears on them"
               data-testid="explore-name"
             />
-            <button type="submit" class="blo-act blo-act--write" :disabled="!canSave" data-testid="explore-create">
+            <button type="submit" class="blo-act blo-act--write blo-act--lg" :disabled="!canSave" data-testid="explore-create">
               {{ saving ? 'Making it…' : 'Make the set' }}
             </button>
           </p>

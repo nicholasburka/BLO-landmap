@@ -147,3 +147,33 @@ tail in a different shape.
 
 **1–3 are each an hour or less and would carry most of the "does it feel like
 one product" weight.** 4 is housekeeping that gets easier once they are done.
+
+---
+
+## Found while doing P9-15/16/17, not acted on
+
+Two things turned up under measurement that are real but outside what the
+three tickets authorised.
+
+### Every internal page has two `<h1>`s
+`App.vue` renders the site title as an `<h1>` ("BLO Knowledge base" inside the
+library, "U.S. Livability Index" outside it), and each page then renders its
+own. Measured on `/datasets`, `/library/:slug` and `/views/:slug`: two `h1`
+elements, the site's at 22.4px *preceding* the page's at 27.2px.
+
+A screen-reader user asking "what is this page?" gets the site's name first.
+This is **pre-existing and app-wide** — `/datasets` has carried `KbNav` since
+P6-13 and shows it too — so P9-16 did not introduce it, which is the only
+reason it is a note rather than part of that fix. The site title wants to be a
+`<p>` or a `<span>`, or the page titles want to be `<h2>`; either is a
+one-line change and a decision about the whole app, so it should be its own
+ticket rather than a side effect of a nav fix.
+
+### `CountyRail` still has a solid-green "act on this county"
+`CountyRail.vue:951` describes a solid-green affordance chosen "so it visually
+outweighs" its neighbours. That is the public map's own design language, on a
+public-facing surface, and Nick asked specifically about not regressing the
+public map's styling — so it was left alone. Worth deciding deliberately
+whether `.blo-act--write`'s "fill means consequence" rule governs the public
+map too, or whether the public map is explicitly a second vocabulary. Right
+now it is neither, which is how `tool-start` happened.

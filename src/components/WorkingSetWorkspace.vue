@@ -39,6 +39,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import DatasetView from '@/views/DatasetView.vue'
+import KbNav from '@/components/KbNav.vue'
 import MapPane from '@/components/MapPane.vue'
 import SetLayerList from '@/components/SetLayerList.vue'
 import MapAddressSearch from '@/components/MapAddressSearch.vue'
@@ -944,6 +945,9 @@ onMounted(async () => {
 
 <template>
   <div class="set-workspace" data-testid="set-workspace">
+    <!-- P9-16: the other surface you could not navigate from. The workspace
+         is the densest page in the product and offered exactly one way out. -->
+    <KbNav />
     <RouterLink to="/analysis" class="back-link">← Analysis</RouterLink>
 
     <p v-if="loading" class="state-note" data-testid="workspace-loading">Opening the working set…</p>
@@ -1303,9 +1307,13 @@ onMounted(async () => {
   color: var(--blo-ink, #111);
 }
 
+/* P9-15: this was 22px Inter — the smallest title in the product, on its
+   deepest and densest page. */
 .workspace-head h1 {
   margin: 0;
-  font-size: 22px;
+  font-family: var(--blo-font-display);
+  font-size: 1.7rem;
+  font-weight: 500;
   color: var(--blo-ink, #111);
 }
 
@@ -1395,9 +1403,12 @@ onMounted(async () => {
   border-radius: 8px;
 }
 
+/* P9-15: 0.95rem like the other section headings beside it. At 13px this
+   section heading was SMALLER than the card titles next to it, so the most
+   substantial block on the page looked like the least. */
 .derived-heading {
   margin: 0 0 8px;
-  font-size: 13px
+  font-size: 0.95rem;
 }
 
 .derived-list {

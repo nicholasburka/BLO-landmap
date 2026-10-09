@@ -4,14 +4,14 @@
        costs nothing — where an analysis runs is our problem, not the
        reader's, and the answer here is "here, instantly". -->
   <section v-if="indices.length >= 2" class="index-compare" data-testid="index-compare">
-    <h3 class="ic-title">Compare two versions</h3>
+    <h2 class="ic-title">Compare two versions</h2>
 
     <p class="ic-pick">
-      <select v-model="leftId" aria-label="First index">
+      <select v-model="leftId" class="blo-select" aria-label="First index">
         <option v-for="c in indices" :key="c.id" :value="c.id">{{ c.label }}</option>
       </select>
       <span class="ic-vs">against</span>
-      <select v-model="rightId" aria-label="Second index">
+      <select v-model="rightId" class="blo-select" aria-label="Second index">
         <option v-for="c in indices" :key="c.id" :value="c.id">{{ c.label }}</option>
       </select>
     </p>
@@ -82,18 +82,6 @@ const verdict = computed(() => {
 </script>
 
 <style scoped>
-/* Same as the analysis card: a bare <select> renders in the UA's Arial among
-   the app's type, and sizes its native dropdown from that. */
-.ic-pick select {
-  font: inherit;
-  font-size: 0.86rem;
-  max-width: 100%;
-  padding: 2px 4px;
-  border: 1px solid var(--blo-cream-divider, #e0d9ca);
-  border-radius: 6px;
-  background: #fff;
-}
-
 .index-compare {
   margin: 1rem 0;
   padding: 0.75rem 0 0;

@@ -4,15 +4,15 @@
        so nothing on screen about where it runs — that is our problem, not the
        reader's. -->
   <section v-if="choices.length" class="analysis" data-testid="layer-analysis">
-    <h3 class="a-title">Look at a layer</h3>
+    <h2 class="a-title">Look at a layer</h2>
 
     <p class="a-pick">
       <label class="a-label" for="layer-analysis-pick">Layer</label>
-      <select id="layer-analysis-pick" v-model="pick" data-testid="analysis-layer">
+      <select id="layer-analysis-pick" v-model="pick" class="blo-select" data-testid="analysis-layer">
         <option v-for="c in choices" :key="c.id" :value="c.id">{{ c.name }}</option>
       </select>
       <label class="a-label" for="layer-analysis-against">against</label>
-      <select id="layer-analysis-against" v-model="against" data-testid="analysis-against">
+      <select id="layer-analysis-against" v-model="against" class="blo-select" data-testid="analysis-against">
         <option value="">nothing — just describe it</option>
         <option v-for="c in otherChoices" :key="c.id" :value="c.id">{{ c.name }}</option>
       </select>
@@ -253,19 +253,6 @@ const scatter = computed(() => {
 .a-title { margin: 0 0 0.5rem; font-size: 0.95rem; }
 .a-pick { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem; margin: 0 0 0.6rem; }
 .a-label { font-size: 0.82rem; color: #6b6560; }
-
-/* A bare <select> inherits nothing: it renders in the UA's own Arial at
-   13.3px among the app's type, and the native dropdown it opens is sized from
-   that. Saying `font: inherit` is what makes it look like it belongs here. */
-.a-pick select {
-  font: inherit;
-  font-size: 0.82rem;
-  max-width: 100%;
-  padding: 2px 4px;
-  border: 1px solid var(--blo-cream-divider, #e0d9ca);
-  border-radius: 6px;
-  background: #fff;
-}
 
 /* The chart draws from a 320-wide viewBox and scales to whatever box it is
    given, so the box is what keeps its text the size of everything else. */
