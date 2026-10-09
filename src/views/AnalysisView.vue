@@ -14,10 +14,11 @@
  *    datasets browser narrowed to the tables we actually hold — pick one and
  *    its Data tab is the explorer. The card says so, rather than leaving the
  *    reader on a list wondering.
- *  - *Show on map* opens the public map itself (`/`), which is where the
- *    layer picker lives. A saved view would be a shortcut to one particular
- *    answer; the tool card is for the person who has not chosen a layer yet,
- *    and the saved views they might want are in the list right below.
+ *  - *Show on map* opens a pane on THIS page (P9-12), listing every layer we
+ *    can draw with all of them off, and turns whatever the reader switches on
+ *    into a working set. It used to navigate to `/`, which meant the
+ *    combination somebody built was lost to this page the moment they built
+ *    it. The link to `/` survives as the narrow-window fallback.
  *
  * **Recent analyses** merges the two places an analysis is kept — saved views
  * (catalog documents) and cached place reports (the server's index) — into
@@ -37,7 +38,7 @@
  *
  * P7-5 adds the first of spec §F.5's tool cards that **operate on a working
  * set rather than on the whole library**: *Measure proximity* and, since P7-8,
- * *Build an index*. Each sits on the
+ * *Create a combined ranking*. Each sits on the
  * set's own row because that is what it is scoped to — a set is what an
  * analysis runs against — and what it writes is a derived column on that set,
  * which the map pane and the data table both then show without a second
@@ -46,6 +47,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import KbNav from '@/components/KbNav.vue'
+import ExploreMapPane from '@/components/ExploreMapPane.vue'
 import { recentAnalyses, type Analysis } from '@/lib/analyses'
 import { fetchPlaceReports, type PlaceReportRow } from '@/lib/placeReport'
 import { fetchViews, type SavedViewSummary } from '@/lib/views'
@@ -84,8 +86,23 @@ interface Tool {
   name: string
   description: string
   href: string
-  /** What pressing Start actually lands on, when that needs saying. */
-  hint?: string
+  /**
+   * P9-13: the label on the control, naming where it goes.
+   *
+   * Every one of these used to read "Start" — four identical labels on four
+   * different behaviours, two landing on a tool, one on a filtered list and
+   * one opening a pane in place. The `hint` line under each card existed to
+   * compensate, which is the tell that the label was doing no work.
+   *
+   * Absent for a tool that lives inside a set: there is no control to label.
+   */
+  start?: string
+  /** P9-12: Start opens a pane on this page instead of navigating. `href`
+   *  stays the fallback below the pane's breakpoint. */
+  opensPane?: boolean
+  /** P9-14: lives inside a working set, so this card names it and says so
+   *  rather than the tool being invisible until somebody stumbles on it. */
+  needsSet?: boolean
 }
 
 const TOOLS: Tool[] = [
@@ -94,32 +111,76 @@ const TOOLS: Tool[] = [
     name: 'Check a place',
     description: 'One address or county, and every source we hold or index that covers it.',
     href: '/place',
+    start: 'Open the place report',
   },
   {
     id: 'compare',
     name: 'Compare',
     description: 'A handful of candidate counties side by side, across the layers that matter.',
     href: '/compare',
+    start: 'Open the comparison',
   },
   {
     id: 'explore',
     name: 'Explore a dataset',
     description: 'Filter, sort and summarise a table we hold, with the county context beside it.',
     href: '/datasets?readiness=held',
-    hint: 'Opens the datasets browser — pick a table, then its Data tab.',
+    // P9-13: the hint used to say "Opens the datasets browser — pick a table,
+    // then its Data tab", which existed only because the label said "Start".
+    start: 'Browse the tables we hold',
   },
   {
     id: 'map',
     name: 'Show on map',
-    description: 'Draw a layer over the counties and read it where it lands.',
+    description: 'Draw any of our layers over the counties, together, and keep the combination.',
+    // P9-12: opens the pane HERE rather than navigating to `/`. The href is
+    // kept as the narrow-window fallback and as a real link to right-click.
     href: '/',
-    hint: 'Opens the map, where the layer picker is.',
+    // Reads differently from the three above on purpose: it is the one that
+    // does not take you anywhere.
+    start: 'Open a map on this page',
+    opensPane: true,
+  },
+  // P9-14: the tools that need a SET. They were missing from this list
+  // entirely — the page's answer to "what can I run?" omitted six of the
+  // things you can run, because they were built as parts of a set's page
+  // rather than as tools, and a reader who had not been told they exist
+  // would not find them four levels down.
+  //
+  // P9-3's rule rather than silence: a gated capability says why. These
+  // carry no Start, because the honest answer is "open a set" and the sets
+  // are listed directly below.
+  {
+    id: 'weigh',
+    name: 'Weigh an index differently',
+    description:
+      'Drag the weights of a combined ranking and watch the map and the order move, then keep the version you like.',
+    href: '',
+    needsSet: true,
+  },
+  {
+    id: 'describe',
+    name: 'Look at a layer',
+    description:
+      'How much of the country it covers, how it spreads out, who is at each end, and how two layers relate.',
+    href: '',
+    needsSet: true,
+  },
+  {
+    id: 'address',
+    name: 'Find an address in the data',
+    description: 'A street address, the county it lands in, and what every layer in the set says there.',
+    href: '',
+    needsSet: true,
   },
 ]
 
 /** How many rows "recent" means. Long enough to be a memory, short enough to
  *  read without scrolling past the tools. */
 const RECENT_LIMIT = 12
+
+/** P9-12: whether the in-page map is open. */
+const exploring = ref(false)
 
 const views = ref<SavedViewSummary[]>([])
 const reports = ref<PlaceReportRow[]>([])
@@ -260,8 +321,14 @@ async function measure(): Promise<void> {
 }
 
 /**
- * P7-8: *Build an index* — spec §F.5's second set-scoped tool card, and §F.3's
- * whole feature.
+ * P7-8: *Create a combined ranking* — spec §F.5's second set-scoped tool card,
+ * and §F.3's whole feature.
+ *
+ * P9-6a renamed it from "Build an index" (Nick, 2026-10-08). "Build" and
+ * "index" together read like a commitment — a thing you had better get right
+ * first time — when what this actually is is the start of an experiment whose
+ * weights are draggable the moment it exists. The word "index" stays in
+ * parentheses because it is what the result is called everywhere else.
  *
  * One form, reused by whichever set's row is open, the same way the proximity
  * form is: two sets are never being indexed at once.
@@ -364,17 +431,36 @@ function whoAndWhen(analysis: Analysis): string {
       <KbNav />
       <header class="analysis-header">
         <h1>Analysis</h1>
-        <p class="lede">The four things you can run over what the library holds, and what has been run lately.</p>
+        <p class="lede">What you can run over what the library holds, and what has been run lately.
+          Some tools work on the whole library; others need a working set, and say so.</p>
       </header>
 
       <ul class="tool-cards" data-testid="tool-cards">
         <li v-for="tool in TOOLS" :key="tool.id" class="tool-card" :data-tool="tool.id" data-testid="tool-card">
           <h2 class="tool-name">{{ tool.name }}</h2>
           <p class="tool-description">{{ tool.description }}</p>
-          <p v-if="tool.hint" class="tool-hint" data-testid="tool-hint">{{ tool.hint }}</p>
-          <RouterLink :to="tool.href" class="tool-start" data-testid="tool-start">Start</RouterLink>
+          <!-- P9-14: a gated capability says why (P9-3's rule), instead of
+               being absent from the list of what you can run. -->
+          <p v-if="tool.needsSet" class="tool-needs" data-testid="tool-needs-set">
+            Inside a working set — open one below, on its Map.
+          </p>
+          <!-- P9-12: the map tool opens in place, because what a reader turns
+               on is the thing worth keeping and navigating away loses it. -->
+          <button
+            v-else-if="tool.opensPane"
+            type="button"
+            class="blo-act blo-act--lg tool-start"
+            data-testid="tool-start"
+            :aria-expanded="exploring"
+            @click="exploring = !exploring"
+          >
+            {{ exploring ? 'Close the map' : tool.start }}
+          </button>
+          <RouterLink v-else :to="tool.href" class="blo-act blo-act--lg tool-start" data-testid="tool-start">{{ tool.start }}</RouterLink>
         </li>
       </ul>
+
+      <ExploreMapPane v-if="exploring" @close="exploring = false" />
 
       <!-- P7-1: what an analysis runs AGAINST, above the record of what has
            been run. -->
@@ -419,24 +505,43 @@ function whoAndWhen(analysis: Analysis): string {
               <RouterLink :to="workingSetPlaceHref(row.set.slug)" data-testid="set-place">Check a place in this set</RouterLink>
               ·
               <RouterLink :to="workingSetDatasetsHref(row.set.slug)" data-testid="set-datasets">Its datasets</RouterLink>
-              <!-- P7-5, spec §F.5: a tool that operates on THIS set. Offered
-                   only when the set has both halves of the question — rows to
-                   measure from and a feature layer to measure to. -->
-              <template v-if="row.set.sites && measurableLayers(row.set).length">
+              <!-- P7-5, spec §F.5: a tool that operates on THIS set. It needs
+                   both halves of the question — rows to measure FROM and a
+                   feature layer to measure TO.
+                   P9-3: when a half is missing, SAY SO rather than vanish.
+                   P7-5 hid the control so it could not be refused, which is
+                   right when a reader cannot act on the reason and wrong when
+                   they can: both of these are things they set on the set. A
+                   capability nobody can see is one nobody knows exists. -->
+              <template v-if="measurableLayers(row.set).length">
                 ·
-                <button type="button" class="set-tool" data-testid="set-proximity" @click="openProximity(row.set)">
+                <button
+                  v-if="row.set.sites"
+                  type="button"
+                  class="blo-act"
+                  data-testid="set-proximity"
+                  @click="openProximity(row.set)"
+                >
                   {{ proximityFor === row.set.slug ? 'Close' : 'Measure proximity' }}
                 </button>
+                <span v-else class="set-tool-why" data-testid="set-proximity-why">
+                  Measure proximity — needs an anchor table, the rows to measure from
+                </span>
               </template>
-              <!-- P7-8, spec §F.5: the second set-scoped tool. Offered only
-                   when the set names at least two COUNTY layers — over one
-                   layer an index is that layer rescaled, and the server
-                   refuses it, so the control is not there to be refused. -->
+              <!-- P7-8, spec §F.5: over ONE layer an index is that layer
+                   rescaled, which the server refuses. Same P9-3 change: name
+                   the missing half instead of disappearing. -->
               <template v-if="indexableLayers(row.set).length >= 2">
                 ·
-                <button type="button" class="set-tool" data-testid="set-index" @click="openIndex(row.set)">
-                  {{ indexFor === row.set.slug ? 'Close' : 'Build an index' }}
+                <button type="button" class="blo-act" data-testid="set-index" @click="openIndex(row.set)">
+                  {{ indexFor === row.set.slug ? 'Close' : 'Create a combined ranking (index)' }}
                 </button>
+              </template>
+              <template v-else>
+                ·
+                <span class="set-tool-why" data-testid="set-index-why">
+                  Create a combined ranking — needs two or more county layers to weigh against each other
+                </span>
               </template>
             </p>
 
@@ -447,8 +552,10 @@ function whoAndWhen(analysis: Analysis): string {
               @submit.prevent="buildIndex"
             >
               <p class="proximity-lede">
-                A weighted score per county over this set's layers — written onto the set as a column the map and the
-                table both read, and drawn as a layer of its own.
+                One score per county over this set's layers, so they can be ranked together — written onto the set
+                as a column the map and the table both read, and drawn as a layer of its own. Nothing here is
+                final: the weights can be dragged around afterwards on the set's map, and every version you like
+                can be kept beside this one.
               </p>
               <div class="proximity-row">
                 <label class="proximity-label" :for="`index-name-${row.set.slug}`">Call it</label>
@@ -490,7 +597,7 @@ function whoAndWhen(analysis: Analysis): string {
                          manifest field somebody can edit later. -->
                     <select
                       v-model="indexTerms[layer.id].direction"
-                      class="index-direction"
+                      class="blo-select"
                       :aria-label="`Which end of ${layer.name} is better`"
                       :data-testid="`index-direction-${layer.id}`"
                     >
@@ -503,11 +610,11 @@ function whoAndWhen(analysis: Analysis): string {
               <div class="proximity-row">
                 <button
                   type="submit"
-                  class="promote-btn"
+                  class="blo-act blo-act--write blo-act--lg"
                   :disabled="indexFormula.length < 2 || !indexName.trim() || indexing"
                   data-testid="index-submit"
                 >
-                  {{ indexing ? 'Building…' : 'Build' }}
+                  {{ indexing ? 'Creating…' : 'Create' }}
                 </button>
                 <span class="index-hint" data-testid="index-hint">
                   {{
@@ -564,7 +671,7 @@ function whoAndWhen(analysis: Analysis): string {
               </p>
               <div class="proximity-row">
                 <label class="proximity-label" :for="`prox-to-${row.set.slug}`">Measure to</label>
-                <select :id="`prox-to-${row.set.slug}`" v-model="proximityTo" data-testid="proximity-to">
+                <select :id="`prox-to-${row.set.slug}`" v-model="proximityTo" class="blo-select" data-testid="proximity-to">
                   <option v-for="layer in measurableLayers(row.set)" :key="layer.id" :value="layer.id">
                     {{ layer.name }}
                   </option>
@@ -581,7 +688,7 @@ function whoAndWhen(analysis: Analysis): string {
                   placeholder="miles"
                   data-testid="proximity-within"
                 />
-                <button type="submit" class="promote-btn" :disabled="!proximityTo || measuring" data-testid="proximity-submit">
+                <button type="submit" class="blo-act blo-act--write blo-act--lg" :disabled="!proximityTo || measuring" data-testid="proximity-submit">
                   {{ measuring ? 'Measuring…' : 'Measure' }}
                 </button>
               </div>
@@ -626,7 +733,7 @@ function whoAndWhen(analysis: Analysis): string {
         <form v-if="adHocViews.length" class="promote" data-testid="promote-form" @submit.prevent="promote">
           <label class="promote-label" for="promote-view">Make a working set from a saved view</label>
           <div class="promote-row">
-            <select id="promote-view" v-model="promoteFrom" class="promote-select" data-testid="promote-view">
+            <select id="promote-view" v-model="promoteFrom" class="blo-select promote-select" data-testid="promote-view">
               <option value="">Choose a view…</option>
               <option v-for="view in adHocViews" :key="view.slug" :value="view.slug">{{ view.name }}</option>
             </select>
@@ -637,7 +744,7 @@ function whoAndWhen(analysis: Analysis): string {
               placeholder="Name it (or keep the view's name)"
               data-testid="promote-name"
             />
-            <button type="submit" class="promote-btn" :disabled="!promoteFrom || promoting" data-testid="promote-submit">
+            <button type="submit" class="blo-act blo-act--write blo-act--lg" :disabled="!promoteFrom || promoting" data-testid="promote-submit">
               {{ promoting ? 'Making…' : 'Make a working set' }}
             </button>
           </div>
@@ -798,10 +905,15 @@ function whoAndWhen(analysis: Analysis): string {
   gap: 6px;
 }
 
+/* Layout only. `.promote-name` is a text input and keeps its own look; the
+   select beside it takes `.blo-select`, which is the same look by design. */
 .promote-select,
 .promote-name {
   flex: 1 1 180px;
   min-width: 0;
+}
+
+.promote-name {
   padding: 6px 8px;
   font-family: inherit;
   font-size: 13px;
@@ -809,22 +921,6 @@ function whoAndWhen(analysis: Analysis): string {
   background: #ffffff;
   border: 1px solid var(--blo-cream-divider);
   border-radius: 6px;
-}
-
-.promote-btn {
-  padding: 6px 12px;
-  font-family: inherit;
-  font-size: 13px;
-  color: #ffffff;
-  background: var(--blo-ink);
-  border: 1px solid var(--blo-ink);
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.promote-btn:disabled {
-  opacity: 0.45;
-  cursor: default;
 }
 
 .promote-note {
@@ -861,24 +957,24 @@ function whoAndWhen(analysis: Analysis): string {
   color: var(--blo-stone);
 }
 
-.tool-hint {
-  margin: 0;
+
+/* P9-14: the reason, in the place the control would have been. Quiet: it is
+   an explanation, not a refusal to be argued with. */
+.tool-needs {
+  align-self: flex-start;
+  margin: 8px 0 0;
   font-size: 12px;
-  font-style: italic;
   color: var(--blo-stone);
 }
 
+/* P9-15: bordered, not filled. This goes somewhere; it does not DO anything,
+   and a solid fill outranking every write in the product was the single
+   clearest thing the coherence review found. `.blo-act .blo-act--lg` carries
+   the look; what stays here is only this card's layout. */
 .tool-start {
   align-self: flex-start;
   margin-top: 8px;
-  padding: 6px 18px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #ffffff;
   text-decoration: none;
-  background: var(--blo-ink);
-  border: 1px solid var(--blo-ink);
-  border-radius: 6px;
 }
 
 .recent-heading {
@@ -1014,7 +1110,6 @@ a.analysis-row:hover {
   .lede,
   .state-note,
   .tool-description,
-  .tool-hint,
   .row-meta-line,
   .row-line,
   .row-who {
@@ -1027,18 +1122,11 @@ a.analysis-row:hover {
 }
 
 /* P7-5: the proximity tool on a set's row. */
-.set-tool {
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  color: var(--blo-green, #2f6b4f);
-  text-decoration: underline;
-  cursor: pointer;
+.set-tool-why {
+  color: #6b6560;
+  font-size: 0.86rem;
 }
-.set-tool:hover {
-  text-decoration: none;
-}
+
 .proximity {
   margin: 10px 0 0;
   padding: 12px 14px;
@@ -1061,15 +1149,6 @@ a.analysis-row:hover {
 .proximity-label {
   font-size: 13px;
   color: #4a4a44;
-}
-.proximity-row select {
-  padding: 6px 8px;
-  font: inherit;
-  font-size: 13px;
-  border: 1px solid rgba(0, 0, 0, 0.18);
-  border-radius: 6px;
-  background: #fff;
-  max-width: 260px;
 }
 .index-name {
   flex: 1 1 14rem;
@@ -1116,10 +1195,6 @@ a.analysis-row:hover {
   border-radius: 4px;
 }
 
-.index-direction {
-  padding: 0.25rem 0.4rem;
-  font: inherit;
-}
 
 .index-hint {
   font-size: 0.82rem;

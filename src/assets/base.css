@@ -119,6 +119,120 @@
   box-shadow: var(--blo-shadow-panel-strong);
 }
 
+/* P9-13: what a control will DO, in three shapes.
+   From the navigation audit: six buttons on one screen shared a class and
+   covered three unrelated kinds of action — a reversible canvas toggle, a
+   disclosure, and a server-side recompute that rewrites a stored column —
+   so a reader could not tell which press was free. These are the only three
+   kinds there are:
+
+     Go     a link, always <a href>. The URL changes; back and right-click
+            work. Needs no class: a link already looks like one.
+     Show   `.blo-act` alone. Changes what is on this screen. Free,
+            reversible, nobody else sees it.
+     Write  `.blo-act .blo-act--write`. Changes something stored, for
+            everybody, and usually costs something to undo.
+
+   A tab is the one allowed exception: it is a button that changes the URL,
+   and it already reads as a tab rather than as either of these.
+
+   A Go may take `.blo-act` when it is the POINT of the card it sits in
+   ("Open this view", "Show on map") and needs a press-sized target rather
+   than a word in a sentence. It stays bordered — see `--write` below. */
+.blo-act {
+  font: inherit;
+  font-size: 12px;
+  padding: 2px 8px;
+  color: var(--blo-green-deep, #1f7a2e);
+  background: none;
+  border: 1px solid var(--blo-cream-divider, #e0d9ca);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.blo-act:hover:not(:disabled) {
+  border-color: var(--blo-green-deep, #1f7a2e);
+}
+
+/* The Go case: padding needs a box, and the border already says "press me",
+   so the underline would be noise. */
+a.blo-act,
+a.blo-act:hover {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.blo-act:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Page-level rather than row-level: the same three kinds, at the size a
+   control gets when it is the point of the card or the panel it sits in. */
+.blo-act--lg {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 18px;
+  border-radius: 6px;
+}
+
+/* Solid, because it is the one that leaves a mark.
+
+   FILL MEANS CONSEQUENCE, and nothing else may use it. The measured state
+   before this rule: "Open the place report" and "Browse the tables we hold"
+   were solid black at 13px/600 — and they only navigate — while "Save as an
+   index" and "Run again", which write to the shared library and recompute on
+   the server, were a third of that weight. The two heaviest controls in the
+   product were the two you could press all day with no effect. */
+.blo-act--write {
+  color: #ffffff;
+  background: var(--blo-green-deep, #1f7a2e);
+  border-color: var(--blo-green-deep, #1f7a2e);
+  font-weight: 600;
+}
+
+.blo-act--write:hover:not(:disabled) {
+  background: var(--blo-ink, #111);
+  border-color: var(--blo-ink, #111);
+}
+
+/* A <select> is a control too, and it was six near-identical copies of this
+   rule across five sizes — 0.78rem, 0.82rem, 0.86rem, 13px, 14px — three of
+   them written as `.some-wrapper select` descendant rules, which is why each
+   new panel that held a dropdown quietly needed a sixth copy. */
+.blo-select {
+  font: inherit;
+  font-size: 13px;
+  max-width: 100%;
+  padding: 4px 8px;
+  color: var(--blo-ink, #111);
+  background: #ffffff;
+  border: 1px solid var(--blo-cream-divider, #e0d9ca);
+  border-radius: 6px;
+}
+
+/* 640px is this app's phone breakpoint (41 rules use it against 13 at 768).
+
+   A control needs a 44px target under a thumb, and a <select> needs 16px or
+   iOS zooms the whole page on focus and does not zoom back. Both were already
+   deliberate in the library entry, written against the six button classes
+   that happened to be on that page — so every control added anywhere else
+   silently missed them. They belong to the vocabulary, once. */
+@media (max-width: 640px) {
+  .blo-act {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  .blo-select {
+    min-height: 44px;
+    font-size: 16px;
+  }
+}
+
 .blo-panel--reference {
   background: rgba(247, 244, 238, 0.92);
   backdrop-filter: saturate(1.1) blur(6px);

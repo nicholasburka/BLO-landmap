@@ -227,9 +227,51 @@ describe('the index', () => {
   it('records the scale each term was normalised against, so the 0 and 100 can be read back', async () => {
     const run = await build()
     expect(run.scales).toEqual([
-      { layer: 'internal-turnout', weight: 4, direction: 'higher_better', min: 31.5, max: 70.9, counties: 4 },
-      { layer: 'internal-votes', weight: 6, direction: 'higher_better', min: 38.6, max: 80.2, counties: 6 },
+      // P9-4: `scale` says WHICH span the 0-100 was measured against. These
+      // held layers pin no range, so both read `observed`.
+      { layer: 'internal-turnout', weight: 4, direction: 'higher_better', min: 31.5, max: 70.9, counties: 4, scale: 'observed' },
+      { layer: 'internal-votes', weight: 6, direction: 'higher_better', min: 38.6, max: 80.2, counties: 6, scale: 'observed' },
     ])
+  })
+
+  /**
+   * P9-4, the point of the ticket. A registry layer pins a range, and the
+   * Lens scales against that literal. If this scaled against the observed
+   * span instead, the same weights would produce a different number and
+   * "the index is a working set" would silently move published scores.
+   */
+  it('scales a registry layer against the range the registry pins, like the Lens does', async () => {
+    const run = await build({
+      label: 'Public terms',
+      terms: [
+        { layer: 'pct_Black', weight: 5, direction: 'higher_better' },
+        { layer: 'internal-votes', weight: 5, direction: 'higher_better' },
+      ],
+    })
+    const scale = run.scales.find(x => x.layer === 'pct_Black')
+    expect(scale).toBeDefined()
+    expect(scale!.scale).toBe('pinned')
+    // A percentage runs 0-100 whether or not any county reaches either end.
+    expect(scale!.min).toBe(0)
+    expect(scale!.max).toBe(100)
+  })
+
+  /**
+   * P9-4. The two calls a researcher makes, both stored with the result, so
+   * a number can be read back as "this index, under these rules".
+   */
+  it('stores the missing-data rule it was run under', async () => {
+    const run = await build({ label: 'Strict', missing: 'ignore' })
+    expect(run.missing).toBe('ignore')
+  })
+
+  it('defaults the rule rather than leaving it unsaid', async () => {
+    const run = await build()
+    expect(run.missing).toBe('penalise')
+  })
+
+  it('refuses a rule it does not know, in words a person can act on', async () => {
+    await expect(build({ label: 'Odd', missing: 'sideways' })).rejects.toThrow(/penalise|ignore/)
   })
 
   it('declares what it measures, in a method a column header can show', async () => {

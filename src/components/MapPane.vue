@@ -24,6 +24,15 @@
         @county-click="emit('county-click', $event)"
         @counties-ready="emit('counties-ready')"
       />
+      <!-- P9-10: what a host wants ON the map rather than under it — the
+           public map keeps its controls over the canvas (the Lens) and the
+           pane had everything stacked below, so a reader scrolled away from
+           the map to change what the map showed. The slot is empty by
+           default: a host that wants nothing here renders nothing, and the
+           canvas is untouched. -->
+      <div v-if="$slots.overlay" class="pane-overlay" data-testid="pane-overlay">
+        <slot name="overlay" />
+      </div>
     </div>
   </aside>
 </template>
@@ -158,10 +167,31 @@ const emit = defineEmits<{
 }
 
 .pane-map {
+  position: relative;
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
   border: 1px solid var(--blo-cream-divider, #e0d9ca);
   border-radius: 8px;
+}
+
+/* P9-10: over the canvas, in the same tier the public map's Lens uses.
+   Capped and scrollable, because a set with thirty layers must not become a
+   panel taller than the map it is covering — and `pointer-events: none` on
+   the wrapper keeps the uncovered canvas draggable, with the panel itself
+   putting them back. */
+.pane-overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  max-width: min(18rem, calc(100% - 20px));
+  max-height: calc(100% - 20px);
+  overflow-y: auto;
+  pointer-events: none;
+}
+
+.pane-overlay > * {
+  pointer-events: auto;
 }
 </style>

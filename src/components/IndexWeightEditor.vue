@@ -1,0 +1,186 @@
+<template>
+  <!-- P9-6: drag a weight, watch the map move, keep the version you like.
+       The scoring runs HERE — a full 3,144-county, 11-term recompute is about
+       4ms, a quarter of a 60fps frame — so every change rescores immediately
+       and nothing is written until a reader asks for it. The view is the
+       sandbox; the set is the record. -->
+  <section class="weights" data-testid="index-weight-editor">
+    <h2 class="w-title">Weigh it differently</h2>
+
+    <ul class="w-rows">
+      <li v-for="t in rows" :key="t.layer" class="w-row" data-testid="weight-row">
+        <span class="w-name">{{ t.name }}</span>
+        <input
+          type="range"
+          min="0"
+          :max="MAX_WEIGHT"
+          step="1"
+          :value="t.weight"
+          :aria-label="`Weight for ${t.name}`"
+          @input="setWeight(t.layer, Number(($event.target as HTMLInputElement).value))"
+        />
+        <span class="w-weight" :class="{ off: t.weight === 0 }">
+          {{ t.weight === 0 ? 'out' : t.weight }}
+        </span>
+        <select
+          class="blo-select"
+          data-testid="weight-direction"
+          :value="t.direction"
+          :aria-label="`Direction for ${t.name}`"
+          @change="setDirection(t.layer, ($event.target as HTMLSelectElement).value)"
+        >
+          <option value="higher_better">higher is better</option>
+          <option value="lower_better">lower is better</option>
+        </select>
+      </li>
+    </ul>
+
+    <p class="w-save">
+      <!-- A placeholder is not a label: it disappears the moment anyone types
+           and screen readers treat it inconsistently. -->
+      <input
+        type="text"
+        class="w-name-input"
+        data-testid="weight-name"
+        aria-label="Name for this version of the index"
+        placeholder="Name this version…"
+        :value="label"
+        @input="label = ($event.target as HTMLInputElement).value"
+      />
+      <button
+        type="button"
+        class="blo-act blo-act--write blo-act--lg"
+        data-testid="weight-save"
+        :disabled="!canSave"
+        :aria-describedby="whyNotSaveable ? 'weight-save-why' : undefined"
+        @click="$emit('save', { label: label.trim(), terms: active })"
+      >
+        Save as an index
+      </button>
+      <button type="button" class="blo-act" data-testid="weight-reset" @click="reset">
+        Reset
+      </button>
+    </p>
+    <!-- Why the button is off, rather than a grey button and a shrug. Seen on
+         the real page: eleven terms weighed, a changed formula, Save disabled,
+         and the only hint a placeholder in the box beside it. -->
+    <!-- `role="status"`, so dragging the last term out of a formula announces
+         why Save went away instead of silently greying it. -->
+    <p
+      v-if="whyNotSaveable"
+      id="weight-save-why"
+      class="w-note"
+      role="status"
+      data-testid="weight-save-why"
+    >
+      {{ whyNotSaveable }}
+    </p>
+  </section>
+</template>
+
+<script setup lang="ts">
+import { computed, ref, watch } from 'vue'
+import type { WeightTerm } from '@/lib/workingSets'
+
+const props = defineProps<{ terms: WeightTerm[] }>()
+const emit = defineEmits<{
+  /** The live formula, on every change, in the shape a scoring query takes.
+   *  Nothing is stored. */
+  score: [terms: { layerId: string; weight: number; direction: WeightTerm['direction'] }[]]
+  save: [input: { label: string; terms: WeightTerm[] }]
+  /**
+   * Put it back to the saved formula.
+   *
+   * The HOST has to do it, because the host owns what "saved" means: once it
+   * feeds the live formula back through `terms` (so the editor survives being
+   * unmounted), resetting to `props.terms` resets to what is on screen
+   * already — which is nothing at all. Caught in a browser: Reset left a
+   * dragged weight exactly where it was.
+   */
+  reset: []
+}>()
+
+/** Matches the server's `COMPOSITE_WEIGHT_MAX`; weights are relative anyway. */
+const MAX_WEIGHT = 10
+
+const edited = ref<WeightTerm[]>([])
+const label = ref('')
+
+watch(() => props.terms, t => { edited.value = t.map(x => ({ ...x })) }, { immediate: true, deep: true })
+
+const rows = computed(() => edited.value)
+
+/** A term at zero is OUT of the index, not in it at nothing: the server
+ *  refuses a zero weight, so the editor must not offer one that looks
+ *  saveable. */
+const active = computed(() => edited.value.filter(t => t.weight > 0))
+
+const canSave = computed(() => !!label.value.trim() && active.value.length >= 2)
+
+/** What is standing between this formula and being saved, if anything. The
+ *  count comes first: a name cannot rescue an index of one. */
+const whyNotSaveable = computed(() => {
+  if (active.value.length < 2) return 'An index needs at least two layers — over one it is that layer rescaled.'
+  if (!label.value.trim()) return 'Give this version a name and it can be saved beside the one it came from.'
+  return ''
+})
+
+function publish(): void {
+  emit('score', active.value.map(t => ({ layerId: t.layer, weight: t.weight, direction: t.direction })))
+}
+
+function setWeight(layer: string, weight: number): void {
+  const t = edited.value.find(x => x.layer === layer)
+  if (!t) return
+  t.weight = Math.max(0, Math.min(MAX_WEIGHT, Math.round(weight)))
+  publish()
+}
+
+function setDirection(layer: string, direction: string): void {
+  const t = edited.value.find(x => x.layer === layer)
+  if (!t || (direction !== 'higher_better' && direction !== 'lower_better')) return
+  t.direction = direction
+  publish()
+}
+
+function reset(): void {
+  emit('reset')
+  // Standalone (no host listening), the props ARE the saved formula and this
+  // is the whole reset. With a host, its reply through `terms` lands next and
+  // the watcher above copies that instead.
+  //
+  // Deliberately no `publish()`: it would emit the formula that is on screen
+  // at this instant — the one being reset away from — and a host that stores
+  // that has just undone the reset it was asked for. Measured: the sliders
+  // sprang straight back to the dragged values.
+  edited.value = props.terms.map(x => ({ ...x }))
+}
+</script>
+
+<style scoped>
+.weights {
+  /* Capped, and not because of taste. Rendered full-width on a 1,440px window
+     the grid's `1fr` name column put 1,100px of empty space between "Life
+     Expectancy" and the slider that weighs it, so the label and its control
+     could not be read as one row. A formula is a narrow thing. */
+  max-width: 44rem;
+  margin: 1rem 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e7e2da;
+}
+.w-title { margin: 0 0 0.5rem; font-size: 0.95rem; }
+.w-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
+.w-row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 14rem) minmax(6rem, 1fr) 2.5rem auto;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.86rem;
+}
+.w-name { overflow-wrap: anywhere; }
+.w-weight { font-variant-numeric: tabular-nums; color: #6b6560; }
+.w-weight.off { color: #92400e; font-size: 0.78rem; }
+.w-save { display: flex; gap: 0.5rem; align-items: center; margin: 0.7rem 0 0; flex-wrap: wrap; }
+.w-name-input { flex: 1 1 10rem; min-width: 0; }
+.w-note { margin: 0.4rem 0 0; color: #6b6560; font-size: 0.82rem; }
+</style>

@@ -84,9 +84,13 @@ const isBusy = (field: NeedsALookField, action: VerifyAction) => busy.value === 
     <p v-for="field in fields" :key="field.field" class="field-line" :data-field="field.field" :data-state="field.state" data-testid="needs-a-look-field">
       <span class="field-label">{{ field.label }}</span>
 
-      <!-- Missing: nothing could fill it, so there is nothing to keep. -->
+      <!-- Missing: nothing could fill it, so there is nothing to keep.
+           P9-8: "nothing could fill this" was the SYSTEM describing its own
+           effort. The reader's question is "is there an organization?" and
+           the answer is "no"; the machinery that went looking is not their
+           concern. Three of these opened every entry page. -->
       <template v-if="field.state === 'missing'">
-        <span class="gap">nothing could fill this</span>
+        <span class="gap">not set</span>
       </template>
 
       <!-- Unverified: a model's reading, with the sentence it came from. -->
@@ -101,18 +105,22 @@ const isBusy = (field: NeedsALookField, action: VerifyAction) => busy.value === 
         <button
           v-if="field.state === 'unverified'"
           type="button"
-          class="act keep"
+          class="blo-act act keep"
           data-testid="needs-a-look-keep"
           :disabled="!!busy"
           @click="act(field, 'keep')"
         >
           {{ isBusy(field, 'keep') ? 'Keeping…' : 'Keep' }}
         </button>
-        <button type="button" class="act" data-testid="needs-a-look-edit" :disabled="!!busy" @click="startEdit(field)">Edit</button>
+        <!-- "Add" for a blank, "Edit" for a value: the same button, named for
+             what pressing it actually does. -->
+        <button type="button" class="blo-act act" data-testid="needs-a-look-edit" :disabled="!!busy" @click="startEdit(field)">
+          {{ field.state === 'missing' ? 'Add' : 'Edit' }}
+        </button>
         <button
           v-if="field.state === 'unverified'"
           type="button"
-          class="act clear"
+          class="blo-act act clear"
           data-testid="needs-a-look-clear"
           :disabled="!!busy"
           @click="act(field, 'clear')"
@@ -146,10 +154,10 @@ const isBusy = (field: NeedsALookField, action: VerifyAction) => busy.value === 
           :maxlength="field.field === 'whatItAnswers' ? WHAT_IT_ANSWERS_MAX_CHARS : undefined"
           data-testid="needs-a-look-input"
         />
-        <button type="button" class="act save" data-testid="needs-a-look-save" :disabled="!draft || !!busy" @click="act(field, 'edit', draft)">
+        <button type="button" class="blo-act act save" data-testid="needs-a-look-save" :disabled="!draft || !!busy" @click="act(field, 'edit', draft)">
           {{ isBusy(field, 'edit') ? 'Saving…' : 'Save' }}
         </button>
-        <button type="button" class="act" data-testid="needs-a-look-cancel" :disabled="!!busy" @click="cancelEdit">Cancel</button>
+        <button type="button" class="blo-act act" data-testid="needs-a-look-cancel" :disabled="!!busy" @click="cancelEdit">Cancel</button>
       </span>
     </p>
 
@@ -223,24 +231,19 @@ const isBusy = (field: NeedsALookField, action: VerifyAction) => busy.value === 
   gap: 4px;
 }
 
+/* P9-17: `.blo-act` carries the look — this rule was a byte-for-byte copy of
+   it but for the padding, which is the one thing that must differ. These sit
+   INSIDE a sentence ("Publisher — unknown · Keep Edit Clear"), so they are
+   the dense variant: tighter here, and 32px rather than 44px on a phone
+   (below, and WCAG 2.5.8's 24px floor), because a thumb-sized box in a line
+   of running text breaks the line. The scoped `.act[data-v-…]` outranks the
+   global `.blo-act`, which is what lets the two rules below win. */
 .act {
   padding: 1px 6px;
-  font: inherit;
-  font-size: 12px;
-  color: var(--blo-green-deep, #1f7a2e);
-  background: none;
-  border: 1px solid var(--blo-cream-divider, #e0d9ca);
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 .act:hover:not(:disabled) {
   background: var(--blo-cream, #faf6ec);
-}
-
-.act:disabled {
-  opacity: 0.5;
-  cursor: default;
 }
 
 .act.clear {

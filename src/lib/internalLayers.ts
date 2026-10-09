@@ -289,6 +289,22 @@ export function clearInternalLayerCache(): void {
   manifestPromise = null
 }
 
+/**
+ * A new derived layer has appeared — an index was just saved (P9-6a) — so the
+ * next read must ask for the manifest again.
+ *
+ * The VALUES caches are deliberately left alone, which is why this is not
+ * `clearInternalLayerCache`: nothing already downloaded has changed, and
+ * re-fetching every county layer's numbers because one new layer appeared is a
+ * cost with no benefit. Without this the set's own layer list called the index
+ * it had just saved — the one the map was drawing — "not in the library any
+ * more", because the manifest it was reading had been fetched before the layer
+ * existed.
+ */
+export function invalidateInternalManifest(): void {
+  manifestPromise = null
+}
+
 // P5-89: the manifest is shared by pages the map is not on any more (P5-86), so
 // the map's own logout watcher is no longer what empties it. Nothing internal —
 // not a layer name — may outlive the session.

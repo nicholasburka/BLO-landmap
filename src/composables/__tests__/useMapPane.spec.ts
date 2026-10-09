@@ -66,6 +66,80 @@ describe('useMapPane (P6-14)', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
+  it('opens again when the room comes back', async () => {
+    // Seen in a real browser: narrow the window once and widen it again, and
+    // the page says "There is not room for a map here" on a 1,440px screen
+    // with no map under it. Nothing reopened the pane, because the hosts only
+    // call `open()` from a watcher on their own state and widening changes
+    // none of it — so the only way back was a reload.
+    const viewport = stubViewportWidth(1280)
+    const { pane } = probe()
+    await nextTick()
+    pane.open()
+    expect(pane.isOpen.value).toBe(true)
+
+    viewport.resize(800)
+    await nextTick()
+    expect(pane.isOpen.value).toBe(false)
+
+    viewport.resize(1280)
+    await nextTick()
+    expect(pane.isOpen.value).toBe(true)
+  })
+
+  it('leaves a pane the READER closed closed, however the window is resized', async () => {
+    // The width may undo what the width did. It may not undo a decision.
+    const viewport = stubViewportWidth(1280)
+    const { pane } = probe()
+    await nextTick()
+    pane.open()
+    pane.close()
+    expect(pane.isOpen.value).toBe(false)
+
+    viewport.resize(800)
+    await nextTick()
+    viewport.resize(1280)
+    await nextTick()
+    expect(pane.isOpen.value).toBe(false)
+  })
+
+  it('does not open a pane nobody ever asked for when the window widens', async () => {
+    const viewport = stubViewportWidth(800)
+    const { pane } = probe()
+    await nextTick()
+    expect(pane.isOpen.value).toBe(false)
+    viewport.resize(1280)
+    await nextTick()
+    expect(pane.isOpen.value).toBe(false)
+  })
+
+  it('opens a pane that was ASKED for while the window was too narrow', async () => {
+    // The other half of the same defect, and the one a reader meets first:
+    // open the page on a small window, widen it, and the map never arrives.
+    // The host called `open()` once, at mount, and nothing calls it again —
+    // widening changes none of the state its watcher is on.
+    const viewport = stubViewportWidth(800)
+    const { pane } = probe()
+    await nextTick()
+    pane.open()
+    expect(pane.isOpen.value).toBe(false)
+
+    viewport.resize(1280)
+    await nextTick()
+    expect(pane.isOpen.value).toBe(true)
+  })
+
+  it('forgets the ask once the reader closes it', async () => {
+    const viewport = stubViewportWidth(800)
+    const { pane } = probe()
+    await nextTick()
+    pane.open()
+    pane.close()
+    viewport.resize(1280)
+    await nextTick()
+    expect(pane.isOpen.value).toBe(false)
+  })
+
   it('runs onClose once, and not for a close that closes nothing', () => {
     stubViewportWidth(1280)
     const onClose = vi.fn()

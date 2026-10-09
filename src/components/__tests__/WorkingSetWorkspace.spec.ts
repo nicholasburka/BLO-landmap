@@ -58,6 +58,7 @@ vi.mock('@/lib/workingSets', async importOriginal => {
     fetchWorkingSet: vi.fn(),
     fetchWorkingSetColumns: vi.fn(),
     rerunDerivedColumn: vi.fn(),
+    runComposite: vi.fn(),
   }
 })
 
@@ -75,10 +76,13 @@ import {
   fetchWorkingSet,
   fetchWorkingSetColumns,
   rerunDerivedColumn,
+  runComposite,
+  type CompositeRun,
   type DerivedColumn,
   type WorkingSetColumns,
   type WorkingSetDetail,
 } from '@/lib/workingSets'
+import { indexDraftKey, readIndexDraft } from '@/lib/indexDraft'
 import { sharedManifest, clearInternalLayerCache, type InternalLayerManifestEntry } from '@/lib/internalLayers'
 import WorkingSetWorkspace from '../WorkingSetWorkspace.vue'
 import MapPane from '@/components/MapPane.vue'
@@ -97,6 +101,7 @@ const mockedFetchViews = vi.mocked(fetchViews)
 const mockedSet = vi.mocked(fetchWorkingSet)
 const mockedColumns = vi.mocked(fetchWorkingSetColumns)
 const mockedManifest = vi.mocked(sharedManifest)
+const mockedComposite = vi.mocked(runComposite)
 
 // --- Fixtures ---------------------------------------------------------------
 
@@ -240,6 +245,16 @@ function manifestEntry(): InternalLayerManifestEntry {
 let router: Router
 let network: CountyDataFetchStub
 
+/**
+ * P9-6a arms a debounced write on a slider drag, and P7-11's lesson is that
+ * detached work outliving the test that armed it is what a flaky suite is made
+ * of: a 500ms autosave from one test landing in the next one's freshly cleared
+ * storage reads as "this draft was restored" with no draft in sight.
+ *
+ * What unmounts these is `enableAutoUnmount` in `src/testing/vitestSetup.ts` —
+ * global, because this file was one of twenty-seven that never unmounted and
+ * the next one written would have been twenty-eight.
+ */
 async function mountAt(view: SavedView, path = '/views/memphis-map') {
   router = createRouter({
     history: createMemoryHistory(),
@@ -305,6 +320,7 @@ beforeEach(() => {
   mockedFetchViews.mockResolvedValue([])
   mockedSet.mockReset()
   mockedColumns.mockReset()
+  mockedComposite.mockReset()
   mockedSet.mockResolvedValue(detail())
   mockedColumns.mockResolvedValue(columnsBody())
   localStorage.clear()
@@ -488,6 +504,21 @@ describe('the filtered subset reaching the map (query.only, P6-10)', () => {
     await settleMap()
     expect(w.findComponent(MapPane).exists()).toBe(true)
     expect(w.get('[data-testid="set-map-pane-note"]').text()).toBe('Every county in these layers')
+  })
+
+  /**
+   * P9-6 regression. "There is not room for a map here" belongs to the PANE
+   * being closed — a phone. It is a `v-else`, and between P9-2 and P9-6 it
+   * sat after `SetLayerList`'s `v-if` instead of the pane's, so on a desktop
+   * a set with no drawable layers would claim there was no room. None of the
+   * other 45 tests here noticed, because none paired a wide viewport with an
+   * open pane and checked what was NOT said.
+   */
+  it('does not claim there is no room when the pane is open', async () => {
+    const w = await mountAt(mapView())
+    await settleMap()
+    expect(w.findComponent(MapPane).exists()).toBe(true)
+    expect(w.find('[data-testid="map-too-narrow"]').exists()).toBe(false)
   })
 
   it('says so rather than drawing a blank map when the set names no layers', async () => {
@@ -863,5 +894,594 @@ describe('a composite index on the map interface', () => {
     await flushPromises()
     await settleMap()
     expect(w.findComponent(MapPane).props('layers').internal.value).toEqual(['internal-sites'])
+  })
+
+  /**
+   * P9-6a: the weight editor, wired to the set it is about.
+   *
+   * The ticket's four questions are the four things asserted here: where the
+   * terms come from, what the map shows while somebody drags, what a save
+   * does, and what happens to an unsaved formula when they leave. The editor's
+   * own arithmetic is `IndexWeightEditor.spec`; this is the wiring.
+   */
+  describe('weighing it differently (P9-6a)', () => {
+    /** The index's internal term, so its row can be NAMED. Its public term
+     *  (`poverty_by_race`) needs no manifest — the registry is static. */
+    const VOTES: InternalLayerManifestEntry = {
+      ...manifestEntry(),
+      id: 'internal-votes',
+      slug: 'votes',
+      name: 'Voter turnout',
+      range: { min: 0, max: 100 },
+    }
+
+    const SAVED: CompositeRun = {
+      set: 'memphis-redevelopment',
+      column: 'political-efficacy-v2',
+      label: 'Efficacy, housing-weighted',
+      terms: [
+        { layer: 'internal-votes', weight: 6, direction: 'higher_better' },
+        { layer: 'poverty_by_race', weight: 9, direction: 'lower_better' },
+      ],
+      scales: [],
+      reused: false,
+      served: 'computed',
+      freshness: 'fresh',
+      staleNote: '',
+      counties: 2,
+      complete: 2,
+      partial: 0,
+      layerId: 'internal-memphis-redevelopment~political-efficacy-v2',
+      method: 'Weighted index of 2 county layers…',
+      computedAt: '2026-10-08T09:00:00.000Z',
+    }
+
+    beforeEach(() => {
+      mockedManifest.mockResolvedValue([
+        manifestEntry(),
+        VOTES,
+        {
+          ...manifestEntry(),
+          id: 'internal-memphis-redevelopment~political-efficacy',
+          slug: 'memphis-redevelopment~political-efficacy',
+          name: 'Political efficacy',
+          dataType: 'index',
+          range: { min: 0, max: 100 },
+        },
+      ])
+      network = stubCountyDataFetch({
+        'http://localhost:3001/api/layers/internal/memphis-sites': {
+          id: 'internal-sites',
+          slug: 'memphis-sites',
+          geometry: 'county',
+          values: { '47157': 2, '28033': 1 },
+          range: { min: 0, max: 10 },
+        },
+        'http://localhost:3001/api/layers/internal/votes': {
+          id: 'internal-votes',
+          slug: 'votes',
+          geometry: 'county',
+          values: { '47157': 61, '28033': 44 },
+          range: { min: 0, max: 100 },
+        },
+        'http://localhost:3001/api/layers/internal/memphis-redevelopment~political-efficacy': {
+          id: 'internal-memphis-redevelopment~political-efficacy',
+          slug: 'memphis-redevelopment~political-efficacy',
+          geometry: 'county',
+          values: { '47157': 71.4, '28033': 38 },
+          range: { min: 0, max: 100 },
+        },
+      })
+    })
+
+    /** Open the editor on the set's one index. */
+    async function openWeights(w: VueWrapper): Promise<void> {
+      await w.get('[data-testid="derived-weigh"]').trigger('click')
+      await flushPromises()
+    }
+
+    function slider(w: VueWrapper, row: number) {
+      return w.findAll('[data-testid="weight-row"]')[row].find('input[type="range"]')
+    }
+
+    it('tells a free press apart from one that writes (P9-13)', async () => {
+      // Six buttons on this screen shared one class and covered three kinds
+      // of action: a reversible canvas toggle, a disclosure, and a
+      // server-side recompute that rewrites a stored column. A reader could
+      // not tell which press was free.
+      mockedColumns.mockResolvedValue(
+        columnsBody({
+          columns: [{ ...INDEX, freshness: 'stale', staleNote: '“votes” has changed since this ran.' }],
+        }),
+      )
+      const w = await mountAt(mapView())
+      await settleMap()
+
+      const cls = (id: string) => w.get(`[data-testid="${id}"]`).classes()
+      // Show: changes this screen, free, reversible.
+      expect(cls('derived-draw')).toContain('blo-act')
+      expect(cls('derived-draw')).not.toContain('blo-act--write')
+      expect(cls('derived-weigh')).toContain('blo-act')
+      expect(cls('derived-weigh')).not.toContain('blo-act--write')
+      // Write: recomputes on the server and rewrites the column.
+      expect(cls('derived-rerun')).toContain('blo-act--write')
+    })
+
+    it('offers the editor on a formula, and nothing of the sort on a measurement', async () => {
+      const w = await mountAt(mapView())
+      await settleMap()
+      expect(w.get('[data-testid="derived-weigh"]').text()).toBe('Weigh it differently')
+
+      // Nothing in "miles to the nearest line" can be weighed against anything,
+      // so there is no control rather than one that refuses.
+      mockedColumns.mockResolvedValue(columnsBody({ columns: [COLUMN] }))
+      const measured = await mountAt(mapView())
+      await settleMap()
+      expect(measured.find('[data-testid="derived-weigh"]').exists()).toBe(false)
+    })
+
+    it('says why instead of offering a control that opens nothing, on a narrow window', async () => {
+      // The editor lives in the map pane, beside the choropleth it repaints,
+      // and the pane wants a desktop. Measured at 820px before the fix: the
+      // button was there, clicking it relabelled itself "Close the weights",
+      // and nothing appeared.
+      stubViewportWidth(820)
+      const w = await mountAt(mapView())
+      await settleMap()
+      expect(w.find('[data-testid="derived-weigh"]').exists()).toBe(false)
+      expect(w.get('[data-testid="derived-weigh-why"]').text()).toContain('needs a wider window')
+    })
+
+    it('opens on the SAVED formula, naming each term instead of printing its id', async () => {
+      const w = await mountAt(mapView())
+      await settleMap()
+      await openWeights(w)
+      // The terms come from the column's own stored record — the same record a
+      // re-run reads — so nothing is retyped and nothing is inferred.
+      expect(w.findAll('[data-testid="weight-row"]').map(row => row.get('.w-name').text())).toEqual([
+        'Voter turnout',
+        'Poverty Rate (Black)',
+      ])
+      expect([slider(w, 0), slider(w, 1)].map(input => (input.element as HTMLInputElement).value)).toEqual([
+        '6',
+        '4',
+      ])
+    })
+
+    it('draws the dragged formula INSTEAD of the saved index, and says which it is', async () => {
+      const w = await mountAt(mapView())
+      await settleMap()
+      await w.get('[data-testid="derived-draw"]').trigger('click')
+      await settleMap()
+      expect(w.findComponent(MapPane).props('layers').internal.value).toEqual([
+        'internal-memphis-redevelopment~political-efficacy',
+      ])
+
+      // Opening the editor changes nothing: a reader who has not touched a
+      // slider is still looking at the record.
+      await openWeights(w)
+      await settleMap()
+      expect(w.find('[data-testid="map-preview-note"]').exists()).toBe(false)
+      expect(w.findComponent(MapPane).props('layers').internal.value).toEqual([
+        'internal-memphis-redevelopment~political-efficacy',
+      ])
+
+      await slider(w, 1).setValue('9')
+      await settleMap()
+
+      // One choropleth, and it is the formula on the sliders: the saved index
+      // is off the map rather than averaged with its own ingredients.
+      const query = w.findComponent(MapPane).props('query')
+      expect(query.weights.value).toEqual({ 'internal-votes': 6, poverty_by_race: 9 })
+      expect(query.directions.value).toEqual({
+        'internal-votes': 'higher_better',
+        poverty_by_race: 'lower_better',
+      })
+      const note = w.get('[data-testid="map-preview-note"]').text()
+      expect(note).toContain('unsaved version')
+      expect(note).toContain('Political efficacy')
+    })
+
+    it('names the preview’s terms in the layer list, public ones included', async () => {
+      // A public layer is not in the internal manifest, and was reading as
+      // "not in the library any more" — a choropleth the national map draws
+      // every day being called missing.
+      const w = await mountAt(mapView())
+      await settleMap()
+      await openWeights(w)
+      await slider(w, 1).setValue('9')
+      await settleMap()
+      expect(w.findAll('[data-testid="set-layer"]').map(row => row.text())).toEqual([
+        expect.stringContaining('Voter turnout'),
+        expect.stringContaining('Poverty Rate (Black)'),
+      ])
+      expect(w.find('[data-testid="set-layer-missing"]').exists()).toBe(false)
+    })
+
+    it('stops offering to toggle a term while its weight is on a slider', async () => {
+      // Unchecking a previewed term drops it from the scoring query while its
+      // slider still shows a weight — measured: scoring went from two terms to
+      // one with the slider still reading 6. The sliders would lie about what
+      // the map is. A term leaves a formula by being dragged to zero, which the
+      // editor labels "out": one control per decision.
+      const w = await mountAt(mapView())
+      await settleMap()
+      expect(w.findAll('[data-testid="set-layer"] input[type="checkbox"]')).toHaveLength(1)
+
+      await openWeights(w)
+      await slider(w, 1).setValue('9')
+      await settleMap()
+      expect(w.findAll('[data-testid="set-layer"]')).toHaveLength(2)
+      expect(w.findAll('[data-testid="set-layer"] input[type="checkbox"]')).toHaveLength(0)
+
+      // And the toggles come back the moment the preview does not own the map.
+      await w.get('[data-testid="derived-weigh"]').trigger('click')
+      await settleMap()
+      expect(w.findAll('[data-testid="set-layer"] input[type="checkbox"]')).toHaveLength(1)
+    })
+
+    it('says how many counties the drag moved, because the colours barely do', async () => {
+      // P9-6c: dropping a whole term out of an eleven-term index repaints
+      // about a tenth of the canvas at a maximum channel delta of 20/255 — a
+      // real change almost nobody can see. The count is perceptible.
+      // Three counties with numbers on both sides: below that `compareIndices`
+      // correctly refuses to report a shift at all, which is its own rule and
+      // not this one.
+      network = stubCountyDataFetch({
+        'http://localhost:3001/api/layers/internal/memphis-sites': {
+          id: 'internal-sites',
+          slug: 'memphis-sites',
+          geometry: 'county',
+          values: { '47157': 2, '28033': 1, '13121': 3 },
+          range: { min: 0, max: 10 },
+        },
+        'http://localhost:3001/api/layers/internal/votes': {
+          id: 'internal-votes',
+          slug: 'votes',
+          geometry: 'county',
+          values: { '47157': 61, '28033': 44, '13121': 52 },
+          range: { min: 0, max: 100 },
+        },
+      })
+      mockedColumns.mockResolvedValue(
+        columnsBody({
+          columns: [{ ...INDEX, values: { '47157': 71.4, '28033': 38, '13121': 55 } }],
+        }),
+      )
+      const w = await mountAt(mapView())
+      await settleMap()
+      await openWeights(w)
+      expect(w.find('[data-testid="map-preview-shift"]').exists()).toBe(false)
+
+      await slider(w, 1).setValue('9')
+      await settleMap()
+      const shift = w.find('[data-testid="map-preview-shift"]')
+      expect(shift.exists()).toBe(true)
+      expect(shift.text()).toMatch(/moved more than|No county changed place/i)
+    })
+
+    it('puts the saved formula back on Reset, and clears the preview with it', async () => {
+      // Caught in a browser: Reset left a dragged weight exactly where it was,
+      // because the editor's own reset copies `props.terms` and those are now
+      // the LIVE formula (the host feeds it back so the editor survives being
+      // unmounted). Only the host knows what "saved" means.
+      const w = await mountAt(mapView())
+      await settleMap()
+      await openWeights(w)
+      await slider(w, 1).setValue('9')
+      await slider(w, 0).setValue('0')
+      await settleMap()
+      expect(w.find('[data-testid="map-preview-note"]').exists()).toBe(true)
+
+      await w.get('[data-testid="weight-reset"]').trigger('click')
+      await settleMap()
+      expect([slider(w, 0), slider(w, 1)].map(i => (i.element as HTMLInputElement).value)).toEqual([
+        '6',
+        '4',
+      ])
+      // Back to the saved index on the map, so the unsaved-version banner goes.
+      expect(w.find('[data-testid="map-preview-note"]').exists()).toBe(false)
+    })
+
+    it('says it is opening, rather than going quiet for a second', async () => {
+      // `openEditor` awaits the layer manifest so rows carry names not ids. On
+      // a cold pane that was over a second of a button reading "Close the
+      // weights" with nothing under it — long enough to press it twice and
+      // close what never opened, which is what happened in the audit.
+      let release!: () => void
+      mockedManifest.mockImplementationOnce(
+        () => new Promise(resolve => { release = () => resolve([manifestEntry(), VOTES]) }),
+      )
+      const w = await mountAt(mapView())
+      await settleMap()
+      mockedManifest.mockImplementationOnce(
+        () => new Promise(resolve => { release = () => resolve([manifestEntry(), VOTES]) }),
+      )
+      await w.get('[data-testid="derived-weigh"]').trigger('click')
+      await flushPromises()
+
+      const button = w.get('[data-testid="derived-weigh"]')
+      expect(button.text()).toBe('Opening…')
+      expect(button.attributes('disabled')).toBeDefined()
+
+      release()
+      await flushPromises()
+      await settleMap()
+      expect(w.get('[data-testid="derived-weigh"]').text()).toBe('Close the weights')
+    })
+
+    it('takes a term dragged to zero OUT of the formula it draws', async () => {
+      const w = await mountAt(mapView())
+      await settleMap()
+      await openWeights(w)
+      await slider(w, 1).setValue('0')
+      await settleMap()
+      expect(w.findComponent(MapPane).props('query').weights.value).toEqual({ 'internal-votes': 6 })
+      // And it may not be saved as an index of one, which is that layer rescaled.
+      expect(w.get('[data-testid="weight-save"]').attributes('disabled')).toBeDefined()
+    })
+
+    it('survives a switch to the data interface, part-way through a drag', async () => {
+      // The editor sits with the derived columns rather than beside the canvas
+      // precisely for this: switching interface tears the pane down, and a
+      // formula somebody is part-way through must not go with it.
+      const w = await mountAt(mapView())
+      await settleMap()
+      await openWeights(w)
+      await slider(w, 1).setValue('9')
+      await settleMap()
+      // A term dragged OUT is the subtle half: it is absent from the live
+      // formula (zero means out), so a naive restore snaps it back to its
+      // saved weight.
+      await slider(w, 0).setValue('0')
+      await settleMap()
+      await switchTo(w, 'data')
+      await switchTo(w, 'map')
+      expect((slider(w, 1).element as HTMLInputElement).value).toBe('9')
+      expect((slider(w, 0).element as HTMLInputElement).value).toBe('0')
+      // And the map came back drawing the same formula the sliders show.
+      expect(w.findComponent(MapPane).props('query').weights.value).toEqual({ poverty_by_race: 9 })
+    })
+
+    it('saves a VERSION — a new column, drawn, with the old one kept', async () => {
+      mockedComposite.mockResolvedValue(SAVED)
+      const w = await mountAt(mapView())
+      await settleMap()
+      await openWeights(w)
+      await slider(w, 1).setValue('9')
+
+      const SAVED_COLUMN: DerivedColumn = {
+        ...INDEX,
+        id: 'political-efficacy-v2',
+        label: 'Efficacy, housing-weighted',
+        values: { '47157': 64.2, '28033': 41.5 },
+        rerun: { type: 'composite', terms: SAVED.terms },
+        layerId: SAVED.layerId,
+      }
+      mockedColumns.mockResolvedValue(columnsBody({ columns: [INDEX, SAVED_COLUMN] }))
+
+      await w.get('[data-testid="weight-name"]').setValue('Efficacy, housing-weighted')
+      await w.get('[data-testid="weight-save"]').trigger('click')
+      await flushPromises()
+      await settleMap()
+
+      // No `id` is sent: the set GAINS a column and keeps the one it had, which
+      // is the whole point of being able to compare two versions.
+      expect(mockedComposite).toHaveBeenCalledWith('memphis-redevelopment', {
+        label: 'Efficacy, housing-weighted',
+        terms: [
+          { layer: 'internal-votes', weight: 6, direction: 'higher_better' },
+          { layer: 'poverty_by_race', weight: 9, direction: 'lower_better' },
+        ],
+      })
+      // Both columns are on the page without a reload, and the comparison the
+      // second version exists to make is now offered.
+      expect(w.findAll('[data-testid="derived-row"]')).toHaveLength(2)
+      expect(w.find('[data-testid="index-compare"]').exists()).toBe(true)
+      // The editor is closed and the preview is gone: what is drawn is a record
+      // again, so the note that said otherwise must not still be there.
+      expect(w.find('[data-testid="index-weight-editor"]').exists()).toBe(false)
+      expect(w.find('[data-testid="map-preview-note"]').exists()).toBe(false)
+      expect(readIndexDraft('memphis-redevelopment', 'political-efficacy')).toBeNull()
+    })
+
+    it('tells the layer list the new index exists, rather than calling it lost', async () => {
+      // Seen after a real save: the map drew the new index and the list under
+      // it said "internal-…~heavier-on-black-progress — not in the library any
+      // more", because the manifest in hand had been fetched before the layer
+      // existed. A saved index IS a new county layer.
+      mockedComposite.mockResolvedValue(SAVED)
+      const w = await mountAt(mapView())
+      await settleMap()
+      const readsBefore = mockedManifest.mock.calls.length
+
+      mockedManifest.mockResolvedValue([
+        manifestEntry(),
+        VOTES,
+        {
+          ...manifestEntry(),
+          id: 'internal-memphis-redevelopment~political-efficacy',
+          slug: 'memphis-redevelopment~political-efficacy',
+          name: 'Political efficacy',
+        },
+        {
+          ...manifestEntry(),
+          id: SAVED.layerId,
+          slug: 'memphis-redevelopment~political-efficacy-v2',
+          name: 'Efficacy, housing-weighted',
+        },
+      ])
+      mockedColumns.mockResolvedValue(
+        columnsBody({
+          columns: [
+            INDEX,
+            { ...INDEX, id: 'political-efficacy-v2', label: SAVED.label, layerId: SAVED.layerId },
+          ],
+        }),
+      )
+
+      await openWeights(w)
+      await slider(w, 1).setValue('9')
+      await w.get('[data-testid="weight-name"]').setValue('Efficacy, housing-weighted')
+      await w.get('[data-testid="weight-save"]').trigger('click')
+      await flushPromises()
+      await settleMap()
+
+      // The manifest was asked for again…
+      expect(mockedManifest.mock.calls.length).toBeGreaterThan(readsBefore)
+      // …so the layer the map is now drawing is named, not mourned.
+      expect(w.find('[data-testid="set-layer-missing"]').exists()).toBe(false)
+      expect(w.findAll('[data-testid="set-layer"]').map(r => r.text())).toEqual([
+        expect.stringContaining('Efficacy, housing-weighted'),
+      ])
+    })
+
+    it('keeps the formula on screen when the save fails', async () => {
+      // Losing five minutes of dragging to a 500 would be the worst possible
+      // moment to discard it.
+      // The server's own sentence, which `friendlyError` passes through word for
+      // word: a 413 names the local batch pass, and that is the useful half.
+      mockedComposite.mockRejectedValue(
+        new Error('14 layers over 62.0 MB of source tables is past the 48.0 MB this parses in a request.'),
+      )
+      const w = await mountAt(mapView())
+      await settleMap()
+      await openWeights(w)
+      await slider(w, 1).setValue('9')
+      await w.get('[data-testid="weight-name"]').setValue('Efficacy, housing-weighted')
+      await w.get('[data-testid="weight-save"]').trigger('click')
+      await flushPromises()
+      expect(w.get('[data-testid="index-save-error"]').text()).toContain('past the 48.0 MB')
+      expect(w.find('[data-testid="index-weight-editor"]').exists()).toBe(true)
+      expect((slider(w, 1).element as HTMLInputElement).value).toBe('9')
+    })
+
+    it('brings an unsaved formula back after a page leave, and says it is unsaved', async () => {
+      vi.useFakeTimers()
+      const w = await mountAt(mapView())
+      await settleMap()
+      await openWeights(w)
+      await slider(w, 1).setValue('9')
+      await slider(w, 0).setValue('0')
+      vi.advanceTimersByTime(600)
+      vi.useRealTimers()
+      expect(readIndexDraft('memphis-redevelopment', 'political-efficacy')).toEqual([
+        { layer: 'poverty_by_race', weight: 9, direction: 'lower_better' },
+      ])
+
+      // A different page, a closed tab, a clicked link: the formula comes back.
+      const back = await mountAt(mapView())
+      await settleMap()
+      await openWeights(back)
+      expect(back.get('[data-testid="index-draft-restored"]').text()).toContain('unsaved version')
+      // Dragged to zero is OUT, and comes back out — not back at its saved 6.
+      expect([slider(back, 0), slider(back, 1)].map(i => (i.element as HTMLInputElement).value)).toEqual([
+        '0',
+        '9',
+      ])
+    })
+
+    it('does not call a formula unsaved when it matches the saved one', async () => {
+      // Seen on the real page: Reset put the published weights back, the
+      // autosave stored them, and reopening announced "an unsaved version from
+      // last time" above sliders sitting on exactly the saved index.
+      // `PageEditor`'s rule — a draft identical to what is saved is not a draft.
+      vi.useFakeTimers()
+      const w = await mountAt(mapView())
+      await settleMap()
+      await openWeights(w)
+      await slider(w, 1).setValue('9')
+      vi.advanceTimersByTime(600)
+      expect(readIndexDraft('memphis-redevelopment', 'political-efficacy')).not.toBeNull()
+
+      // Back to where it started.
+      await slider(w, 1).setValue('4')
+      vi.advanceTimersByTime(600)
+      vi.useRealTimers()
+      expect(readIndexDraft('memphis-redevelopment', 'political-efficacy')).toBeNull()
+
+      const back = await mountAt(mapView())
+      await settleMap()
+      await openWeights(back)
+      expect(back.find('[data-testid="index-draft-restored"]').exists()).toBe(false)
+    })
+
+    it('throws the restored draft away on request, back to what the set holds', async () => {
+      localStorage.setItem(
+        indexDraftKey('memphis-redevelopment', 'political-efficacy'),
+        JSON.stringify([{ layer: 'poverty_by_race', weight: 9, direction: 'lower_better' }]),
+      )
+      const w = await mountAt(mapView())
+      await settleMap()
+      await openWeights(w)
+      await w.get('[data-testid="index-draft-discard"]').trigger('click')
+      await settleMap()
+      expect(w.find('[data-testid="index-draft-restored"]').exists()).toBe(false)
+      expect([slider(w, 0), slider(w, 1)].map(i => (i.element as HTMLInputElement).value)).toEqual(['6', '4'])
+      // And the map is back to drawing a record rather than a preview.
+      expect(w.find('[data-testid="map-preview-note"]').exists()).toBe(false)
+      expect(readIndexDraft('memphis-redevelopment', 'political-efficacy')).toBeNull()
+    })
+
+    it('sends a set with the layers but no formula to where a first one is built', async () => {
+      // P9-3's rule, and the ticket's first question. Equal weights over a
+      // set's candidate layers is a real formula wearing the clothes of a
+      // neutral starting point, and a reader cannot tell the difference — so
+      // there is exactly one way to make a first formula, and this says where.
+      mockedSet.mockResolvedValue(detail({ layers: ['internal-sites', 'internal-votes'], derivedCount: 0 }))
+      mockedColumns.mockResolvedValue(columnsBody())
+      const w = await mountAt(mapView())
+      await settleMap()
+      const note = w.get('[data-testid="index-none-yet"]')
+      expect(note.text()).toContain('nothing ranking them yet')
+      expect(note.get('a').text()).toContain('Create a combined ranking')
+      expect(note.get('a').attributes('href')).toBe('/analysis')
+      expect(w.find('[data-testid="index-weight-editor"]').exists()).toBe(false)
+    })
+
+    it('says nothing of the sort to a set whose other layers are points and lines', async () => {
+      // Seen on the redevelopment set: one county layer and five point/line
+      // layers read as "layers that could be ranked together", because
+      // `registerInternalLayers` puts internal COUNTY layers into
+      // `LAYER_REGISTRY` too and the count used both sources. The reader was
+      // pointed at a control that would refuse them for having fewer than two.
+      mockedSet.mockResolvedValue(
+        detail({ layers: ['internal-sites', 'internal-pipelines'], derivedCount: 0 }),
+      )
+      mockedColumns.mockResolvedValue(columnsBody())
+      mockedManifest.mockResolvedValue([
+        manifestEntry(),
+        {
+          ...manifestEntry(),
+          id: 'internal-pipelines',
+          slug: 'pipelines',
+          name: 'Pipelines',
+          geometry: 'line',
+        },
+      ])
+      const w = await mountAt(mapView())
+      await settleMap()
+      expect(w.find('[data-testid="index-none-yet"]').exists()).toBe(false)
+    })
+
+    it('says nothing of the sort to a set that already has one', async () => {
+      const w = await mountAt(mapView())
+      await settleMap()
+      expect(w.find('[data-testid="index-none-yet"]').exists()).toBe(false)
+    })
+
+    it('ignores a draft whose layers the formula no longer has', async () => {
+      // A set edited since is a reason to start from what is saved, not to put
+      // weights on screen for a term that is not in the index any more.
+      localStorage.setItem(
+        indexDraftKey('memphis-redevelopment', 'political-efficacy'),
+        JSON.stringify([{ layer: 'internal-gone', weight: 7, direction: 'higher_better' }]),
+      )
+      const w = await mountAt(mapView())
+      await settleMap()
+      await openWeights(w)
+      expect(w.find('[data-testid="index-draft-restored"]').exists()).toBe(false)
+      expect([slider(w, 0), slider(w, 1)].map(i => (i.element as HTMLInputElement).value)).toEqual(['6', '4'])
+    })
   })
 })

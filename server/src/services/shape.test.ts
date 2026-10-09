@@ -61,6 +61,18 @@ describe('shape — a map layer says it outright', () => {
     // A block that never says means county, exactly as the layer parser reads it.
     expect(await deriveShape(dataset({ layer: { valueKey: 'rate' } }))).toBe('statistics')
   })
+
+  it('reads a line layer as lines, not as records with no location (P9-8)', async () => {
+    // `transmission-345kv` holds 3,477 LineStrings the map draws every day,
+    // and the entry page chipped it "Records without a location": `line` was
+    // the one geometry with no branch here, so it fell past the manifest to
+    // the file sniffer, which saw a GeoJSON with no lat/lng columns.
+    expect(shapeFromManifest(dataset({ layer: { geometry: 'line', pathKey: '_path' } }))).toBe('lines')
+    expect(await deriveShape(dataset({ layer: { geometry: 'line', file: 'lines.geojson' } }))).toBe('lines')
+    // And the manifest still wins over the geometry, as it does for every
+    // other shape.
+    expect(shapeFromManifest(dataset({ shape: 'areas', layer: { geometry: 'line' } }))).toBe('areas')
+  })
 })
 
 describe('shape — a source says what you can ask it for', () => {

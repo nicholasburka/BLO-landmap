@@ -58,7 +58,11 @@ export function analysisFromView(view: SavedViewSummary): Analysis {
     href: `/views/${encodeURIComponent(view.slug)}`,
     by: view.savedBy ?? '',
     at: view.savedAt ?? '',
-    line: view.description ?? '',
+    // P9-13: not the kind twice. A saved map view's stored description is
+    // the words "Map view", which is exactly what the badge beside it
+    // already says — so the row read "Livability index — play with it ·
+    // Map view · Map view · nick · 2d ago".
+    line: (view.description ?? '') === (ANALYSIS_KIND_LABELS[view.type] ?? view.type) ? '' : (view.description ?? ''),
   }
 }
 

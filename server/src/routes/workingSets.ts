@@ -453,6 +453,9 @@ router.post('/api/working-sets/:slug/composite', async (req, res) => {
       label: typeof body.label === 'string' ? body.label : '',
       terms: body.terms,
       id: typeof body.id === 'string' ? body.id : undefined,
+      // P9-4: the missing-data rule is part of the definition, so it has to
+      // cross the wire. Validated in the service, which owns the vocabulary.
+      missing: typeof body.missing === 'string' ? body.missing : undefined,
       recompute: body.recompute === true,
       by: user?.username ?? 'unknown',
       byId: user?.id ?? null,

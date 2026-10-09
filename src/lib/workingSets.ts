@@ -355,6 +355,20 @@ export interface CompositeTerm {
 }
 
 /**
+ * One term as a person edits it (P9-6a): the formula's own three fields plus
+ * the layer's NAME, because `internal-cejst~pct_pop_energy` is not a thing to
+ * put beside a slider.
+ *
+ * The name is display only and is never sent back — `runComposite` takes
+ * `CompositeTerm`s. It lives here rather than in the editor component because
+ * both halves speak it: the editor renders these, and whatever hosts it builds
+ * them from a saved formula.
+ */
+export interface WeightTerm extends CompositeTerm {
+  name: string
+}
+
+/**
  * What a re-run of a column would ask for, as the server read it off the
  * stored analysis. Null when the column records nothing to re-run — and a
  * button that cannot say what it would re-run is worse than no button.

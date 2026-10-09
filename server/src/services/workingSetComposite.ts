@@ -52,10 +52,14 @@
  */
 
 import { getCatalogEntry } from './libraryCatalog.js'
+import { WORKING_SET_KIND } from './workingSetMeta.js'
 import {
   INTERNAL_LAYER_ID_PREFIX,
   isDerivedLayerSlug,
+  splitDerivedLayerSlug,
   readInternalLayerValues,
+  parseLayerBlock,
+  parseMeasures,
 } from './internalLayers.js'
 import { getWorkingSet, putDerivedColumns, type DerivedColumnWrite, type WorkingSet } from './libraryWorkingSets.js'
 import { DERIVED_COLUMNS_MAX, readDerivedColumns } from './workingSetColumns.js'
@@ -76,6 +80,7 @@ import {
   type CompositeScale,
   type CompositeTerm,
   type CompositeTermValues,
+  type MissingRule,
 } from './composite.js'
 import { isPublicLayerId, publicLayerBytes, publicLayerRecord, readPublicCountyLayer } from './publicLayerValues.js'
 
@@ -100,6 +105,8 @@ export interface CompositeInput {
   terms?: unknown
   /** Column id; derived from the label when absent. */
   id?: string
+  /** P9-4: 'penalise' (default) or 'ignore'. See CompositeOptions. */
+  missing?: string
   recompute?: boolean
   by?: string
   byId?: number | null
@@ -111,6 +118,9 @@ export interface CompositeAnalysis {
   type: 'composite'
   /** The saved formula, canonical (sorted by layer id). */
   terms: CompositeTerm[]
+  /** P9-4: which missing-data rule produced the stored values. Part of the
+   *  definition, because a re-run under the other rule is a different number. */
+  missing?: 'penalise' | 'ignore'
   /** What each term's normalisation actually used. Provenance, not input:
    *  recomputed from the data every run, never read back as a parameter. */
   scales: CompositeScale[]
@@ -129,6 +139,8 @@ export interface CompositeRun {
   label: string
   terms: CompositeTerm[]
   scales: CompositeScale[]
+  /** P9-4: the missing-data rule these numbers were produced under. */
+  missing: 'penalise' | 'ignore'
   reused: boolean
   served: 'stored' | 'computed'
   freshness: InputVerdict
@@ -195,7 +207,7 @@ function columnIdFor(input: CompositeInput, label: string): string {
 }
 
 /** The formula, validated and scoped to the set. */
-function termsFor(set: WorkingSet, raw: unknown): CompositeTerm[] {
+async function termsFor(set: WorkingSet, raw: unknown): Promise<CompositeTerm[]> {
   const read = readCompositeTerms(
     Array.isArray(raw)
       ? raw.map(item => {
@@ -206,13 +218,22 @@ function termsFor(set: WorkingSet, raw: unknown): CompositeTerm[] {
   )
   if ('error' in read) throw new CompositeError(400, read.error)
   for (const term of read.terms) {
-    if (isDerivedLayerSlug(bareSlug(term.layer))) {
-      throw new CompositeError(
-        400,
-        `“${term.layer}” is itself a derived index, and an index over an index would need a chain of ` +
-          `staleness this does not keep — a changed input two steps back would read as fresh. ` +
-          `Build it from the layers underneath instead.`,
-      )
+    // P7-8 refused every `<owner>~<column>` id as "an index over an index".
+    // P9-0 gave that shape a second meaning — one of a dataset file's other
+    // measures — which is a plain column with the same staleness story as any
+    // other dataset layer, and a perfectly good ingredient. So the refusal
+    // asks the OWNER's kind, exactly as `readInternalLayerValues` does.
+    const split = splitDerivedLayerSlug(bareSlug(term.layer))
+    if (split) {
+      const owner = await getCatalogEntry(split.set)
+      if (!owner || owner.kind === WORKING_SET_KIND) {
+        throw new CompositeError(
+          400,
+          `“${term.layer}” is itself a derived index, and an index over an index would need a chain of ` +
+            `staleness this does not keep — a changed input two steps back would read as fresh. ` +
+            `Build it from the layers underneath instead.`,
+        )
+      }
     }
     if (!set.layers.includes(term.layer) && !set.datasets.includes(bareSlug(term.layer))) {
       throw new CompositeError(
@@ -273,6 +294,24 @@ async function bytesOfTerms(terms: readonly CompositeTerm[]): Promise<number> {
   return total
 }
 
+/**
+ * The range a held layer pins, if it pins one — from its `layer` block, or
+ * from the matching `measures` entry when the id names one of the file's
+ * other columns (P9-0).
+ */
+function declaredRangeOf(meta: unknown, slug: string): { min: number; max: number } | null {
+  const m = (meta && typeof meta === 'object' && !Array.isArray(meta) ? meta : {}) as Record<string, unknown>
+  const split = splitDerivedLayerSlug(slug)
+  if (split) {
+    const found = parseMeasures(m)
+    if ('error' in found) return null
+    return found.measures.find(m2 => m2.valueKey === split.column)?.range ?? null
+  }
+  const parsed = parseLayerBlock(m)
+  if ('error' in parsed) return null
+  return parsed.block.geometry === 'county' ? parsed.block.range : null
+}
+
 /** One term's county numbers, its name, and its input record. */
 async function resolveTerm(term: CompositeTerm): Promise<ResolvedTerm> {
   if (isPublicLayerId(term.layer)) {
@@ -281,6 +320,11 @@ async function resolveTerm(term: CompositeTerm): Promise<ResolvedTerm> {
       ...term,
       name: layer.name,
       values: layer.values,
+      // P9-4: the registry pins a range per layer, and those literals are the
+      // same numbers `calculate_blo_v2_scores.cjs` computed and rounded. Using
+      // them is what makes this agree with the Lens instead of producing a
+      // second, different answer from the same weights.
+      declaredRange: publicLayerRecord(term.layer)?.range ?? null,
       input: await captureAnalysisInput({ slug: term.layer, role: 'term', file: '', source: 'public' }),
     }
   }
@@ -301,6 +345,9 @@ async function resolveTerm(term: CompositeTerm): Promise<ResolvedTerm> {
     ...term,
     name: entry.title || slug,
     values: layer.values,
+    // A held layer pins a range only when its manifest says so; most do not,
+    // and fall back to their observed span.
+    declaredRange: declaredRangeOf(entry.meta, slug),
     input: await captureAnalysisInput({
       slug,
       role: 'term',
@@ -378,7 +425,7 @@ export async function runWorkingSetComposite(input: CompositeInput): Promise<Com
   if (!set) throw new CompositeError(404, `There is no working set called “${input.set}”.`)
 
   const label = labelFor(input)
-  const terms = termsFor(set, input.terms)
+  const terms = await termsFor(set, input.terms)
   const id = columnIdFor(input, label)
   const layerId = `${INTERNAL_LAYER_ID_PREFIX}${set.slug}~${id}`
 
@@ -413,6 +460,9 @@ export async function runWorkingSetComposite(input: CompositeInput): Promise<Com
           label: column?.label ?? label,
           terms: stored.terms,
           scales: Array.isArray(stored.scales) ? stored.scales : [],
+          // A result stored before this field existed was produced under the
+          // old behaviour, which is `penalise`.
+          missing: stored.missing === 'ignore' ? 'ignore' : 'penalise',
           reused: true,
           served: 'stored',
           // 'unknown' is served too: recomputing a result whose inputs cannot
@@ -434,12 +484,24 @@ export async function runWorkingSetComposite(input: CompositeInput): Promise<Com
   const refusal = compositeRefusal(terms.length, await bytesOfTerms(terms))
   if (refusal) throw new CompositeError(413, refusal)
 
+  // P9-4: how a county missing a layer counts is a RESEARCH choice, not a
+  // constant — so it is part of the definition and travels with the result.
+  const askedMissing = typeof input.missing === 'string' ? input.missing.trim() : ''
+  if (askedMissing && askedMissing !== 'penalise' && askedMissing !== 'ignore') {
+    throw new CompositeError(
+      400,
+      `“${askedMissing}” is not a rule for missing data — it is “penalise” (count an absent layer as ` +
+        `the worst case) or “ignore” (score a county on the data it has).`,
+    )
+  }
+  const missing: MissingRule = askedMissing === 'ignore' ? 'ignore' : 'penalise'
+
   const resolved: ResolvedTerm[] = []
   for (const term of terms) resolved.push(await resolveTerm(term))
 
   let result
   try {
-    result = computeComposite(resolved)
+    result = computeComposite(resolved, { missing })
   } catch (err) {
     // The maths refuses a flat or empty term. That is a 400 about the
     // definition, not a 500 about the server.
@@ -453,6 +515,7 @@ export async function runWorkingSetComposite(input: CompositeInput): Promise<Com
   const analysis: CompositeAnalysis = {
     type: 'composite',
     terms: canonicalTerms(terms),
+    missing: result.missing,
     scales: result.scales,
     columns: [id],
     counties: result.stats.counties,
@@ -488,6 +551,7 @@ export async function runWorkingSetComposite(input: CompositeInput): Promise<Com
   return {
     set: set.slug,
     column: id,
+    missing,
     label,
     terms: analysis.terms,
     scales: result.scales,

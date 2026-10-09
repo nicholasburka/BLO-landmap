@@ -94,20 +94,33 @@ async function mountApp(path = '/') {
   await router.push(path)
   await router.isReady()
   const w = mount(App, { global: { plugins: [router] }, attachTo: document.body })
-  // HelpDrawer is an async component (kept out of the public entry chunk):
-  // let its dynamic import settle before asserting on the header.
-  await flushPromises()
-  for (let i = 0; i < 40 && !w.find('[data-testid="help-trigger"]').exists() && !w.find('[data-testid="search-trigger"]').exists(); i++) {
-    await new Promise(resolve => setTimeout(resolve, 10))
-    await flushPromises()
-  }
-  // The header button belongs to the async drawer; give its import a beat
-  // even when Search (sync) is already there.
-  for (let i = 0; i < 40 && w.find('[data-testid="search-trigger"]').exists() && !w.find('[data-testid="help-trigger"]').exists(); i++) {
-    await new Promise(resolve => setTimeout(resolve, 10))
-    await flushPromises()
-  }
+  // P9-6b: the internal header is an async component (kept out of the public
+  // entry chunk), and this used to wait for it by POLLING THE CLOCK — forty
+  // ten-millisecond turns, then give up and assert. 400ms is plenty on an idle
+  // machine and not always enough on a loaded one, which is precisely the shape
+  // of a test that passes alone and fails in a full run: the assertion that
+  // fails is "an internal user has no Help button", a claim about the header
+  // that is really a claim about how fast Vite transformed a module.
+  //
+  // Resolved here instead, by the same specifier `App.vue` defers on, so the
+  // module registry is warm and the component's own resolution is a microtask.
+  // `settleMap` in `WorkingSetWorkspace.spec` is the same pattern.
+  await settleAsyncHeader()
   return w
+}
+
+/**
+ * The two components `App.vue` loads on demand, resolved for real.
+ *
+ * Then microtasks only — no wall clock, so a slow machine makes this slower
+ * rather than wrong. If the header were genuinely broken these loops would end
+ * with it still absent and the test would fail every time, which is the whole
+ * point: a failure should mean what it says.
+ */
+async function settleAsyncHeader(): Promise<void> {
+  await import('@/components/InternalHeaderTools.vue')
+  await import('@/components/InternalMobileStyles.vue')
+  for (let i = 0; i < 20; i++) await flushPromises()
 }
 
 beforeEach(() => {

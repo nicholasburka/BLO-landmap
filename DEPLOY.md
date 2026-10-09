@@ -322,6 +322,36 @@ whether production login works.**
 
 ---
 
+### Setting a Railway variable (and why to skip the deploy)
+
+```bash
+cd server
+# The value never reaches a command line or a shell history this way.
+grep '^KEY=' .env | cut -d= -f2- | tr -d '\n' \
+  | railway variable set --stdin KEY --skip-deploys
+railway variables --json | python3 -c "import json,sys; print('KEY' in json.load(sys.stdin))"
+```
+
+`--skip-deploys` because setting a variable otherwise **restarts the service**,
+and the API deploys manually (below) — so a restart before the code that needs
+the variable has shipped is downtime for nothing. The next `railway up` picks
+it up.
+
+**`MAPBOX_ACCESS_TOKEN` (P9-11, set 2026-10-08).** The address search on a
+working set's map proxies through `GET /api/geocode/suggest` so the calls can
+be counted (`recordUsage` keys on the path) and rate-limited, and so our server
+is not an open geocoder. Without the variable the route answers
+`{ hits: [], unavailable: true }` and the box says "Address search is not
+switched on for this server" — deliberately not "Nothing found", which would
+blame the address for a deploy problem.
+
+It is the **same public `pk.` token** the client bundle already carries for map
+tiles, copied rather than moved: `mapbox-gl` draws tiles in the browser and
+needs `VITE_MAPBOX_ACCESS_TOKEN`, so removing it from the root `.env` blanks
+every map. **The proxy buys counting, not secrecy.** The control that actually
+limits abuse of a public token is a URL restriction on it in the Mapbox
+account, which is a setting there and not something in this repo.
+
 ### Deploying the API is MANUAL — merging to `main` does not do it
 
 **The `blo-map-api` service has no GitHub connection.** Its `source.repo` is

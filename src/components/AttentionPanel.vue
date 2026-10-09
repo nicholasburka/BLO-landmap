@@ -23,6 +23,20 @@ withDefaults(defineProps<{ items?: AttentionItem[]; loading?: boolean }>(), { it
           <span class="label">{{ item.label }}</span>
           <span class="arrow" aria-hidden="true">→</span>
         </RouterLink>
+        <!-- P9-8: a rolled-up row says what it is made of. "66 — Needs a
+             look" is not a queue anybody can start on; "12 datasets with no
+             period covered" is a morning's work. Quiet, because these are a
+             way in rather than a second alarm, and the counts OVERLAP — one
+             entry can be missing two things — so they do not sum to the row
+             above and are not presented as if they do. -->
+        <ul v-if="item.breakdown?.length" class="reasons" data-testid="attention-reasons">
+          <li v-for="part in item.breakdown" :key="part.key">
+            <RouterLink :to="part.href" class="reason" data-testid="attention-reason">
+              <span class="reason-count">{{ part.count }}</span>
+              <span>{{ part.label }}</span>
+            </RouterLink>
+          </li>
+        </ul>
       </li>
     </ul>
 
@@ -55,6 +69,34 @@ withDefaults(defineProps<{ items?: AttentionItem[]; loading?: boolean }>(), { it
   border-radius: 8px;
   text-decoration: none;
   color: var(--blo-ink);
+}
+
+.reasons {
+  list-style: none;
+  margin: 4px 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+}
+
+.reason {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--blo-stone);
+  text-decoration: none;
+}
+
+.reason:hover {
+  text-decoration: underline;
+  color: var(--blo-ink);
+}
+
+.reason-count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 
 .row:hover {

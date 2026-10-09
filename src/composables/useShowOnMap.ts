@@ -32,6 +32,7 @@ import { useMapState, type MapState } from '@/composables/useMapState'
 import { isInternalLayerId } from '@/lib/internalLayers'
 import { boundsForFeatures } from '@/lib/internalFeatureLayers'
 import type { MapFitRequest } from '@/components/MapCanvas.vue'
+import type { ScoringQueryLayer } from '@/types/mapTypes'
 
 /**
  * What a page is showing. Every field is a getter so this reads the page's
@@ -50,6 +51,22 @@ export interface MapSelection {
    * answer for a page whose rows are not counties.
    */
   only?: () => string[] | null
+  /**
+   * P9-6a: how much each scored layer counts, when the page is previewing a
+   * FORMULA rather than naming layers.
+   *
+   * Absent (or null) is the default and the common case: every county layer
+   * the page names counts the same, because a page that names three layers is
+   * asking to see them, not proposing a weighting. A page that *is* proposing
+   * one — the weight editor — supplies its terms here, and the choropleth is
+   * that formula rather than an average of its ingredients.
+   *
+   * It supplies weights only. Which ids are scorable at all stays with the
+   * geometry dispatch in `apply`, so a formula cannot talk the canvas into
+   * scoring a line layer; a scored id this does not mention keeps the equal
+   * weight.
+   */
+  weights?: () => ScoringQueryLayer[] | null
   /** Where to put the map. Defaults to framing `only`, then a point layer's
    *  own extent. */
   fit?: () => MapFitRequest | null
@@ -75,15 +92,37 @@ export function useShowOnMap(selection: MapSelection): ShowOnMap {
    *  names the right layer instead of flashing the default. */
   function apply(): void {
     const ids = selection.layers()
-    // A point overlay is not part of the scoring query — it has its own
-    // source and its own markers — so the two kinds go different ways. Until
-    // the manifest is in, `pointDefinitions` is empty and every id looks
-    // scorable; `sync()` is what fixes that.
-    const points = ids.filter(id => state.layers.pointDefinitions.value.some(l => l.id === id))
-    const scorable = ids.filter(id => !points.includes(id))
+    // P9-1: dispatch on the layer's DECLARED geometry, never on "is it a
+    // point". A drawn geometry — point, line or state — has its own source and
+    // its own markers; a COUNTY layer is a column of numbers and is the only
+    // kind that can be a scoring term.
+    //
+    // The old split asked only "is this a known point layer", and scored
+    // everything else at weight 5. A line layer is not a point, so a working
+    // set's transmission lines were scored as though they were county metrics:
+    // the set's map drew a choropleth with no legend instead of the set's own
+    // layers, and P7-3's line geometry had no branch here at all.
+    //
+    // An internal id the manifest has not described yet is **held back**, not
+    // guessed at. `apply()` runs once before the manifest lands — that is the
+    // point of it, so the first paint names the right layer — and the old
+    // default for "unknown" was *score it*, which is how the wrong thing got
+    // drawn. A public registry id needs no manifest and is scorable at once.
+    const drawnIds = new Set(state.layers.pointDefinitions.value.map(d => d.id))
+    const countyIds = new Set(state.layers.internalDefinitions.value.map(d => d.id))
+    const points: string[] = []
+    const scorable: string[] = []
+    for (const id of ids) {
+      if (drawnIds.has(id)) points.push(id)
+      else if (countyIds.has(id)) scorable.push(id)
+      else if (!isInternalLayerId(id)) scorable.push(id)
+      // else: internal, unclassified — wait for the manifest rather than guess
+    }
     const only = selection.only?.() ?? null
+    // P9-6a: a declared weight wins over the equal default, per layer.
+    const weights = new Map((selection.weights?.() ?? []).map(term => [term.layerId, term]))
     state.query.apply({
-      layers: scorable.map(layerId => ({ layerId, weight: 5 })),
+      layers: scorable.map(layerId => weights.get(layerId) ?? { layerId, weight: 5 }),
       only: only && only.length ? only : null,
       // A page's own rows are the subset; "top N of them" is a question the
       // map asks, not one a table that is already showing them asks.
@@ -122,11 +161,29 @@ export function useShowOnMap(selection: MapSelection): ShowOnMap {
     else open()
   }
 
+  // P9-1: when the manifest lands, the classification above changes, so the
+  // drawn set has to be recomputed. Watching the definitions makes that a
+  // consequence of the data arriving rather than of `sync()` happening to run
+  // its second `apply()` — which is the ordering that failed in practice.
+  watch(
+    [() => state.layers.pointDefinitions.value, () => state.layers.internalDefinitions.value],
+    () => {
+      if (pane.isOpen.value) apply()
+    },
+  )
+
   // While it is open the pane is a live view of the page, not a snapshot of
   // the moment it was opened. Opening it runs this too, which is where the
   // manifest-dependent half of `sync()` happens.
   watch(
-    [pane.isOpen, () => selection.layers(), () => selection.only?.() ?? null],
+    [
+      pane.isOpen,
+      () => selection.layers(),
+      () => selection.only?.() ?? null,
+      // P9-6a: dragging a weight changes neither the layers nor the subset, so
+      // without this the canvas would keep painting the formula it opened with.
+      () => selection.weights?.() ?? null,
+    ],
     () => {
       if (pane.isOpen.value) void sync()
     },

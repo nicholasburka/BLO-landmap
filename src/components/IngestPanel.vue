@@ -249,7 +249,7 @@ async function copyItIn(): Promise<void> {
       <button
         v-if="hasLink"
         type="button"
-        class="retry-btn"
+        class="blo-act"
         data-testid="inspect-link"
         :disabled="!!busy"
         @click="look"
@@ -259,7 +259,7 @@ async function copyItIn(): Promise<void> {
       <button
         v-if="canRegister"
         type="button"
-        class="retry-btn"
+        class="blo-act"
         data-testid="register-source"
         :disabled="!!busy"
         @click="register"
@@ -269,7 +269,7 @@ async function copyItIn(): Promise<void> {
       <button
         v-if="canReplicate"
         type="button"
-        class="retry-btn"
+        class="blo-act"
         data-testid="replicate-now"
         :disabled="!!busy"
         @click="copyItIn"
@@ -389,7 +389,7 @@ async function copyItIn(): Promise<void> {
       <div class="inspect-actions">
         <button
           type="button"
-          class="retry-btn"
+          class="blo-act"
           data-testid="pull-documents"
           :disabled="!!busy || !chosen.length"
           @click="pullIn"
@@ -484,22 +484,6 @@ async function copyItIn(): Promise<void> {
   flex-wrap: wrap;
   gap: 8px;
   margin: 0 0 10px;
-}
-
-.retry-btn {
-  padding: 5px 12px;
-  font-size: 13px;
-  font-family: inherit;
-  color: var(--blo-ink);
-  background: #ffffff;
-  border: 1px solid var(--blo-cream-divider);
-  border-radius: 999px;
-  cursor: pointer;
-}
-
-.retry-btn:disabled {
-  opacity: 0.6;
-  cursor: default;
 }
 
 .link-list {
@@ -677,9 +661,8 @@ async function copyItIn(): Promise<void> {
 
 /* P5-60: the inspect/register/copy buttons and the plan chips are the only
    controls on this card — they need thumb-sized boxes, and the meta lines
-   need 14 px. */
+   need 14 px. The buttons take `.blo-act`, which carries the 44px itself. */
 @media (max-width: 640px) {
-  .retry-btn,
   .plan-choice {
     display: inline-flex;
     align-items: center;

@@ -69,11 +69,16 @@ describe('what it says', () => {
       ['covers', 'missing'],
       ['published', 'missing'],
     ])
-    expect(fields(w)[0].text).toContain('nothing could fill this')
-    // Nothing to keep and nothing to clear — only an offer to write it.
+    // P9-8: "nothing could fill this" was the system describing its own
+    // effort. The reader asked whether there is an organization; the answer
+    // is no.
+    expect(fields(w)[0].text).toContain('not set')
+    expect(fields(w)[0].text).not.toContain('nothing could fill this')
+    // Nothing to keep and nothing to clear — only an offer to write it, and
+    // the button says the thing pressing it does.
     expect(w.find('[data-testid="needs-a-look-keep"]').exists()).toBe(false)
     expect(w.find('[data-testid="needs-a-look-clear"]').exists()).toBe(false)
-    expect(w.find('[data-testid="needs-a-look-edit"]').exists()).toBe(true)
+    expect(w.get('[data-testid="needs-a-look-edit"]').text()).toBe('Add')
   })
 
   it('shows the field, the value, the mechanism and the evidence for a model’s reading', () => {

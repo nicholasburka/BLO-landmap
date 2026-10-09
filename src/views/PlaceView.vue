@@ -734,9 +734,12 @@ function downloadCsv(): void {
   min-width: 0;
 }
 
+/* P9-15: one page-title treatment across the app. */
 .place-header h1 {
   margin: 0 0 4px;
-  font-size: 28px;
+  font-family: var(--blo-font-display);
+  font-size: 1.7rem;
+  font-weight: 500;
   color: var(--blo-ink);
 }
 
@@ -1281,7 +1284,7 @@ function downloadCsv(): void {
   }
 
   .place-header h1 {
-    font-size: clamp(22px, 7vw, 28px);
+    font-size: clamp(20px, 6.5vw, 1.7rem);
   }
 
   .lede,

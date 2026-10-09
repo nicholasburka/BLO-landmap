@@ -180,9 +180,17 @@ export function registerLogoutHook(hook: () => void): void {
 }
 
 /** localStorage keys that hold internal residue: the chat thread (assistant
- *  text names internal layers) and per-dataset column preferences. Public
+ *  text names internal layers), per-dataset column preferences, and P9-6a's
+ *  unsaved index formulas (which name internal layers by id). Public
  *  preferences (welcome card, etc.) are left alone. */
-const INTERNAL_STORAGE_PREFIXES = ['blo:conversation', 'blo.dataset.hidden.', 'blo:ask', 'blo:draft:', 'blo:shortlist']
+const INTERNAL_STORAGE_PREFIXES = [
+  'blo:conversation',
+  'blo.dataset.hidden.',
+  'blo:ask',
+  'blo:draft:',
+  'blo:index-draft:',
+  'blo:shortlist',
+]
 
 function clearInternalLocalStorage(): void {
   try {

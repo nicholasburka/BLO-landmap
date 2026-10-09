@@ -122,6 +122,35 @@ describe('MapCanvas — the counties and the choropleth', () => {
     wrapper.unmount()
   })
 
+  /**
+   * P9-1b. `updateChoroplethVisibility` called `setLayoutProperty` behind only
+   * a `!map.value` guard, so any repaint arriving before the choropleth layer
+   * existed threw — "Style is not done loading", or "the layer does not exist
+   * in the map's style". In the browser that killed the watcher that applies a
+   * working set's layers, so the set's points and lines never drew at all.
+   *
+   * A repaint is a request to reflect state. Arriving early is normal, not an
+   * error: the right answer is to do nothing now and be correct later.
+   */
+  it('survives a repaint that arrives before the choropleth layer exists', async () => {
+    fetchMock.mockImplementation(async () => ({ ok: false, status: 503, json: async () => ({}) }))
+    const { wrapper, state, map } = await mountCanvas()
+    expect(map.getLayer('county-choropleth')).toBeUndefined()
+
+    expect(() => state.query.repaint()).not.toThrow()
+
+    wrapper.unmount()
+  })
+
+  it('survives a repaint before the style has settled', async () => {
+    const { wrapper, state, map } = await mountCanvas()
+    map.styleLoaded = false
+
+    expect(() => state.query.repaint()).not.toThrow()
+
+    wrapper.unmount()
+  })
+
   it('puts the overlay layers and the hover outline on the counties source', async () => {
     const { wrapper, map } = await mountCanvas()
     for (const id of ['county-hover-outline', 'walkthrough-set-outline', 'inspect-halo', 'diversity-layer']) {

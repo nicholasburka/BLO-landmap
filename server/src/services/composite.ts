@@ -57,6 +57,19 @@ export type CompositeDirection = 'higher_better' | 'lower_better'
 /** One line of a definition: a layer, how much it counts, and which end is
  *  good. This IS the saved formula — nothing about it is read off a manifest. */
 export interface CompositeTerm {
+  /** P9-4: force this term's scale. Absent = pinned when the layer pins one. */
+  scale?: 'pinned' | 'observed'
+  /**
+   * P9-5: the span THIS index scores the term against, overriding whatever
+   * the layer pins.
+   *
+   * The published BLO index needs it: its unbounded terms were scored against
+   * spans the registry does not hold — life expectancy 69-89.5 where the
+   * registry pins 65-87 — so neither "the layer's range" nor "today's spread"
+   * reproduces it. It is also the honest shape for any published index, since
+   * a span recomputed on each refresh silently moves every historical score.
+   */
+  range?: { min: number; max: number }
   /** A public registry layer id (`pct_Black`) or an internal one
    *  (`internal-<slug>`). The caller resolves it; this module only names it. */
   layer: string
@@ -66,6 +79,23 @@ export interface CompositeTerm {
 
 /** A term with the layer's county numbers attached, as the service reads them. */
 export interface CompositeTermValues extends CompositeTerm {
+  /**
+   * P9-4: the range this measure is SCALED against, when one is pinned.
+   *
+   * A range is derived from the data by default and pinned where somebody
+   * decided it. Pinning earns its place twice over: a floating range silently
+   * moves every historical score and makes two indices incomparable, because
+   * they were scaled against different denominators; and natural bounds beat
+   * observation outright — a percentage runs 0-100 whether or not any county
+   * reaches either end, and observed-scaling one that really spans 30-55%
+   * manufactures a dramatic gradient from a narrow real range.
+   *
+   * This is also what makes the Lens and this function agree. The Lens scales
+   * a registry layer against `LAYER_REGISTRY[id].range`, and those literals
+   * are not rival declarations — `calculate_blo_v2_scores.cjs` computed them
+   * from the data and rounded them. Same concept, written down.
+   */
+  declaredRange?: { min: number; max: number } | null
   /** GEOID → value. */
   values: Record<string, number>
 }
@@ -77,6 +107,8 @@ export interface CompositeScale extends CompositeTerm {
   max: number
   /** How many counties carried a usable number for this term. */
   counties: number
+  /** Which span the 0-100 was measured against (P9-4). */
+  scale: 'pinned' | 'observed'
 }
 
 export interface CompositeStats {
@@ -90,6 +122,8 @@ export interface CompositeStats {
 }
 
 export interface CompositeResult {
+  /** Which missing-data rule produced these numbers (P9-4). */
+  missing: MissingRule
   /** GEOID → index, 0–100. A county no term covers is absent, not zero. */
   values: Record<string, number>
   scales: CompositeScale[]
@@ -181,7 +215,17 @@ const DIRECTIONS: readonly string[] = ['higher_better', 'lower_better']
  */
 export function canonicalTerms(terms: readonly CompositeTerm[]): CompositeTerm[] {
   return [...terms]
-    .map(t => ({ layer: t.layer, weight: t.weight, direction: t.direction }))
+    // P9-4: `scale` is part of the FORMULA, not of one run — a definition
+    // that lost it would re-run against a different denominator and quietly
+    // produce different numbers. Omitted when absent so an unset term stays
+    // byte-identical to how it was stored before this field existed.
+    .map(t => ({
+      layer: t.layer,
+      weight: t.weight,
+      direction: t.direction,
+      ...(t.scale ? { scale: t.scale } : {}),
+      ...(t.range ? { range: { min: t.range.min, max: t.range.max } } : {}),
+    }))
     .sort((a, b) => a.layer.localeCompare(b.layer))
 }
 
@@ -193,7 +237,12 @@ export function sameTerms(a: readonly CompositeTerm[], b: readonly CompositeTerm
   const right = canonicalTerms(b)
   return left.every(
     (term, i) =>
-      term.layer === right[i].layer && term.weight === right[i].weight && term.direction === right[i].direction,
+      term.layer === right[i].layer &&
+      term.weight === right[i].weight &&
+      term.direction === right[i].direction &&
+      (term.scale ?? 'pinned') === (right[i].scale ?? 'pinned') &&
+      (term.range?.min ?? null) === (right[i].range?.min ?? null) &&
+      (term.range?.max ?? null) === (right[i].range?.max ?? null),
   )
 }
 
@@ -249,9 +298,56 @@ export function readCompositeTerms(raw: unknown): { terms: CompositeTerm[] } | {
           `so scale them all down instead.`,
       }
     }
-    terms.push({ layer, weight, direction: direction as CompositeDirection })
+    // P9-4: a term may insist on its own observed spread, ignoring whatever
+    // range the layer pins. Absent means "pinned if the layer has one".
+    const scale = typeof row.scale === 'string' ? row.scale.trim() : ''
+    if (scale && scale !== 'pinned' && scale !== 'observed') {
+      return { error: `“${layer}” has an unknown scale “${scale}” — it is “pinned” or “observed”.` }
+    }
+    let range: { min: number; max: number } | undefined
+    if (row.range !== undefined && row.range !== null) {
+      const r = row.range as Record<string, unknown>
+      const min = typeof r.min === 'number' ? r.min : Number.NaN
+      const max = typeof r.max === 'number' ? r.max : Number.NaN
+      if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) {
+        return {
+          error: `“${layer}” has a range that cannot be scored against — it needs a min below a max.`,
+        }
+      }
+      range = { min, max }
+    }
+    terms.push({
+      layer,
+      weight,
+      direction: direction as CompositeDirection,
+      ...(scale ? { scale: scale as 'pinned' | 'observed' } : {}),
+      ...(range ? { range } : {}),
+    })
   }
   return { terms: canonicalTerms(terms) }
+}
+
+/**
+ * The span a term is scaled against: its pinned range when it has a usable
+ * one, otherwise its own min and max over the counties carrying a number.
+ *
+ * A pinned min === max says nothing — it cannot divide — so it is ignored
+ * rather than turned into a division by zero.
+ */
+function spanOf(
+  values: Record<string, number>,
+  pinned: { min: number; max: number } | null | undefined,
+  forced?: 'pinned' | 'observed',
+): { min: number; max: number; counties: number; scale: 'pinned' | 'observed' } {
+  if (forced === 'observed') return { ...scaleOf(values), scale: 'observed' }
+  const observed = scaleOf(values)
+  const usable =
+    pinned &&
+    Number.isFinite(pinned.min) &&
+    Number.isFinite(pinned.max) &&
+    pinned.max !== pinned.min
+  if (!usable) return { ...observed, scale: 'observed' }
+  return { min: pinned.min, max: pinned.max, counties: observed.counties, scale: 'pinned' }
 }
 
 /** A term's own min and max over the counties that carry a usable number. */
@@ -286,11 +382,35 @@ function scaleOf(values: Record<string, number>): { min: number; max: number; co
  * Both say which layer and what to do about it. The ranking itself is left to
  * the reader: this returns values, and the map and the table sort them.
  */
-export function computeComposite(terms: readonly CompositeTermValues[]): CompositeResult {
+/** P9-4: how a county missing a term is treated. */
+export type MissingRule = 'penalise' | 'ignore'
+
+export interface CompositeOptions {
+  /**
+   * `penalise` divides by the FULL declared weight, so a county missing a
+   * layer is dragged down as though it scored zero there — "we know little
+   * about this place, so it should not rank top".
+   *
+   * `ignore` divides by the weight actually available, scoring a county on
+   * the data it has. This is what `calculate_blo_v2_scores.cjs` does, and so
+   * what the published index means.
+   *
+   * Roughly two thirds of US counties are missing at least one of the BLO
+   * index's eleven terms, so the two answers are far apart. Neither is wrong,
+   * which is why it is a setting and not a constant. Default `penalise`:
+   * what this did before the choice existed.
+   */
+  missing?: MissingRule
+}
+
+export function computeComposite(
+  terms: readonly CompositeTermValues[],
+  options: CompositeOptions = {},
+): CompositeResult {
   const ordered = [...terms].sort((a, b) => a.layer.localeCompare(b.layer))
   const scales: CompositeScale[] = []
   for (const term of ordered) {
-    const { min, max, counties } = scaleOf(term.values)
+    const { min, max, counties, scale } = spanOf(term.values, term.range ?? term.declaredRange, term.scale)
     if (!counties) {
       throw new CompositeMathError(
         `“${term.layer}” has no county values, so it cannot be part of an index. ` +
@@ -303,10 +423,14 @@ export function computeComposite(terms: readonly CompositeTermValues[]): Composi
           `and would only scale the whole index down. Remove it, or use a layer with some spread.`,
       )
     }
-    scales.push({ layer: term.layer, weight: term.weight, direction: term.direction, min, max, counties })
+    // `scale` travels with the number: "what does 100 mean" has a different
+    // answer for a pinned term and an observed one, and a reader comparing
+    // two indices needs to know which they are looking at.
+    scales.push({ layer: term.layer, weight: term.weight, direction: term.direction, min, max, counties, scale })
   }
 
   const totalWeight = ordered.reduce((sum, term) => sum + term.weight, 0)
+  const missing: MissingRule = options.missing === 'ignore' ? 'ignore' : 'penalise'
   const geoIds = new Set<string>()
   for (const term of ordered) for (const geoId of Object.keys(term.values)) geoIds.add(geoId)
 
@@ -318,6 +442,7 @@ export function computeComposite(terms: readonly CompositeTermValues[]): Composi
   for (const geoId of [...geoIds].sort()) {
     let weighted = 0
     let present = 0
+    let availableWeight = 0
     for (let i = 0; i < ordered.length; i++) {
       const term = ordered[i]
       const raw = term.values[geoId]
@@ -326,17 +451,23 @@ export function computeComposite(terms: readonly CompositeTermValues[]): Composi
       let normalised = Math.max(0, Math.min(1, (raw - min) / (max - min)))
       if (term.direction === 'lower_better') normalised = 1 - normalised
       weighted += normalised * term.weight
+      availableWeight += term.weight
       present += 1
     }
     if (!present) continue
     if (present === ordered.length) complete += 1
     else partial += 1
-    values[geoId] = stored((weighted / totalWeight) * 100)
+    // P9-4: the divisor IS the missing-data rule. Dividing by the full weight
+    // treats an absent layer as a zero; dividing by what was available scores
+    // the county on the data it has.
+    const divisor = missing === 'ignore' ? availableWeight : totalWeight
+    values[geoId] = stored((weighted / divisor) * 100)
   }
 
   return {
     values,
     scales,
+    missing,
     stats: { terms: ordered.length, counties: complete + partial, complete, partial },
   }
 }

@@ -301,6 +301,17 @@ const fitToGeoIds = (
 // ========== choropleth visibility ==========
 const updateChoroplethVisibility = () => {
   if (!map.value) return;
+  // P9-1b: a repaint is a REQUEST TO REFLECT STATE, and it can arrive before
+  // the style has settled or before the county files have landed — on the
+  // public map, and on every embedded pane. `setLayoutProperty` throws in both
+  // cases ("Style is not done loading"; "The layer … does not exist"), and
+  // because repaint runs inside a watcher that throw took the watcher with it.
+  // In a working set's pane that was the watcher applying the set's own
+  // layers, so its points and lines never drew.
+  //
+  // Doing nothing now is correct: `addCountyChoroplethLayer` calls this again
+  // once the layer is on, so the state that was dropped is applied then.
+  if (!map.value.isStyleLoaded() || !map.value.getLayer("county-choropleth")) return;
 
   debugLog("Updating choropleth visibility:", {
     showContaminationChoropleth: showContaminationChoropleth.value,
@@ -504,6 +515,11 @@ const addCountyChoroplethLayer = () => {
     "County choropleth layer added/updated:",
     map.value.getLayer("county-choropleth")
   );
+
+  // P9-1b: the layer is added hidden, and any repaint that arrived while it
+  // did not exist was dropped on purpose. This is where that state is applied,
+  // so "do nothing now" is only ever "be correct a moment later".
+  updateChoroplethVisibility();
 };
 
 /** The checkbox on a contamination row. No longer waits for the map: the

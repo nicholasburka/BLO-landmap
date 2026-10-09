@@ -74,8 +74,11 @@ describe('taxonomy.generated.json', () => {
     expect(raw.crossTags).toEqual(CROSS_TAGS)
   })
 
-  it('carries the four dataset shapes, in reading order and in plain words (P6-2)', () => {
-    expect(SHAPE_IDS).toEqual(['areas', 'points', 'statistics', 'records'])
+  it('carries the five dataset shapes, in reading order and in plain words (P6-2)', () => {
+    // P9-8 added `lines`. The generated file is exported from the client's
+    // taxonomy, so this failing is how a forgotten `npm run export:layers`
+    // announces itself.
+    expect(SHAPE_IDS).toEqual(['areas', 'points', 'statistics', 'lines', 'records'])
     expect(shapeLabel('statistics')).toBe('Statistics by county or tract')
     expect(shapeLabel('geospatial')).toBe('geospatial')
     expect(isShape('geospatial')).toBe(false)

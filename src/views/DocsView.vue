@@ -463,11 +463,16 @@ onMounted(load)
   color: var(--blo-stone);
 }
 
+/* P9-8: quiet, not orange. Two thirds of the library carries one of these,
+   and a queue holding 68% of everything is not a queue — it is the
+   background. Warning colour is for a value that is WRONG; these say a value
+   is merely unconfirmed, and rendering the two the same trains people to read
+   past both. */
 .row-gap-line {
   margin: 4px 0 0;
   font-size: 12px;
   font-style: italic;
-  color: var(--blo-orange-deep, #e65100);
+  color: var(--blo-stone);
   min-width: 0;
   overflow-wrap: anywhere;
 }

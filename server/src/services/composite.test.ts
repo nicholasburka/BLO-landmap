@@ -30,7 +30,7 @@ describe('computeComposite — the Lens, generalised', () => {
     const result = computeComposite([term('a', 1, 'higher_better', { '01001': 0, '01003': 5, '01005': 10 })])
     expect(result.values).toEqual({ '01001': 0, '01003': 50, '01005': 100 })
     expect(result.scales).toEqual([
-      { layer: 'a', weight: 1, direction: 'higher_better', min: 0, max: 10, counties: 3 },
+      { layer: 'a', weight: 1, direction: 'higher_better', min: 0, max: 10, counties: 3, scale: 'observed' },
     ])
   })
 
@@ -131,6 +131,126 @@ describe('computeComposite — the Lens, generalised', () => {
   })
 })
 
+describe('a declared range beats the observed one (P9-4)', () => {
+  /**
+   * P7-8 scaled every term against its observed min and max. The Lens scales
+   * a registry layer against `LAYER_REGISTRY[id].range`, a literal — so the
+   * same weights produced two different numbers, and "the index is a working
+   * set" would have silently moved published scores.
+   *
+   * Tracing `calculate_blo_v2_scores.cjs` settled which is right: it computes
+   * observed min/max for most terms and declares bounds only where the
+   * measure HAS natural ones — percentages 0-100, the diversity index 0-1. So
+   * the registry's ranges are not declarations competing with observation,
+   * they ARE observation, recorded and tidied. One concept: a range is
+   * derived by default and PINNED where someone decided it.
+   */
+  it('uses a pinned range instead of the observed span', () => {
+    // Observed span is 30-55; pinned says a percentage runs 0-100.
+    const t: CompositeTermValues = {
+      layer: 'pct', weight: 1, direction: 'higher_better',
+      values: { '01001': 30, '01003': 55 },
+      declaredRange: { min: 0, max: 100 },
+    }
+    const r = computeComposite([t])
+    // Observed scaling would have made these 0 and 100 — a dramatic gradient
+    // manufactured from a narrow real range.
+    expect(r.values).toEqual({ '01001': 30, '01003': 55 })
+    expect(r.scales[0]).toMatchObject({ min: 0, max: 100, scale: 'pinned' })
+  })
+
+  it('falls back to the observed span when nothing is pinned', () => {
+    const r = computeComposite([term('a', 1, 'higher_better', { '01001': 30, '01003': 55 })])
+    expect(r.values).toEqual({ '01001': 0, '01003': 100 })
+    expect(r.scales[0]).toMatchObject({ min: 30, max: 55, scale: 'observed' })
+  })
+
+  it('clamps a value outside its pinned range rather than scoring past the ends', () => {
+    const t: CompositeTermValues = {
+      layer: 'pct', weight: 1, direction: 'higher_better',
+      values: { '01001': -5, '01003': 150 },
+      declaredRange: { min: 0, max: 100 },
+    }
+    const r = computeComposite([t])
+    expect(r.values).toEqual({ '01001': 0, '01003': 100 })
+  })
+
+  it('ignores a pinned range that says nothing (min === max)', () => {
+    const t: CompositeTermValues = {
+      layer: 'flat', weight: 1, direction: 'higher_better',
+      values: { '01001': 2, '01003': 8 },
+      declaredRange: { min: 5, max: 5 },
+    }
+    const r = computeComposite([t])
+    expect(r.scales[0]).toMatchObject({ scale: 'observed' })
+  })
+})
+
+describe('a researcher chooses how missing data counts (P9-4)', () => {
+  /**
+   * Two defensible answers, and the published index and the server had picked
+   * different ones without anybody deciding.
+   *
+   * `calculate_blo_v2_scores.cjs` divides by the weight it HAS, so a county
+   * missing life expectancy is scored on the rest. `computeComposite` divided
+   * by the full declared weight, so the same county is dragged down as though
+   * it had scored zero. Roughly two thirds of US counties are missing at
+   * least one of the eleven, so this is not a rounding difference.
+   *
+   * Neither is wrong. "We know little about this county, so it should not
+   * rank top" is a real position; so is "score it on what we have". A
+   * researcher comparing the two wants both, so it is a setting.
+   */
+  // Every term needs real spread (a flat term is refused, and rightly), and
+  // `y` is absent from term b — that absence is the whole subject here.
+  const partial: CompositeTermValues[] = [
+    term('a', 1, 'higher_better', { x: 0, y: 10 }),
+    term('b', 1, 'higher_better', { x: 0, z: 10 }),
+  ]
+
+  it('penalises a county for what it is missing, when asked to', () => {
+    // y tops term a (weight 1 of 2 declared) and has nothing for b.
+    expect(computeComposite(partial, { missing: 'penalise' }).values['y']).toBe(50)
+  })
+
+  it('scores a county on the data it has, when asked to', () => {
+    // Same county, divided by the 1 weight actually available.
+    expect(computeComposite(partial, { missing: 'ignore' }).values['y']).toBe(100)
+  })
+
+  it('agrees about a county that has everything', () => {
+    // x is at the bottom of both terms either way — the rules only differ
+    // where something is absent.
+    expect(computeComposite(partial, { missing: 'penalise' }).values['x']).toBe(0)
+    expect(computeComposite(partial, { missing: 'ignore' }).values['x']).toBe(0)
+  })
+
+  it('defaults to penalise, which is what it did before this was a choice', () => {
+    expect(computeComposite(partial).values['y']).toBe(50)
+  })
+
+  it('records which rule produced the numbers', () => {
+    const r = computeComposite(partial, { missing: 'ignore' })
+    expect(r.missing).toBe('ignore')
+  })
+})
+
+describe('a term can be told to observe its own spread (P9-4)', () => {
+  /** Contamination is the live case: the published script scaled it against
+   *  the observed spread of site counts, while the registry pins 0-500. */
+  it('ignores a pinned range when the term says observe', () => {
+    const t: CompositeTermValues = {
+      layer: 'contamination', weight: 1, direction: 'higher_better',
+      values: { '01001': 10, '01003': 20 },
+      declaredRange: { min: 0, max: 500 },
+      scale: 'observed',
+    }
+    const r = computeComposite([t, term('b', 1, 'higher_better', { '01001': 1, '01003': 2 })])
+    const c = r.scales.find(x => x.layer === 'contamination')!
+    expect(c).toMatchObject({ scale: 'observed', min: 10, max: 20 })
+  })
+})
+
 describe('canonicalTerms / sameTerms — readable field equality', () => {
   it('sorts by layer id, so the same formula typed in another order is the same formula', () => {
     const typed = [
@@ -153,6 +273,96 @@ describe('canonicalTerms / sameTerms — readable field equality', () => {
     expect(sameTerms(base, [{ ...base[0], direction: 'lower_better' }, base[1]])).toBe(false)
     expect(sameTerms(base, [{ ...base[0], layer: 'c' }, base[1]])).toBe(false)
     expect(sameTerms(base, [base[0]])).toBe(false)
+  })
+})
+
+describe('a term may declare the span it is scored against (P9-5)', () => {
+  /**
+   * The published index needs this. Its six unbounded terms were scored
+   * against spans the registry does not hold — life expectancy 69-89.5 where
+   * the registry pins 65-87 — so "use the layer's range" and "use today's
+   * spread" both give the wrong answer. The definition has to be able to say
+   * the number.
+   *
+   * It is also the honest shape for a PUBLISHED index: a span recomputed on
+   * every refresh silently moves every historical score, and two vintages
+   * stop being comparable.
+   */
+  it('a range on the term beats the layer\'s own', () => {
+    const t: CompositeTermValues = {
+      layer: 'life_expectancy', weight: 1, direction: 'higher_better',
+      values: { a: 69, b: 89.5 },
+      declaredRange: { min: 65, max: 87 },   // what the layer pins
+      range: { min: 69, max: 89.5 },          // what THIS index was built on
+    }
+    const r = computeComposite([t, term('b', 1, 'higher_better', { a: 0, b: 1 })])
+    const s = r.scales.find(x => x.layer === 'life_expectancy')!
+    expect(s).toMatchObject({ min: 69, max: 89.5, scale: 'pinned' })
+  })
+
+  it('reads a range off a definition and refuses a backwards one', () => {
+    const ok = readCompositeTerms([
+      { layer: 'a', weight: 1, direction: 'higher_better', range: { min: 69, max: 89.5 } },
+      { layer: 'b', weight: 1, direction: 'higher_better' },
+    ])
+    expect('error' in ok).toBe(false)
+    if ('error' in ok) return
+    expect(ok.terms.find(t => t.layer === 'a')?.range).toEqual({ min: 69, max: 89.5 })
+
+    const bad = readCompositeTerms([
+      { layer: 'a', weight: 1, direction: 'higher_better', range: { min: 100, max: 0 } },
+      { layer: 'b', weight: 1, direction: 'higher_better' },
+    ])
+    expect('error' in bad).toBe(true)
+  })
+
+  it('keeps it through canonicalTerms, and two spans are two formulas', () => {
+    const c = canonicalTerms([
+      { layer: 'a', weight: 1, direction: 'higher_better', range: { min: 0, max: 10 } },
+      { layer: 'b', weight: 1, direction: 'higher_better' },
+    ])
+    expect(c.find(t => t.layer === 'a')?.range).toEqual({ min: 0, max: 10 })
+    expect(
+      sameTerms(
+        [{ layer: 'a', weight: 1, direction: 'higher_better', range: { min: 0, max: 10 } }],
+        [{ layer: 'a', weight: 1, direction: 'higher_better', range: { min: 0, max: 20 } }],
+      ),
+    ).toBe(false)
+  })
+})
+
+describe('the scale choice survives being saved (P9-4)', () => {
+  it('canonicalTerms keeps it — a definition that lost it would re-run differently', () => {
+    const c = canonicalTerms([
+      { layer: 'contamination', weight: 1, direction: 'lower_better', scale: 'observed' },
+      { layer: 'pct_Black', weight: 1, direction: 'higher_better' },
+    ])
+    expect(c.find(t => t.layer === 'contamination')?.scale).toBe('observed')
+    // Absent stays absent, so a term stored before this field existed is
+    // still byte-identical.
+    expect('scale' in (c.find(t => t.layer === 'pct_Black') as object)).toBe(false)
+  })
+
+  it('two formulas differing only in scale are not the same formula', () => {
+    const a = [{ layer: 'x', weight: 1, direction: 'higher_better' as const }]
+    const b = [{ layer: 'x', weight: 1, direction: 'higher_better' as const, scale: 'observed' as const }]
+    expect(sameTerms(a, b)).toBe(false)
+  })
+
+  it('reads the scale off a definition, and refuses one it does not know', () => {
+    const ok = readCompositeTerms([
+      { layer: 'a', weight: 1, direction: 'higher_better', scale: 'observed' },
+      { layer: 'b', weight: 1, direction: 'higher_better' },
+    ])
+    expect('error' in ok).toBe(false)
+    if ('error' in ok) return
+    expect(ok.terms.find(t => t.layer === 'a')?.scale).toBe('observed')
+
+    const bad = readCompositeTerms([
+      { layer: 'a', weight: 1, direction: 'higher_better', scale: 'sideways' },
+      { layer: 'b', weight: 1, direction: 'higher_better' },
+    ])
+    expect('error' in bad).toBe(true)
   })
 })
 

@@ -36,13 +36,27 @@
  * CSV — pointed at the set's anchor by a prop. The map half is P6-14's
  * `useShowOnMap` + `MapPane`, which is six lines. `MapCanvas` is untouched.
  */
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import DatasetView from '@/views/DatasetView.vue'
+import KbNav from '@/components/KbNav.vue'
 import MapPane from '@/components/MapPane.vue'
+import SetLayerList from '@/components/SetLayerList.vue'
+import MapAddressSearch from '@/components/MapAddressSearch.vue'
+import IndexCompareCard from '@/components/IndexCompareCard.vue'
+import LayerAnalysisCard from '@/components/LayerAnalysisCard.vue'
+import IndexWeightEditor from '@/components/IndexWeightEditor.vue'
 import { useShowOnMap } from '@/composables/useShowOnMap'
+import type { MapFitRequest } from '@/components/MapCanvas.vue'
+import { LAYER_REGISTRY } from '@/config/layerRegistry'
 import { contextCell } from '@/lib/countyJoin'
+import { getCountyByGeoId, initCountyLookup } from '@/lib/countyLookup'
+import { compareIndices, shiftLineOf } from '@/lib/indexCompare'
+import { countPointsByCounty, countyAt, rollupLine } from '@/lib/pointRollup'
+import { computeScores, rawLayerValues } from '@/composables/usePersonalizedScore'
 import { friendlyError } from '@/lib/errors'
+import { clearIndexDraft, readIndexDraft, writeIndexDraft } from '@/lib/indexDraft'
+import { invalidateInternalManifest } from '@/lib/internalLayers'
 import {
   SET_INTERFACE_KEY,
   interfaceForViewType,
@@ -61,12 +75,16 @@ import {
   fetchWorkingSet,
   fetchWorkingSetColumns,
   rerunDerivedColumn,
+  runComposite,
   workingSetDatasetsHref,
   workingSetHref,
   workingSetPlaceHref,
+  type CompositeTerm,
   type DerivedColumn,
+  type WeightTerm,
   type WorkingSetDetail,
 } from '@/lib/workingSets'
+import type { ScoringQueryLayer } from '@/types/mapTypes'
 
 const props = defineProps<{
   /** The view whose framing this is. Its `workingSet` is what gets loaded. */
@@ -75,6 +93,10 @@ const props = defineProps<{
 
 const route = useRoute()
 const router = useRouter()
+
+/** How long after the last slider change the draft is written (P9-6a). The
+ *  same pause `PageEditor` leaves before autosaving page text. */
+const AUTOSAVE_MS = 500
 
 const set = ref<WorkingSetDetail | null>(null)
 const columns = ref<DerivedColumn[]>([])
@@ -162,6 +184,28 @@ function onShown(payload: { geoIds: string[]; rows: number; total: number; loadi
 // --- The map half (P6-14, six lines of it) ---------------------------------
 
 /**
+ * P9-6a: the formula being tried out, or null.
+ *
+ * The weight editor is a sandbox and this is the sandbox's contents: a live
+ * formula that exists only on this page until somebody names a version and
+ * saves it. Held HERE rather than in the editor because the map has to draw it
+ * and the autosave has to keep it — the editor owns the sliders, the page owns
+ * what they currently mean.
+ */
+const previewTerms = ref<CompositeTerm[] | null>(null)
+
+/** Which index's formula is open for editing, by column id. '' is none. */
+const editing = ref('')
+
+/** The preview as the canvas takes it. Null whenever there is nothing to
+ *  preview, which is the state every page but this one is always in. */
+const previewQuery = computed<ScoringQueryLayer[] | null>(() => {
+  const terms = previewTerms.value
+  if (!terms || !terms.length) return null
+  return terms.map(term => ({ layerId: term.layer, weight: term.weight, direction: term.direction }))
+})
+
+/**
  * P7-8: the derived index the map is drawing instead of the set's own layers,
  * or `''` for the set's layers.
  *
@@ -176,10 +220,35 @@ const drawnIndex = ref('')
 
 /** The layers the SET names: it is the data, and what to draw is a question
  *  about the data. The view contributes the framing around them. */
-const drawsLayers = computed(() => (set.value?.layers.length ?? 0) > 0 || !!drawnIndex.value)
+const drawsLayers = computed(
+  () => (set.value?.layers.length ?? 0) > 0 || !!drawnIndex.value || !!previewQuery.value,
+)
+
+/**
+ * What the map is drawing, in one list — and it is a list of ONE thing at a
+ * time by design.
+ *
+ * A preview beats a drawn index beats the set's own layers, because each of
+ * those is a different claim about what the choropleth means and two of them
+ * at once is two choropleths arguing. P9-6a's rule: dragging a weight replaces
+ * the saved index on the map, and the layer list below says that it has.
+ */
+const drawnLayerIds = computed(() => {
+  const preview = previewQuery.value
+  if (preview) return preview.map(term => term.layerId)
+  if (drawnIndex.value) return [drawnIndex.value]
+  return set.value?.layers ?? []
+})
+
+/** The layers the set names, in its own order — what the list offers to
+ *  toggle. A drawn index stands alone, the way it draws alone. */
+const setLayerIds = computed(() => drawnLayerIds.value)
 
 const map = useShowOnMap({
-  layers: () => (drawnIndex.value ? [drawnIndex.value] : (set.value?.layers ?? [])),
+  layers: () => drawnLayerIds.value,
+  // Equal weight unless a formula is being tried out, which is the one case a
+  // page here has an opinion about how much each layer counts.
+  weights: () => previewQuery.value,
   only: () => shown.value.geoIds,
 })
 
@@ -200,7 +269,421 @@ function drawIndex(layerId: string): void {
  *  longer there. */
 watch(columns, list => {
   if (drawnIndex.value && !list.some(column => column.layerId === drawnIndex.value)) drawnIndex.value = ''
+  if (editing.value && !list.some(column => column.id === editing.value)) closeEditor()
 })
+
+// --- P9-6a: weighing an index differently ----------------------------------
+
+/**
+ * The formula the editor shows: the saved one, with whatever has been dragged
+ * since laid over it.
+ *
+ * It has to be a COMPUTED rather than a one-shot seed, because the editor now
+ * lives inside the map pane (where the thing it repaints is) and the pane is
+ * `v-if`'d — so switching to the data interface and back unmounts and remounts
+ * it. Reading the live formula means it comes back as it was left instead of
+ * snapping to what is saved.
+ *
+ * The round trip this creates is harmless and the one trap in it is handled: a
+ * term dragged to ZERO is absent from the live formula (zero means out), so
+ * "absent while a formula is live" reads as 0 rather than falling back to the
+ * saved weight and springing the slider back under the cursor.
+ */
+const editorBase = ref<CompositeTerm[]>([])
+
+const editorTerms = computed<WeightTerm[]>(() => {
+  const live = previewTerms.value
+  return editorBase.value.map(row => {
+    const term = live?.find(x => x.layer === row.layer)
+    return {
+      layer: row.layer,
+      name: layerName(row.layer),
+      weight: live ? (term ? term.weight : 0) : row.weight,
+      direction: term ? term.direction : row.direction,
+    }
+  })
+})
+
+/** Shown when the sliders opened on an autosaved draft rather than on the
+ *  saved formula, because weights nobody can account for are worse than none. */
+const draftRestored = ref(false)
+
+const savingIndex = ref(false)
+const indexError = ref('')
+
+/** P9-6c: the column whose editor is being opened. `openEditor` awaits the
+ *  layer manifest so the rows can carry names instead of ids, and on a cold
+ *  pane that is over a second — long enough to press the button twice and
+ *  close what never opened, which is what happened in the audit. */
+const openingEditor = ref('')
+
+const editingColumn = computed(() => columns.value.find(column => column.id === editing.value) ?? null)
+
+/**
+ * What the drag just did, in counties (P9-6c).
+ *
+ * The canvas answers this badly through no fault of its own: dropping a whole
+ * term out of an eleven-term index repaints about a tenth of the map at a
+ * maximum channel delta of 20 out of 255 — a real change nobody can see. The
+ * numbers are emphatic where the colours are not, and they are already here:
+ * the live scores are in the scoring engine and the saved ones are on the
+ * column, so this costs a rank sort and nothing else (§E).
+ *
+ * Ranks, not scores, because the live engine and the stored composite are not
+ * on the same scale — and "how far did counties move" is a question about
+ * order anyway.
+ */
+const previewShift = computed(() => {
+  const base = editorBase.value
+  const live = previewQuery.value
+  if (!base.length || !live) return ''
+  // The baseline is the SAVED formula run through this same engine — not the
+  // stored column, which the server computed with its own normalisation and
+  // missing-data rule. Comparing against that measured the gap between two
+  // engines and read "half the counties moved 305 places" with nothing
+  // changed. Here, identical weights give an identical ranking, as they must.
+  const saved = scoresOf(
+    base.map(term => ({ layerId: term.layer, weight: term.weight, direction: term.direction })),
+  )
+  const now = scoresOf(live)
+  if (!Object.keys(saved).length || !Object.keys(now).length) return ''
+  return shiftLineOf(compareIndices(saved, now))
+})
+
+/** P9-7: a point layer offered as a COUNT per county. The prefix marks it so
+ *  `analysisValues` knows to roll it up rather than look it up. */
+const ROLLUP_PREFIX = 'rollup:'
+
+/**
+ * P9-7: the set's own layers, named, for the free analyses.
+ *
+ * The SET's layers rather than whatever is drawn: a reader asking how
+ * contamination spreads out does not want the question to depend on which
+ * checkbox is ticked.
+ *
+ * A county layer is offered as itself. A POINT layer is offered as "counted
+ * by county" — a point layer answers *where things are* and a county layer
+ * answers *how many are here*, and only the second is a thing an index can
+ * weigh. That is the CEJST rollup, generalised. A line layer is offered as
+ * neither: counting how many transmission lines are "in" a county is a
+ * question about length and crossings, not containment, and a wrong answer
+ * dressed as a count is worse than no answer.
+ */
+const analysableLayers = computed(() => {
+  const ids = set.value?.layers ?? []
+  const county = ids.filter(id => !!LAYER_REGISTRY[id]).map(id => ({ id, name: layerName(id) }))
+  const points = map.state.layers.pointDefinitions.value
+    .filter(def => ids.includes(def.id) && def.geometry === 'point')
+    .map(def => ({ id: `${ROLLUP_PREFIX}${def.id}`, name: `${def.name} — counted by county` }))
+  return [...county, ...points]
+})
+
+
+
+/** Every county the map could draw, so coverage is measured against the
+ *  country and not against the layer's own keys. */
+const analysisUniverse = computed(() => {
+  const ids = new Set<string>()
+  for (const layer of analysableLayers.value) {
+    if (layer.id.startsWith(ROLLUP_PREFIX)) continue
+    for (const geoId of Object.keys(rawLayerValues(layer.id, map.state.scoringData))) ids.add(geoId)
+  }
+  return [...ids]
+})
+
+function analysisValues(layerId: string): { values: Record<string, number>; note?: string; counted?: boolean } {
+  if (!layerId.startsWith(ROLLUP_PREFIX)) {
+    return { values: rawLayerValues(layerId, map.state.scoringData) }
+  }
+  const pointLayer = layerId.slice(ROLLUP_PREFIX.length)
+  const collection = map.state.layers.pointData.value[pointLayer]
+  const counties = map.state.data.countiesData.value?.features ?? []
+  if (!collection?.features?.length || !counties.length) {
+    return { values: {}, note: 'Switch this layer on to count it — its points are not loaded yet.' }
+  }
+  const rolled = countPointsByCounty(collection.features, counties)
+  // `counted`: every point was placed, so a county that does not appear has
+  // none of the thing — which is not the same as a measurement nobody took.
+  return { values: rolled.values, note: rollupLine(rolled), counted: true }
+}
+
+/**
+ * P9-11: where an address landed, and what this set holds there.
+ *
+ * The county comes from US, not from the geocoder: P9-7's point-in-polygon
+ * over geometry the map has already downloaded. That costs no second call and
+ * does not depend on Mapbox's `district` context being a county name we can
+ * match to a GEOID — it IS the GEOID, which is what every layer is keyed on.
+ */
+function resolveAddress(center: [number, number]): {
+  geoId: string | null
+  countyLabel: string
+  values: { id: string; name: string; value: number | null }[]
+} {
+  const [lng, lat] = center
+  const geoId = countyAt(lng, lat, map.state.data.countiesData.value?.features ?? [])
+  if (!geoId) return { geoId: null, countyLabel: '', values: [] }
+  // The lookup first: the geometry's properties carry NAME but not reliably a
+  // state, and "Shelby" on its own is a county in nine states.
+  const known = lookupCounty(geoId)
+  const county = map.state.data.countiesData.value?.features.find(f => f.properties?.GEOID === geoId)
+  const label = known ? `${known.name}, ${known.stateAbbr}` : String(county?.properties?.NAME ?? geoId)
+  return {
+    geoId,
+    countyLabel: label,
+    // The SET's layers, including its own derived columns: the question is
+    // what this working set says about this place, not what the library does.
+    values: [
+      ...analysableLayers.value
+        .filter(layer => !layer.id.startsWith(ROLLUP_PREFIX))
+        .map(layer => ({
+          id: layer.id,
+          name: layer.name,
+          value: analysisValues(layer.id).values[geoId] ?? null,
+        })),
+      ...columns.value.map(column => ({
+        id: column.id,
+        name: column.label,
+        value: column.values[geoId] ?? null,
+      })),
+    ],
+  }
+}
+
+/** The county lookup is a static file the map page has usually already paid
+ *  for, and the only place a state abbreviation lives. Missing is fine — the
+ *  geometry's own NAME stands in. */
+function lookupCounty(geoId: string): { name: string; stateAbbr: string } | null {
+  try {
+    return getCountyByGeoId(geoId) ?? null
+  } catch {
+    return null
+  }
+}
+
+/** Where the map should fly when an address is chosen. */
+const addressFit = ref<MapFitRequest | null>(null)
+
+function onAddressFound(place: { center: [number, number]; geoId: string | null }): void {
+  addressFit.value = { center: place.center, zoom: 9, duration: 800 }
+  // The derived-column readouts already answer "what about here?" for a
+  // clicked county; an address is the same question asked another way.
+  clickedGeoId.value = place.geoId
+}
+
+function onAddressCleared(): void {
+  addressFit.value = null
+  clickedGeoId.value = null
+}
+
+/** One query, scored against the data this map already holds. */
+function scoresOf(query: ScoringQueryLayer[]): Record<string, number> {
+  const out: Record<string, number> = {}
+  for (const [geoId, county] of computeScores(query, map.state.scoringData, [])) {
+    if (county.score !== null && !county.filteredOut) out[geoId] = county.score
+  }
+  return out
+}
+
+/**
+ * A set that could carry an index but has none yet (P9-3's rule, P9-6a's
+ * first question).
+ *
+ * It is NOT offered sliders. Equal weights over a set's candidate layers is a
+ * real formula wearing the clothes of a neutral starting point, and a reader
+ * cannot tell the difference. So there is exactly one way to make a first
+ * formula — "Create a combined ranking" on the Analysis page — and this says where it is
+ * rather than leaving a capability to be discovered. Said only when the set
+ * could actually carry one: a reason a reader cannot act on is worse than
+ * silence.
+ */
+const couldWeigh = computed(() => {
+  if (columns.value.some(column => column.rerun?.type === 'composite')) return false
+  // ONE source, because `registerInternalLayers` injects every internal COUNTY
+  // layer into `LAYER_REGISTRY` as well. Counting the manifest and the registry
+  // separately counted each of those twice, which told the redevelopment set —
+  // one county layer and five point and line layers — that it had "layers that
+  // could be ranked together", and sent the reader to a control that would
+  // refuse them for having fewer than two. A point layer has features, not
+  // values; nothing in the registry has features, so this is the whole test.
+  const indexable = (set.value?.layers ?? []).filter(id => !!LAYER_REGISTRY[id])
+  return indexable.length >= 2
+})
+
+/** A layer id is not a thing to put beside a slider. Internal names come off
+ *  the manifest the pane already loaded, public ones off the static registry,
+ *  so naming a term costs no request. */
+function layerName(layerId: string): string {
+  const internal = map.state.layers.internalDefinitions.value.find(def => def.id === layerId)
+  if (internal) return internal.name
+  return LAYER_REGISTRY[layerId]?.name || layerId
+}
+
+/**
+ * Open (or close) the weight editor on one index's formula.
+ *
+ * The terms come from the column's own stored formula — the same record a
+ * re-run reads — so nothing is retyped and nothing is inferred from a layer
+ * manifest that somebody may since have edited. A set with no index is not
+ * offered this at all: equal weights over its candidate layers would be a real
+ * formula presented as a neutral starting point, which it is not. That path is
+ * "Create a combined ranking" on the Analysis page, so there is exactly one way
+ * to make a first formula.
+ *
+ * Awaits the manifest before seeding, so the rows open with names rather than
+ * with ids that fill in a moment later. It is cached and shared; when the pane
+ * is already open this costs nothing.
+ */
+async function openEditor(column: DerivedColumn): Promise<void> {
+  if (editing.value === column.id) {
+    closeEditor()
+    return
+  }
+  if (openingEditor.value || column.rerun?.type !== 'composite' || !set.value) return
+  const saved = column.rerun.terms
+  indexError.value = ''
+  openingEditor.value = column.id
+  try {
+    await map.state.loadInternalLayers()
+  } finally {
+    openingEditor.value = ''
+  }
+  // A draft is only usable if it is still about this formula's layers; a set
+  // edited since is a reason to start from what is saved.
+  const draft = readIndexDraft(set.value.slug, column.id)
+  const known = draft && draft.every(term => saved.some(row => row.layer === term.layer))
+  // A draft worth announcing is one that still fits this formula's layers AND
+  // actually differs from it. One left behind by a Reset is neither.
+  const usable = known && draft && !sameFormula(draft, saved) ? draft : null
+  if (draft && !usable) clearIndexDraft(set.value.slug, column.id)
+  editorBase.value = saved.map(row => ({ ...row }))
+  draftRestored.value = !!usable
+  // A restored draft draws at once: sliders saying one thing while the map
+  // shows another is the single worst state this feature could be in.
+  previewTerms.value = usable
+  editing.value = column.id
+}
+
+function closeEditor(): void {
+  editing.value = ''
+  editorBase.value = []
+  previewTerms.value = null
+  draftRestored.value = false
+  indexError.value = ''
+}
+
+/**
+ * Two formulas that would score every county identically.
+ *
+ * Used to keep a draft that merely *equals* the saved index from announcing
+ * itself as unsaved work — `PageEditor`'s rule ("a draft identical to the saved
+ * page is not a draft"), which this did not have until the real page showed
+ * "These weights are an unsaved version from last time" above sliders sitting
+ * on exactly the published weights. Order is not part of a formula, so both
+ * sides are compared by layer.
+ */
+function sameFormula(a: readonly CompositeTerm[], b: readonly CompositeTerm[]): boolean {
+  const live = a.filter(term => term.weight > 0)
+  const saved = b.filter(term => term.weight > 0)
+  if (live.length !== saved.length) return false
+  return live.every(term => {
+    const other = saved.find(x => x.layer === term.layer)
+    return !!other && other.weight === term.weight && other.direction === term.direction
+  })
+}
+
+/** The live formula, on every drag. Nothing is written to the set. */
+function onScore(terms: ScoringQueryLayer[]): void {
+  previewTerms.value = terms.map(term => ({
+    layer: term.layerId,
+    weight: term.weight,
+    direction: term.direction === 'lower_better' ? 'lower_better' : 'higher_better',
+  }))
+}
+
+/**
+ * Autosave, so a formula somebody spent five minutes on does not die with a
+ * clicked link (`PageEditor`'s answer to unfinished page text). Debounced:
+ * dragging a slider fires a change per pixel and none of them is worth a
+ * synchronous write.
+ */
+let autosave: ReturnType<typeof setTimeout> | undefined
+onBeforeUnmount(() => clearTimeout(autosave))
+watch([previewTerms, editing], ([terms, columnId]) => {
+  const slug = set.value?.slug
+  if (!slug || !columnId) return
+  clearTimeout(autosave)
+  autosave = setTimeout(() => {
+    // Dragging a weight back to where it started is not unsaved work.
+    if (terms && terms.length && !sameFormula(terms, editorBase.value)) {
+      writeIndexDraft(slug, columnId, terms)
+    } else {
+      clearIndexDraft(slug, columnId)
+    }
+  }, AUTOSAVE_MS)
+})
+
+/** Throw the restored draft away and go back to what the set holds. */
+function discardDraft(): void {
+  const column = editingColumn.value
+  if (!set.value || column?.rerun?.type !== 'composite') return
+  // The last drag may still have a write pending. Without this it lands after
+  // the clear and the draft is back, which is how a discarded version comes
+  // haunting the next time somebody opens the sliders.
+  clearTimeout(autosave)
+  clearIndexDraft(set.value.slug, column.id)
+  editorBase.value = column.rerun.terms.map(row => ({ ...row }))
+  draftRestored.value = false
+  previewTerms.value = null
+}
+
+/**
+ * Save the previewed formula as a new index on the set.
+ *
+ * A version, never an overwrite: no `id` is sent, so the set gains a column
+ * and keeps the one it had — which is the whole point of being able to compare
+ * two versions (`IndexCompareCard`). The columns are then read again rather
+ * than patched in place, for the reason a re-run does the same: one source of
+ * truth re-read beats several patched by hand. The new column becomes what the
+ * map draws, because somebody who just saved a version is looking at it.
+ */
+async function saveIndex(input: { label: string; terms: WeightTerm[] }): Promise<void> {
+  if (savingIndex.value || !set.value) return
+  const columnId = editing.value
+  savingIndex.value = true
+  indexError.value = ''
+  try {
+    const run = await runComposite(set.value.slug, {
+      label: input.label,
+      terms: input.terms.map(term => ({
+        layer: term.layer,
+        weight: term.weight,
+        direction: term.direction,
+      })),
+    })
+    const stored = await fetchWorkingSetColumns(set.value.slug)
+    columns.value = stored.columns
+    unreadable.value = stored.unreadable
+    // The saved index IS a new county layer, and the manifest in hand was
+    // fetched before it existed — so the layer list called the thing the map
+    // had just started drawing "not in the library any more".
+    invalidateInternalManifest()
+    await map.state.loadInternalLayers()
+    // Same race as `discardDraft`, and worse here: a pending write landing
+    // after the save would make the next visit announce an unsaved version of
+    // a formula that is now saved.
+    clearTimeout(autosave)
+    clearIndexDraft(set.value.slug, columnId)
+    closeEditor()
+    if (run.layerId) drawnIndex.value = run.layerId
+  } catch (err) {
+    // A 413 is the on-demand ceiling and its sentence names the local batch
+    // pass, so it is shown rather than reworded.
+    indexError.value = friendlyError(err, 'That index could not be saved.')
+  } finally {
+    savingIndex.value = false
+  }
+}
 
 /**
  * The pane follows the interface. Opening it is what loads the county files,
@@ -282,6 +765,18 @@ const mapColumns = computed(() =>
       // no control is offered that cannot do what it says.
       layerId: column.layerId,
       drawing: !!column.layerId && drawnIndex.value === column.layerId,
+      // P9-6a: a formula is editable, a measurement is not — there is nothing
+      // in "miles to the nearest line" to weigh against anything.
+      //
+      // And only where the editor can actually appear. It lives in the map
+      // pane, beside the choropleth it repaints, and the pane wants a desktop
+      // — so on a narrower window this button opened nothing and relabelled
+      // itself "Close the weights", which is a dead control wearing the
+      // clothes of a working one. P9-3's rule: say why instead.
+      isIndex: column.rerun?.type === 'composite',
+      canWeigh: column.rerun?.type === 'composite' && map.canOpen.value,
+      weighing: editing.value === column.id,
+      opening: openingEditor.value === column.id,
       column,
     }
   }),
@@ -353,6 +848,39 @@ async function rerun(column: DerivedColumn): Promise<void> {
   }
 }
 
+/**
+ * P9-14: what is on this page, below the map.
+ *
+ * Only the things actually rendered, in the order they appear — a contents
+ * line that offers something not below it is worse than no contents line.
+ *
+ * The layer list and the address search are deliberately NOT here, though
+ * the audit proposed them: both are overlaid ON the canvas, so they are
+ * already in front of a reader looking at the map, and listing them would
+ * pad the line with things that need no finding. What needed finding is what
+ * sits under 560 pixels of choropleth.
+ */
+/** True when one of the derived columns is an index, which is what makes the
+ *  last entry worth naming for its verb rather than its noun. */
+const indexHere = computed(() => columns.value.some(column => column.rerun?.type === 'composite'))
+
+const onThisPage = computed(() => {
+  const items: { id: string; name: string }[] = []
+  if (!map.isOpen.value) return items
+  if (analysableLayers.value.length) items.push({ id: 'set-analysis', name: 'Look at a layer' })
+  if (columns.value.filter(column => column.rerun?.type === 'composite').length >= 2) {
+    items.push({ id: 'set-compare', name: 'Compare versions' })
+  }
+  if (mapColumns.value.length) {
+    items.push({ id: 'set-derived', name: indexHere.value ? 'Columns, and weighing them' : 'Derived columns' })
+  }
+  return items
+})
+
+function jumpTo(id: string): void {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
 /** What the set holds, in counts — the same sentence shape its catalog row
  *  uses, so the two cannot disagree. */
 const holds = computed(() => {
@@ -391,6 +919,9 @@ function seedTableState(): void {
 }
 
 onMounted(async () => {
+  // P9-11: so an address can be named by the county it lands in. Cached for
+  // the session and shared with the analyses; a failure costs only the name.
+  void initCountyLookup().catch(() => {})
   const slug = props.view.workingSet ?? ''
   try {
     // Both at once: the set's members and its stored columns are two reads of
@@ -414,6 +945,9 @@ onMounted(async () => {
 
 <template>
   <div class="set-workspace" data-testid="set-workspace">
+    <!-- P9-16: the other surface you could not navigate from. The workspace
+         is the densest page in the product and offered exactly one way out. -->
+    <KbNav />
     <RouterLink to="/analysis" class="back-link">← Analysis</RouterLink>
 
     <p v-if="loading" class="state-note" data-testid="workspace-loading">Opening the working set…</p>
@@ -485,6 +1019,29 @@ onMounted(async () => {
         >Data</button>
       </nav>
 
+      <!-- P9-14: what is on this page, and a way to it.
+           Everything built in P9-6a…P9-12 lives below the map, which means a
+           reader who has not been told it exists scrolls past a 560px canvas
+           to find out. Five hidden features become five visible ones for the
+           price of one line. Only what is actually here is listed, so this
+           can never offer something that is not below it. -->
+      <nav
+        v-if="iface === 'map' && onThisPage.length"
+        class="page-contents"
+        aria-label="On this page"
+        data-testid="page-contents"
+      >
+        <span class="page-contents-label">On this page:</span>
+        <a
+          v-for="item in onThisPage"
+          :key="item.id"
+          :href="`#${item.id}`"
+          class="page-contents-link"
+          data-testid="page-contents-link"
+          @click.prevent="jumpTo(item.id)"
+        >{{ item.name }}</a>
+      </nav>
+
       <p v-if="set.missing.length" class="state-note warn" data-testid="workspace-missing">
         This set names {{ set.missing.length }}
         {{ set.missing.length === 1 ? 'thing' : 'things' }} the library no longer has:
@@ -496,25 +1053,118 @@ onMounted(async () => {
            hold a WebGL context. -->
       <section v-show="iface === 'map'" class="interface" data-testid="interface-map">
         <template v-if="readyToDraw">
-          <MapPane
-            v-if="map.isOpen.value"
-            class="workspace-pane"
-            testid="set-map-pane"
-            :layers="map.state.layers"
-            :query="map.state.query"
-            :data="map.state.data"
-            :fit="map.fit.value"
-            :title="set.name"
-            :note="paneNote"
-            label="This working set on the map"
-            @close="show('data')"
-            @county-click="clickedGeoId = $event"
-          />
+          <!-- The pane and everything that reads against it are ONE branch.
+               They were siblings until P9-6, which left the `v-else` below
+               pairing with whatever happened to precede it rather than with
+               the pane — so "there is not room for a map" could show on a
+               desktop whenever the set named no layers. -->
+          <template v-if="map.isOpen.value">
+            <MapPane
+              class="workspace-pane"
+              testid="set-map-pane"
+              :layers="map.state.layers"
+              :query="map.state.query"
+              :data="map.state.data"
+              :fit="addressFit ?? map.fit.value"
+              :title="set.name"
+              :note="paneNote"
+              label="This working set on the map"
+              @close="show('data')"
+              @county-click="clickedGeoId = $event"
+            >
+              <!-- P9-10: the layer list floats ON the map, the way the public
+                   map keeps its Lens over the canvas. It used to sit below,
+                   so changing what the map drew meant scrolling away from
+                   the map. -->
+              <template #overlay>
+                <SetLayerList
+                  v-if="setLayerIds.length"
+                  :layers="map.state.layers"
+                  :ids="setLayerIds"
+                  :readonly="!!previewQuery"
+                />
+                <!-- P9-11: a place, and what this set holds there. -->
+                <MapAddressSearch
+                  :resolve="resolveAddress"
+                  @found="onAddressFound"
+                  @cleared="onAddressCleared"
+                />
+              </template>
+            </MapPane>
+            <!-- P9-2: once a set's layers actually draw (P9-1, P9-1b) the map
+                 is two dense national networks and thousands of clustered
+                 points with nothing to say what they are. This names them,
+                 carries each one's own colour so the list reads against the
+                 map, and toggles through the same state the canvas draws from. -->
+            <!-- P9-6a: the preview replaced the saved index on the canvas, so
+                 the thing naming the map's layers has to say so. A reader must
+                 never mistake a preview for the record. -->
+            <!-- A live region: somebody dragging a slider must be told the map
+                 is now showing something unsaved, not only shown it. -->
+            <p v-if="previewQuery" class="preview-note" role="status" data-testid="map-preview-note">
+              Showing an unsaved version of
+              {{ editingColumn ? '“' + editingColumn.label + '”' : 'this index' }}, weighed below.
+              <!-- P9-6c: the colours shift by about 20/255 when a whole term
+                   leaves the formula. The count is what a reader can actually
+                   perceive, so it goes beside the claim, not in a panel. -->
+              <span v-if="previewShift" class="preview-shift" data-testid="map-preview-shift">
+                {{ previewShift }}
+              </span>
+            </p>
+            <!-- P9-6a: the active control, so it sits closest to the canvas
+                 it repaints — above the layer list, not below it.
+                 It was first placed down with the derived columns, which it is
+                 *about*, and seeing it rendered killed that idea: on a 900px
+                 window the sliders were 1,500px below the map, so you could see
+                 the control or the consequence, never both — which is the whole
+                 feature. Even directly under the list it was 370px adrift,
+                 because eleven layer rows sit between. Surviving an interface
+                 switch is handled by seeding from the live formula instead
+                 (`editorTerms`), not by placing it where nobody can use it. -->
+            <template v-if="editing && editorTerms.length">
+              <p v-if="draftRestored" class="draft-note" role="status" data-testid="index-draft-restored">
+                These weights are an unsaved version from last time.
+                <button type="button" class="link-btn" data-testid="index-draft-discard" @click="discardDraft">
+                  Use the saved index instead
+                </button>
+              </p>
+              <IndexWeightEditor
+                :terms="editorTerms"
+                @score="onScore"
+                @reset="previewTerms = null"
+                @save="saveIndex"
+              />
+              <p v-if="savingIndex" class="state-note" data-testid="index-saving">Saving this version…</p>
+              <p v-if="indexError" class="state-note error" data-testid="index-save-error">{{ indexError }}</p>
+            </template>
+            <!-- P9-7: four questions about the set's own layers, answered
+                 here over numbers the page already holds. -->
+            <div id="set-analysis">
+              <LayerAnalysisCard
+                :choices="analysableLayers"
+                :values-for="analysisValues"
+                :universe="analysisUniverse"
+              />
+            </div>
+            <!-- P9-6: when a set holds more than one index, the useful question
+                 is not what either says but what re-weighting did to the order.
+                 Both columns' values are already here, so this costs nothing. -->
+            <div id="set-compare"><IndexCompareCard :columns="columns" /></div>
+          </template>
           <!-- A map beside a page wants a desktop (P6-14). On a phone the deep
                link is still how this view is shared, and still works. -->
           <p v-else class="state-note" data-testid="map-too-narrow">
             There is not room for a map here.
             <RouterLink :to="`/?view=${view.slug}`">Open it on the full map</RouterLink>.
+            <!-- P9-10/P9-11: the layer list, the address search, the free
+                 analyses and the comparison all live with the map and all
+                 read the county data it loads, so they go when it goes. They
+                 were vanishing in silence, which reads as a broken page
+                 rather than a narrow one. -->
+            <span class="state-note-aside" data-testid="map-too-narrow-tools">
+              Its layers, address search and analyses are there too — they read the
+              same county data the map loads.
+            </span>
           </p>
         </template>
         <p v-else-if="!drawsLayers" class="state-note" data-testid="map-no-layers">
@@ -526,7 +1176,7 @@ onMounted(async () => {
 
         <!-- The map's reading of the set's derived columns: the same values the
              table is sorting, over the counties this map is drawing. -->
-        <section v-if="mapColumns.length" class="derived" data-testid="derived-columns">
+        <section v-if="mapColumns.length" id="set-derived" class="derived" data-testid="derived-columns">
           <h2 class="derived-heading">Derived columns</h2>
           <ul class="derived-list">
             <li
@@ -548,10 +1198,13 @@ onMounted(async () => {
               <!-- The re-run, offered where the number is READ rather than on a
                    form elsewhere: the arguments are in the stored record, so
                    there is nothing for a reader to retype. -->
+              <!-- P9-13: a WRITE. It recomputes on the server and rewrites
+                   the stored column, which is a different kind of thing from
+                   the two beside it, and used to look identical to them. -->
               <button
                 v-if="column.freshness === 'stale' && column.canRerun"
                 type="button"
-                class="derived-rerun"
+                class="blo-act blo-act--write"
                 :disabled="!!rerunning"
                 data-testid="derived-rerun"
                 @click="rerun(column.column)"
@@ -561,13 +1214,36 @@ onMounted(async () => {
               <button
                 v-if="column.layerId"
                 type="button"
-                class="derived-rerun"
+                class="blo-act"
                 data-testid="derived-draw"
                 :aria-pressed="column.drawing"
                 @click="drawIndex(column.layerId)"
               >
                 {{ column.drawing ? 'Show the set’s layers' : 'Draw on the map' }}
               </button>
+              <!-- P9-6a: offered where the formula is READ, for the same reason
+                   the re-run is — the terms are in the stored record, so there
+                   is nothing for a reader to retype. -->
+              <button
+                v-if="column.canWeigh"
+                type="button"
+                class="blo-act"
+                data-testid="derived-weigh"
+                :aria-pressed="column.weighing"
+                :disabled="column.opening"
+                @click="openEditor(column.column)"
+              >
+                {{
+                  column.opening
+                    ? 'Opening…'
+                    : column.weighing
+                      ? 'Close the weights'
+                      : 'Weigh it differently'
+                }}
+              </button>
+              <span v-else-if="column.isIndex" class="derived-why" data-testid="derived-weigh-why">
+                Weigh it differently — needs a wider window, so the map can show what the weights do
+              </span>
               <span class="derived-provenance" data-testid="derived-provenance">{{ column.provenance }}</span>
               <span v-if="column.method" class="derived-method" data-testid="derived-method">{{ column.method }}</span>
             </li>
@@ -576,7 +1252,15 @@ onMounted(async () => {
           <p class="derived-note">
             Stored on the set, not recomputed to draw this. The table sorts these same numbers.
           </p>
+
         </section>
+        <!-- P9-6a: where a first formula comes from, for a set that has the
+             layers to weigh but nothing weighing them yet. -->
+        <p v-if="couldWeigh" class="state-note" data-testid="index-none-yet">
+          This set has layers that could be ranked together, but nothing ranking them yet.
+          <RouterLink to="/analysis">Create a combined ranking on the Analysis page</RouterLink> — then its
+          weights can be dragged around here.
+        </p>
         <p v-if="unreadable.length" class="state-note warn" data-testid="derived-unreadable">
           {{ unreadable.length === 1 ? 'One derived column' : `${unreadable.length} derived columns` }} could not be
           read: {{ unreadable.join(', ') }}.
@@ -623,9 +1307,13 @@ onMounted(async () => {
   color: var(--blo-ink, #111);
 }
 
+/* P9-15: this was 22px Inter — the smallest title in the product, on its
+   deepest and densest page. */
 .workspace-head h1 {
   margin: 0;
-  font-size: 22px;
+  font-family: var(--blo-font-display);
+  font-size: 1.7rem;
+  font-weight: 500;
   color: var(--blo-ink, #111);
 }
 
@@ -715,9 +1403,12 @@ onMounted(async () => {
   border-radius: 8px;
 }
 
+/* P9-15: 0.95rem like the other section headings beside it. At 13px this
+   section heading was SMALLER than the card titles next to it, so the most
+   substantial block on the page looked like the least. */
 .derived-heading {
   margin: 0 0 8px;
-  font-size: 13px
+  font-size: 0.95rem;
 }
 
 .derived-list {
@@ -754,10 +1445,78 @@ onMounted(async () => {
   color: var(--blo-stone);
 }
 
+/* P9-3's shape: a reason reads as a reason, not as a button somebody greyed. */
+.derived-why {
+  font-size: 12px;
+  color: var(--blo-stone);
+}
+
+/* P9-14: a quiet line, not a navbar. It is a way to the things under the
+   map, and it must not compete with them. */
+.page-contents {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 10px 0 0;
+  font-size: 12px;
+}
+
+.page-contents-label {
+  color: var(--blo-stone);
+}
+
+.page-contents-link {
+  color: var(--blo-green-deep, #1f7a2e);
+  text-decoration: none;
+}
+
+.page-contents-link:hover {
+  text-decoration: underline;
+}
+
+.state-note-aside {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--blo-stone);
+}
+
 .derived-note {
   margin: 8px 0 0;
   font-size: 12px;
   color: var(--blo-stone);
+}
+
+/* P9-6a. The preview note and the restored-draft note carry the same orange a
+   stale column's badge does — `--blo-orange-deep`, not a new hex — because the
+   state is the same kind of state: a number on screen that nobody has committed
+   to. Quiet grey would make them decorative, which is exactly the mistake; a
+   reader who misses these is reading an unsaved formula as the set's record. */
+.preview-shift {
+  display: block;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.preview-note,
+.draft-note {
+  margin: 8px 0 0;
+  padding: 6px 8px;
+  border-left: 3px solid var(--blo-orange-deep, #e65100);
+  background: var(--blo-orange-soft, rgba(255, 107, 28, 0.1));
+  font-size: 12px;
+  color: var(--blo-orange-deep, #e65100);
+}
+
+.link-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 /* P7-6: a column whose inputs have moved must never look like one whose have
@@ -789,20 +1548,6 @@ onMounted(async () => {
 
 /* `.act`'s geometry from NeedsALookNote, which is this codebase's small
    inline action beside a value that needs attention. */
-.derived-rerun {
-  padding: 1px 6px;
-  font-size: 12px;
-  color: var(--blo-green-deep, #1f7a2e);
-  background: none;
-  border: 1px solid var(--blo-cream-divider, #e0d9ca);
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.derived-rerun:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
 
 /* The header line — the half a reader on the DATA interface sees, where a
    derived column is indistinguishable from a county-context one. The row-level

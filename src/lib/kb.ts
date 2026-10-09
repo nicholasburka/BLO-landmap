@@ -78,6 +78,16 @@ export interface AttentionItem {
   label: string
   count: number
   href: string
+  /**
+   * P9-8: what a rolled-up row is MADE of, biggest first.
+   *
+   * "66 — Needs a look" against a 97-entry library is not a queue, it is the
+   * background: a reader cannot start on it, so they start on nothing. The
+   * rules behind it were already there, each with its own key and its own
+   * deep link — they were simply not shown. "12 datasets with no period
+   * covered" is a morning's work.
+   */
+  breakdown?: AttentionItem[]
 }
 
 /** A dropped link whose file nobody has fetched yet: the entry still holds
@@ -372,10 +382,22 @@ export function attentionItems(entries: CatalogEntry[]): AttentionItem[] {
   // show them or the landing should stop counting them — that is a question
   // for Nick, not something a count fix should settle. See P6-23.
   const live = entries.filter(entry => entry.status !== 'archived')
+  const itemFor = (rule: { key: string; label: string; test: (e: CatalogEntry) => boolean }): AttentionItem => {
+    const matched = live.filter(rule.test)
+    return { key: rule.key, label: rule.label, count: matched.length, href: attentionHref(rule.key, matched) }
+  }
   return ATTENTION_RULES.filter(rule => !rule.rolledUp)
     .map(rule => {
-      const matched = live.filter(rule.test)
-      return { key: rule.key, label: rule.label, count: matched.length, href: attentionHref(rule.key, matched) }
+      const item = itemFor(rule)
+      if (rule.key !== ROLLED_UP_KEY) return item
+      // The reasons behind the one row, so a reader can pick one off instead
+      // of facing two thirds of the library at once. Counts here overlap —
+      // one entry can be missing a topic AND a period — so they are not
+      // summed and the roll-up stays the honest total.
+      const breakdown = ROLLED_UP_RULES.map(itemFor)
+        .filter(part => part.count > 0)
+        .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+      return { ...item, breakdown }
     })
     .filter(item => item.count > 0)
 }

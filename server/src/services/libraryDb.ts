@@ -205,6 +205,23 @@ CREATE INDEX IF NOT EXISTS library_audit_created_idx ON library_audit (created_a
  *  injected pool, e.g. pg-mem). Returns true when library features are
  *  available; any failure logs a warning and returns false so the rest of
  *  the server boots normally. */
+/**
+ * Is the library actually running on the in-memory dev store?
+ *
+ * Lives here because it mirrors the branch below and must not drift from it.
+ * The FLAG ALONE is not the answer, and that was a real hole: `initLibraryDb`
+ * honours `LIBRARY_DEV_PGMEM` only when `DATABASE_URL` is unset, so with one
+ * configured the server connects to that Postgres and ignores the flag — while
+ * `seedDevUser` in `index.ts` went ahead and inserted `dev-admin` /
+ * `dev-password-123`, role admin, into it. `npm run demo` on a laptop with a
+ * `DATABASE_URL` in `server/.env` therefore created a known-credential
+ * administrator in whatever that URL pointed at, and `docs/RUN-LOCAL.md`
+ * suggests that may be a hosted Neon database the team shares.
+ */
+export function usingInMemoryLibraryStore(env: NodeJS.ProcessEnv = process.env): boolean {
+  return !env.DATABASE_URL && env.LIBRARY_DEV_PGMEM === '1' && env.NODE_ENV !== 'production'
+}
+
 export async function initLibraryDb(injectedPool?: PgPool): Promise<boolean> {
   try {
     let candidate: PgPool

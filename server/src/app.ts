@@ -23,6 +23,7 @@ import libraryIngestRouter from './routes/libraryIngest.js'
 import librarySourcesRouter from './routes/librarySources.js'
 import libraryPlaceRouter from './routes/libraryPlace.js'
 import libraryAskRouter from './routes/libraryAsk.js'
+import geocodeRouter from './routes/geocode.js'
 import libraryChatRouter from './routes/libraryChat.js'
 import kbRouter from './routes/kb.js'
 import libraryActivityRouter from './routes/libraryActivity.js'
@@ -202,6 +203,7 @@ export function createApp(): express.Express {
   // own limiter + daily budget, since it is the only library route that spends
   // Anthropic tokens.
   app.use(libraryAskRouter)
+  app.use(geocodeRouter)
 
   // Chat (P6-7): threads with the library's own tool set, internal-tier. The
   // message route carries the daily budget (it is the only one that spends

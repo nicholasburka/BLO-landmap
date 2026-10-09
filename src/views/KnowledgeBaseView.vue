@@ -270,9 +270,14 @@ const recentNote = computed(() => {
   max-width: 900px;
 }
 
+/* P9-15: the page title is one treatment everywhere. This was Inter at
+   28px while /analysis and /datasets were the display face at 1.7rem — two
+   typefaces for the same thing, which is drift rather than hierarchy. */
 .kb-header h1 {
   margin: 0 0 4px;
-  font-size: 28px;
+  font-family: var(--blo-font-display);
+  font-size: 1.7rem;
+  font-weight: 500;
   color: var(--blo-ink);
 }
 
@@ -500,7 +505,7 @@ const recentNote = computed(() => {
   }
 
   .kb-header h1 {
-    font-size: clamp(22px, 7vw, 28px);
+    font-size: clamp(20px, 6.5vw, 1.7rem);
   }
 
   /* Three tiles stack, with a zero floor so nothing scrolls sideways at

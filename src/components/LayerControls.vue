@@ -112,23 +112,13 @@
           Demographics
         </h3>
         <div v-show="expandedCategories.demographics">
-          <div v-for="layer in demographicLayers.filter(l => l.category === 'Demographics')" :key="layer.id" class="layer-item">
-            <input
-              type="checkbox"
-              :id="layer.id"
-              :checked="selectedDemographicLayers.includes(layer.id)"
-              @change="$emit('toggle-demographic', layer.id)"
-            />
-            <label :for="layer.id">{{ layer.name }}</label>
-            <span class="tooltip-wrapper" v-if="layer.tooltip">
-              <button
-                type="button"
-                class="tooltip-icon"
-                :aria-label="'Info about ' + layer.name"
-                :aria-describedby="'tooltip-' + layer.id"
-              >ⓘ</button>
-              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip" v-html="layer.tooltip"></span>
-            </span>
+          <LayerRow
+            v-for="layer in demographicLayers.filter(l => l.category === 'Demographics')"
+            :key="layer.id"
+            :layer="layer"
+            :checked="selectedDemographicLayers.includes(layer.id) ?? false"
+            @toggle="$emit('toggle-demographic', $event)"
+          >
             <LayerScoringControls
               v-if="showScoringControls && isLayerSelected(layer.id)"
               :layer-id="layer.id"
@@ -142,7 +132,7 @@
               @update-direction="(id, d) => $emit('update-direction', id, d)"
               @update-filter="(id, f) => $emit('update-filter', id, f)"
             />
-          </div>
+          </LayerRow>
         </div>
       </template>
 
@@ -152,23 +142,13 @@
           Economic Indicators
         </h3>
         <div v-show="expandedCategories.economic">
-          <div v-for="layer in economicLayers" :key="layer.id" class="layer-item">
-            <input
-              type="checkbox"
-              :id="layer.id"
-              :checked="selectedEconomicLayers?.includes(layer.id)"
-              @change="$emit('toggle-economic', layer.id)"
-            />
-            <label :for="layer.id">{{ layer.name }}</label>
-            <span class="tooltip-wrapper" v-if="layer.tooltip">
-              <button
-                type="button"
-                class="tooltip-icon"
-                :aria-label="'Info about ' + layer.name"
-                :aria-describedby="'tooltip-' + layer.id"
-              >ⓘ</button>
-              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip" v-html="layer.tooltip"></span>
-            </span>
+          <LayerRow
+            v-for="layer in economicLayers"
+            :key="layer.id"
+            :layer="layer"
+            :checked="selectedEconomicLayers?.includes(layer.id) ?? false"
+            @toggle="$emit('toggle-economic', $event)"
+          >
             <LayerScoringControls
               v-if="showScoringControls && isLayerSelected(layer.id)"
               :layer-id="layer.id"
@@ -182,7 +162,7 @@
               @update-direction="(id, d) => $emit('update-direction', id, d)"
               @update-filter="(id, f) => $emit('update-filter', id, f)"
             />
-          </div>
+          </LayerRow>
         </div>
       </template>
 
@@ -192,23 +172,13 @@
           Housing & Affordability
         </h3>
         <div v-show="expandedCategories.housing">
-          <div v-for="layer in housingLayers" :key="layer.id" class="layer-item">
-            <input
-              type="checkbox"
-              :id="layer.id"
-              :checked="selectedHousingLayers?.includes(layer.id)"
-              @change="$emit('toggle-housing', layer.id)"
-            />
-            <label :for="layer.id">{{ layer.name }}</label>
-            <span class="tooltip-wrapper" v-if="layer.tooltip">
-              <button
-                type="button"
-                class="tooltip-icon"
-                :aria-label="'Info about ' + layer.name"
-                :aria-describedby="'tooltip-' + layer.id"
-              >ⓘ</button>
-              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip" v-html="layer.tooltip"></span>
-            </span>
+          <LayerRow
+            v-for="layer in housingLayers"
+            :key="layer.id"
+            :layer="layer"
+            :checked="selectedHousingLayers?.includes(layer.id) ?? false"
+            @toggle="$emit('toggle-housing', $event)"
+          >
             <LayerScoringControls
               v-if="showScoringControls && isLayerSelected(layer.id)"
               :layer-id="layer.id"
@@ -222,7 +192,7 @@
               @update-direction="(id, d) => $emit('update-direction', id, d)"
               @update-filter="(id, f) => $emit('update-filter', id, f)"
             />
-          </div>
+          </LayerRow>
         </div>
       </template>
 
@@ -232,23 +202,13 @@
           Racial Equity
         </h3>
         <div v-show="expandedCategories.equity">
-          <div v-for="layer in equityLayers" :key="layer.id" class="layer-item">
-            <input
-              type="checkbox"
-              :id="layer.id"
-              :checked="selectedEquityLayers?.includes(layer.id)"
-              @change="$emit('toggle-equity', layer.id)"
-            />
-            <label :for="layer.id">{{ layer.name }}</label>
-            <span class="tooltip-wrapper" v-if="layer.tooltip">
-              <button
-                type="button"
-                class="tooltip-icon"
-                :aria-label="'Info about ' + layer.name"
-                :aria-describedby="'tooltip-' + layer.id"
-              >ⓘ</button>
-              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip" v-html="layer.tooltip"></span>
-            </span>
+          <LayerRow
+            v-for="layer in equityLayers"
+            :key="layer.id"
+            :layer="layer"
+            :checked="selectedEquityLayers?.includes(layer.id) ?? false"
+            @toggle="$emit('toggle-equity', $event)"
+          >
             <LayerScoringControls
               v-if="showScoringControls && isLayerSelected(layer.id)"
               :layer-id="layer.id"
@@ -262,7 +222,7 @@
               @update-direction="(id, d) => $emit('update-direction', id, d)"
               @update-filter="(id, f) => $emit('update-filter', id, f)"
             />
-          </div>
+          </LayerRow>
         </div>
       </template>
 
@@ -272,23 +232,13 @@
           Transportation
         </h3>
         <div v-show="expandedCategories.transportation">
-          <div v-for="layer in transportationLayers" :key="layer.id" class="layer-item">
-            <input
-              type="checkbox"
-              :id="layer.id"
-              :checked="selectedTransportationLayers?.includes(layer.id)"
-              @change="$emit('toggle-transportation', layer.id)"
-            />
-            <label :for="layer.id">{{ layer.name }}</label>
-            <span class="tooltip-wrapper" v-if="layer.tooltip">
-              <button
-                type="button"
-                class="tooltip-icon"
-                :aria-label="'Info about ' + layer.name"
-                :aria-describedby="'tooltip-' + layer.id"
-              >ⓘ</button>
-              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip" v-html="layer.tooltip"></span>
-            </span>
+          <LayerRow
+            v-for="layer in transportationLayers"
+            :key="layer.id"
+            :layer="layer"
+            :checked="selectedTransportationLayers?.includes(layer.id) ?? false"
+            @toggle="$emit('toggle-transportation', $event)"
+          >
             <LayerScoringControls
               v-if="showScoringControls && isLayerSelected(layer.id)"
               :layer-id="layer.id"
@@ -302,7 +252,7 @@
               @update-direction="(id, d) => $emit('update-direction', id, d)"
               @update-filter="(id, f) => $emit('update-filter', id, f)"
             />
-          </div>
+          </LayerRow>
         </div>
       </template>
 
@@ -400,23 +350,13 @@
           Health
         </h3>
         <div v-show="expandedCategories.health">
-          <div v-for="layer in demographicLayers.filter(l => l.category === 'Health')" :key="layer.id" class="layer-item">
-            <input
-              type="checkbox"
-              :id="layer.id"
-              :checked="selectedDemographicLayers.includes(layer.id)"
-              @change="$emit('toggle-demographic', layer.id)"
-            />
-            <label :for="layer.id">{{ layer.name }}</label>
-            <span class="tooltip-wrapper" v-if="layer.tooltip">
-              <button
-                type="button"
-                class="tooltip-icon"
-                :aria-label="'Info about ' + layer.name"
-                :aria-describedby="'tooltip-' + layer.id"
-              >ⓘ</button>
-              <span class="tooltip-popup" :id="'tooltip-' + layer.id" role="tooltip" v-html="layer.tooltip"></span>
-            </span>
+          <LayerRow
+            v-for="layer in demographicLayers.filter(l => l.category === 'Health')"
+            :key="layer.id"
+            :layer="layer"
+            :checked="selectedDemographicLayers.includes(layer.id) ?? false"
+            @toggle="$emit('toggle-demographic', $event)"
+          >
             <LayerScoringControls
               v-if="showScoringControls && isLayerSelected(layer.id)"
               :layer-id="layer.id"
@@ -430,7 +370,7 @@
               @update-direction="(id, d) => $emit('update-direction', id, d)"
               @update-filter="(id, f) => $emit('update-filter', id, f)"
             />
-          </div>
+          </LayerRow>
         </div>
       </template>
   </div>
@@ -450,6 +390,7 @@ import type {
 import type { ScoringFilter } from '@/types/mapTypes'
 import type { LayerDefinition } from '@/config/layerRegistry'
 import type { InternalFeatureLayer } from '@/lib/internalLayers'
+import LayerRow from '@/components/LayerRow.vue'
 import LayerScoringControls from '@/components/LayerScoringControls.vue'
 
 interface Props {
@@ -672,7 +613,7 @@ onMounted(() => {
     align-items: flex-start;
     flex-wrap: wrap;
   }
-  .layer-item label {
+  .layer-item :deep(label) {
     word-wrap: break-word;
     overflow-wrap: break-word;
     max-width: calc(100% - 50px);
@@ -714,14 +655,14 @@ button.layer-state {
   font-style: normal;
 }
 
-.tooltip-wrapper {
+:deep(.tooltip-wrapper) {
   position: relative;
   display: inline-block;
   margin-left: 5px;
   vertical-align: middle;
 }
 
-button.tooltip-icon {
+:deep(button.tooltip-icon) {
   background: none;
   border: none;
   cursor: help;
@@ -739,14 +680,14 @@ button.tooltip-icon:focus {
   outline-offset: 1px;
 }
 
-.tooltip-wrapper:hover button.tooltip-icon,
-.tooltip-wrapper button.tooltip-icon:focus {
+:deep(.tooltip-wrapper:hover button.tooltip-icon),
+:deep(.tooltip-wrapper button.tooltip-icon:focus) {
   color: #4a90e2;
   background-color: #f0f7ff;
   transform: scale(1.2);
 }
 
-.tooltip-popup {
+:deep(.tooltip-popup) {
   visibility: hidden;
   opacity: 0;
   position: fixed;
@@ -769,19 +710,19 @@ button.tooltip-icon:focus {
   text-align: left;
 }
 
-.tooltip-wrapper:hover .tooltip-popup,
-.tooltip-wrapper:focus-within .tooltip-popup,
-.tooltip-popup:hover {
+:deep(.tooltip-wrapper:hover .tooltip-popup),
+:deep(.tooltip-wrapper:focus-within .tooltip-popup),
+:deep(.tooltip-popup:hover) {
   visibility: visible;
   opacity: 1;
 }
 
 /* Make any embedded links visible against the dark tooltip background. */
-.tooltip-popup :deep(a) {
+:deep(.tooltip-popup a) {
   color: #9be29b;
   text-decoration: underline;
 }
-.tooltip-popup :deep(a:hover) {
+:deep(.tooltip-popup a:hover) {
   color: white;
 }
 
