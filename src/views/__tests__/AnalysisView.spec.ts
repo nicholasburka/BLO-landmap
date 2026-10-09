@@ -178,19 +178,52 @@ beforeEach(() => {
 })
 
 describe('the tool cards (P6-4)', () => {
-  it('offers the four tools, each with a line about it and a Start', async () => {
+  it('offers every tool, each saying where it goes rather than "Start"', async () => {
     const w = await mountIt()
     const cards = w.findAll('[data-testid="tool-card"]')
+    // P9-14: the last three need a working set and were missing from this
+    // list entirely — the page's answer to "what can I run?" omitted the
+    // things built in P9-6a…P9-12 because they live inside a set's page.
     expect(cards.map(c => c.get('.tool-name').text())).toEqual([
       'Check a place',
       'Compare',
       'Explore a dataset',
       'Show on map',
+      'Weigh an index differently',
+      'Look at a layer',
+      'Find an address in the data',
+    ])
+    // P9-13: four controls labelled "Start" were four different behaviours —
+    // two tools, a filtered list, and a pane that opens in place. The label
+    // does the work now, which is why the hint line under each card is gone.
+    // Only the four that go somewhere carry a control; the rest say why.
+    expect(
+      cards
+        .map(c => c.find('[data-testid="tool-start"]'))
+        .filter(b => b.exists())
+        .map(b => b.text()),
+    ).toEqual([
+      'Open the place report',
+      'Open the comparison',
+      'Browse the tables we hold',
+      'Open a map on this page',
     ])
     for (const card of cards) {
       expect(card.get('.tool-description').text().length).toBeGreaterThan(10)
-      expect(card.get('[data-testid="tool-start"]').text()).toBe('Start')
+      expect(card.find('[data-testid="tool-hint"]').exists()).toBe(false)
     }
+  })
+
+  it('says why the set-scoped tools have no Start, rather than hiding them', async () => {
+    // P9-3's rule, applied to the cards: a gated capability says why.
+    const w = await mountIt()
+    const gated = ['weigh', 'describe', 'address']
+    for (const id of gated) {
+      expect(w.get(`[data-tool="${id}"] [data-testid="tool-needs-set"]`).text()).toContain('working set')
+      expect(w.find(`[data-tool="${id}"] [data-testid="tool-start"]`).exists()).toBe(false)
+    }
+    // And the ungated ones still start.
+    expect(w.find('[data-tool="place"] [data-testid="tool-start"]').exists()).toBe(true)
   })
 
   it('sends each Start somewhere real', async () => {
@@ -216,16 +249,18 @@ describe('the tool cards (P6-4)', () => {
     // pre-selects has made the choice the reader came to make.
     expect(w.find('[data-testid="explore-chosen"]').exists()).toBe(false)
     // And it closes again from the same control.
-    expect(w.get('[data-tool="map"] [data-testid="tool-start"]').text()).toBe('Close')
+    expect(w.get('[data-tool="map"] [data-testid="tool-start"]').text()).toBe('Close the map')
     await w.get('[data-tool="map"] [data-testid="tool-start"]').trigger('click')
     expect(w.find('[data-testid="explore-map"]').exists()).toBe(false)
   })
 
-  it('says where the two that are not pages of their own actually land', async () => {
+  it('needs no hint line, because the label is no longer "Start"', async () => {
+    // The hints existed to say what "Start" would not. P9-13 removed the
+    // reason for them, so a reinstated hint is a signal that a label has
+    // gone vague again.
     const w = await mountIt()
-    expect(w.get('[data-tool="explore"] [data-testid="tool-hint"]').text()).toContain('Data tab')
-    expect(w.get('[data-tool="map"] [data-testid="tool-hint"]').text()).toContain('every layer we can draw')
-    expect(w.find('[data-tool="place"] [data-testid="tool-hint"]').exists()).toBe(false)
+    expect(w.findAll('[data-testid="tool-hint"]')).toHaveLength(0)
+    expect(w.get('[data-tool="explore"] [data-testid="tool-start"]').text()).toBe('Browse the tables we hold')
   })
 })
 
@@ -284,7 +319,7 @@ describe('recent analyses (P6-4)', () => {
     expect(w.get('[data-testid="analyses-empty"]').text()).toContain('Nothing has been run yet')
     // The tools are still there — an empty library is where you start, not a
     // dead end.
-    expect(w.findAll('[data-testid="tool-card"]')).toHaveLength(4)
+    expect(w.findAll('[data-testid="tool-card"]')).toHaveLength(7)
   })
 
   it('says it is looking while the two lists are on their way', async () => {
@@ -406,7 +441,7 @@ describe('working sets (P7-1)', () => {
   it('still shows the tools and the recent list when the sets could not be loaded', async () => {
     mockedSets.mockRejectedValue(new Error('bucket unhappy'))
     const w = await mountIt()
-    expect(w.findAll('[data-testid="tool-card"]')).toHaveLength(4)
+    expect(w.findAll('[data-testid="tool-card"]')).toHaveLength(7)
     expect(rowTitles(w).length).toBeGreaterThan(0)
     expect(w.find('[data-testid="sets-empty"]').exists()).toBe(true)
   })

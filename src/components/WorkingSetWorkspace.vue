@@ -847,6 +847,39 @@ async function rerun(column: DerivedColumn): Promise<void> {
   }
 }
 
+/**
+ * P9-14: what is on this page, below the map.
+ *
+ * Only the things actually rendered, in the order they appear — a contents
+ * line that offers something not below it is worse than no contents line.
+ *
+ * The layer list and the address search are deliberately NOT here, though
+ * the audit proposed them: both are overlaid ON the canvas, so they are
+ * already in front of a reader looking at the map, and listing them would
+ * pad the line with things that need no finding. What needed finding is what
+ * sits under 560 pixels of choropleth.
+ */
+/** True when one of the derived columns is an index, which is what makes the
+ *  last entry worth naming for its verb rather than its noun. */
+const indexHere = computed(() => columns.value.some(column => column.rerun?.type === 'composite'))
+
+const onThisPage = computed(() => {
+  const items: { id: string; name: string }[] = []
+  if (!map.isOpen.value) return items
+  if (analysableLayers.value.length) items.push({ id: 'set-analysis', name: 'Look at a layer' })
+  if (columns.value.filter(column => column.rerun?.type === 'composite').length >= 2) {
+    items.push({ id: 'set-compare', name: 'Compare versions' })
+  }
+  if (mapColumns.value.length) {
+    items.push({ id: 'set-derived', name: indexHere.value ? 'Columns, and weighing them' : 'Derived columns' })
+  }
+  return items
+})
+
+function jumpTo(id: string): void {
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
 /** What the set holds, in counts — the same sentence shape its catalog row
  *  uses, so the two cannot disagree. */
 const holds = computed(() => {
@@ -982,6 +1015,29 @@ onMounted(async () => {
         >Data</button>
       </nav>
 
+      <!-- P9-14: what is on this page, and a way to it.
+           Everything built in P9-6a…P9-12 lives below the map, which means a
+           reader who has not been told it exists scrolls past a 560px canvas
+           to find out. Five hidden features become five visible ones for the
+           price of one line. Only what is actually here is listed, so this
+           can never offer something that is not below it. -->
+      <nav
+        v-if="iface === 'map' && onThisPage.length"
+        class="page-contents"
+        aria-label="On this page"
+        data-testid="page-contents"
+      >
+        <span class="page-contents-label">On this page:</span>
+        <a
+          v-for="item in onThisPage"
+          :key="item.id"
+          :href="`#${item.id}`"
+          class="page-contents-link"
+          data-testid="page-contents-link"
+          @click.prevent="jumpTo(item.id)"
+        >{{ item.name }}</a>
+      </nav>
+
       <p v-if="set.missing.length" class="state-note warn" data-testid="workspace-missing">
         This set names {{ set.missing.length }}
         {{ set.missing.length === 1 ? 'thing' : 'things' }} the library no longer has:
@@ -1079,15 +1135,17 @@ onMounted(async () => {
             </template>
             <!-- P9-7: four questions about the set's own layers, answered
                  here over numbers the page already holds. -->
-            <LayerAnalysisCard
-              :choices="analysableLayers"
-              :values-for="analysisValues"
-              :universe="analysisUniverse"
-            />
+            <div id="set-analysis">
+              <LayerAnalysisCard
+                :choices="analysableLayers"
+                :values-for="analysisValues"
+                :universe="analysisUniverse"
+              />
+            </div>
             <!-- P9-6: when a set holds more than one index, the useful question
                  is not what either says but what re-weighting did to the order.
                  Both columns' values are already here, so this costs nothing. -->
-            <IndexCompareCard :columns="columns" />
+            <div id="set-compare"><IndexCompareCard :columns="columns" /></div>
           </template>
           <!-- A map beside a page wants a desktop (P6-14). On a phone the deep
                link is still how this view is shared, and still works. -->
@@ -1114,7 +1172,7 @@ onMounted(async () => {
 
         <!-- The map's reading of the set's derived columns: the same values the
              table is sorting, over the counties this map is drawing. -->
-        <section v-if="mapColumns.length" class="derived" data-testid="derived-columns">
+        <section v-if="mapColumns.length" id="set-derived" class="derived" data-testid="derived-columns">
           <h2 class="derived-heading">Derived columns</h2>
           <ul class="derived-list">
             <li
@@ -1136,10 +1194,13 @@ onMounted(async () => {
               <!-- The re-run, offered where the number is READ rather than on a
                    form elsewhere: the arguments are in the stored record, so
                    there is nothing for a reader to retype. -->
+              <!-- P9-13: a WRITE. It recomputes on the server and rewrites
+                   the stored column, which is a different kind of thing from
+                   the two beside it, and used to look identical to them. -->
               <button
                 v-if="column.freshness === 'stale' && column.canRerun"
                 type="button"
-                class="derived-rerun"
+                class="blo-act blo-act--write"
                 :disabled="!!rerunning"
                 data-testid="derived-rerun"
                 @click="rerun(column.column)"
@@ -1149,7 +1210,7 @@ onMounted(async () => {
               <button
                 v-if="column.layerId"
                 type="button"
-                class="derived-rerun"
+                class="blo-act"
                 data-testid="derived-draw"
                 :aria-pressed="column.drawing"
                 @click="drawIndex(column.layerId)"
@@ -1162,7 +1223,7 @@ onMounted(async () => {
               <button
                 v-if="column.canWeigh"
                 type="button"
-                class="derived-rerun"
+                class="blo-act"
                 data-testid="derived-weigh"
                 :aria-pressed="column.weighing"
                 :disabled="column.opening"
@@ -1379,6 +1440,30 @@ onMounted(async () => {
   color: var(--blo-stone);
 }
 
+/* P9-14: a quiet line, not a navbar. It is a way to the things under the
+   map, and it must not compete with them. */
+.page-contents {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 10px 0 0;
+  font-size: 12px;
+}
+
+.page-contents-label {
+  color: var(--blo-stone);
+}
+
+.page-contents-link {
+  color: var(--blo-green-deep, #1f7a2e);
+  text-decoration: none;
+}
+
+.page-contents-link:hover {
+  text-decoration: underline;
+}
+
 .state-note-aside {
   display: block;
   margin-top: 2px;
@@ -1452,20 +1537,6 @@ onMounted(async () => {
 
 /* `.act`'s geometry from NeedsALookNote, which is this codebase's small
    inline action beside a value that needs attention. */
-.derived-rerun {
-  padding: 1px 6px;
-  font-size: 12px;
-  color: var(--blo-green-deep, #1f7a2e);
-  background: none;
-  border: 1px solid var(--blo-cream-divider, #e0d9ca);
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.derived-rerun:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
 
 /* The header line — the half a reader on the DATA interface sees, where a
    derived column is indistinguishable from a county-context one. The row-level

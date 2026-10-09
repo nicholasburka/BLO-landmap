@@ -86,11 +86,23 @@ interface Tool {
   name: string
   description: string
   href: string
-  /** What pressing Start actually lands on, when that needs saying. */
-  hint?: string
+  /**
+   * P9-13: the label on the control, naming where it goes.
+   *
+   * Every one of these used to read "Start" — four identical labels on four
+   * different behaviours, two landing on a tool, one on a filtered list and
+   * one opening a pane in place. The `hint` line under each card existed to
+   * compensate, which is the tell that the label was doing no work.
+   *
+   * Absent for a tool that lives inside a set: there is no control to label.
+   */
+  start?: string
   /** P9-12: Start opens a pane on this page instead of navigating. `href`
    *  stays the fallback below the pane's breakpoint. */
   opensPane?: boolean
+  /** P9-14: lives inside a working set, so this card names it and says so
+   *  rather than the tool being invisible until somebody stumbles on it. */
+  needsSet?: boolean
 }
 
 const TOOLS: Tool[] = [
@@ -99,19 +111,23 @@ const TOOLS: Tool[] = [
     name: 'Check a place',
     description: 'One address or county, and every source we hold or index that covers it.',
     href: '/place',
+    start: 'Open the place report',
   },
   {
     id: 'compare',
     name: 'Compare',
     description: 'A handful of candidate counties side by side, across the layers that matter.',
     href: '/compare',
+    start: 'Open the comparison',
   },
   {
     id: 'explore',
     name: 'Explore a dataset',
     description: 'Filter, sort and summarise a table we hold, with the county context beside it.',
     href: '/datasets?readiness=held',
-    hint: 'Opens the datasets browser — pick a table, then its Data tab.',
+    // P9-13: the hint used to say "Opens the datasets browser — pick a table,
+    // then its Data tab", which existed only because the label said "Start".
+    start: 'Browse the tables we hold',
   },
   {
     id: 'map',
@@ -120,8 +136,42 @@ const TOOLS: Tool[] = [
     // P9-12: opens the pane HERE rather than navigating to `/`. The href is
     // kept as the narrow-window fallback and as a real link to right-click.
     href: '/',
-    hint: 'Opens a map on this page with every layer we can draw, all off.',
+    // Reads differently from the three above on purpose: it is the one that
+    // does not take you anywhere.
+    start: 'Open a map on this page',
     opensPane: true,
+  },
+  // P9-14: the tools that need a SET. They were missing from this list
+  // entirely — the page's answer to "what can I run?" omitted six of the
+  // things you can run, because they were built as parts of a set's page
+  // rather than as tools, and a reader who had not been told they exist
+  // would not find them four levels down.
+  //
+  // P9-3's rule rather than silence: a gated capability says why. These
+  // carry no Start, because the honest answer is "open a set" and the sets
+  // are listed directly below.
+  {
+    id: 'weigh',
+    name: 'Weigh an index differently',
+    description:
+      'Drag the weights of a combined ranking and watch the map and the order move, then keep the version you like.',
+    href: '',
+    needsSet: true,
+  },
+  {
+    id: 'describe',
+    name: 'Look at a layer',
+    description:
+      'How much of the country it covers, how it spreads out, who is at each end, and how two layers relate.',
+    href: '',
+    needsSet: true,
+  },
+  {
+    id: 'address',
+    name: 'Find an address in the data',
+    description: 'A street address, the county it lands in, and what every layer in the set says there.',
+    href: '',
+    needsSet: true,
   },
 ]
 
@@ -389,20 +439,24 @@ function whoAndWhen(analysis: Analysis): string {
         <li v-for="tool in TOOLS" :key="tool.id" class="tool-card" :data-tool="tool.id" data-testid="tool-card">
           <h2 class="tool-name">{{ tool.name }}</h2>
           <p class="tool-description">{{ tool.description }}</p>
-          <p v-if="tool.hint" class="tool-hint" data-testid="tool-hint">{{ tool.hint }}</p>
+          <!-- P9-14: a gated capability says why (P9-3's rule), instead of
+               being absent from the list of what you can run. -->
+          <p v-if="tool.needsSet" class="tool-needs" data-testid="tool-needs-set">
+            Inside a working set — open one below, on its Map.
+          </p>
           <!-- P9-12: the map tool opens in place, because what a reader turns
                on is the thing worth keeping and navigating away loses it. -->
           <button
-            v-if="tool.opensPane"
+            v-else-if="tool.opensPane"
             type="button"
             class="tool-start"
             data-testid="tool-start"
             :aria-expanded="exploring"
             @click="exploring = !exploring"
           >
-            {{ exploring ? 'Close' : 'Start' }}
+            {{ exploring ? 'Close the map' : tool.start }}
           </button>
-          <RouterLink v-else :to="tool.href" class="tool-start" data-testid="tool-start">Start</RouterLink>
+          <RouterLink v-else :to="tool.href" class="tool-start" data-testid="tool-start">{{ tool.start }}</RouterLink>
         </li>
       </ul>
 
@@ -914,10 +968,13 @@ function whoAndWhen(analysis: Analysis): string {
   color: var(--blo-stone);
 }
 
-.tool-hint {
-  margin: 0;
+
+/* P9-14: the reason, in the place the control would have been. Quiet: it is
+   an explanation, not a refusal to be argued with. */
+.tool-needs {
+  align-self: flex-start;
+  margin: 8px 0 0;
   font-size: 12px;
-  font-style: italic;
   color: var(--blo-stone);
 }
 
@@ -1067,7 +1124,6 @@ a.analysis-row:hover {
   .lede,
   .state-note,
   .tool-description,
-  .tool-hint,
   .row-meta-line,
   .row-line,
   .row-who {

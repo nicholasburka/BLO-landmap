@@ -40,7 +40,7 @@
               placeholder="Sites and what bears on them"
               data-testid="explore-name"
             />
-            <button type="submit" class="explore-btn" :disabled="!canSave" data-testid="explore-create">
+            <button type="submit" class="blo-act blo-act--write" :disabled="!canSave" data-testid="explore-create">
               {{ saving ? 'Making it…' : 'Make the set' }}
             </button>
           </p>
@@ -268,15 +268,4 @@ async function save(): Promise<void> {
   border-radius: 6px;
 }
 
-.explore-btn {
-  font: inherit;
-  font-size: 13px;
-  padding: 4px 12px;
-  cursor: pointer;
-}
-
-.explore-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
 </style>

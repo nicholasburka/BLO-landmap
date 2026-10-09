@@ -703,7 +703,7 @@ pre-selected has made the choice the reader opened it to make.
 the shared bucket and there is still no delete (P8-2), so the write path is
 covered by tests rather than by a set nobody asked for.
 
-### P9-13 [BUG] One vocabulary for what a control does
+### P9-13 [BUG] One vocabulary for what a control does — DONE
 From the navigation audit (`specs/ux-audit-navigation.md`), which enumerated
 every control on five surfaces rather than eyeballing them. The pages are
 individually fine; the SYSTEM has no shared vocabulary for "what will this do
@@ -735,7 +735,21 @@ is the one surface hiding it.
 **Size: S.** Rules 2 and 3 are copy; rule 1 is a styling change plus two class
 renames.
 
-### P9-14 [FEATURE] Make the new analyses findable
+**Done.** `.blo-act` / `.blo-act--write` live in `base.css` beside the panel
+tiers, and `derived-rerun` is gone: "Draw on the map" and "Weigh it
+differently" are Show, "Run again" and "Save as an index" are Write. Two tests
+pin the distinction so it cannot quietly drift back. The four "Start"s now
+name their destinations and the hint lines under the cards are deleted — a
+reinstated hint is the signal that a label has gone vague again.
+
+**Rule 3 was half wrong and shrank.** The duplicate "Redevelopment dashboard"
+labels are already disambiguated by sibling text my crawl did not read
+(`kindLabel` on `/kb`, "One view:" on `/analysis`); "make the labels unique"
+would have added noise to two lists that were already clear. What survived is
+narrower and real: a saved view's stored description is the string "Map view",
+identical to the badge beside it, so every view row printed the kind twice.
+
+### P9-14 [FEATURE] Make the new analyses findable — DONE
 The same audit's structural half. Everything built in P9-6a…P9-12 lives four
 levels deep — `/analysis` → a set's view → Map interface → scroll past the
 map — and nothing anywhere points at it. The six tool cards on `/analysis`,
@@ -754,6 +768,17 @@ Two parts:
   rather than vanishing — and the same treatment belongs on the cards.
 
 **Size: M.** Depends on nothing, but reads better after P9-13.
+
+**Done.** The contents strip names three destinations, not the five proposed:
+the layer list and the address search are overlaid ON the canvas and are
+already in front of anyone looking at the map, so listing them would pad the
+line with things that need no finding. It lists what sits under 560 pixels of
+choropleth, and only what is actually rendered.
+
+The three set-scoped tools are cards now and carry **no Start** — the honest
+answer to "how do I weigh an index" is "open a set", and the sets are listed
+directly below, so the card says that rather than offering a control that
+would have to refuse.
 
 ### P9-9 [BUG] A county with no EPA record scores as if it had no contamination
 **Affects the PUBLISHED index.** Deferred by Nick on 2026-10-08 — noted now,
@@ -1191,11 +1216,9 @@ were the good part.
 
 ```
 DONE: P9-0 ─ P9-1 ─ P9-1b ─ P9-2 ─ P9-2b ─ P9-3 ─ P9-4 ─ P9-5 ─ P9-6 ─ P9-6a ─ P9-6b ─ P9-6c ─ P9-7 ─ P9-8
-      P9-10 ─ P9-11 ─ P9-12
+      P9-10 ─ P9-11 ─ P9-12 ─ P9-13 ─ P9-14
 
-next:  P9-13  one vocabulary for controls  ← from the navigation audit
-       P9-14  make the analyses findable   (reads better after P9-13)
-       P9-9   contamination                (deferred by Nick)
+next:  P9-9   contamination                (deferred by Nick)
 ```
 
 **P9-6a is done** and reviewed in a browser (`specs/ux-audit-p9-6a.md`): open a

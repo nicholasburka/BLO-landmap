@@ -53,17 +53,24 @@ like the others and behaves unlike all of them.
 The card text carries the real information ("Opens the datasets browser…"),
 which is the tell: **the hint exists because the control cannot say it.**
 
-## 3. One label, two destinations, same page
+## 3. One label, two destinations, same page — **half of this was wrong**
 
 On `/kb` and on `/analysis`, **"Redevelopment dashboard"** appears twice with
-different targets:
+different targets: `/views/redevelopment-dashboard-2` (the view) and
+`/library/redevelopment-dashboard` (the entry).
 
-- `/views/redevelopment-dashboard-2` — the saved view
-- `/library/redevelopment-dashboard` — the catalog entry
+**Corrected on a second look.** The crawl captured link TEXT only, and both
+surfaces already disambiguate in the sibling element the crawl did not read:
+`/kb`'s rows print `kindLabel` beside the title ("Saved view" / "Working
+set"), and `/analysis` lists a set's views under an explicit "One view:" /
+"N views:" label. There is no fix owed here, and "make the labels unique"
+would have added noise to two lists that were already clear.
 
-Same words, same page, different places. The set/view distinction is load-
-bearing everywhere else in phase 9 (§F: a set is the data, a view is the
-framing) and the navigation is the one surface that hides it.
+What IS real, found while checking: a saved map view's stored `description`
+is the string **"Map view"**, which is exactly what the kind badge beside it
+says — so every view row on `/analysis` read *"Livability index — play with
+it · Map view · Map view · nick · 2d ago"*. The kind, twice, as if it were
+two facts.
 
 ## 4. The new power is four levels deep with no signpost
 
@@ -135,12 +142,12 @@ counties*, *Browse the tables we hold*, *Open a map here*. The last one reads
 differently from the others on purpose, because it behaves differently. Then
 delete the hints that exist only to compensate for the label.
 
-### Rule 3 — one label, one destination
+### Rule 3 — say a thing once
 
-Where a set and its view are both listed, say which: **"Redevelopment
-dashboard"** (the set) and **"Redevelopment dashboard — map view"** (the
-view). The distinction is already the spine of phase 9; the labels should
-carry it.
+Withdrawn as proposed: the set/view labels are already disambiguated (see §3).
+What remains is the narrower rule it turned into — **do not print the same
+fact twice** — which is one line: a row's description is suppressed when it
+merely repeats the kind badge beside it.
 
 ### Structural 1 — a contents strip on the set's workspace
 
@@ -169,3 +176,20 @@ capability says why.** The same treatment belongs on the cards.
 
 Worth saying plainly: 1–3 are small and would fix most of what this audit
 found. Only the last is a real piece of work.
+
+---
+
+## Done 2026-10-09 (P9-13, P9-14)
+
+Rules 1–3 and both structural changes are in. The deviations from the proposal
+above, and why:
+
+- **The contents strip lists three things, not five.** The layer list and the
+  address search are overlaid ON the canvas, so they are already in front of
+  anyone looking at the map; listing them would pad the line with things that
+  need no finding. It names what sits *under* 560 pixels of choropleth.
+- **Rule 3 shrank** to "do not say a thing twice", because the duplicate-label
+  finding did not survive a second look.
+- **The gated tool cards carry no Start.** The honest answer to "how do I weigh
+  an index" is "open a set", and the sets are listed directly below — so the
+  card says that instead of offering a control that would have to refuse.

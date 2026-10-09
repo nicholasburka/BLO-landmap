@@ -16,6 +16,16 @@ const TERMS = [
 ]
 
 
+describe('what each control will do (P9-13)', () => {
+  it('marks saving as a write and resetting as free', () => {
+    const w = mount(IndexWeightEditor, { props: { terms: TERMS } })
+    // Save writes a column to the shared library; Reset changes this screen.
+    expect(w.get('[data-testid="weight-save"]').classes()).toContain('blo-act--write')
+    expect(w.get('[data-testid="weight-reset"]').classes()).toContain('blo-act')
+    expect(w.get('[data-testid="weight-reset"]').classes()).not.toContain('blo-act--write')
+  })
+})
+
 describe('why it will not save yet (P9-6a)', () => {
   // A grey button and no sentence is the state the real page was in: eleven
   // terms weighed, a changed formula, Save off, and the only hint a

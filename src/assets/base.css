@@ -119,6 +119,55 @@
   box-shadow: var(--blo-shadow-panel-strong);
 }
 
+/* P9-13: what a control will DO, in three shapes.
+   From the navigation audit: six buttons on one screen shared a class and
+   covered three unrelated kinds of action — a reversible canvas toggle, a
+   disclosure, and a server-side recompute that rewrites a stored column —
+   so a reader could not tell which press was free. These are the only three
+   kinds there are:
+
+     Go     a link, always <a href>. The URL changes; back and right-click
+            work. Needs no class: a link already looks like one.
+     Show   `.blo-act` alone. Changes what is on this screen. Free,
+            reversible, nobody else sees it.
+     Write  `.blo-act .blo-act--write`. Changes something stored, for
+            everybody, and usually costs something to undo.
+
+   A tab is the one allowed exception: it is a button that changes the URL,
+   and it already reads as a tab rather than as either of these. */
+.blo-act {
+  font: inherit;
+  font-size: 12px;
+  padding: 2px 8px;
+  color: var(--blo-green-deep, #1f7a2e);
+  background: none;
+  border: 1px solid var(--blo-cream-divider, #e0d9ca);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.blo-act:hover:not(:disabled) {
+  border-color: var(--blo-green-deep, #1f7a2e);
+}
+
+.blo-act:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Solid, because it is the one that leaves a mark. */
+.blo-act--write {
+  color: #ffffff;
+  background: var(--blo-green-deep, #1f7a2e);
+  border-color: var(--blo-green-deep, #1f7a2e);
+  font-weight: 600;
+}
+
+.blo-act--write:hover:not(:disabled) {
+  background: var(--blo-ink, #111);
+  border-color: var(--blo-ink, #111);
+}
+
 .blo-panel--reference {
   background: rgba(247, 244, 238, 0.92);
   backdrop-filter: saturate(1.1) blur(6px);

@@ -49,7 +49,7 @@
       />
       <button
         type="button"
-        class="w-btn"
+        class="blo-act blo-act--write"
         data-testid="weight-save"
         :disabled="!canSave"
         :aria-describedby="whyNotSaveable ? 'weight-save-why' : undefined"
@@ -57,7 +57,7 @@
       >
         Save as an index
       </button>
-      <button type="button" class="w-reset" data-testid="weight-reset" @click="reset">
+      <button type="button" class="blo-act" data-testid="weight-reset" @click="reset">
         Reset
       </button>
     </p>
@@ -183,8 +183,5 @@ function reset(): void {
 .w-dir { font-size: 0.78rem; }
 .w-save { display: flex; gap: 0.5rem; align-items: center; margin: 0.7rem 0 0; flex-wrap: wrap; }
 .w-name-input { flex: 1 1 10rem; min-width: 0; }
-.w-btn { cursor: pointer; }
-.w-btn:disabled { cursor: not-allowed; opacity: 0.55; }
-.w-reset { background: none; border: none; color: #6b6560; cursor: pointer; font-size: 0.82rem; }
 .w-note { margin: 0.4rem 0 0; color: #6b6560; font-size: 0.82rem; }
 </style>

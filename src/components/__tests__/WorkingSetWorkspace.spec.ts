@@ -984,6 +984,29 @@ describe('a composite index on the map interface', () => {
       return w.findAll('[data-testid="weight-row"]')[row].find('input[type="range"]')
     }
 
+    it('tells a free press apart from one that writes (P9-13)', async () => {
+      // Six buttons on this screen shared one class and covered three kinds
+      // of action: a reversible canvas toggle, a disclosure, and a
+      // server-side recompute that rewrites a stored column. A reader could
+      // not tell which press was free.
+      mockedColumns.mockResolvedValue(
+        columnsBody({
+          columns: [{ ...INDEX, freshness: 'stale', staleNote: '“votes” has changed since this ran.' }],
+        }),
+      )
+      const w = await mountAt(mapView())
+      await settleMap()
+
+      const cls = (id: string) => w.get(`[data-testid="${id}"]`).classes()
+      // Show: changes this screen, free, reversible.
+      expect(cls('derived-draw')).toContain('blo-act')
+      expect(cls('derived-draw')).not.toContain('blo-act--write')
+      expect(cls('derived-weigh')).toContain('blo-act')
+      expect(cls('derived-weigh')).not.toContain('blo-act--write')
+      // Write: recomputes on the server and rewrites the column.
+      expect(cls('derived-rerun')).toContain('blo-act--write')
+    })
+
     it('offers the editor on a formula, and nothing of the sort on a measurement', async () => {
       const w = await mountAt(mapView())
       await settleMap()
