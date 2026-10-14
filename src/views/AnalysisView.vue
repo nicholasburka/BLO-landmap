@@ -95,18 +95,26 @@ interface Tool {
    * one opening a pane in place. The `hint` line under each card existed to
    * compensate, which is the tell that the label was doing no work.
    *
-   * Absent for a tool that lives inside a set: there is no control to label.
+   * P11-7: required now. Every tool in this list can be started, because the
+   * ones that could not are no longer in it — `needsSet` and `opensPane`
+   * went with them.
    */
-  start?: string
-  /** P9-12: Start opens a pane on this page instead of navigating. `href`
-   *  stays the fallback below the pane's breakpoint. */
-  opensPane?: boolean
-  /** P9-14: lives inside a working set, so this card names it and says so
-   *  rather than the tool being invisible until somebody stumbles on it. */
-  needsSet?: boolean
+  start: string
 }
 
-const TOOLS: Tool[] = [
+/**
+ * The tools that run over the WHOLE library (P11-7).
+ *
+ * This list had six entries, three of which could not be started — they need
+ * a working set, and said so in their own copy. P9-14 added them so a reader
+ * would know they exist, which was right; making them cards was not, because
+ * a card you cannot press is an advertisement. They are a sentence under the
+ * set list now, and they work on the set page where they always did.
+ *
+ * "Show on map" also left: it is how a working set gets MADE, so it sits with
+ * the sets rather than here.
+ */
+const LIBRARY_TOOLS: Tool[] = [
   {
     id: 'place',
     name: 'Check a place',
@@ -126,53 +134,7 @@ const TOOLS: Tool[] = [
     name: 'Explore a dataset',
     description: 'Filter, sort and summarise a table we hold, with the county context beside it.',
     href: '/datasets?readiness=held',
-    // P9-13: the hint used to say "Opens the datasets browser — pick a table,
-    // then its Data tab", which existed only because the label said "Start".
     start: 'Browse the tables we hold',
-  },
-  {
-    id: 'map',
-    name: 'Show on map',
-    description: 'Draw any of our layers over the counties, together, and keep the combination.',
-    // P9-12: opens the pane HERE rather than navigating to `/`. The href is
-    // kept as the narrow-window fallback and as a real link to right-click.
-    href: '/',
-    // Reads differently from the three above on purpose: it is the one that
-    // does not take you anywhere.
-    start: 'Open a map on this page',
-    opensPane: true,
-  },
-  // P9-14: the tools that need a SET. They were missing from this list
-  // entirely — the page's answer to "what can I run?" omitted six of the
-  // things you can run, because they were built as parts of a set's page
-  // rather than as tools, and a reader who had not been told they exist
-  // would not find them four levels down.
-  //
-  // P9-3's rule rather than silence: a gated capability says why. These
-  // carry no Start, because the honest answer is "open a set" and the sets
-  // are listed directly below.
-  {
-    id: 'weigh',
-    name: 'Weigh an index differently',
-    description:
-      'Drag the weights of a combined ranking and watch the map and the order move, then keep the version you like.',
-    href: '',
-    needsSet: true,
-  },
-  {
-    id: 'describe',
-    name: 'Look at a layer',
-    description:
-      'How much of the country it covers, how it spreads out, who is at each end, and how two layers relate.',
-    href: '',
-    needsSet: true,
-  },
-  {
-    id: 'address',
-    name: 'Find an address in the data',
-    description: 'A street address, the county it lands in, and what every layer in the set says there.',
-    href: '',
-    needsSet: true,
   },
 ]
 
@@ -432,44 +394,29 @@ function whoAndWhen(analysis: Analysis): string {
       <KbNav />
       <header class="analysis-header">
         <h1>Analysis</h1>
-        <p class="lede">What you can run over what the library holds, and what has been run lately.
-          Some tools work on the whole library; others need a working set, and say so.</p>
+        <p class="lede">The working sets you analyse against, and the tools that run over the whole
+          library.</p>
       </header>
 
-      <ul class="tool-cards" data-testid="tool-cards">
-        <li v-for="tool in TOOLS" :key="tool.id" class="tool-card" :data-tool="tool.id" data-testid="tool-card">
-          <h2 class="tool-name">{{ tool.name }}</h2>
-          <p class="tool-description">{{ tool.description }}</p>
-          <!-- P9-14: a gated capability says why (P9-3's rule), instead of
-               being absent from the list of what you can run. -->
-          <p v-if="tool.needsSet" class="tool-needs" data-testid="tool-needs-set">
-            Inside a working set — open one below, on its Map.
-          </p>
-          <!-- P9-12: the map tool opens in place, because what a reader turns
-               on is the thing worth keeping and navigating away loses it. -->
-          <button
-            v-else-if="tool.opensPane"
-            type="button"
-            class="blo-act blo-act--lg tool-start"
-            data-testid="tool-start"
-            :aria-expanded="exploring"
-            @click="exploring = !exploring"
-          >
-            {{ exploring ? 'Close the map' : tool.start }}
-          </button>
-          <RouterLink v-else :to="tool.href" class="blo-act blo-act--lg tool-start" data-testid="tool-start">{{ tool.start }}</RouterLink>
-        </li>
-      </ul>
-
-      <ExploreMapPane v-if="exploring" @close="exploring = false" />
-
-      <!-- P7-1: what an analysis runs AGAINST, above the record of what has
-           been run. -->
+      <!-- P11-7: the SETS lead.
+           This page opened with six tool cards and put the sets below them —
+           but five of the six need a set and said so in their own copy
+           ("Inside a working set — open one below"). The page led with things
+           you could not use yet, on an object you had not chosen. -->
       <section class="sets" data-testid="working-sets">
         <h2 class="recent-heading">Working sets</h2>
         <p class="section-lede">
           A named set of datasets and the sites they bear on. A place report run inside one asks that set's sources and
           no others.
+        </p>
+
+        <!-- P11-7: P9-14 made these three their own cards so a reader would
+             know they exist. They cannot be STARTED from here — every one of
+             them needs a set — so they are a line naming what a set opens
+             into, and the sets are directly below it. -->
+        <p class="set-inside" data-testid="set-inside">
+          Open a set to weigh an index differently, look at how a layer covers the country, or find an
+          address in its data.
         </p>
 
         <p v-if="loading" class="state-note" data-testid="sets-loading">Looking for working sets…</p>
@@ -755,6 +702,48 @@ function whoAndWhen(analysis: Analysis): string {
           </p>
           <p v-if="promoteError" class="promote-note error" data-testid="promote-error">{{ promoteError }}</p>
         </form>
+
+        <!-- P9-12/P11-7: the other way a set comes into being — turn layers
+             on, keep the combination. It opens in place, because what a
+             reader switches on is the thing worth keeping and navigating away
+             loses it. Here rather than in the tool strip because making a set
+             is a thing you do to this list, not a tool over the library. -->
+        <p class="sets-new">
+          <button
+            type="button"
+            class="blo-act blo-act--write blo-act--lg"
+            data-testid="tool-start"
+            :aria-expanded="exploring"
+            @click="exploring = !exploring"
+          >
+            {{ exploring ? 'Close the map' : 'New working set' }}
+          </button>
+          <span class="sets-new-why">Draw any of our layers together, and keep the combination.</span>
+        </p>
+        <ExploreMapPane v-if="exploring" @close="exploring = false" />
+      </section>
+
+      <!-- P11-7: the three that genuinely run over the whole library. The
+           three that need a set are not cards any more — they are on the set
+           page, named in one line under the list above, because a card you
+           cannot start is not a tool, it is an advertisement. -->
+      <section class="tools" data-testid="library-tools">
+        <h2 class="recent-heading">Across the whole library</h2>
+        <ul class="tool-cards" data-testid="tool-cards">
+          <li
+            v-for="tool in LIBRARY_TOOLS"
+            :key="tool.id"
+            class="tool-card"
+            :data-tool="tool.id"
+            data-testid="tool-card"
+          >
+            <h3 class="tool-name">{{ tool.name }}</h3>
+            <p class="tool-description">{{ tool.description }}</p>
+            <RouterLink :to="tool.href" class="blo-act blo-act--lg tool-start" data-testid="tool-start">{{
+              tool.start
+            }}</RouterLink>
+          </li>
+        </ul>
       </section>
 
       <section class="recent">
@@ -976,6 +965,26 @@ function whoAndWhen(analysis: Analysis): string {
   align-self: flex-start;
   margin-top: 8px;
   text-decoration: none;
+}
+
+/* P11-7: what a set opens into, where the three un-startable cards were. */
+.set-inside {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--blo-stone);
+}
+
+.sets-new {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 16px 0 0;
+}
+
+.sets-new-why {
+  font-size: 13px;
+  color: var(--blo-stone);
 }
 
 .recent-heading {
