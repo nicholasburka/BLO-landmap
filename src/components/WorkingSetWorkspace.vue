@@ -1019,12 +1019,12 @@ onMounted(async () => {
              the set's own name — the page introduced itself twice. What it is
              for is the LINK (to the set's library entry, which is a different
              thing from this working surface) and the counts. -->
-        <p class="set-line" data-testid="workspace-set">
+        <p class="blo-type-meta set-line" data-testid="workspace-set">
           <span class="set-holds" data-testid="workspace-holds">{{ holds }}</span>
           ·
           <RouterLink :to="workingSetHref(set.slug)" data-testid="workspace-set-link">Its library entry</RouterLink>
         </p>
-        <p v-if="set.purpose" class="set-purpose" data-testid="workspace-purpose">{{ set.purpose }}</p>
+        <p v-if="set.purpose" class="blo-type-body blo-type-body--measure set-purpose" data-testid="workspace-purpose">{{ set.purpose }}</p>
         <!-- P7-6: in the HEADER, which is outside both interface panes, so a
              reader on the data interface is told too. Inside the explorer a
              derived column is indistinguishable from a county-context one, and
@@ -1032,18 +1032,28 @@ onMounted(async () => {
         <p v-if="unsoundLine" class="set-unsound" data-testid="workspace-unsound">{{ unsoundLine }}</p>
         <!-- P11-8/P11-9: the two scoped surfaces, reached FROM the set they
              scope to. The scope is a query key, so these are plain links. -->
-        <p class="set-scoped" data-testid="workspace-scoped">
-          <RouterLink :to="workingSetPlaceHref(set.slug)" data-testid="scoped-place">Check a place in this set</RouterLink>
-          ·
-          <RouterLink :to="`/search?set=${encodeURIComponent(set.slug)}`" data-testid="scoped-search">Search in this set</RouterLink>
-          ·
-          <RouterLink :to="`/chat?set=${encodeURIComponent(set.slug)}`" data-testid="scoped-chat">Ask about this set</RouterLink>
+        <p class="blo-actions set-scoped" data-testid="workspace-scoped">
+          <RouterLink
+            :to="workingSetPlaceHref(set.slug)"
+            class="blo-type-action"
+            data-testid="scoped-place"
+          >Check a place</RouterLink>
+          <RouterLink
+            :to="`/search?set=${encodeURIComponent(set.slug)}`"
+            class="blo-type-action"
+            data-testid="scoped-search"
+          >Search in this set</RouterLink>
+          <RouterLink
+            :to="`/chat?set=${encodeURIComponent(set.slug)}`"
+            class="blo-type-action"
+            data-testid="scoped-chat"
+          >Ask about this set</RouterLink>
         </p>
 
         <!-- A set may carry saved framings, and all of them read these rows.
              Worth saying here, because it is the reason the set and the view
              are two objects at all. -->
-        <p v-if="siblingViews.length" class="set-siblings" data-testid="workspace-siblings">
+        <p v-if="siblingViews.length" class="blo-type-meta set-siblings" data-testid="workspace-siblings">
           Also presented by
           <RouterLink
             v-for="other in siblingViews"
@@ -1232,7 +1242,7 @@ onMounted(async () => {
         <!-- The map's reading of the set's derived columns: the same values the
              table is sorting, over the counties this map is drawing. -->
         <section v-if="mapColumns.length" id="set-derived" class="derived" data-testid="derived-columns">
-          <h2 class="derived-heading">Derived columns</h2>
+          <h2 class="blo-type-section derived-heading">Derived columns</h2>
           <ul class="derived-list">
             <li
               v-for="column in mapColumns"
@@ -1393,9 +1403,7 @@ onMounted(async () => {
 .set-line,
 .set-purpose,
 .set-scoped {
-  margin: 6px 0 0;
-  font-size: 13px;
-  color: var(--blo-stone);
+  margin: 8px 0 0;
 }
 
 .set-siblings {
@@ -1485,9 +1493,9 @@ onMounted(async () => {
 /* P9-15: 0.95rem like the other section headings beside it. At 13px this
    section heading was SMALLER than the card titles next to it, so the most
    substantial block on the page looked like the least. */
+/* P12-1: `.blo-type-section` owns the type. */
 .derived-heading {
   margin: 0 0 8px;
-  font-size: 0.95rem;
 }
 
 .derived-list {

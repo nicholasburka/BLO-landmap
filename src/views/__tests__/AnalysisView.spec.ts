@@ -404,7 +404,7 @@ describe('working sets (P7-1)', () => {
     // catalog entry, which is its provenance record — so the working surface
     // was reachable only through a saved view, if it had one.
     expect(row.get('[data-testid="set-title"]').attributes('href')).toBe('/sets/memphis-redevelopment')
-    expect(row.get('[data-testid="set-progress"]').text()).toBe('1 of 2 held · 1 indexed')
+    expect(row.get('[data-testid="set-progress"]').text()).toBe('2 datasets')
     expect(row.get('[data-testid="set-purpose"]').text()).toBe('Which parcels can be redeveloped')
   })
 
@@ -597,12 +597,14 @@ describe('the proximity tool on a set', () => {
    * nobody can see is a tool nobody knows exists.
    */
   it('names the missing anchor table instead of hiding the tool', async () => {
+    // P9-3's rule holds; P12-1 moved WHERE it is said. It was a span inside
+    // the action row, at 13.8px — larger than the links it sat between, so
+    // the one thing you could not press was the biggest text in the row.
+    // It is one quiet line under the row now, in the page's lightest type.
     mockedSets.mockResolvedValue([{ ...MEASURABLE[0], sites: null }])
     const w = await mountIt()
     expect(w.find('[data-testid="set-proximity"]').exists()).toBe(false)
-    const why = w.get('[data-testid="set-proximity-why"]').text()
-    expect(why).toContain('Measure proximity')
-    expect(why).toContain('anchor table')
+    expect(w.get('[data-testid="set-unavailable"]').text()).toContain('anchor table')
   })
 
   /** Nothing to measure TO is not a precondition a reader can read off the
@@ -618,7 +620,7 @@ describe('the proximity tool on a set', () => {
     mockedSets.mockResolvedValue([{ ...MEASURABLE[0], layers: ['internal-sites', 'internal-one-county'] }])
     const w = await mountIt()
     expect(w.find('[data-testid="set-index"]').exists()).toBe(false)
-    expect(w.get('[data-testid="set-index-why"]').text()).toContain('two or more county layers')
+    expect(w.get('[data-testid="set-unavailable"]').text()).toContain('two or more county layers')
   })
 
   it('lists only the point and line layers, by the layer’s own name', async () => {
@@ -804,7 +806,7 @@ describe('the index tool on a set', () => {
     const w = await mountIt()
     // P9-6a: "Build an index" read like a commitment; this is the start of an
     // experiment whose weights are draggable the moment it exists.
-    expect(w.get('[data-testid="set-index"]').text()).toBe('Create a combined ranking (index)')
+    expect(w.get('[data-testid="set-index"]').text()).toBe('Create a combined ranking')
   })
 
   it('does NOT offer it on a set with only one county layer — that is the layer', async () => {

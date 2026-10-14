@@ -124,7 +124,7 @@ function close(): void {
 
 .state-note {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--blo-text-body);
   color: var(--blo-stone);
 }
 
@@ -137,7 +137,7 @@ function close(): void {
 }
 
 .open-name {
-  font-size: 0.95rem;
+  font-size: var(--blo-text-body);
   font-weight: 600;
   color: var(--blo-ink);
 }
@@ -171,13 +171,13 @@ function close(): void {
 }
 
 .d-name {
-  font-size: 0.9rem;
+  font-size: var(--blo-text-body);
   color: var(--blo-ink);
   overflow-wrap: anywhere;
 }
 
 .d-meta {
-  font-size: 0.78rem;
+  font-size: var(--blo-text-meta);
   color: var(--blo-stone);
 }
 

@@ -315,15 +315,24 @@ export function workingSetProgress(
 /**
  * That progress, in words.
  *
- * "9 of 11 held" leads because getting a table into the library is the work
- * the number is tracking. The rest is only said when it is true — a set with
- * nothing missing should not carry a "0 missing" clause for somebody to read
- * past.
+ * **The COUNT leads, not the ratio.** This used to open with "9 of 11 held",
+ * and on a set where everything is sourced that reads "4 of 4 held" — a ratio
+ * whose two halves are always the same number, over an assumption nobody
+ * questions. If a set names four datasets we have four datasets; that is what
+ * naming them means. The information is *four*.
+ *
+ * The exceptions still earn their place, because they are the cases the
+ * reader can act on: something named that the library has lost, something we
+ * hold but could not reach. Those are said only when true — a set with
+ * nothing missing should not carry a "0 missing" clause to read past.
+ *
+ * `indexed` is no longer broken out here. A source we point at rather than
+ * hold is a real distinction, and the Datasets tab makes it per row (P11-6),
+ * which is where somebody deciding about one of them is looking.
  */
 export function progressLine(progress: WorkingSetProgress): string {
   if (progress.total === 0) return 'Nothing in this set yet'
-  const parts = [`${progress.held} of ${progress.total} held`]
-  if (progress.indexed) parts.push(`${progress.indexed} indexed`)
+  const parts = [`${progress.total} ${progress.total === 1 ? 'dataset' : 'datasets'}`]
   if (progress.unreached) parts.push(`${progress.unreached} could not be reached`)
   if (progress.missing) {
     parts.push(`${progress.missing} no longer in the library`)

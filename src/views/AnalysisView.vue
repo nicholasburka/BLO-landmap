@@ -314,6 +314,26 @@ const indexRun = ref<CompositeRun | null>(null)
 
 /** The layers an index can weigh: county layers only — internal ones off the
  *  catalog this page already loaded, public ones off the static registry. */
+/**
+ * What this set cannot do yet, and why (P9-3's rule, P12-1's placement).
+ *
+ * Both halves used to be `<span>`s inside the action row, which made the one
+ * thing a reader could NOT press the largest text in it. They are one quiet
+ * line under the row now. Said as plain sentences rather than as
+ * "Verb — needs X": the verb is not a control here, and writing it like one
+ * is what made them read as broken links.
+ */
+function unavailableIn(set: WorkingSetSummary): string[] {
+  const out: string[] = []
+  if (measurableLayers(set).length && !set.sites) {
+    out.push('Measuring proximity needs an anchor table — the rows to measure from.')
+  }
+  if (indexableLayers(set).length < 2) {
+    out.push('A combined ranking needs two or more county layers to weigh against each other.')
+  }
+  return out
+}
+
 function indexableLayers(set: WorkingSetSummary) {
   return indexableLayersOf(set, entries.value, LAYER_REGISTRY)
 }
@@ -394,7 +414,7 @@ function whoAndWhen(analysis: Analysis): string {
       <KbNav />
       <header class="analysis-header">
         <h1>Analysis</h1>
-        <p class="lede">The working sets you analyse against, and the tools that run over the whole
+        <p class="blo-type-body blo-type-body--measure lede">The working sets you analyse against, and the tools that run over the whole
           library.</p>
       </header>
 
@@ -404,8 +424,8 @@ function whoAndWhen(analysis: Analysis): string {
            ("Inside a working set — open one below"). The page led with things
            you could not use yet, on an object you had not chosen. -->
       <section class="sets" data-testid="working-sets">
-        <h2 class="recent-heading">Working sets</h2>
-        <p class="section-lede">
+        <h2 class="blo-type-section section-head">Working sets</h2>
+        <p class="blo-type-body blo-type-body--measure section-lede">
           A named set of datasets and the sites they bear on. A place report run inside one asks that set's sources and
           no others.
         </p>
@@ -414,7 +434,7 @@ function whoAndWhen(analysis: Analysis): string {
              know they exist. They cannot be STARTED from here — every one of
              them needs a set — so they are a line naming what a set opens
              into, and the sets are directly below it. -->
-        <p class="set-inside" data-testid="set-inside">
+        <p class="blo-type-body blo-type-body--measure set-inside" data-testid="set-inside">
           Open a set to weigh an index differently, look at how a layer covers the country, or find an
           address in its data.
         </p>
@@ -426,16 +446,16 @@ function whoAndWhen(analysis: Analysis): string {
         <ul v-else class="set-list">
           <li v-for="row in setRows" :key="row.set.slug" class="set-row" data-testid="set-row">
             <div class="row-title-line">
-              <RouterLink :to="setWorkspaceHref(row.set.slug)" class="row-title" data-testid="set-title">
+              <RouterLink :to="setWorkspaceHref(row.set.slug)" class="blo-type-item row-title" data-testid="set-title">
                 {{ row.set.name }}
               </RouterLink>
               <span class="badge kind-set" data-testid="set-progress">{{ row.progress }}</span>
             </div>
-            <p v-if="row.set.purpose" class="row-line" data-testid="set-purpose">{{ row.set.purpose }}</p>
+            <p v-if="row.set.purpose" class="blo-type-body blo-type-body--measure row-line" data-testid="set-purpose">{{ row.set.purpose }}</p>
             <!-- P11-2: saved framings of the set, when somebody kept one. No
                  longer the way IN — the title is — so a set with none says
                  nothing rather than announcing an absence as a dead end. -->
-            <p v-if="row.set.views.length" class="set-views" data-testid="set-views">
+            <p v-if="row.set.views.length" class="blo-type-meta set-views" data-testid="set-views">
               <template v-if="row.set.views.length">
                 <span class="set-views-label">{{ row.set.views.length === 1 ? 'Saved framing' : 'Saved framings' }}:</span>
                 <RouterLink
@@ -449,49 +469,55 @@ function whoAndWhen(analysis: Analysis): string {
                 </RouterLink>
               </template>
             </p>
-            <p class="set-actions">
-              <RouterLink :to="workingSetPlaceHref(row.set.slug)" data-testid="set-place">Check a place in this set</RouterLink>
-              ·
-              <RouterLink :to="workingSetDatasetsHref(row.set.slug)" data-testid="set-datasets">Its datasets</RouterLink>
+            <!-- P12-1: a ROW of controls, not a sentence. The middots were
+                 what let two links, a button and a refusal read as one
+                 paragraph — and the refusal was the largest text in it. -->
+            <p class="blo-actions set-actions">
+              <RouterLink
+                :to="workingSetPlaceHref(row.set.slug)"
+                class="blo-type-action"
+                data-testid="set-place"
+              >Check a place</RouterLink>
+              <RouterLink
+                :to="workingSetDatasetsHref(row.set.slug)"
+                class="blo-type-action"
+                data-testid="set-datasets"
+              >Its datasets</RouterLink>
               <!-- P7-5, spec §F.5: a tool that operates on THIS set. It needs
                    both halves of the question — rows to measure FROM and a
-                   feature layer to measure TO.
-                   P9-3: when a half is missing, SAY SO rather than vanish.
-                   P7-5 hid the control so it could not be refused, which is
-                   right when a reader cannot act on the reason and wrong when
-                   they can: both of these are things they set on the set. A
-                   capability nobody can see is one nobody knows exists. -->
-              <template v-if="measurableLayers(row.set).length">
-                ·
-                <button
-                  v-if="row.set.sites"
-                  type="button"
-                  class="blo-act"
-                  data-testid="set-proximity"
-                  @click="openProximity(row.set)"
-                >
-                  {{ proximityFor === row.set.slug ? 'Close' : 'Measure proximity' }}
-                </button>
-                <span v-else class="set-tool-why" data-testid="set-proximity-why">
-                  Measure proximity — needs an anchor table, the rows to measure from
-                </span>
-              </template>
+                   feature layer to measure TO. -->
+              <button
+                v-if="measurableLayers(row.set).length && row.set.sites"
+                type="button"
+                class="blo-act"
+                data-testid="set-proximity"
+                @click="openProximity(row.set)"
+              >
+                {{ proximityFor === row.set.slug ? 'Close' : 'Measure proximity' }}
+              </button>
               <!-- P7-8, spec §F.5: over ONE layer an index is that layer
-                   rescaled, which the server refuses. Same P9-3 change: name
-                   the missing half instead of disappearing. -->
-              <template v-if="indexableLayers(row.set).length >= 2">
-                ·
-                <button type="button" class="blo-act" data-testid="set-index" @click="openIndex(row.set)">
-                  {{ indexFor === row.set.slug ? 'Close' : 'Create a combined ranking (index)' }}
-                </button>
-              </template>
-              <template v-else>
-                ·
-                <span class="set-tool-why" data-testid="set-index-why">
-                  Create a combined ranking — needs two or more county layers to weigh against each other
-                </span>
-              </template>
+                   rescaled, which the server refuses. -->
+              <button
+                v-if="indexableLayers(row.set).length >= 2"
+                type="button"
+                class="blo-act"
+                data-testid="set-index"
+                @click="openIndex(row.set)"
+              >
+                {{ indexFor === row.set.slug ? 'Close' : 'Create a combined ranking' }}
+              </button>
             </p>
+
+            <!-- P9-3's rule holds — a gated capability says WHY rather than
+                 vanishing — but P12-1 moves it out of the action row and into
+                 the quietest type on the page. It was a 13.8px span wedged
+                 between two 13px links: the one thing you could not press was
+                 the largest thing in the row. -->
+            <p
+              v-if="unavailableIn(row.set).length"
+              class="blo-type-unavailable set-unavailable"
+              data-testid="set-unavailable"
+            >{{ unavailableIn(row.set).join(' ') }}</p>
 
             <form
               v-if="indexFor === row.set.slug"
@@ -718,7 +744,7 @@ function whoAndWhen(analysis: Analysis): string {
           >
             {{ exploring ? 'Close the map' : 'New working set' }}
           </button>
-          <span class="sets-new-why">Draw any of our layers together, and keep the combination.</span>
+          <span class="blo-type-meta sets-new-why">Draw any of our layers together, and keep the combination.</span>
         </p>
         <ExploreMapPane v-if="exploring" @close="exploring = false" />
       </section>
@@ -728,7 +754,7 @@ function whoAndWhen(analysis: Analysis): string {
            page, named in one line under the list above, because a card you
            cannot start is not a tool, it is an advertisement. -->
       <section class="tools" data-testid="library-tools">
-        <h2 class="recent-heading">Across the whole library</h2>
+        <h2 class="blo-type-section section-head">Across the whole library</h2>
         <ul class="tool-cards" data-testid="tool-cards">
           <li
             v-for="tool in LIBRARY_TOOLS"
@@ -737,8 +763,8 @@ function whoAndWhen(analysis: Analysis): string {
             :data-tool="tool.id"
             data-testid="tool-card"
           >
-            <h3 class="tool-name">{{ tool.name }}</h3>
-            <p class="tool-description">{{ tool.description }}</p>
+            <h3 class="blo-type-item tool-name">{{ tool.name }}</h3>
+            <p class="blo-type-body tool-description">{{ tool.description }}</p>
             <RouterLink :to="tool.href" class="blo-act blo-act--lg tool-start" data-testid="tool-start">{{
               tool.start
             }}</RouterLink>
@@ -747,7 +773,7 @@ function whoAndWhen(analysis: Analysis): string {
       </section>
 
       <section class="recent">
-        <h2 class="recent-heading">Recent analyses</h2>
+        <h2 class="blo-type-section section-head">Recent analyses</h2>
         <p v-if="loading" class="state-note" data-testid="analyses-loading">Looking for what has been run…</p>
         <p v-else-if="analyses.length === 0" class="state-note empty" data-testid="analyses-empty">
           Nothing has been run yet. Check a place or save a view and it will appear here.
@@ -803,8 +829,6 @@ function whoAndWhen(analysis: Analysis): string {
 
 .lede {
   margin: 0 0 18px;
-  font-size: 14px;
-  color: var(--blo-stone);
 }
 
 .tool-cards {
@@ -824,8 +848,6 @@ function whoAndWhen(analysis: Analysis): string {
 
 .section-lede {
   margin: 0 0 10px;
-  font-size: 13px;
-  color: var(--blo-stone);
 }
 
 .set-list {
@@ -839,9 +861,10 @@ function whoAndWhen(analysis: Analysis): string {
   border-top: 1px solid var(--blo-cream-divider);
 }
 
+/* P12-1: `.blo-type-item` owns size, weight and colour. What is left is the
+   one thing a link needs here — the title is the set's name, so it carries
+   no underline until it is hovered. */
 .set-row .row-title {
-  font-size: 14px;
-  color: var(--blo-ink);
   text-decoration: none;
 }
 
@@ -853,11 +876,17 @@ function whoAndWhen(analysis: Analysis): string {
   font-variant-numeric: tabular-nums;
 }
 
-.set-views,
-.set-actions {
+.set-views {
   margin: 4px 0 0;
-  font-size: 13px;
-  color: var(--blo-stone);
+}
+
+.set-actions {
+  margin: 8px 0 0;
+}
+
+/* P12-1: the quiet line under the row. */
+.set-unavailable {
+  margin: 5px 0 0;
 }
 
 .set-views-label {
@@ -869,10 +898,23 @@ function whoAndWhen(analysis: Analysis): string {
   color: var(--blo-stone);
 }
 
-.set-view-link,
-.set-actions a {
-  margin-right: 4px;
-  color: inherit;
+/* A saved framing is a link to a framing, so it is an action — not the
+   bordered panel it briefly became when the rule it shared a selector with
+   was removed out from under it. */
+.set-view-link {
+  font-size: var(--blo-text-meta);
+  font-weight: 500;
+  color: var(--blo-green-deep);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--blo-green-deep) 32%, transparent);
+}
+
+.set-view-link:hover {
+  border-bottom-color: var(--blo-green-deep);
+}
+
+.set-view-link:not(:last-child) {
+  margin-right: 10px;
 }
 
 .promote {
@@ -936,15 +978,10 @@ function whoAndWhen(analysis: Analysis): string {
 
 .tool-name {
   margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--blo-ink);
 }
 
 .tool-description {
   margin: 0;
-  font-size: 13px;
-  color: var(--blo-stone);
 }
 
 
@@ -969,9 +1006,7 @@ function whoAndWhen(analysis: Analysis): string {
 
 /* P11-7: what a set opens into, where the three un-startable cards were. */
 .set-inside {
-  margin: 0 0 12px;
-  font-size: 13px;
-  color: var(--blo-stone);
+  margin: 0 0 14px;
 }
 
 .sets-new {
@@ -982,18 +1017,13 @@ function whoAndWhen(analysis: Analysis): string {
   margin: 16px 0 0;
 }
 
-.sets-new-why {
-  font-size: 13px;
-  color: var(--blo-stone);
-}
 
-.recent-heading {
-  margin: 0 0 10px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--blo-ink);
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--blo-cream-divider);
+
+/* P12-1: `.blo-type-section` owns the type. A section heading is an eyebrow
+   now, so the rule under it would cut it off from what it heads — space does
+   that job, and more of it above than below. */
+.section-head {
+  margin: 26px 0 10px;
 }
 
 .state-note {
@@ -1032,10 +1062,9 @@ a.analysis-row:hover {
   gap: 8px;
 }
 
+/* `.blo-type-item` owns the type. */
 .row-title {
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--blo-ink);
+  text-decoration: none;
 }
 
 .row-meta-line {
@@ -1082,10 +1111,13 @@ a.analysis-row:hover {
   background: #f1edfb;
 }
 
-.row-line,
 .row-who {
-  font-size: 12px;
+  font-size: var(--blo-text-meta);
   color: var(--blo-stone);
+}
+
+.row-line {
+  margin: 2px 0 0;
 }
 
 /* --- Phone (P5-60) ---------------------------------------------------------
@@ -1132,10 +1164,7 @@ a.analysis-row:hover {
 }
 
 /* P7-5: the proximity tool on a set's row. */
-.set-tool-why {
-  color: #6b6560;
-  font-size: 0.86rem;
-}
+
 
 .proximity {
   margin: 10px 0 0;

@@ -119,6 +119,112 @@
   box-shadow: var(--blo-shadow-panel-strong);
 }
 
+/* --- Type: five roles on one scale (P12-1) --------------------------------
+
+   The analysis page had SEVEN sizes between 12 and 15px — 12, 13, 13.8, 14,
+   15 — four of them within two pixels of each other, and the 13.8 was an
+   inherited `em` nobody chose. That is not drift; it is the absence of
+   anything to reuse. Before this block `base.css` carried ONE typographic
+   token (the display family) and eight `font-size` declarations in the whole
+   file, so every component picked its own numbers and picked differently.
+
+   The scale is a minor third (x1.2) from a 14px body, rounded to whole
+   pixels. Five roles, with a page title in the display face above them.
+
+   P9-13 gave CONTROLS a vocabulary — Go / Show / Write — and expressed it
+   only in borders and fill. These are the same vocabulary reaching type, so
+   that a Go inside a sentence can look like one. */
+:root {
+  --blo-text-eyebrow: 11px;
+  --blo-text-meta: 13px;
+  --blo-text-body: 14px;
+  --blo-text-item: 17px;
+  --blo-text-section: 20px;
+}
+
+/* A SECTION, as an eyebrow rather than a bigger heading.
+
+   The obvious fix for "the heading is typed like its own items" is to make
+   the heading bigger. The sturdier one is to make it a different KIND of
+   type: it then cannot be confused with an item title however the sizes
+   drift later, and it frees item titles to go UP instead of being capped
+   under a heading. The page had already lost that arms race twice — a 15px
+   h3 sat under a 14px h2. */
+.blo-type-section {
+  font-size: var(--blo-text-eyebrow);
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--blo-stone, #6b6560);
+}
+
+/* The thing the row is ABOUT: a set's name, a tool's name. */
+.blo-type-item {
+  font-size: var(--blo-text-item);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--blo-ink, #111);
+}
+
+/* Prose. Capped near 68 characters wherever it is a paragraph rather than a
+   fragment — a description running the full width of a 1400px page is not a
+   description anybody finishes. */
+.blo-type-body {
+  font-size: var(--blo-text-body);
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--blo-ink-soft, #2a2a2a);
+}
+
+.blo-type-body--measure {
+  max-width: 68ch;
+}
+
+/* Counts, timestamps, "saved framing" — true, and never the point. */
+.blo-type-meta {
+  font-size: var(--blo-text-meta);
+  font-weight: 400;
+  color: var(--blo-stone, #6b6560);
+}
+
+/* An ACTION in running text. Green and 500, so it is not the prose around it. */
+.blo-type-action {
+  font-size: var(--blo-text-meta);
+  font-weight: 500;
+  color: var(--blo-green-deep, #1f7a2e);
+}
+
+/* A link needs a non-colour affordance: colour alone is not one (WCAG 1.4.1),
+   and here colour was doing nothing anyway — the links were the same stone as
+   the paragraph around them. A hairline rather than a full underline, because
+   these sit in rows of three and four. */
+a.blo-type-action {
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--blo-green-deep, #1f7a2e) 32%, transparent);
+}
+
+a.blo-type-action:hover {
+  border-bottom-color: var(--blo-green-deep, #1f7a2e);
+}
+
+/* What you CANNOT do. P9-3's rule stands — a gated capability says why — but
+   it says so in the quietest type on the page, rather than as a 13.8px span
+   wedged between two links and larger than both. */
+.blo-type-unavailable {
+  font-size: var(--blo-text-meta);
+  font-weight: 400;
+  color: var(--blo-stone-soft, #9a948e);
+}
+
+/* A row of controls is a ROW, not a sentence. The middots are what let four
+   different kinds of thing read as one paragraph. */
+.blo-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
 /* P9-13: what a control will DO, in three shapes.
    From the navigation audit: six buttons on one screen shared a class and
    covered three unrelated kinds of action — a reversible canvas toggle, a

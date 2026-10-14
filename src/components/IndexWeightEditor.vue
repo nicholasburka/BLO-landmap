@@ -5,7 +5,7 @@
        and nothing is written until a reader asks for it. The view is the
        sandbox; the set is the record. -->
   <section class="weights" data-testid="index-weight-editor">
-    <h2 class="w-title">Weigh it differently</h2>
+    <h2 class="blo-type-section w-title">Weigh it differently</h2>
 
     <ul class="w-rows">
       <li v-for="t in rows" :key="t.layer" class="w-row" data-testid="weight-row">
@@ -168,19 +168,21 @@ function reset(): void {
   padding-top: 0.75rem;
   border-top: 1px solid #e7e2da;
 }
-.w-title { margin: 0 0 0.5rem; font-size: 0.95rem; }
+.w-title {
+  margin: 0 0 0.6rem;
+}
 .w-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
 .w-row {
   display: grid;
   grid-template-columns: minmax(8rem, 14rem) minmax(6rem, 1fr) 2.5rem auto;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.86rem;
+  font-size: var(--blo-text-meta);
 }
 .w-name { overflow-wrap: anywhere; }
 .w-weight { font-variant-numeric: tabular-nums; color: #6b6560; }
-.w-weight.off { color: #92400e; font-size: 0.78rem; }
+.w-weight.off { color: #92400e; font-size: var(--blo-text-meta); }
 .w-save { display: flex; gap: 0.5rem; align-items: center; margin: 0.7rem 0 0; flex-wrap: wrap; }
 .w-name-input { flex: 1 1 10rem; min-width: 0; }
-.w-note { margin: 0.4rem 0 0; color: #6b6560; font-size: 0.82rem; }
+.w-note { margin: 0.4rem 0 0; color: #6b6560; font-size: var(--blo-text-meta); }
 </style>

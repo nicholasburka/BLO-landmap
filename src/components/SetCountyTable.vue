@@ -228,13 +228,13 @@ function print(value: number | null, col: Col): string {
 
 .state-note {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--blo-text-body);
   color: var(--blo-stone);
 }
 
 .counties-line {
   margin: 0;
-  font-size: 0.86rem;
+  font-size: var(--blo-text-meta);
   color: var(--blo-stone);
 }
 
@@ -258,7 +258,7 @@ function print(value: number | null, col: Col): string {
 .counties-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.86rem;
+  font-size: var(--blo-text-meta);
   font-variant-numeric: tabular-nums;
 }
 
@@ -287,7 +287,7 @@ function print(value: number | null, col: Col): string {
   width: 100%;
   padding: 7px 10px;
   font: inherit;
-  font-size: 0.8rem;
+  font-size: var(--blo-text-meta);
   font-weight: 600;
   color: var(--blo-stone);
   text-align: inherit;
@@ -304,7 +304,7 @@ function print(value: number | null, col: Col): string {
 .c-dir {
   margin-left: 5px;
   color: var(--blo-green-deep);
-  font-size: 0.7rem;
+  font-size: var(--blo-text-eyebrow);
 }
 
 .c-name {
@@ -326,7 +326,7 @@ thead .c-num .c-sort {
 
 .counties-key {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: var(--blo-text-meta);
   color: var(--blo-stone);
 }
 
@@ -337,7 +337,7 @@ thead .c-num .c-sort {
 
 @media (max-width: 640px) {
   .counties-table {
-    font-size: 0.8rem;
+    font-size: var(--blo-text-meta);
   }
 }
 </style>

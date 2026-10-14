@@ -169,10 +169,15 @@ describe('how far a set’s sourcing has got', () => {
     }),
   ]
 
-  it('is the spec’s own sentence — 9 of 11 held, and what could not be reached', () => {
+  it('leads with the COUNT, and says what cannot be reached', () => {
+    // P12-1: it used to lead "9 of 11 held · 2 indexed". On a fully sourced
+    // set that reads "4 of 4 held" — a ratio whose halves are always the same
+    // number, over an assumption nobody questions. The information is the
+    // count. The progress numbers themselves are unchanged; only the sentence
+    // moved, and the exceptions still earn their place.
     const progress = workingSetProgress(ELEVEN, CATALOG)
     expect(progress).toEqual({ total: 11, held: 9, indexed: 2, missing: 0, unreached: 1 })
-    expect(progressLine(progress)).toBe('9 of 11 held · 2 indexed · 1 could not be reached')
+    expect(progressLine(progress)).toBe('11 datasets · 1 could not be reached')
   })
 
   /**
@@ -187,7 +192,7 @@ describe('how far a set’s sourcing has got', () => {
       CATALOG,
     )
     expect(progress).toEqual({ total: 2, held: 1, indexed: 0, missing: 1, unreached: 0 })
-    expect(progressLine(progress)).toBe('1 of 2 held · 1 no longer in the library')
+    expect(progressLine(progress)).toBe('2 datasets · 1 no longer in the library')
   })
 
   it('does not count a member that is in the catalog as something else', () => {
@@ -196,8 +201,12 @@ describe('how far a set’s sourcing has got', () => {
     expect(progress.held).toBe(0)
   })
 
-  it('says nothing it does not have to — a clean set carries no zero clauses', () => {
-    expect(progressLine(workingSetProgress(set({ datasets: ['held-1', 'held-2'] }), CATALOG))).toBe('2 of 2 held')
+  it('says nothing it does not have to — a clean set is just its count', () => {
+    expect(progressLine(workingSetProgress(set({ datasets: ['held-1', 'held-2'] }), CATALOG))).toBe('2 datasets')
+  })
+
+  it('counts one dataset in the singular', () => {
+    expect(progressLine(workingSetProgress(set({ datasets: ['held-1'] }), CATALOG))).toBe('1 dataset')
   })
 
   it('an empty set says it is empty rather than "0 of 0 held"', () => {
