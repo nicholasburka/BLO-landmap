@@ -341,6 +341,17 @@ describe('narrowToSet — searching inside a working set (P11-8)', () => {
     expect(got.groups).toHaveLength(1)
   })
 
+  it('drops the facet chips, which were counted off the whole library', () => {
+    // Seen in the browser: a scoped search showed "source 17 · US EPA 15"
+    // over a list of two. A count that disagrees with the list under it is
+    // the bug P6-23 named, and these are counted off everything the query
+    // matched rather than off what the scope kept.
+    const got = narrowToSet({ ...outcome, facets: { kind: [{ id: 'source', count: 17 }] } } as never, [
+      'in-the-set',
+    ])
+    expect(Object.values(got.facets).every(list => (list as unknown[]).length === 0)).toBe(true)
+  })
+
   it('narrows a match found inside a document by the entry it is in', () => {
     const withText = {
       ...outcome,

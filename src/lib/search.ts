@@ -371,7 +371,13 @@ export function narrowToSet(outcome: SearchOutcome, slugs: readonly string[]): S
     (n, group) => n + (group.name === INSIDE_DOCUMENTS ? 0 : group.items.length),
     0,
   )
-  return { ...outcome, groups, matched }
+  // The facet chips go. They are counted off everything the QUERY matched,
+  // across the whole library — so a scoped search showed "source 17" over a
+  // list of two, which is precisely the disagreement between a count and the
+  // list under it that P6-23 forbids. Recounting them off the narrowed set
+  // would be a second, differently-derived answer to "what is in this set",
+  // and the set already answers that on its Datasets tab.
+  return { ...outcome, groups, matched, facets: facetsFor([]) }
 }
 
 export async function searchEverything(q: string, filters: SearchFilters = {}): Promise<SearchOutcome> {

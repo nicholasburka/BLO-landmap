@@ -1015,10 +1015,14 @@ onMounted(async () => {
     <template v-else-if="set">
       <header class="workspace-head">
         <h1 data-testid="workspace-title">{{ set.name }}</h1>
+        <!-- P11-2 left this saying "Over <set name>" under an h1 that is now
+             the set's own name — the page introduced itself twice. What it is
+             for is the LINK (to the set's library entry, which is a different
+             thing from this working surface) and the counts. -->
         <p class="set-line" data-testid="workspace-set">
-          Over
-          <RouterLink :to="workingSetHref(set.slug)" data-testid="workspace-set-link">{{ set.name }}</RouterLink>
-          <span class="set-holds" data-testid="workspace-holds"> · {{ holds }}</span>
+          <span class="set-holds" data-testid="workspace-holds">{{ holds }}</span>
+          ·
+          <RouterLink :to="workingSetHref(set.slug)" data-testid="workspace-set-link">Its library entry</RouterLink>
         </p>
         <p v-if="set.purpose" class="set-purpose" data-testid="workspace-purpose">{{ set.purpose }}</p>
         <!-- P7-6: in the HEADER, which is outside both interface panes, so a
@@ -1107,6 +1111,10 @@ onMounted(async () => {
                the pane — so "there is not room for a map" could show on a
                desktop whenever the set named no layers. -->
           <template v-if="map.isOpen.value">
+            <!-- No `title`: MapPane falls back to the name of the layer it
+                 is drawing, which is the one thing on this page the heading
+                 does not already say. It used to be passed `set.name`, which
+                 after P11-2 was the third copy of that name on the page. -->
             <MapPane
               class="workspace-pane"
               testid="set-map-pane"
@@ -1114,7 +1122,6 @@ onMounted(async () => {
               :query="map.state.query"
               :data="map.state.data"
               :fit="addressFit ?? map.fit.value"
-              :title="set.name"
               :note="paneNote"
               label="This working set on the map"
               @close="show('counties')"

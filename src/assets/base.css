@@ -231,6 +231,15 @@ a.blo-act:hover {
     min-height: 44px;
     font-size: 16px;
   }
+
+  /* P11 audit: a tab is the one button that is not `.blo-act` (it changes
+     the URL and already reads as a tab), so the rule above never reached it
+     — every tab bar in the product was a 34px target. Two components define
+     `.tab-btn` separately and a third would have made three; scoped styles
+     set no min-height, so this reaches all of them without fighting any. */
+  .tab-btn {
+    min-height: 44px;
+  }
 }
 
 .blo-panel--reference {

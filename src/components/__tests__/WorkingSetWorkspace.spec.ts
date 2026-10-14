@@ -356,7 +356,11 @@ describe('the two interfaces', () => {
     // with whichever VIEW you arrived through, which meant one object had as
     // many names as it had views.
     expect(w.get('[data-testid="workspace-title"]').text()).toBe('Memphis redevelopment')
-    expect(w.get('[data-testid="workspace-set-link"]').text()).toBe('Memphis redevelopment')
+    // The name is said ONCE. This line used to read "Over Memphis
+    // redevelopment" under an h1 that is now the same words; what it is for
+    // is the link to the set's library ENTRY, which is a different object
+    // from this working surface.
+    expect(w.get('[data-testid="workspace-set-link"]').text()).toBe('Its library entry')
     expect(w.get('[data-testid="workspace-holds"]').text()).toContain('2 datasets · 1 layer')
     expect(w.get('[data-testid="workspace-purpose"]').text()).toBe('What bears on siting')
     // Every saved framing of the set, not "the others" — there is no current
@@ -482,10 +486,13 @@ describe('the filtered subset reaching the map (query.only, P6-10)', () => {
     expect(router.currentRoute.value.query.q).toBe('River')
   })
 
-  it('names the set on the pane and draws the set’s own layers', async () => {
+  it('names the LAYER on the pane and draws the set’s own layers', async () => {
+    // The pane used to be titled with the set, which after P11-2 was the
+    // third copy of that name on one page — h1, the line under it, and this.
+    // Naming what it is DRAWING is the one thing the headings do not say.
     const w = await mountAt(mapView())
     await settleMap()
-    expect(w.get('[data-testid="set-map-pane-layer"]').text()).toBe('Memphis redevelopment')
+    expect(w.get('[data-testid="set-map-pane-layer"]').text()).toBe('Sites by county')
     expect(w.findComponent(MapPane).props('layers').internal.value).toEqual(['internal-sites'])
   })
 

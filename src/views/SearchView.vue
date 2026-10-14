@@ -254,6 +254,15 @@ const nothingMatched = computed(() => !loading.value && !error.value && !!search
       <p v-else-if="!searched" class="state-note" data-testid="search-start">
         Type a few words and press Enter. Every filter is part of the link, so a search can be sent to somebody else.
       </p>
+      <!-- P9-3's rule: when something is narrowing the answer, SAY SO. A
+           scoped search that finds nothing is usually the scope, and
+           "try fewer words" sends the reader to fix the wrong thing. -->
+      <p v-else-if="nothingMatched && scopeSet" class="state-note empty" data-testid="search-empty">
+        Nothing in <strong>{{ scopeSet.name }}</strong> matched that.
+        <button type="button" class="blo-act" data-testid="search-widen" @click="clearScope">
+          Search the whole library
+        </button>
+      </p>
       <p v-else-if="nothingMatched" class="state-note empty" data-testid="search-empty">
         Nothing matched — try fewer words, or <RouterLink to="/chat">ask in Chat</RouterLink>.
       </p>

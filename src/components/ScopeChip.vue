@@ -87,6 +87,12 @@ const emit = defineEmits<{ clear: [] }>()
 }
 
 @media (max-width: 640px) {
+  /* The pill radius is for ONE line. At 375px this wraps to three and a
+     999px radius on a three-line box reads as a blob rather than a chip. */
+  .scope {
+    border-radius: 10px;
+  }
+
   .scope-clear {
     min-width: 44px;
     min-height: 44px;
