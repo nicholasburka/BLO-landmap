@@ -21,9 +21,8 @@ import {
   tableStateOf,
   tableViewUrl,
   viewOpenUrl,
-  interfaceForViewType,
-  parseSetInterface,
-  workingSetViewHref,
+  parseSetTab,
+  workingSetTabHref,
   readSiteLayers,
   siteLayerRestore,
   VIEW_RESULTS_MAX,
@@ -251,11 +250,15 @@ describe('tableViewUrl / viewOpenUrl', () => {
    * which is where that view's framing now lives. Same rule as the rest of
    * this function — send a view to the surface that can show what it is of.
    */
-  it('sends a set-backed view to its two interfaces, in the one its own kind names', () => {
+  it('sends a set-backed view to the SET, whatever its own kind', () => {
+    // P11-2: the set is the surface that can show what the view is of, which
+    // is the rule the rest of this function has always followed. It used to
+    // open at `/views/<slug>`, where a set's interfaces lived when a set had
+    // no address of its own.
     const map = { ...TABLE_DOC, type: 'map' as const, slug: 'tn', workingSet: 'memphis' } as unknown as SavedView
-    expect(viewOpenUrl(map)).toBe('/views/tn')
+    expect(viewOpenUrl(map)).toBe('/sets/memphis')
     const table = { ...tableView(TABLE_DOC.state), workingSet: 'memphis' }
-    expect(viewOpenUrl(table)).toBe('/views/georgia-orgs')
+    expect(viewOpenUrl(table)).toBe('/sets/memphis')
   })
 
   it('leaves an ad-hoc view exactly where it was — absent and blank both mean ad-hoc', () => {
@@ -630,34 +633,29 @@ describe('the working set a view presents (P7-1)', () => {
   })
 })
 
-// --- P7-2: two interfaces over one working set -------------------------------
+// --- P11-4: three tabs over one working set ----------------------------------
 
-describe('which interface a set-backed view opens in', () => {
-  it('is the one the view’s own type names — the view IS the framing', () => {
-    expect(interfaceForViewType('map')).toBe('map')
-    expect(interfaceForViewType('table')).toBe('data')
-    expect(interfaceForViewType('compare')).toBe('map')
+describe('which tab a working set opens on', () => {
+  it('reads ?tab= and degrades rather than throwing on a hand-edited link', () => {
+    expect(parseSetTab('counties')).toBe('counties')
+    expect(parseSetTab('datasets')).toBe('datasets')
+    expect(parseSetTab('map')).toBe('map')
+    expect(parseSetTab(['counties'])).toBe('counties')
+    expect(parseSetTab('sideways')).toBe('map')
+    expect(parseSetTab(undefined)).toBe('map')
+    // `data` was the old vocabulary and is not a tab any more — it split into
+    // the two below. A stale link opens the set rather than nothing.
+    expect(parseSetTab('data')).toBe('map')
   })
 
-  it('reads ?interface= and falls back rather than throwing on a hand-edited link', () => {
-    expect(parseSetInterface('data', 'map')).toBe('data')
-    expect(parseSetInterface('map', 'data')).toBe('map')
-    expect(parseSetInterface(['data'], 'map')).toBe('data')
-    expect(parseSetInterface('sideways', 'map')).toBe('map')
-    expect(parseSetInterface(undefined, 'data')).toBe('data')
-  })
-
-  it('deep-links to either interface, and leaves the default unsaid', () => {
-    expect(workingSetViewHref('memphis-map')).toBe('/views/memphis-map')
-    expect(workingSetViewHref('memphis-map', 'map', 'map')).toBe('/views/memphis-map')
-    expect(workingSetViewHref('memphis-map', 'data', 'map')).toBe('/views/memphis-map?interface=data')
-    // A table view's default is the data interface, so the MAP is the one its
-    // link has to name.
-    expect(workingSetViewHref('memphis-table', 'data', 'table')).toBe('/views/memphis-table')
-    expect(workingSetViewHref('memphis-table', 'map', 'table')).toBe('/views/memphis-table?interface=map')
+  it('deep-links to a tab, and leaves the default unsaid', () => {
+    expect(workingSetTabHref('memphis')).toBe('/sets/memphis')
+    expect(workingSetTabHref('memphis', 'map')).toBe('/sets/memphis')
+    expect(workingSetTabHref('memphis', 'counties')).toBe('/sets/memphis?tab=counties')
+    expect(workingSetTabHref('memphis', 'datasets')).toBe('/sets/memphis?tab=datasets')
   })
 
   it('encodes a slug rather than trusting it', () => {
-    expect(workingSetViewHref('a b', 'data')).toBe('/views/a%20b?interface=data')
+    expect(workingSetTabHref('a b', 'counties')).toBe('/sets/a%20b?tab=counties')
   })
 })

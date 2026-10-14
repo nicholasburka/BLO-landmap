@@ -42,6 +42,8 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import DatasetView from '@/views/DatasetView.vue'
 import KbNav from '@/components/KbNav.vue'
 import MapPane from '@/components/MapPane.vue'
+import SetCountyTable from '@/components/SetCountyTable.vue'
+import SetDatasetList from '@/components/SetDatasetList.vue'
 import SetLayerList from '@/components/SetLayerList.vue'
 import MapAddressSearch from '@/components/MapAddressSearch.vue'
 import IndexCompareCard from '@/components/IndexCompareCard.vue'
@@ -58,7 +60,7 @@ import { computeScores, rawLayerValues } from '@/composables/usePersonalizedScor
 import { friendlyError } from '@/lib/errors'
 import { clearIndexDraft, readIndexDraft, writeIndexDraft } from '@/lib/indexDraft'
 import { invalidateInternalManifest } from '@/lib/internalLayers'
-import { SET_INTERFACE_KEY, parseSetInterface, type SetInterface } from '@/lib/views'
+import { DEFAULT_SET_TAB, SET_OPEN_KEY, SET_TAB_KEY, parseSetTab, type SetTab } from '@/lib/views'
 import {
   derivedFreshnessBadge,
   derivedFreshnessLine,
@@ -102,29 +104,37 @@ const setGone = ref(false)
 
 // --- Which interface -------------------------------------------------------
 
-/** A set opens on its map. It used to open on whichever interface the VIEW
- *  that got you here was saved from; with no view in the way there is one
- *  answer, and the map is it — the framing a set stores is a map state. */
-const defaultInterface = computed<SetInterface>(() => 'map')
+/** The three tabs, in the order a reader meets them: what it looks like,
+ *  what it says, what it is made of. */
+const TABS: { id: SetTab; label: string }[] = [
+  { id: 'map', label: 'Map' },
+  { id: 'counties', label: 'Counties' },
+  { id: 'datasets', label: 'Datasets' },
+]
 
-const iface = computed<SetInterface>(() =>
-  parseSetInterface(route.query[SET_INTERFACE_KEY], defaultInterface.value),
-)
+const iface = computed<SetTab>(() => parseSetTab(route.query[SET_TAB_KEY]))
 
 /**
- * Switch interface. `replace`, same path, every other query key untouched — so
- * the table's filters survive a look at the map and come back with it, and Back
- * does not walk a trail of interface switches.
+ * Switch tab (P11-4).
+ *
+ * **`push`, not `replace`.** It was `replace` with the reasoning that two
+ * interfaces over one object are not a navigation — sound for two tabs, and
+ * it cost the reader the Back button: Back from the Data tab left the
+ * workspace entirely rather than returning to the map. With three tabs and a
+ * dataset to drill into, Back has to walk them.
+ *
+ * Every other query key is untouched, so the explorer's filters survive a
+ * look at the map and come back with it.
  */
-function show(next: SetInterface): void {
+function show(next: SetTab): void {
   if (next === iface.value) return
   const query: Record<string, string | string[] | null> = { ...route.query } as Record<
     string,
     string | string[] | null
   >
-  if (next === defaultInterface.value) delete query[SET_INTERFACE_KEY]
-  else query[SET_INTERFACE_KEY] = next
-  void router.replace({ query })
+  if (next === DEFAULT_SET_TAB) delete query[SET_TAB_KEY]
+  else query[SET_TAB_KEY] = next
+  void router.push({ query })
 }
 
 // --- The data half ---------------------------------------------------------
@@ -173,6 +183,26 @@ function onShown(payload: { geoIds: string[]; rows: number; total: number; loadi
   shown.value = payload
   if (!payload.loading) subsetSettled.value = true
 }
+
+/** Which of the set's datasets is open inside the Datasets tab (P11-6), or
+ *  '' when the tab is showing its list. */
+const openDataset = computed(() => {
+  const raw = route.query[SET_OPEN_KEY]
+  const slug = Array.isArray(raw) ? raw[0] : raw
+  return typeof slug === 'string' ? slug : ''
+})
+
+/**
+ * Closing a dataset puts the map back on the whole layer.
+ *
+ * Without this the subset outlives the table that produced it: close the
+ * explorer and the map keeps drawing the rows it last filtered to, with
+ * nothing on screen to say why only eighteen counties are painted.
+ */
+watch(openDataset, slug => {
+  if (slug) return
+  shown.value = { geoIds: [], rows: 0, total: 0, loading: false }
+})
 
 // --- The map half (P6-14, six lines of it) ---------------------------------
 
@@ -711,12 +741,20 @@ async function saveIndex(input: { label: string; terms: WeightTerm[] }): Promise
  * so a reader who stays on the table never pays for them; closing it on the
  * way out is what stops a hidden map holding a WebGL context.
  *
- * It waits for the table's first answer (or for a set with no table at all),
- * so the pane's first paint is already the right subset rather than the whole
- * layer — which is what `useShowOnMap` promises and what the data half being
- * mounted all along makes possible.
+ * It waits for the table's first answer ONLY while a dataset is open.
+ *
+ * P11-6 broke the old rule, which was "wait for the table, because the data
+ * half is mounted all along". It is not any more: the Datasets tab opens on a
+ * LIST, and the explorer mounts only when a reader opens one of them. Waiting
+ * on a table nobody opened left the map permanently un-drawn — the map tab of
+ * every anchored set went blank, which is how this was caught.
+ *
+ * With nothing open there is no subset to wait for, and an empty `only` means
+ * the whole layer, which is the right answer.
  */
-const readyToDraw = computed(() => drawsLayers.value && (subsetSettled.value || !anchor.value))
+const readyToDraw = computed(
+  () => drawsLayers.value && (!openDataset.value || subsetSettled.value),
+)
 
 watch(
   [iface, readyToDraw],
@@ -1003,27 +1041,20 @@ onMounted(async () => {
         </p>
       </header>
 
-      <!-- Two interfaces, one object, one URL. `replace` on the same path, so
-           this is not a navigation. -->
-      <nav class="tab-bar strip" role="tablist" aria-label="Interfaces" data-testid="interface-switch">
+      <!-- P11-4: three tabs over one object, each a real query change, so
+           Back walks them instead of leaving the set. -->
+      <nav class="tab-bar strip" role="tablist" aria-label="Tabs" data-testid="interface-switch">
         <button
+          v-for="tab in TABS"
+          :key="tab.id"
           type="button"
           role="tab"
           class="tab-btn"
-          :class="{ active: iface === 'map' }"
-          :aria-selected="iface === 'map'"
-          data-interface="map"
-          @click="show('map')"
-        >Map</button>
-        <button
-          type="button"
-          role="tab"
-          class="tab-btn"
-          :class="{ active: iface === 'data' }"
-          :aria-selected="iface === 'data'"
-          data-interface="data"
-          @click="show('data')"
-        >Data</button>
+          :class="{ active: iface === tab.id }"
+          :aria-selected="iface === tab.id"
+          :data-interface="tab.id"
+          @click="show(tab.id)"
+        >{{ tab.label }}</button>
       </nav>
 
       <!-- P9-14: what is on this page, and a way to it.
@@ -1076,7 +1107,7 @@ onMounted(async () => {
               :title="set.name"
               :note="paneNote"
               label="This working set on the map"
-              @close="show('data')"
+              @close="show('counties')"
               @county-click="clickedGeoId = $event"
             >
               <!-- P9-10: the layer list floats ON the map, the way the public
@@ -1276,19 +1307,37 @@ onMounted(async () => {
 
       <!-- DATA. Kept mounted: the map draws the rows this is showing, so they
            have to survive a switch. -->
-      <section v-show="iface === 'data'" class="interface" data-testid="interface-data">
-        <DatasetView
-          v-if="anchor"
-          embedded
-          host-map
-          :slug="anchor"
+      <!-- P11-5: what the set says per county. `v-if`, not `v-show`: the
+           rollup is real work and a reader on another tab must not pay it. -->
+      <section v-if="iface === 'counties'" class="interface" data-testid="interface-counties">
+        <SetCountyTable
+          :layers="analysableLayers"
+          :columns="columns"
+          :values-for="analysisValues"
+          :universe="analysisUniverse"
+        />
+      </section>
+
+      <!-- P11-6: what the set is made of, each one openable in place.
+           Mounted while the tab is on OR a dataset is open, and only SHOWN on
+           the tab. That is what keeps P6-10 working under three tabs: open a
+           dataset, filter it, switch to the map, and the map draws those rows
+           — the explorer is still alive behind the tab, feeding `shown`.
+           With nothing open it does not mount at all, so a reader who never
+           opens a table never pays for one. -->
+      <section
+        v-if="iface === 'datasets' || openDataset"
+        v-show="iface === 'datasets'"
+        class="interface"
+        data-testid="interface-datasets"
+      >
+        <SetDatasetList
+          :members="set.members"
+          :missing="set.missing"
+          :set-name="set.name"
           :extra-columns="joined"
           @shown="onShown"
         />
-        <p v-else class="state-note" data-testid="data-no-anchor">
-          This set is not anchored on a table we hold, so there are no rows to explore yet.
-          <RouterLink :to="workingSetDatasetsHref(set.slug)">Its datasets, and what is still missing</RouterLink>
-        </p>
       </section>
     </template>
   </div>
