@@ -95,8 +95,26 @@ export interface WorkingSetMember {
   readiness?: { as: string; placeReport: string; notes: string[] }
 }
 
+/**
+ * What a set opens on (P11-1) — a map state, minus the `prompt` a saved view
+ * carries. Absent means none was stored: every set made before P11-1, and
+ * every set whose framing has been cleared. The reader derives a default from
+ * the set's own county layers rather than showing an empty map.
+ */
+export interface SetFraming {
+  layers: { layerId: string; weight: number; direction?: string }[]
+  filters: unknown[]
+  limit: number | null
+  regionStates: string[]
+  viewport: { center: [number, number]; zoom: number } | null
+  pointLayers?: { id: string; name: string }[]
+  siteLayers?: string[]
+}
+
 export interface WorkingSetDetail extends WorkingSetSummary {
   members: WorkingSetMember[]
+  /** P11-1. Absent on a set that has never been framed. */
+  framing?: SetFraming
   /**
    * Slugs the set names that the library no longer has.
    *
@@ -137,6 +155,14 @@ export interface WorkingSetFields {
   datasets?: string[]
   layers?: string[]
   sites?: string | null
+  /**
+   * P11-1: the map state this set opens on.
+   *
+   * `null` clears it and puts the set back on a default derived from its own
+   * county layers. Validated server-side by the same parser a saved view's
+   * state goes through, so a layer id refused there is refused here.
+   */
+  framing?: SetFraming | null
 }
 
 export async function createWorkingSet(input: { name: string } & WorkingSetFields): Promise<{ slug: string; name: string }> {

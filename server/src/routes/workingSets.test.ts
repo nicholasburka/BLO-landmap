@@ -195,9 +195,12 @@ describe('the working-set routes', () => {
     expect((await post(auth, '/api/working-sets', { name: '—' })).status).toBe(400)
   })
 
-  /** §F.1's load-bearing line. Framing belongs to a view; if a viewport can
-   *  get in here the two objects have collapsed into one. */
-  it('stores no framing, however it is offered', async () => {
+  /** Was §F.1's load-bearing line: a set held no framing at all. P11-1 gives
+   *  a set ONE framing, through a validated `framing` key — and this case is
+   *  what still stands under it. Loose framing fields at the top level are
+   *  not a framing and never become one, so a caller cannot half-write a map
+   *  state by scattering keys at the set. */
+  it('stores no framing offered as loose top-level fields', async () => {
     const auth = await login()
     const slug = await makeSet(auth, {
       viewport: { center: [-90, 35], zoom: 9 },
@@ -1214,5 +1217,80 @@ describe('POST /api/working-sets/:slug/composite', () => {
       .set('Cookie', auth.cookie)
       .send({ label: 'x', terms: TERMS })
     expect(res.status).toBe(403)
+  })
+})
+
+describe('a set carries its own framing (P11-1)', () => {
+  const FRAMING = {
+    layers: [{ layerId: 'combined_scores_v2', weight: 3, direction: 'higher_better' }],
+    regionStates: ['MS'],
+    viewport: { center: [-90.1, 32.3], zoom: 6 },
+  }
+
+  it('stores a framing and hands it back on the set itself', async () => {
+    const auth = await login()
+    const slug = await makeSet(auth, { framing: FRAMING })
+    const one = await get(auth, `/api/working-sets/${slug}`)
+    expect(one.body.framing.layers).toEqual([
+      { layerId: 'combined_scores_v2', weight: 3, direction: 'higher_better' },
+    ])
+    // The viewport is the half a view keeps and MCP never had: where the map
+    // was is part of a framing, which is the point of the whole field.
+    expect(one.body.framing.viewport).toEqual({ center: [-90.1, 32.3], zoom: 6 })
+    expect(one.body.framing.regionStates).toEqual(['MS'])
+  })
+
+  it('keeps no prompt — a set is a resting state, not a question', async () => {
+    const auth = await login()
+    const slug = await makeSet(auth, { framing: { ...FRAMING, prompt: 'where are the brownfields' } })
+    const one = await get(auth, `/api/working-sets/${slug}`)
+    expect(one.body.framing.prompt).toBeUndefined()
+  })
+
+  it('refuses a framing naming a layer the map does not have', async () => {
+    const auth = await login()
+    const res = await post(auth, '/api/working-sets', {
+      name: 'Bad framing',
+      framing: { layers: [{ layerId: 'not_a_layer', weight: 1 }] },
+    })
+    expect(res.status).toBe(400)
+    // The same vocabulary a saved view's state is refused in — one validator.
+    expect(res.body.error).toMatch(/unknown layer: not_a_layer/)
+  })
+
+  it('refuses a framing that is not a map state at all', async () => {
+    const auth = await login()
+    for (const framing of ['a string', 42, []]) {
+      const res = await post(auth, '/api/working-sets', { name: `Bad ${String(framing)}`, framing })
+      expect(res.status, JSON.stringify(framing)).toBe(400)
+    }
+  })
+
+  it('leaves the framing alone on an edit that does not mention it', async () => {
+    const auth = await login()
+    const slug = await makeSet(auth, { framing: FRAMING })
+    await put(auth, `/api/working-sets/${slug}`, { purpose: 'Narrowed' })
+    const one = await get(auth, `/api/working-sets/${slug}`)
+    expect(one.body.framing.layers).toHaveLength(1)
+    expect(one.body.purpose).toBe('Narrowed')
+  })
+
+  it('clears the framing when an edit sends null', async () => {
+    const auth = await login()
+    const slug = await makeSet(auth, { framing: FRAMING })
+    const res = await put(auth, `/api/working-sets/${slug}`, { framing: null })
+    expect(res.status).toBe(200)
+    const one = await get(auth, `/api/working-sets/${slug}`)
+    expect(one.body.framing).toBeUndefined()
+  })
+
+  it('keeps the framing off the LIST, the way derived columns are counted', async () => {
+    const auth = await login()
+    await makeSet(auth, { framing: FRAMING })
+    const list = await get(auth, '/api/working-sets')
+    expect(list.body.sets.length).toBeGreaterThan(0)
+    for (const row of list.body.sets) {
+      expect(row.framing).toBeUndefined()
+    }
   })
 })

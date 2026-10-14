@@ -18,6 +18,7 @@ import {
   WORKING_SET_PURPOSE_MAX,
   describeWorkingSet,
 } from '../services/workingSetMeta.js'
+import { parseFraming } from '../services/mapState.js'
 import {
   derivedColumnKey,
   readDerivedColumns,
@@ -91,6 +92,8 @@ interface ParsedFields {
   datasets?: string[]
   layers?: string[]
   sites?: string | null
+  /** P11-1. `null` clears it, which puts the set back on a derived default. */
+  framing?: Record<string, unknown> | null
 }
 
 /**
@@ -152,6 +155,20 @@ async function parseFields(body: Record<string, unknown>): Promise<{ error: stri
         return { error: `The sites a set is anchored on have to be a dataset we hold; “${slug}” is not.` }
       }
       out.sites = slug
+    }
+  }
+
+  // P11-1: the map state this set opens on. Validated by the same parser a
+  // map VIEW's state goes through — one validator, or the two drift and a
+  // layer id the view route accepts is one the set route rejects.
+  if (body.framing !== undefined) {
+    if (body.framing === null) out.framing = null
+    else if (typeof body.framing !== 'object' || Array.isArray(body.framing)) {
+      return { error: 'A framing is a map state: {layers, filters, limit, regionStates, viewport}.' }
+    } else {
+      const parsed = await parseFraming(body.framing as Record<string, unknown>)
+      if ('error' in parsed) return { error: `This set's framing ${parsed.error}` }
+      out.framing = parsed.state
     }
   }
 
@@ -230,6 +247,9 @@ router.get('/api/working-sets/:slug', async (req, res) => {
     const [{ entries, missing }, views] = await Promise.all([workingSetMembers(set), viewsBySet()])
     res.json({
       ...setRow(set, views.get(set.slug) ?? []),
+      // P11-1: the detail carries the framing; the LIST does not, for the
+      // reason `derivedCount` is a count — /analysis draws no maps.
+      ...(set.framing ? { framing: set.framing } : {}),
       members: entries.map(e => ({
         slug: e.slug,
         kind: e.kind,

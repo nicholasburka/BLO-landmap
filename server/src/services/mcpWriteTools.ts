@@ -10,6 +10,7 @@ import {
 } from './libraryCatalog.js'
 import { createLinkEntry } from './libraryLinks.js'
 import { listInternalLayers } from './internalLayers.js'
+import { parseMapState } from './mapState.js'
 import { ProximityError, runWorkingSetProximity } from './workingSetProximity.js'
 import { CompositeError, runWorkingSetComposite } from './workingSetComposite.js'
 import { COMPOSITE_TERMS_MAX } from './composite.js'
@@ -18,7 +19,6 @@ import { PROXIMITY_ROWS_MAX } from './proximity.js'
 // a table view an assistant saves has to open in the explorer for exactly the
 // same reasons one saved from the browser does (P5-54).
 import { parseTableState } from '../routes/views.js'
-import siteLayerRegistry from '../prompt/siteLayers.generated.json' with { type: 'json' }
 import {
   McpToolError,
   PUBLIC_LAYERS,
@@ -65,10 +65,10 @@ export const WRITE_TITLE_MAX = 160
 export const WRITE_TAGS_MAX = 20
 /** One tag; matches what the filing form accepts. */
 export const WRITE_TAG_MAX = 60
-/** Scoring layers in one saved map view — well past what the map renders. */
-export const VIEW_LAYERS_MAX = 20
-/** State abbreviations a saved map view may be limited to. */
-export const VIEW_REGIONS_MAX = 60
+/** Scoring layers in one saved map view, and the state abbreviations it may
+ *  be limited to. Declared with the validator that enforces them (P11-1) and
+ *  re-exported here, because `routes/views.ts` imports them from this module. */
+export { VIEW_LAYERS_MAX, VIEW_REGIONS_MAX } from './mapState.js'
 
 /**
  * The page that is the library's front door. An assistant appending to it is
@@ -401,128 +401,8 @@ export async function dropLink(args: DropLinkArgs, ctx: McpToolContext): Promise
 
 // --- save_view -------------------------------------------------------------------------
 
-function stringList(value: unknown): string[] | null {
-  if (!Array.isArray(value)) return null
-  return value.every(v => typeof v === 'string') ? (value as string[]) : null
-}
-
-const MAP_FILTER_OPERATORS = ['greater_than', 'less_than', 'between'] as const
-
-/** The contamination overlays a map view may name (P5-78), generated from the
- *  client's `src/config/siteLayers.ts`. */
-const SITE_LAYER_IDS = siteLayerRegistry.map(l => l.id)
-
-/**
- * A map view's state, checked against the layers that actually exist.
- *
- * The browser never needs this — it can only put on the map what the map
- * offered it. An assistant composes the state from a conversation, so a
- * typo'd layer id would otherwise be discovered by a person opening a view
- * that renders nothing. Both registries are consulted: the generated public
- * layer registry, and the internal manifest (published datasets carrying a
- * layer block), so an internal layer is as saveable here as it is in the app.
- */
-async function parseMapState(raw: Record<string, unknown>): Promise<{ error: string } | { state: Record<string, unknown> }> {
-  const internal = await listInternalLayers()
-  const countyIds = new Set<string>([
-    ...PUBLIC_LAYERS.map(l => l.id),
-    ...internal.filter(l => l.geometry === 'county').map(l => l.id),
-  ])
-  // Overlays — point and line (P7-3). Neither can be scored, and both ride
-  // in the view's `pointLayers` list, which is the stored key.
-  const pointIds = new Map(internal.filter(l => l.geometry !== 'county').map(l => [l.id, l.name]))
-
-  if (!Array.isArray(raw.layers)) return { error: 'a map view needs a layers list' }
-  if (raw.layers.length === 0) return { error: 'a map view needs at least one layer' }
-  if (raw.layers.length > VIEW_LAYERS_MAX) return { error: `layers: at most ${VIEW_LAYERS_MAX}` }
-  const layers: Record<string, unknown>[] = []
-  for (const entry of raw.layers) {
-    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
-      return { error: 'each layer is {layerId, weight}' }
-    }
-    const { layerId, weight, direction } = entry as Record<string, unknown>
-    if (typeof layerId !== 'string' || !countyIds.has(layerId)) {
-      return { error: `unknown layer: ${String(layerId)} — call list_layers for the ids` }
-    }
-    if (typeof weight !== 'number' || !Number.isFinite(weight) || weight <= 0) {
-      return { error: `layer ${layerId}: weight must be a positive number` }
-    }
-    if (direction !== undefined && direction !== 'higher_better' && direction !== 'lower_better') {
-      return { error: `layer ${layerId}: direction must be higher_better or lower_better` }
-    }
-    layers.push({ layerId, weight, ...(direction ? { direction } : {}) })
-  }
-
-  const filters: Record<string, unknown>[] = []
-  if (raw.filters !== undefined) {
-    if (!Array.isArray(raw.filters)) return { error: 'filters must be a list' }
-    for (const entry of raw.filters) {
-      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
-        return { error: 'each filter is {layerId, operator, value}' }
-      }
-      const { layerId, operator, value, max } = entry as Record<string, unknown>
-      if (typeof layerId !== 'string' || !countyIds.has(layerId)) {
-        return { error: `unknown layer in a filter: ${String(layerId)}` }
-      }
-      if (typeof operator !== 'string' || !(MAP_FILTER_OPERATORS as readonly string[]).includes(operator)) {
-        return { error: `filter operator must be one of ${MAP_FILTER_OPERATORS.join(', ')}` }
-      }
-      if (typeof value !== 'number' || !Number.isFinite(value)) return { error: `filter on ${layerId}: value must be a number` }
-      if (operator === 'between' && (typeof max !== 'number' || !Number.isFinite(max))) {
-        return { error: `filter on ${layerId}: a between filter needs a numeric max` }
-      }
-      filters.push({ layerId, operator, value, ...(operator === 'between' ? { max } : {}) })
-    }
-  }
-
-  const state: Record<string, unknown> = { layers, filters, prompt: '', viewport: null }
-
-  if (raw.limit !== undefined && raw.limit !== null) {
-    if (typeof raw.limit !== 'number' || !Number.isInteger(raw.limit) || raw.limit < 1) {
-      return { error: 'limit must be a whole number of counties, or omitted' }
-    }
-    state.limit = raw.limit
-  } else {
-    state.limit = null
-  }
-
-  const regions = raw.regionStates === undefined ? [] : stringList(raw.regionStates)
-  if (!regions) return { error: 'regionStates must be a list of two-letter state codes' }
-  if (regions.length > VIEW_REGIONS_MAX) return { error: `regionStates: at most ${VIEW_REGIONS_MAX}` }
-  const bad = regions.find(code => !/^[A-Za-z]{2}$/.test(code))
-  if (bad !== undefined) return { error: `not a two-letter state code: ${bad}` }
-  state.regionStates = regions.map(code => code.toUpperCase())
-
-  if (typeof raw.prompt === 'string') state.prompt = raw.prompt.trim().slice(0, WRITE_BODY_MAX)
-
-  if (raw.pointLayers !== undefined) {
-    if (!Array.isArray(raw.pointLayers)) return { error: 'pointLayers must be a list' }
-    const points: { id: string; name: string }[] = []
-    for (const entry of raw.pointLayers) {
-      const id = typeof entry === 'string' ? entry : (entry as Record<string, unknown>)?.id
-      if (typeof id !== 'string' || !pointIds.has(id)) return { error: `unknown overlay layer: ${String(id)}` }
-      points.push({ id, name: pointIds.get(id) as string })
-    }
-    if (points.length) state.pointLayers = points
-  }
-
-  // P5-78: the contamination overlays that come on with the view. A typo is
-  // an error here rather than a dropped id the way the browser's route drops
-  // one: an assistant composes this list from a conversation, and a silently
-  // lost layer would only be noticed by whoever opens the view.
-  if (raw.siteLayers !== undefined) {
-    const ids = stringList(raw.siteLayers)
-    if (!ids) return { error: 'siteLayers must be a list of contamination layer ids' }
-    const bad = ids.find(id => !SITE_LAYER_IDS.includes(id))
-    if (bad !== undefined) {
-      return { error: `unknown site layer: ${bad} — one of ${SITE_LAYER_IDS.join(', ')}` }
-    }
-    const sites = [...new Set(ids)]
-    if (sites.length) state.siteLayers = sites
-  }
-
-  return { state }
-}
+// `parseMapState` and its helpers moved to `./mapState.ts` in P11-1: a
+// working set's framing is the same shape and must not drift from it.
 
 export interface SaveViewArgs {
   name: string

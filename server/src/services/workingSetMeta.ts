@@ -68,12 +68,35 @@ export interface WorkingSetDoc {
   sites: string | null
   /** P7-5's columns. Written by analysis, never by a person, never by a view. */
   derived?: unknown[]
+  /**
+   * P11-1: the map state this set opens on — layers, filters, limit, region,
+   * viewport, overlays. A map state, validated by `parseFraming`.
+   *
+   * This is the field that gives a set an address of its own. Before it, the
+   * workspace could only render from a saved VIEW, so a set without one was
+   * unreachable — and the Explore flow made sets without one. Views still
+   * exist and still read the same rows, so the §F guarantee that matters (no
+   * two framings can disagree about a number) is untouched; what changed is
+   * that a view is no longer the way IN.
+   *
+   * Absent means "no framing was stored" — every set written before P11-1 —
+   * and the reader derives a default from the set's county layers. Preserved
+   * verbatim here, exactly like `derived`: this module stores, the route
+   * validates.
+   */
+  framing?: Record<string, unknown>
   savedBy: string
   savedById: number | null
   savedAt: string
   /** The saved view this set was promoted from, when it came into being that
    *  way (P7-1's promote action). */
   fromView?: string
+}
+
+/** A framing is an object or it is nothing. An array passes `typeof` and must
+ *  not: a list where a map state belongs is a hand-edit, not a framing. */
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
 function strings(value: unknown, max: number): string[] {
@@ -114,6 +137,7 @@ export function readWorkingSet(meta: Record<string, unknown>, slug: string): Wor
     layers: strings(meta.layers, WORKING_SET_LAYERS_MAX),
     sites,
     ...(Array.isArray(meta.derived) ? { derived: meta.derived } : {}),
+    ...(isPlainObject(meta.framing) ? { framing: meta.framing } : {}),
     savedBy: typeof meta.savedBy === 'string' ? meta.savedBy : '',
     savedById: typeof meta.savedById === 'number' ? meta.savedById : null,
     savedAt: typeof meta.savedAt === 'string' ? meta.savedAt : '',
@@ -160,6 +184,7 @@ export function workingSetManifest(doc: WorkingSetDoc): Record<string, unknown> 
     layers: doc.layers,
     sites: doc.sites,
     ...(doc.derived !== undefined ? { derived: doc.derived } : {}),
+    ...(doc.framing !== undefined ? { framing: doc.framing } : {}),
     savedBy: doc.savedBy,
     savedById: doc.savedById,
     savedAt: doc.savedAt,

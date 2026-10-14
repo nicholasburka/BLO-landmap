@@ -203,6 +203,8 @@ export interface WorkingSetInput {
   datasets?: string[]
   layers?: string[]
   sites?: string | null
+  /** P11-1: the map state this set opens on. Validated by the route. */
+  framing?: Record<string, unknown> | null
   fromView?: string
   savedBy: string
   savedById: number | null
@@ -231,6 +233,7 @@ export async function createWorkingSet(input: WorkingSetInput): Promise<WorkingS
     datasets: withAnchor(members(input.datasets, WORKING_SET_DATASETS_MAX), sites),
     layers: members(input.layers, WORKING_SET_LAYERS_MAX),
     sites,
+    ...(input.framing ? { framing: input.framing } : {}),
     savedBy: input.savedBy,
     savedById: input.savedById,
     savedAt: new Date().toISOString(),
@@ -246,6 +249,8 @@ export interface WorkingSetUpdates {
   datasets?: string[]
   layers?: string[]
   sites?: string | null
+  /** P11-1. `null` clears it; omitted leaves it exactly as it was. */
+  framing?: Record<string, unknown> | null
 }
 
 /**
@@ -271,6 +276,10 @@ export async function updateWorkingSet(slug: string, updates: WorkingSetUpdates)
     ...(updates.layers === undefined ? {} : { layers: members(updates.layers, WORKING_SET_LAYERS_MAX) }),
     sites,
   }
+  // P11-1: omitted leaves the framing alone (it rode in on `...existing`);
+  // null clears it, which puts the set back on a derived default.
+  if (updates.framing === null) delete doc.framing
+  else if (updates.framing !== undefined) doc.framing = updates.framing
   await writeWorkingSet(slug, doc)
   return { ...doc, slug }
 }
