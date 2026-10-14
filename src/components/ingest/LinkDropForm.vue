@@ -149,7 +149,7 @@ async function submit(): Promise<void> {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 0.9rem;
+  font-size: var(--blo-text-body);
 }
 
 .actions {
@@ -177,7 +177,7 @@ async function submit(): Promise<void> {
 .hint,
 .note {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: var(--blo-text-body);
   color: #5c5348;
 }
 

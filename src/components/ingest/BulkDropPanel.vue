@@ -284,7 +284,7 @@ defineExpose({ take, clear, count })
 
 .estimate {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: var(--blo-text-body);
   color: #5c5348;
 }
 
@@ -292,7 +292,7 @@ defineExpose({ take, clear, count })
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 0.9rem;
+  font-size: var(--blo-text-body);
 }
 
 .title-input {
@@ -352,7 +352,7 @@ defineExpose({ take, clear, count })
 
 .running-total {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--blo-text-body);
   font-weight: 600;
 }
 
@@ -367,7 +367,7 @@ defineExpose({ take, clear, count })
 
 .note {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: var(--blo-text-body);
   color: #5c5348;
 }
 

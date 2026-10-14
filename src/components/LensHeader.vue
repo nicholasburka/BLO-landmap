@@ -132,7 +132,7 @@ const queryDescriptorFull = computed(() => {
 }
 .lens-hd-prefix {
   font-family: var(--blo-font-display, 'Fraunces', serif);
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -154,7 +154,7 @@ const queryDescriptorFull = computed(() => {
 }
 .lens-hd-label {
   font-family: var(--blo-font-display, 'Fraunces', serif);
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -188,7 +188,7 @@ const queryDescriptorFull = computed(() => {
   color: white;
   border: 1px solid var(--blo-green-deep, #1f7a2e);
   border-radius: 999px;
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 600;
   padding: 3px 10px;
   cursor: pointer;
@@ -203,7 +203,7 @@ const queryDescriptorFull = computed(() => {
   background: transparent;
   border: 1px solid var(--blo-cream-divider, #e0d9ca);
   border-radius: 999px;
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   padding: 2px 8px;
   color: var(--blo-stone, #6b6560);
   cursor: pointer;
@@ -261,7 +261,7 @@ const queryDescriptorFull = computed(() => {
   color: var(--blo-ink-soft, #2a2a2a);
   border: 1px solid var(--blo-cream-divider, #e0d9ca);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
 }
 
 .lens-hd-chip--limit {

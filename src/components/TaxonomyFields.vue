@@ -128,7 +128,7 @@ function toggleTag(tag: string): void {
   background: transparent;
   border-radius: 999px;
   padding: 2px 10px;
-  font-size: 0.78rem;
+  font-size: var(--blo-text-caption);
   color: var(--blo-ink-muted, #6b6558);
   cursor: pointer;
 }

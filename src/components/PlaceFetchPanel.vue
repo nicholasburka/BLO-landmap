@@ -447,7 +447,7 @@ const resultLine = computed(() => {
 
 .panel-hint {
   margin: 0 0 0.75rem;
-  font-size: 0.85rem;
+  font-size: var(--blo-text-meta);
   color: var(--color-text-soft, #666);
   max-width: 60ch;
 }
@@ -464,7 +464,7 @@ const resultLine = computed(() => {
   background: transparent;
   border-radius: 999px;
   padding: 0.25rem 0.75rem;
-  font-size: 0.85rem;
+  font-size: var(--blo-text-meta);
   cursor: pointer;
 }
 
@@ -483,7 +483,7 @@ const resultLine = computed(() => {
 }
 
 .field label {
-  font-size: 0.8rem;
+  font-size: var(--blo-text-meta);
   color: var(--color-text-soft, #666);
   min-width: 9rem;
 }
@@ -505,7 +505,7 @@ const resultLine = computed(() => {
 }
 
 .field-note {
-  font-size: 0.8rem;
+  font-size: var(--blo-text-meta);
   color: var(--color-text-soft, #666);
   margin: 0;
 }
@@ -526,7 +526,7 @@ const resultLine = computed(() => {
   background: transparent;
   border-radius: 4px;
   padding: 0.25rem 0.6rem;
-  font-size: 0.85rem;
+  font-size: var(--blo-text-meta);
   cursor: pointer;
 }
 
@@ -557,7 +557,7 @@ const resultLine = computed(() => {
   border: none;
   padding: 0;
   font: inherit;
-  font-size: 0.85rem;
+  font-size: var(--blo-text-meta);
   color: var(--color-link, #2563eb);
   text-decoration: underline;
   cursor: pointer;
@@ -570,7 +570,7 @@ const resultLine = computed(() => {
 
 .place-error {
   margin: 0.75rem 0 0;
-  font-size: 0.85rem;
+  font-size: var(--blo-text-meta);
   color: #b3261e;
 }
 
@@ -580,7 +580,7 @@ const resultLine = computed(() => {
 
 .result-line {
   margin: 0 0 0.5rem;
-  font-size: 0.9rem;
+  font-size: var(--blo-text-body);
 }
 
 .table-scroll {
@@ -594,7 +594,7 @@ const resultLine = computed(() => {
 .data-table {
   border-collapse: collapse;
   width: 100%;
-  font-size: 0.85rem;
+  font-size: var(--blo-text-meta);
 }
 
 .data-table th,
@@ -635,7 +635,7 @@ const resultLine = computed(() => {
 
 .saved-note {
   margin: 0.5rem 0 0;
-  font-size: 0.85rem;
+  font-size: var(--blo-text-meta);
 }
 
 .slice-list {
@@ -646,7 +646,7 @@ const resultLine = computed(() => {
 
 .slice-list h4 {
   margin: 0 0 0.4rem;
-  font-size: 0.85rem;
+  font-size: var(--blo-text-meta);
   color: var(--color-text-soft, #666);
 }
 
@@ -665,7 +665,7 @@ const resultLine = computed(() => {
 }
 
 .slice-place {
-  font-size: 0.9rem;
+  font-size: var(--blo-text-body);
 }
 
 /* Only a sheet on a phone; an ordinary card everywhere else. */
@@ -744,7 +744,7 @@ const resultLine = computed(() => {
   .saved-note,
   .result-line,
   .slice-place {
-    font-size: 0.9rem;
+    font-size: var(--blo-text-body);
   }
 
   /* Segmented control: the three modes share one row and one border. */
@@ -762,7 +762,7 @@ const resultLine = computed(() => {
   .mode-btn {
     min-height: 44px;
     padding: 0 0.5rem;
-    font-size: 0.9rem;
+    font-size: var(--blo-text-body);
     border: none;
     border-radius: 0;
   }
@@ -779,7 +779,7 @@ const resultLine = computed(() => {
 
   .field label {
     min-width: 0;
-    font-size: 0.85rem;
+    font-size: var(--blo-text-meta);
   }
 
   .field input[type='text'],
@@ -794,7 +794,7 @@ const resultLine = computed(() => {
   .county-matches button {
     min-height: 44px;
     padding: 0 0.9rem;
-    font-size: 0.9rem;
+    font-size: var(--blo-text-body);
   }
 
   .run-row {
@@ -811,11 +811,11 @@ const resultLine = computed(() => {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
-    font-size: 0.9rem;
+    font-size: var(--blo-text-body);
   }
 
   .data-table {
-    font-size: 0.9rem;
+    font-size: var(--blo-text-body);
   }
 
   .sort-btn {

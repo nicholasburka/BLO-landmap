@@ -79,8 +79,17 @@
   --color-border: var(--vt-c-divider-light-2);
   --color-border-hover: var(--vt-c-divider-light-1);
 
-  --color-heading: var(--vt-c-text-light-1);
-  --color-text: var(--vt-c-text-light-1);
+  /* P12-2: these pointed at `--vt-c-indigo` (#2c3e50) — the colour the Vite
+     starter template ships with. So the app's DEFAULT text colour was the
+     scaffold's, and every element that did not set a colour of its own
+     inherited it: measured on /datasets, the group headings rendered
+     rgb(44, 62, 80) rather than the product's ink.
+
+     It is also why so many components set `color: var(--blo-ink)`
+     explicitly — they were each compensating for a default that was wrong,
+     one component at a time. */
+  --color-heading: var(--blo-ink);
+  --color-text: var(--blo-ink);
 
   --section-gap: 160px;
 }
@@ -135,11 +144,24 @@
    only in borders and fill. These are the same vocabulary reaching type, so
    that a Go inside a sentence can look like one. */
 :root {
-  --blo-text-eyebrow: 11px;
-  --blo-text-meta: 13px;
-  --blo-text-body: 14px;
-  --blo-text-item: 17px;
-  --blo-text-section: 20px;
+  /* A WHOLE-PIXEL scale, not a strict modular one, and that is deliberate.
+     A x1.2 ratio through this range gives 11.6 / 14 / 16.8 / 20 — and
+     fractional sizes are exactly what produced the mess: 11.2, 12.5, 12.8,
+     13.1, 13.4, 13.6, 13.8, 14.4, 15.2, all from rem fractions nobody chose.
+     Seven whole steps, each with a job.
+
+     The steps match what the app already reaches for — measured across 900
+     font-size declarations, 14px and 13px dominate, then 12 and 11. A scale
+     that omitted 12 would have meant changing 136 declarations to avoid
+     admitting a step that is plainly in use. */
+  --blo-text-micro: 10px;     /* map chrome, over a canvas */
+  --blo-text-eyebrow: 11px;   /* a SECTION, as an overline */
+  --blo-text-caption: 12px;   /* chips, badges, column heads */
+  --blo-text-meta: 13px;      /* counts, timestamps, actions */
+  --blo-text-body: 14px;      /* prose */
+  --blo-text-input: 16px;     /* form fields — below this iOS zooms on focus */
+  --blo-text-item: 17px;      /* the thing a row is about */
+  --blo-text-section: 20px;   /* a section that must be a real heading */
 }
 
 /* A SECTION, as an eyebrow rather than a bigger heading.

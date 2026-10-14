@@ -216,7 +216,7 @@ watch(
 .rail-eyebrow {
   display: block;
   font-family: var(--blo-font-display, 'Fraunces', serif);
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;

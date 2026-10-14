@@ -263,7 +263,7 @@ function added(): void {
    draws nothing must also cost nothing. The zone carries the spacing instead. */
 .what {
   margin: 0 0 12px;
-  font-size: 0.9rem;
+  font-size: var(--blo-text-body);
   color: #5c5348;
   max-width: 62ch;
 }
@@ -291,18 +291,18 @@ function added(): void {
 }
 
 .zone-lead {
-  font-size: 0.95rem;
+  font-size: var(--blo-text-body);
 }
 
 .zone-next {
   margin-top: 8px;
-  font-size: 0.88rem;
+  font-size: var(--blo-text-body);
   color: #5c5348;
 }
 
 .zone-limit {
   margin-top: 4px;
-  font-size: 0.82rem;
+  font-size: var(--blo-text-meta);
   color: #7a7063;
 }
 
@@ -347,7 +347,7 @@ function added(): void {
   }
 
   .zone-next {
-    font-size: 0.95rem;
+    font-size: var(--blo-text-body);
   }
 
   .zone-limit {

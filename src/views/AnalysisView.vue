@@ -1236,7 +1236,7 @@ a.analysis-row:hover {
 
 
 .index-hint {
-  font-size: 0.82rem;
+  font-size: var(--blo-text-meta);
   color: var(--blo-muted, #5a6472);
 }
 

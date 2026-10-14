@@ -65,7 +65,7 @@ function pick(event: Event): string {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  font-size: 0.85rem;
+  font-size: var(--blo-text-meta);
   color: var(--kb-muted, #555);
 }
 .vocab-fields select {
