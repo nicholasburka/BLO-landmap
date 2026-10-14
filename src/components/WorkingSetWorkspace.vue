@@ -8,11 +8,12 @@
  *
  *  - **The working set is the data** — its members, its anchor, and the derived
  *    columns P7-5 computes onto it. Loaded ONCE, here.
- *  - **The view is the framing** — which is why this component takes a
- *    `SavedView` and reads the set off it, rather than the other way round. A
- *    set holds no viewport, no sort and no palette, so there is nothing to show
- *    it *with* until a view supplies one; a set may carry several views, and
- *    each of them lands here over the same rows.
+ *  - **The set is also the framing now** (P11-1/P11-2) — this component takes
+ *    a SET SLUG and reads everything off the set, which is the other way round
+ *    from how it started. It used to take a `SavedView` and find the set on
+ *    it, and that indirection was the bug: a set with no view had no way to
+ *    be opened at all, and the Explore flow made sets with no view. A set
+ *    still may carry views; they are saved framings of it, not the way in.
  *  - **The interface is neither.** It is a query key, so switching is a
  *    `router.replace` on the path you are already on: nothing navigates,
  *    nothing unmounts that holds data, and nothing is fetched twice. A deep
@@ -57,15 +58,7 @@ import { computeScores, rawLayerValues } from '@/composables/usePersonalizedScor
 import { friendlyError } from '@/lib/errors'
 import { clearIndexDraft, readIndexDraft, writeIndexDraft } from '@/lib/indexDraft'
 import { invalidateInternalManifest } from '@/lib/internalLayers'
-import {
-  SET_INTERFACE_KEY,
-  interfaceForViewType,
-  parseSetInterface,
-  tableStateOf,
-  tableViewQuery,
-  type SavedView,
-  type SetInterface,
-} from '@/lib/views'
+import { SET_INTERFACE_KEY, parseSetInterface, type SetInterface } from '@/lib/views'
 import {
   derivedFreshnessBadge,
   derivedFreshnessLine,
@@ -87,8 +80,8 @@ import {
 import type { ScoringQueryLayer } from '@/types/mapTypes'
 
 const props = defineProps<{
-  /** The view whose framing this is. Its `workingSet` is what gets loaded. */
-  view: SavedView
+  /** The working set this is. Everything else is read off it. */
+  slug: string
 }>()
 
 const route = useRoute()
@@ -109,10 +102,10 @@ const setGone = ref(false)
 
 // --- Which interface -------------------------------------------------------
 
-/** The interface the view's own type opens in — the view IS the framing, so a
- *  view saved off the map opens on the map and one saved off a table on the
- *  table. The set is the same either way, which is the point. */
-const defaultInterface = computed(() => interfaceForViewType(props.view.type))
+/** A set opens on its map. It used to open on whichever interface the VIEW
+ *  that got you here was saved from; with no view in the way there is one
+ *  answer, and the map is it — the framing a set stores is a map state. */
+const defaultInterface = computed<SetInterface>(() => 'map')
 
 const iface = computed<SetInterface>(() =>
   parseSetInterface(route.query[SET_INTERFACE_KEY], defaultInterface.value),
@@ -139,15 +132,15 @@ function show(next: SetInterface): void {
 /**
  * Which table the data interface shows.
  *
- * The view's own dataset first, when it has one: a saved table view is about
- * that table and has to keep opening on it. Then the set's anchor — the held
- * dataset the set is *about* — then its first held member, so a map view over a
- * set still gets a table to explore. In practice these agree: the promote
- * action puts a table view's dataset into the set it makes.
+ * The set's anchor — the held dataset the set is *about* — then its first held
+ * member, so a set with no anchor still gets a table to explore.
+ *
+ * A saved TABLE view's own dataset used to win here. P11-2 drops that: the
+ * workspace no longer arrives through a view, and the preference was already
+ * noted as agreeing with the anchor in practice, because the promote action
+ * puts a table view's dataset into the set it makes.
  */
 const anchor = computed(() => {
-  const saved = tableStateOf(props.view)?.dataset
-  if (saved) return saved
   if (set.value?.sites) return set.value.sites
   return set.value?.members.find(member => member.kind === 'dataset')?.slug ?? ''
 })
@@ -237,7 +230,33 @@ const drawnLayerIds = computed(() => {
   const preview = previewQuery.value
   if (preview) return preview.map(term => term.layerId)
   if (drawnIndex.value) return [drawnIndex.value]
+  const framed = framingTerms.value
+  if (framed) return framed.map(term => term.layerId)
   return set.value?.layers ?? []
+})
+
+/**
+ * The set's own stored framing, as scoring terms (P11-1/P11-2).
+ *
+ * This is what the `framing` field is FOR: a set that has been weighed opens
+ * on that weighting instead of on an unweighted average of everything it
+ * names. Null when the set has never been framed — every set made before
+ * P11-1 — and then the layers draw at equal weight exactly as they did.
+ *
+ * It sits below a preview and below a drawn index for the same reason those
+ * two are ordered: each is a different claim about what the choropleth means,
+ * and the more deliberate, more recent one wins.
+ */
+const framingTerms = computed<ScoringQueryLayer[] | null>(() => {
+  const layers = set.value?.framing?.layers
+  if (!layers?.length) return null
+  return layers.map(term => ({
+    layerId: term.layerId,
+    weight: term.weight,
+    ...(term.direction === 'higher_better' || term.direction === 'lower_better'
+      ? { direction: term.direction }
+      : {}),
+  }))
 })
 
 /** The layers the set names, in its own order — what the list offers to
@@ -246,9 +265,11 @@ const setLayerIds = computed(() => drawnLayerIds.value)
 
 const map = useShowOnMap({
   layers: () => drawnLayerIds.value,
-  // Equal weight unless a formula is being tried out, which is the one case a
-  // page here has an opinion about how much each layer counts.
-  weights: () => previewQuery.value,
+  // Equal weight unless a formula is being tried out, or the set carries one
+  // of its own — the two cases a page here has an opinion about how much each
+  // layer counts. A live preview beats the stored framing, the way it beats
+  // everything else.
+  weights: () => previewQuery.value ?? framingTerms.value,
   only: () => shown.value.geoIds,
 })
 
@@ -894,35 +915,23 @@ const holds = computed(() => {
   return parts.join(' · ')
 })
 
-/** Every other view of this set. Several is the normal case, not an edge, and
- *  this is the one place a reader can see that they are all over one object. */
-const siblingViews = computed(() => (set.value?.views ?? []).filter(view => view.slug !== props.view.slug))
+/** The saved framings of this set, if anybody kept one. No longer "the OTHER
+ *  views" — there is no current view to be other than, because the set is
+ *  what you opened. Usually empty, and that is now a normal state. */
+const siblingViews = computed(() => set.value?.views ?? [])
 
 // --- Load, once ------------------------------------------------------------
 
-/**
- * A saved table view's query, put on the URL it is already on.
- *
- * The explorer reads its state from the URL, so restoring a table view is the
- * same job here as on the entry hub — the keys, not the destination
- * (`tableViewQuery`). Only when the URL carries none of them: a link somebody
- * shared with its own filters must win over the ones the document was saved
- * with.
- */
-function seedTableState(): void {
-  const saved = tableStateOf(props.view)
-  if (!saved) return
-  const query = tableViewQuery(saved, props.view.slug)
-  const owned = ['file', 'q', 'sort', 'dir', 'filter', 'page', 'limit', 'view']
-  if (owned.some(key => route.query[key] !== undefined)) return
-  void router.replace({ query: { ...route.query, ...query } })
-}
+// `seedTableState` went with P11-2. It replayed a saved TABLE view's filters
+// onto this URL, and there is no view in the way any more to have any — the
+// table tab opens on the set's anchor, and a link carrying its own filters is
+// read by the explorer exactly as before.
 
 onMounted(async () => {
   // P9-11: so an address can be named by the county it lands in. Cached for
   // the session and shared with the analyses; a failure costs only the name.
   void initCountyLookup().catch(() => {})
-  const slug = props.view.workingSet ?? ''
+  const slug = props.slug
   try {
     // Both at once: the set's members and its stored columns are two reads of
     // one object and neither waits on the other.
@@ -934,7 +943,6 @@ onMounted(async () => {
     set.value = detail
     columns.value = stored.columns
     unreadable.value = stored.unreadable
-    seedTableState()
   } catch (err) {
     error.value = friendlyError(err, 'That working set could not be loaded.')
   } finally {
@@ -953,23 +961,22 @@ onMounted(async () => {
     <p v-if="loading" class="state-note" data-testid="workspace-loading">Opening the working set…</p>
     <p v-else-if="error" class="state-note error" data-testid="workspace-error">{{ error }}</p>
 
-    <!-- A set can be archived or renamed out from under an open view. Say what
-         happened and offer the map, which is where this view used to go. -->
+    <!-- P11-2: the slug IS the set now, so this is a plain 404 rather than a
+         view pointing at something that moved. Name what was asked for — a
+         mistyped or archived slug is the common cause and the reader can see
+         it in the URL. -->
     <div v-else-if="setGone" class="state-note" data-testid="workspace-set-gone">
-      <p>
-        The view “{{ view.name }}” presents a working set called “{{ view.workingSet }}”, and the library does not have
-        one by that name any more.
-      </p>
+      <p>There is no working set called “{{ slug }}”.</p>
       <p class="gone-links">
-        <RouterLink :to="`/?view=${view.slug}`">Open it on the map</RouterLink>
-        ·
         <RouterLink to="/analysis">Working sets</RouterLink>
+        ·
+        <RouterLink to="/">The map</RouterLink>
       </p>
     </div>
 
     <template v-else-if="set">
       <header class="workspace-head">
-        <h1 data-testid="workspace-title">{{ view.name }}</h1>
+        <h1 data-testid="workspace-title">{{ set.name }}</h1>
         <p class="set-line" data-testid="workspace-set">
           Over
           <RouterLink :to="workingSetHref(set.slug)" data-testid="workspace-set-link">{{ set.name }}</RouterLink>
@@ -1155,7 +1162,7 @@ onMounted(async () => {
                link is still how this view is shared, and still works. -->
           <p v-else class="state-note" data-testid="map-too-narrow">
             There is not room for a map here.
-            <RouterLink :to="`/?view=${view.slug}`">Open it on the full map</RouterLink>.
+            <RouterLink :to="`/?set=${set.slug}`">Open it on the full map</RouterLink>.
             <!-- P9-10/P9-11: the layer list, the address search, the free
                  analyses and the comparison all live with the map and all
                  read the county data it loads, so they go when it goes. They

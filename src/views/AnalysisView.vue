@@ -54,6 +54,7 @@ import { fetchViews, type SavedViewSummary } from '@/lib/views'
 import { relativeTime } from '@/lib/kb'
 import { fetchCatalog, type CatalogEntry } from '@/lib/libraryCatalog'
 import {
+  setWorkspaceHref,
   fetchWorkingSets,
   compositeLine,
   compositeServedLine,
@@ -478,17 +479,18 @@ function whoAndWhen(analysis: Analysis): string {
         <ul v-else class="set-list">
           <li v-for="row in setRows" :key="row.set.slug" class="set-row" data-testid="set-row">
             <div class="row-title-line">
-              <RouterLink :to="workingSetHref(row.set.slug)" class="row-title" data-testid="set-title">
+              <RouterLink :to="setWorkspaceHref(row.set.slug)" class="row-title" data-testid="set-title">
                 {{ row.set.name }}
               </RouterLink>
               <span class="badge kind-set" data-testid="set-progress">{{ row.progress }}</span>
             </div>
             <p v-if="row.set.purpose" class="row-line" data-testid="set-purpose">{{ row.set.purpose }}</p>
-            <!-- A set may carry SEVERAL views, which is the point of the two
-                 objects being two objects. -->
-            <p class="set-views" data-testid="set-views">
+            <!-- P11-2: saved framings of the set, when somebody kept one. No
+                 longer the way IN — the title is — so a set with none says
+                 nothing rather than announcing an absence as a dead end. -->
+            <p v-if="row.set.views.length" class="set-views" data-testid="set-views">
               <template v-if="row.set.views.length">
-                <span class="set-views-label">{{ row.set.views.length === 1 ? 'One view' : `${row.set.views.length} views` }}:</span>
+                <span class="set-views-label">{{ row.set.views.length === 1 ? 'Saved framing' : 'Saved framings' }}:</span>
                 <RouterLink
                   v-for="view in row.set.views"
                   :key="view.slug"
@@ -499,7 +501,6 @@ function whoAndWhen(analysis: Analysis): string {
                   {{ view.name }}
                 </RouterLink>
               </template>
-              <span v-else class="set-views-label" data-testid="set-no-views">No views of it yet</span>
             </p>
             <p class="set-actions">
               <RouterLink :to="workingSetPlaceHref(row.set.slug)" data-testid="set-place">Check a place in this set</RouterLink>

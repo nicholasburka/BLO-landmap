@@ -1,20 +1,20 @@
 <template>
-  <!-- P7-2: a view that PRESENTS a working set stops here and gets the set's
-       two interfaces, because this is the URL they live at. A view with no set
-       is ad-hoc — permanent and first-class, never legacy — and goes exactly
-       where it has always gone, by exactly the code below. -->
-  <WorkingSetWorkspace v-if="workspaceView" :view="workspaceView" />
+  <!-- P11-2: a view that PRESENTS a working set now redirects to the set's own
+       URL, because the set is the object and `/sets/<slug>` is where it lives.
+       This file is a shim again, which is all it was before P7-2.
 
+       A view with no set is ad-hoc — permanent and first-class, never legacy —
+       and goes exactly where it has always gone, by exactly the code below. -->
   <!-- Almost nothing renders: this route exists so /views/<slug> share links
        get the internal-route guard (login redirect + return), then land on
        the surface that can restore the view. The line below is only ever
        seen for the instant the document takes to arrive. -->
-  <p v-else-if="!missing" class="opening" data-testid="view-redirect">Opening saved view…</p>
+  <p v-if="!missing" class="opening" data-testid="view-redirect">Opening saved view…</p>
 
   <!-- P5-69: a link to a view that is not there any more used to drop the
        reader on a plain map with no explanation. Say what happened, and
        offer the two places worth going next. -->
-  <div v-else-if="missing" class="view-missing" data-testid="view-missing">
+  <div v-else class="view-missing" data-testid="view-missing">
     <p class="missing-line">There is no saved view called “{{ slug }}”.</p>
     <p class="missing-links">
       <RouterLink to="/analysis">Saved views</RouterLink>
@@ -27,8 +27,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import WorkingSetWorkspace from '@/components/WorkingSetWorkspace.vue'
-import { compareStateOf, compareViewUrl, fetchView, tableStateOf, tableViewUrl, type SavedView } from '@/lib/views'
+import { compareStateOf, compareViewUrl, fetchView, tableStateOf, tableViewUrl } from '@/lib/views'
 
 /**
  * P5-16 shim: /views/:slug → the surface that can restore that view.
@@ -62,10 +61,6 @@ const router = useRouter()
 
 const slug = String(route.params.slug)
 const missing = ref(false)
-/** P7-2: set when this view presents a working set — the workspace renders
- *  here instead of anything being replaced. Null for an ad-hoc view, which is
- *  every view saved before P7-1 and plenty saved after. */
-const workspaceView = ref<SavedView | null>(null)
 
 onMounted(async () => {
   const mapUrl = { path: '/', query: { view: slug } }
@@ -76,8 +71,13 @@ onMounted(async () => {
       return
     }
     // The one fork. Everything after it is P5-16/P5-54/P5-55, unchanged.
+    //
+    // P11-2: `replace`, so Back returns where the reader came from rather
+    // than bouncing through this shim — the rule the rest of this file has
+    // always followed. Any query the link carried rides along, so a shared
+    // `/views/<slug>?tab=counties` still lands on that tab.
     if (view.workingSet) {
-      workspaceView.value = view
+      await router.replace({ path: `/sets/${view.workingSet}`, query: route.query })
       return
     }
     const table = tableStateOf(view)

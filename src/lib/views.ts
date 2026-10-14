@@ -406,7 +406,19 @@ function readViewport(value: unknown): SavedMapViewState['viewport'] {
  */
 export function mapStateOf(view: SavedView): SavedMapViewState | null {
   if (view.type !== 'map') return null
-  const raw = (view.state ?? {}) as unknown as Record<string, unknown>
+  return readMapState((view.state ?? {}) as unknown as Record<string, unknown>)
+}
+
+/**
+ * The same reading, over a bare map state (P11-2).
+ *
+ * A working set's `framing` is a map state that never belonged to a view, so
+ * it has no `type` to check and no document around it. Everything below used
+ * to live inside `mapStateOf`; it is lifted so the set and the view are read
+ * by one function and cannot drift — the client half of the same argument
+ * that put `parseMapState` in one place on the server.
+ */
+export function readMapState(raw: Record<string, unknown>): SavedMapViewState {
   const layers = (Array.isArray(raw.layers) ? raw.layers : [])
     .filter(
       (l): l is { layerId: string; weight: number; direction?: unknown } =>

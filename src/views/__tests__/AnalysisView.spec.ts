@@ -404,24 +404,31 @@ describe('working sets (P7-1)', () => {
     const w = await mountIt()
     const row = w.get('[data-testid="set-row"]')
     expect(row.get('[data-testid="set-title"]').text()).toBe('Memphis redevelopment')
-    expect(row.get('[data-testid="set-title"]').attributes('href')).toBe('/library/memphis-redevelopment')
+    // P11-2: the primary click on a set OPENS it. It used to go to the set's
+    // catalog entry, which is its provenance record — so the working surface
+    // was reachable only through a saved view, if it had one.
+    expect(row.get('[data-testid="set-title"]').attributes('href')).toBe('/sets/memphis-redevelopment')
     expect(row.get('[data-testid="set-progress"]').text()).toBe('1 of 2 held · 1 indexed')
     expect(row.get('[data-testid="set-purpose"]').text()).toBe('Which parcels can be redeveloped')
   })
 
-  /** §F.1's load-bearing claim, made visible: one set, several framings. */
-  it('shows the several views a set carries, each as its own link', async () => {
+  /** Still one set, several framings — they are just no longer the way in. */
+  it('shows the framings saved of a set, each as its own link', async () => {
     const w = await mountIt()
     const links = w.findAll('[data-testid="set-view-link"]')
     expect(links.map(l => l.text())).toEqual(['Memphis cluster', 'Memphis by distance'])
     expect(links[0].attributes('href')).toBe('/views/memphis-cluster')
-    expect(w.get('[data-testid="set-views"]').text()).toContain('2 views')
+    expect(w.get('[data-testid="set-views"]').text()).toContain('Saved framings')
   })
 
-  it('says so when a set has no views yet, rather than drawing an empty strip', async () => {
+  it('says nothing at all when a set has no saved framing', async () => {
+    // P11-2: "No views of it yet" was a dead end — it announced an absence
+    // and offered nowhere to go, on the very sets the Explore flow makes.
+    // The title opens the set now, so an absent framing is not worth a line.
     mockedSets.mockResolvedValue([{ ...SETS[0], views: [] }])
     const w = await mountIt()
-    expect(w.get('[data-testid="set-no-views"]').text()).toBe('No views of it yet')
+    expect(w.find('[data-testid="set-views"]').exists()).toBe(false)
+    expect(w.get('[data-testid="set-title"]').attributes('href')).toBe('/sets/memphis-redevelopment')
   })
 
   it('offers the scoped place report and the set’s own datasets', async () => {

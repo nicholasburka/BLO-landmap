@@ -172,6 +172,15 @@ const router = createRouter({
       meta: { requiresInternal: true }
     },
     {
+      // P11-2: a working set's own page. The workspace lives here now; it
+      // used to be reachable only through a view that presented a set, which
+      // left a set with no view unopenable.
+      path: '/sets/:slug',
+      name: 'working-set',
+      component: () => import('../views/SetView.vue'),
+      meta: { requiresInternal: true }
+    },
+    {
       // P5-16 shim: guarded entry point for shared view links. Redirects to
       // /?view=<slug> (the map watches that query param) after the internal
       // guard has had its chance to bounce logged-out users to /login.

@@ -284,7 +284,18 @@ import { initCountyLookup } from "@/lib/countyLookup";
 import type { ToolContext } from "@/lib/mapTools";
 import { useRoute, useRouter } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
-import { saveView, fetchView, mapStateOf, siteLayerRestore, VIEW_RESULTS_MAX, type SavedViewResult } from "@/lib/views";
+import {
+  saveView,
+  fetchView,
+  mapStateOf,
+  readMapState,
+  siteLayerRestore,
+  VIEW_RESULTS_MAX,
+  type SavedViewResult,
+  type SavedMapViewState,
+} from "@/lib/views";
+// P11-2: `?set=<slug>` opens a working set's own framing on the full map.
+import { fetchWorkingSet } from "@/lib/workingSets";
 import { isInternalLayerId } from "@/lib/internalLayers";
 import { boundsForFeatures } from "@/lib/internalFeatureLayers";
 
@@ -1574,6 +1585,11 @@ const saveViewError = ref("");
 /** Restore requested before the map/counties existed — replayed once in
  *  the map's `load` handler, same deferral pattern as pendingInspectGeoId. */
 const pendingViewSlug = ref<string | null>(null);
+/** The same, for `?set=<slug>` (P11-2). A working set carries its own framing
+ *  now, so it can be opened on the full map without a saved view in between —
+ *  which is what the workspace's narrow-screen link needs, since a set is not
+ *  required to have a view at all. */
+const pendingSetSlug = ref<string | null>(null);
 
 const openSaveView = () => {
   saveViewOpen.value = true;
@@ -1699,6 +1715,54 @@ const submitSaveView = async () => {
  *  region through the same atomic mutator the LLM tools use, then jump the
  *  viewport. Field checks are defensive — the state payload is opaque to
  *  the server, so a hand-edited document must degrade, not throw. */
+/** Put a map state on the map. The half `?view=` and `?set=` share (P11-2). */
+const applyMapState = async (saved: SavedMapViewState) => {
+  toolContext.applyQueryState({
+    layers: saved.layers,
+    filters: saved.filters,
+    limit: saved.limit,
+    regionStates: saved.regionStates,
+    explanation: "",
+  });
+  // P5-24: point layers are overlays outside the scoring query.
+  setInternalFeatureLayers(saved.pointLayers);
+  if (saved.viewport) map.value?.jumpTo(saved.viewport);
+  // P5-78: last, because switching a site layer on downloads its GeoJSON
+  // (P5-74) — the query, the point layers and the viewport must not wait
+  // for it.
+  await restoreSiteLayers(saved.siteLayers);
+};
+
+/**
+ * `?set=<slug>` — open a working set's own framing on the full map (P11-2).
+ *
+ * The sibling of `applySavedView`, and deliberately the same shape. A set
+ * that has never been framed has nothing to draw, and that is not an error:
+ * the map stays as it was rather than clearing to grey.
+ */
+const applySetFraming = async (slug: string) => {
+  if (!map.value || !countiesData.value) {
+    pendingSetSlug.value = slug;
+    return;
+  }
+  try {
+    if (internalManifestLoaded) await internalManifestLoaded;
+    const set = await fetchWorkingSet(slug);
+    if (!set) {
+      console.warn(`[sets] no such working set: ${slug}`);
+      return;
+    }
+    if (!set.framing?.layers?.length) {
+      console.warn(`[sets] ${slug} has no framing to draw`);
+      return;
+    }
+    await applyMapState(readMapState(set.framing as unknown as Record<string, unknown>));
+  } catch (err) {
+    // A logged-out visitor's fetch 401s here, exactly as a view's does.
+    console.warn("[sets] restore failed:", err instanceof Error ? err.message : err);
+  }
+};
+
 const applySavedView = async (slug: string) => {
   if (!map.value || !countiesData.value) {
     pendingViewSlug.value = slug;
@@ -1721,20 +1785,7 @@ const applySavedView = async (slug: string) => {
       console.warn(`[views] ${slug} is a ${view.type} view — nothing here can draw it`);
       return;
     }
-    toolContext.applyQueryState({
-      layers: saved.layers,
-      filters: saved.filters,
-      limit: saved.limit,
-      regionStates: saved.regionStates,
-      explanation: "",
-    });
-    // P5-24: point layers are overlays outside the scoring query.
-    setInternalFeatureLayers(saved.pointLayers);
-    if (saved.viewport) map.value?.jumpTo(saved.viewport);
-    // P5-78: last, because switching a site layer on downloads its GeoJSON
-    // (P5-74) — the query, the point layers and the viewport must not wait
-    // for it.
-    await restoreSiteLayers(saved.siteLayers);
+    await applyMapState(saved);
   } catch (err) {
     // A logged-out visitor's fetch 401s here — the guarded /views/:slug
     // shim is the shareable entry point, so just log and show the map.
@@ -1746,6 +1797,14 @@ watch(
   () => route.query.view,
   (slug) => {
     if (typeof slug === "string" && slug) void applySavedView(slug);
+  },
+  { immediate: true },
+);
+
+watch(
+  () => route.query.set,
+  (slug) => {
+    if (typeof slug === "string" && slug) void applySetFraming(slug);
   },
   { immediate: true },
 );
@@ -1831,6 +1890,11 @@ const onCountiesReady = () => {
     const slug = pendingViewSlug.value;
     pendingViewSlug.value = null;
     void applySavedView(slug);
+  }
+  if (pendingSetSlug.value) {
+    const slug = pendingSetSlug.value;
+    pendingSetSlug.value = null;
+    void applySetFraming(slug);
   }
   // Same deferral for ?layers= deep links (P5-36).
   if (pendingDeepLink.value) {

@@ -346,6 +346,20 @@ export function workingSetHref(slug: string): string {
   return `/library/${encodeURIComponent(slug)}`
 }
 
+/**
+ * Where a working set is WORKED ON (P11-2) — its map, its counties, its
+ * datasets, its analyses.
+ *
+ * Distinct from `workingSetHref`, which is the set's catalog entry: the
+ * library's record of what this thing is, who saved it and what it holds.
+ * The entry is the provenance; this is the surface. Before P11-2 there was
+ * no address for the surface at all — you reached it through a saved view,
+ * and a set without one could not be opened.
+ */
+export function setWorkspaceHref(slug: string): string {
+  return `/sets/${encodeURIComponent(slug)}`
+}
+
 /** The datasets browser, narrowed to one set — the list its progress line
  *  counts, so the count and the list it opens can never disagree. */
 export function workingSetDatasetsHref(slug: string): string {

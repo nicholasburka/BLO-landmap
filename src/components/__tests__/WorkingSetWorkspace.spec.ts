@@ -255,12 +255,20 @@ let network: CountyDataFetchStub
  * global, because this file was one of twenty-seven that never unmounted and
  * the next one written would have been twenty-eight.
  */
-async function mountAt(view: SavedView, path = '/views/memphis-map') {
+/**
+ * P11-2: the component takes a SET SLUG now, not a view. The fixtures still
+ * build a `SavedView` because that is what the library mocks return and what
+ * most of these cases are about; the slug is read off its `workingSet`
+ * pointer, which is the same set the old prop would have resolved to. One
+ * line changed here instead of twenty-eight call sites.
+ */
+async function mountAt(view: SavedView, path = '/sets/memphis-redevelopment') {
   router = createRouter({
     history: createMemoryHistory(),
     routes: [
       { path: '/', component: { template: '<div>map</div>' } },
-      { path: '/views/:slug', component: WorkingSetWorkspace, props: true },
+      { path: '/sets/:slug', component: WorkingSetWorkspace, props: true },
+      { path: '/views/:slug', component: { template: '<div />' } },
       { path: '/analysis', component: { template: '<div />' } },
       { path: '/datasets', component: { template: '<div />' } },
       { path: '/place', component: { template: '<div />' } },
@@ -270,7 +278,10 @@ async function mountAt(view: SavedView, path = '/views/memphis-map') {
   })
   await router.push(path)
   await router.isReady()
-  const wrapper = mount(WorkingSetWorkspace, { props: { view }, global: { plugins: [router] } })
+  const wrapper = mount(WorkingSetWorkspace, {
+    props: { slug: view.workingSet ?? '' },
+    global: { plugins: [router] },
+  })
   await flushPromises()
   return wrapper
 }
@@ -339,14 +350,19 @@ afterEach(() => {
 })
 
 describe('the two interfaces', () => {
-  it('names the set both interfaces are over, and the other views reading the same rows', async () => {
+  it('is titled with the SET, and lists the framings saved of it', async () => {
     const w = await mountAt(mapView())
-    expect(w.get('[data-testid="workspace-title"]').text()).toBe('Memphis map')
+    // P11-2: the page is the set, so the set names it. It used to be titled
+    // with whichever VIEW you arrived through, which meant one object had as
+    // many names as it had views.
+    expect(w.get('[data-testid="workspace-title"]').text()).toBe('Memphis redevelopment')
     expect(w.get('[data-testid="workspace-set-link"]').text()).toBe('Memphis redevelopment')
     expect(w.get('[data-testid="workspace-holds"]').text()).toContain('2 datasets · 1 layer')
     expect(w.get('[data-testid="workspace-purpose"]').text()).toBe('What bears on siting')
-    // A set may carry several views; this one says which the others are.
+    // Every saved framing of the set, not "the others" — there is no current
+    // view to be other than.
     expect(w.findAll('[data-testid="workspace-sibling"]').map(a => a.text())).toEqual([
+      'Memphis map',
       'Memphis sites by distance',
     ])
   })
@@ -392,43 +408,36 @@ describe('a deep link to either interface', () => {
     expect(w.findComponent(MapPane).exists()).toBe(true)
   })
 
-  it('opens a table view on the data interface, because that view IS a table', async () => {
-    const w = await mountAt(tableView(), '/views/memphis-table')
-    expect(w.get('[data-interface="data"]').attributes('aria-selected')).toBe('true')
-    expect(w.findComponent(MapPane).exists()).toBe(false)
-  })
-
-  it('opens ?interface=data there, whatever the view’s own kind', async () => {
-    const w = await mountAt(mapView(), '/views/memphis-map?interface=data')
-    expect(w.get('[data-interface="data"]').attributes('aria-selected')).toBe('true')
-    expect(w.findComponent(MapPane).exists()).toBe(false)
-  })
-
-  it('opens ?interface=map on a table view', async () => {
-    const w = await mountAt(tableView(), '/views/memphis-table?interface=map')
+  it('opens on the map, whatever framing it was reached through', async () => {
+    // P11-2: a set has ONE default interface and the map is it. This used to
+    // depend on the type of the view you arrived through, so the same set
+    // opened differently depending on the link — and a set with no view had
+    // no answer at all.
+    const w = await mountAt(tableView(), '/sets/memphis-redevelopment')
     await settleMap()
     expect(w.get('[data-interface="map"]').attributes('aria-selected')).toBe('true')
     expect(w.findComponent(MapPane).exists()).toBe(true)
   })
 
+  it('opens ?interface=data when the URL asks for it', async () => {
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?interface=data')
+    expect(w.get('[data-interface="data"]').attributes('aria-selected')).toBe('true')
+    expect(w.findComponent(MapPane).exists()).toBe(false)
+  })
+
   it('degrades a hand-edited interface rather than breaking the page', async () => {
-    const w = await mountAt(mapView(), '/views/memphis-map?interface=sideways')
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?interface=sideways')
     expect(w.get('[data-interface="map"]').attributes('aria-selected')).toBe('true')
   })
 
-  it('restores a saved table view’s own query into the URL it is already on', async () => {
-    await mountAt(tableView(), '/views/memphis-table')
-    const query = router.currentRoute.value.query
-    expect(router.currentRoute.value.path).toBe('/views/memphis-table')
-    expect(query.filter).toBe(JSON.stringify([{ column: 'Site', op: 'contains', value: 'River' }]))
-    expect(query.sort).toBe('Site')
-    expect(query.view).toBe('memphis-table')
-  })
-
-  it('lets a shared link’s own filters win over the ones the document was saved with', async () => {
-    await mountAt(tableView(), '/views/memphis-table?q=Rail')
+  it('leaves the explorer’s own URL keys alone', async () => {
+    // `seedTableState` went with P11-2 — it replayed a saved TABLE view's
+    // filters onto this URL, and there is no view in the way to have any.
+    // What a shared link carries is the explorer's to read, untouched.
+    await mountAt(tableView(), '/sets/memphis-redevelopment?q=Rail')
     expect(router.currentRoute.value.query.q).toBe('Rail')
     expect(router.currentRoute.value.query.filter).toBeUndefined()
+    expect(router.currentRoute.value.query.view).toBeUndefined()
   })
 })
 
@@ -723,12 +732,16 @@ describe('what the set does not have', () => {
     expect(w.get('[data-testid="workspace-missing"]').text()).toContain('eia-transmission')
   })
 
-  it('says what happened when the set itself is gone, and offers the map', async () => {
+  it('says there is no such set, and offers the two places worth going', async () => {
+    // P11-2: the slug IS the set, so a miss is a plain 404 — name what was
+    // asked for, because a mistyped or archived slug is visible in the URL.
+    // It used to be "the view you came through points at a set that moved",
+    // which is a sentence only the old indirection could produce.
     mockedSet.mockResolvedValue(null)
     const w = await mountAt(mapView())
     const panel = w.get('[data-testid="workspace-set-gone"]')
     expect(panel.text()).toContain('memphis-redevelopment')
-    expect(panel.findAll('a').map(a => a.attributes('href'))).toEqual(['/?view=memphis-map', '/analysis'])
+    expect(panel.findAll('a').map(a => a.attributes('href'))).toEqual(['/analysis', '/'])
     expect(w.find('[data-testid="interface-switch"]').exists()).toBe(false)
   })
 
@@ -1483,5 +1496,59 @@ describe('a composite index on the map interface', () => {
       expect(w.find('[data-testid="index-draft-restored"]').exists()).toBe(false)
       expect([slider(w, 0), slider(w, 1)].map(i => (i.element as HTMLInputElement).value)).toEqual(['6', '4'])
     })
+  })
+})
+
+/**
+ * P11-2 — the defect this phase exists for.
+ *
+ * The workspace used to render only from a saved VIEW that presented a set,
+ * so a set with no view could not be opened at all. `createWorkingSet` makes
+ * sets with no view, and it is what the Explore flow calls, so the newest
+ * creation path shipped unreachable sets.
+ */
+describe('a set opens on its own, with or without a saved framing (P11-2)', () => {
+  it('opens a set that has no views at all', async () => {
+    mockedSet.mockResolvedValue(detail({ views: [] }))
+    const w = await mountAt(mapView())
+    await settleMap()
+    expect(w.get('[data-testid="workspace-title"]').text()).toBe('Memphis redevelopment')
+    expect(w.get('[data-testid="interface-switch"]').exists()).toBe(true)
+    expect(w.findComponent(MapPane).exists()).toBe(true)
+    // Nothing anywhere says a view is missing, because nothing is.
+    expect(w.find('[data-testid="workspace-sibling"]').exists()).toBe(false)
+  })
+
+  it('draws the set’s stored framing, weights and all', async () => {
+    mockedSet.mockResolvedValue(
+      detail({
+        framing: {
+          layers: [
+            { layerId: 'internal-sites', weight: 7, direction: 'higher_better' },
+            { layerId: 'pct_Black', weight: 3, direction: 'higher_better' },
+          ],
+          filters: [],
+          limit: null,
+          regionStates: [],
+          viewport: null,
+        },
+      }),
+    )
+    const w = await mountAt(mapView())
+    await settleMap()
+    const query = w.findComponent(MapPane).props('query')
+    // The framing's own weighting, not the equal weight every layer gets
+    // when a set has never been framed. (`weights` is a per-id record by the
+    // time it reaches the pane — the Lens scores from ids, not from terms.)
+    expect(query.weights.value).toEqual({ 'internal-sites': 7, pct_Black: 3 })
+  })
+
+  it('falls back to equal weight when the set has never been framed', async () => {
+    const w = await mountAt(mapView())
+    await settleMap()
+    // Every layer the set names, counting the same — a page naming layers is
+    // asking to see them, not proposing a weighting.
+    expect(w.findComponent(MapPane).props('query').weights.value).toEqual({ 'internal-sites': 5 })
+    expect(w.findComponent(MapPane).props('layers').internal.value).toEqual(['internal-sites'])
   })
 })
