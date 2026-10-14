@@ -68,7 +68,7 @@ Override any of these and the ticket moves with it.
 
 ---
 
-## P11-1 [FEATURE] The set carries its own framing
+## P11-1 [FEATURE] The set carries its own framing — DONE 2026-10-14
 
 **Type:** Feature · **Size:** M · **Depends:** none
 
@@ -123,7 +123,7 @@ The route and the UI (P11-2). Migration of existing views (P11-3).
 
 ---
 
-## P11-2 [FEATURE] `/sets/<slug>` is the set's home
+## P11-2 [FEATURE] `/sets/<slug>` is the set's home — DONE 2026-10-14
 
 **Type:** Feature · **Size:** M · **Depends:** P11-1
 
@@ -170,7 +170,7 @@ Tabs (P11-4). The two new tabs (P11-5, P11-6).
 
 ---
 
-## P11-3 [CHORE] Fold the existing views into their sets
+## P11-3 [CHORE] Fold the existing views into their sets — DONE 2026-10-14
 
 **Type:** Chore · **Size:** S · **Depends:** P11-1
 
@@ -201,7 +201,7 @@ resolves.
 
 ---
 
-## P11-4 [FEATURE] Tabs become navigations, so Back works
+## P11-4 [FEATURE] Tabs become navigations, so Back works — DONE 2026-10-14
 
 **Type:** Feature · **Size:** S · **Depends:** P11-2
 
@@ -233,7 +233,7 @@ Counties is open.
 
 ---
 
-## P11-5 [FEATURE] The Counties tab
+## P11-5 [FEATURE] The Counties tab — DONE 2026-10-14
 
 **Type:** Feature · **Size:** M · **Depends:** P11-4
 
@@ -276,7 +276,7 @@ Filtering. Export. Editing.
 
 ---
 
-## P11-6 [FEATURE] The Datasets tab
+## P11-6 [FEATURE] The Datasets tab — DONE 2026-10-14
 
 **Type:** Feature · **Size:** M · **Depends:** P11-4
 
@@ -308,7 +308,7 @@ links to sourcing rather than opening an empty table.
 
 ---
 
-## P11-7 [FEATURE] Analysis leads with sets
+## P11-7 [FEATURE] Analysis leads with sets — DONE 2026-10-14
 
 **Type:** Feature · **Size:** S · **Depends:** P11-2
 
@@ -336,7 +336,7 @@ says nothing about views.
 
 ---
 
-## P11-8 [FEATURE] Search scoped to a set
+## P11-8 [FEATURE] Search scoped to a set — DONE 2026-10-14
 
 **Type:** Feature · **Size:** S · **Depends:** P11-2
 
@@ -362,7 +362,7 @@ explaining the scope was dropped.
 
 ---
 
-## P11-9 [FEATURE] Chat scoped to a set, rescopable mid-conversation
+## P11-9 [FEATURE] Chat scoped to a set, rescopable mid-conversation — DONE 2026-10-14
 
 **Type:** Feature · **Size:** M · **Depends:** P11-2, P11-8 (the chip)
 
@@ -406,7 +406,7 @@ amends them (below) rather than doing them.
 
 ---
 
-## P11-10 [CHORE] Spec §F says a set holds no framing
+## P11-10 [CHORE] Spec §F says a set holds no framing — DONE 2026-10-14
 
 **Type:** Chore · **Size:** XS · **Depends:** P11-1
 
@@ -457,6 +457,26 @@ P11-10 spec §F   — with P11-1, not after
 P8-2   rename/delete — write it after P11-1, against the new object
 ```
 
-**P11-1 → P11-2 is the critical path and the whole point.** Everything after is
+**All ten landed 2026-10-14.** The critical path was P11-1 → P11-2 and it did
+what it was for: the library's `energy` set, which had no saved view and
+therefore no way to be opened at all, opens.
+
+Two things found while building, neither in the tickets:
+
+- **The map went blank on every anchored set** when the tabs split. `readyToDraw`
+  waited for the table's first answer on the premise that the data half was
+  mounted all along, which three tabs made false. It waits only while a dataset
+  is open now.
+- **P6-10 would have been lost** — "the map draws the rows the table is showing"
+  needs the explorer alive, and a `v-if` tab unmounts it. The Datasets tab stays
+  mounted while a dataset is open, so filtering a table and switching to the map
+  still works.
+
+One ticket shipped less than written, deliberately: **P11-9's transcript marks
+are session-local.** Scope survives a reload through the URL, but the history of
+where it changed does not, because persisting it needs a message kind the store
+does not have. Noted rather than half-built.
+
+**P11-1 → P11-2 was the critical path and the whole point.** Everything after is
 additive; a set that opens is the fix. If the phase has to stop early, stop
 after P11-2 and the product is strictly better than it is today.

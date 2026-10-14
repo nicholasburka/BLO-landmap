@@ -1,13 +1,22 @@
 /**
  * Working-set manifests (P7-1) — the shape, and nothing that touches storage.
  *
- * Spec §F.1. A **working set** is the compound data object an analysis runs
- * against: the datasets in it, the sites that anchor it, and the derived
- * columns P7-5 writes onto it. **It holds no framing** — no viewport, no sort,
- * no palette. Those belong to a saved view, and a set may carry several views,
- * which is the whole reason the two are different objects: every view reads the
- * same rows and the same derived columns, so none of them can disagree about a
- * number.
+ * Spec §F.1, as amended by P11-1. A **working set** is the compound data
+ * object an analysis runs against: the datasets in it, the sites that anchor
+ * it, the derived columns P7-5 writes onto it, and the default `framing` it
+ * opens on.
+ *
+ * It held NO framing until P11-1 — no viewport, no sort, no palette — on the
+ * reasoning that those belong to a saved view. That reasoning had a gap it
+ * could not reach: with no framing of its own a set could only be shown
+ * through a view, so a set with NO view could not be opened at all, and
+ * `createWorkingSet` makes sets with no view.
+ *
+ * A set may still carry several views, and the guarantee that made the two
+ * objects two objects is untouched: every framing reads the same rows and the
+ * same derived columns, so none of them can disagree about a number. The
+ * set's own framing is one more framing over those rows, not a second copy of
+ * them. What changed is that a view is no longer the way in.
  *
  * Pure — no imports — for the same reason `sourceMeta.ts` is: `libraryCatalog`
  * has to normalise a row at reindex time without this module importing it back.

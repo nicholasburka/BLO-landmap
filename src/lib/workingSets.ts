@@ -335,12 +335,13 @@ export function progressLine(progress: WorkingSetProgress): string {
  * Where a working set opens: its catalog entry, like anything else in the
  * library.
  *
- * P7-2 gave a set its two interfaces and they are deliberately NOT here. A set
- * holds no framing — no viewport, no sort, no palette — so there is nothing to
- * show it WITH until a view supplies one; the interfaces live on
- * `/views/:slug` (`workingSetViewHref`), over the set the view presents. A set
- * with no view yet has an entry page and a sourcing checklist, which is the
- * honest amount of surface for an object that has not been framed.
+ * The set's WORKING surface is `setWorkspaceHref` (P11-2); this is its entry
+ * in the library — what the thing is, who saved it, what it holds.
+ *
+ * P7-2 put the interfaces on `/views/:slug`, because a set held no framing and
+ * so had nothing to be shown with until a view supplied one. P11-1 gave the set
+ * a framing of its own and P11-2 gave it an address, which is what fixed the
+ * case that reasoning could not reach: a set with no view at all.
  */
 export function workingSetHref(slug: string): string {
   return `/library/${encodeURIComponent(slug)}`
