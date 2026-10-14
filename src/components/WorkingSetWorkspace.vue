@@ -1026,7 +1026,17 @@ onMounted(async () => {
              derived column is indistinguishable from a county-context one, and
              a caveat that only holds on the map is not a caveat. -->
         <p v-if="unsoundLine" class="set-unsound" data-testid="workspace-unsound">{{ unsoundLine }}</p>
-        <!-- A set may carry several views, and all of them read these rows.
+        <!-- P11-8/P11-9: the two scoped surfaces, reached FROM the set they
+             scope to. The scope is a query key, so these are plain links. -->
+        <p class="set-scoped" data-testid="workspace-scoped">
+          <RouterLink :to="workingSetPlaceHref(set.slug)" data-testid="scoped-place">Check a place in this set</RouterLink>
+          ·
+          <RouterLink :to="`/search?set=${encodeURIComponent(set.slug)}`" data-testid="scoped-search">Search in this set</RouterLink>
+          ·
+          <RouterLink :to="`/chat?set=${encodeURIComponent(set.slug)}`" data-testid="scoped-chat">Ask about this set</RouterLink>
+        </p>
+
+        <!-- A set may carry saved framings, and all of them read these rows.
              Worth saying here, because it is the reason the set and the view
              are two objects at all. -->
         <p v-if="siblingViews.length" class="set-siblings" data-testid="workspace-siblings">
@@ -1375,6 +1385,12 @@ onMounted(async () => {
 
 .set-line,
 .set-purpose,
+.set-scoped {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--blo-stone);
+}
+
 .set-siblings {
   margin: 6px 0 0;
   font-size: 13px;

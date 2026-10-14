@@ -13,6 +13,7 @@ import { fetchCatalog, type CatalogEntry } from '@/lib/libraryCatalog'
 import { internalFetch } from '@/lib/apiBase'
 import {
   searchEverything,
+  narrowToSet,
   searchInsideDocuments,
   documentPageHref,
   searchUrl,
@@ -305,5 +306,68 @@ describe('map layers in the results (P6-20)', () => {
     mockedCatalog.mockResolvedValue([])
     const out = await searchEverything('zzzznotalayer')
     expect(out.groups.find(g => g.name === 'Layers')).toBeUndefined()
+  })
+})
+
+describe('narrowToSet — searching inside a working set (P11-8)', () => {
+  const outcome = {
+    groups: [
+      {
+        name: 'Datasets' as never,
+        items: [
+          { key: 'dataset:in-the-set', title: 'In', href: '/library/in-the-set', badge: '', verdict: '', page: null },
+          { key: 'dataset:not-in-it', title: 'Out', href: '/library/not-in-it', badge: '', verdict: '', page: null },
+        ],
+      },
+      {
+        name: 'Pages' as never,
+        items: [{ key: 'wiki:some-page', title: 'Page', href: '/docs/some-page', badge: '', verdict: '', page: null }],
+      },
+    ],
+    facets: {} as never,
+    matched: 3,
+    searchedInsideDocuments: false,
+  }
+
+  it('keeps only what the set names, and recounts', () => {
+    const got = narrowToSet(outcome as never, ['in-the-set'])
+    expect(got.groups.map(g => g.items.map(i => i.key))).toEqual([['dataset:in-the-set']])
+    // A count that disagrees with the list under it is the bug P6-23 named.
+    expect(got.matched).toBe(1)
+  })
+
+  it('drops a group it empties rather than leaving a heading over nothing', () => {
+    const got = narrowToSet(outcome as never, ['in-the-set'])
+    expect(got.groups).toHaveLength(1)
+  })
+
+  it('narrows a match found inside a document by the entry it is in', () => {
+    const withText = {
+      ...outcome,
+      groups: [
+        {
+          name: 'Inside documents' as never,
+          items: [
+            { key: 'text:in-the-set:a.pdf:3', title: 'p3', href: '#', badge: '', verdict: '', page: 3 },
+            { key: 'text:not-in-it:b.pdf:1', title: 'p1', href: '#', badge: '', verdict: '', page: 1 },
+          ],
+        },
+      ],
+    }
+    const got = narrowToSet(withText as never, ['in-the-set'])
+    expect(got.groups[0].items.map(i => i.key)).toEqual(['text:in-the-set:a.pdf:3'])
+  })
+
+  it('keeps a slug that contains a colon in one piece', () => {
+    const odd = {
+      ...outcome,
+      groups: [
+        {
+          name: 'Layers' as never,
+          items: [{ key: 'layer:internal:odd-slug', title: 'L', href: '#', badge: '', verdict: '', page: null }],
+        },
+      ],
+    }
+    expect(narrowToSet(odd as never, ['internal:odd-slug']).groups[0].items).toHaveLength(1)
   })
 })

@@ -29,6 +29,8 @@ import { useMapPane } from '@/composables/useMapPane'
 import { useLibraryChat, type ChatMessageView } from '@/composables/useLibraryChat'
 import { useMapState } from '@/composables/useMapState'
 import { executeTool, type ToolContext } from '@/lib/mapTools'
+import ScopeChip from '@/components/ScopeChip.vue'
+import { fetchWorkingSet, type WorkingSetDetail } from '@/lib/workingSets'
 import type { ChatToolCall } from '@/lib/libraryChat'
 
 /**
@@ -69,6 +71,7 @@ function runMapTool(call: ChatToolCall): void {
 }
 
 const chat = useLibraryChat({ onToolCall: runMapTool })
+
 const isPhone = usePhoneLayout()
 
 /** The canvas has a map: drain whatever the assistant asked for while it was
@@ -109,6 +112,53 @@ watch(
 const route = useRoute()
 const router = useRouter()
 
+/**
+ * P11-9: the working set this conversation is scoped to, or '' for the
+ * whole library. It lives on the URL, so it survives a reload and a shared
+ * link carries it.
+ */
+const scopeSlug = computed(() => {
+  const raw = route.query.set
+  const slug = Array.isArray(raw) ? raw[0] : raw
+  return typeof slug === 'string' ? slug.trim() : ''
+})
+
+const scopeSet = ref<WorkingSetDetail | null>(null)
+
+/**
+ * Where the scope changed, in order.
+ *
+ * Session-local: the marks are not stored with the thread, so reopening a
+ * conversation shows its CURRENT scope (from the URL) without the history of
+ * how it got there. Persisting them needs a message kind the store does not
+ * have — noted as a follow-up rather than half-built here.
+ */
+const scopeMarks = ref<{ id: number; text: string }[]>([])
+let markId = 0
+
+watch(
+  scopeSlug,
+  async (slug, before) => {
+    if (slug === scopeSet.value?.slug) return
+    scopeSet.value = slug ? await fetchWorkingSet(slug).catch(() => null) : null
+    // Not on first load: arriving scoped is not a change, it is a starting
+    // point, and the chip already says so.
+    if (before === undefined) return
+    const name = scopeSet.value?.name ?? slug
+    scopeMarks.value.push({
+      id: ++markId,
+      text: slug ? `Scoped to ${name} from here.` : 'Widened to the whole library from here.',
+    })
+  },
+  { immediate: true },
+)
+
+function clearScope(): void {
+  const query = { ...route.query } as Record<string, unknown>
+  delete query.set
+  void router.replace({ query: query as Record<string, string> })
+}
+
 onMounted(async () => {
   await chat.loadThreads()
   // `/chat?q=…` is where the Ask boxes on entry, layer and compare pages
@@ -118,7 +168,7 @@ onMounted(async () => {
   const question = typeof route.query.q === 'string' ? route.query.q.trim() : ''
   if (question) {
     await router.replace({ path: route.path })
-    await chat.send(question)
+    await chat.send(question, scopeSlug.value)
     return
   }
   // Most recently used first: carry on where they left off rather than
@@ -155,6 +205,15 @@ onBeforeUnmount(() => chat.stop())
       <section class="conversation" data-testid="chat-conversation">
         <div class="chat-head">
           <h1 class="chat-title" data-testid="chat-title">{{ chat.currentChat.value?.title ?? 'Chat' }}</h1>
+          <!-- P11-9: what this conversation is scoped to, and the way out. -->
+          <ScopeChip
+            v-if="scopeSet"
+            :slug="scopeSet.slug"
+            :name="scopeSet.name"
+            label="Asking about"
+            clear-label="Ask about the whole library instead"
+            @clear="clearScope"
+          />
           <!-- Desktop only: the pane is a second map, which a phone should
                not be asked to run. -->
           <button
@@ -182,6 +241,14 @@ onBeforeUnmount(() => chat.stop())
             adding to a page; nothing is written until you press Run.
           </p>
 
+          <!-- P11-9: where the scope changed, so the turns under it can be
+               read against the right one. An answer drawn from one set reads
+               exactly like an answer drawn from the library, and without
+               this the reader has no way to tell them apart afterwards. -->
+          <p v-for="mark in scopeMarks" :key="mark.id" class="scope-mark" data-testid="scope-mark">
+            {{ mark.text }}
+          </p>
+
           <ChatMessageItem
             v-for="entry in thread"
             :key="entry.message.id"
@@ -198,7 +265,7 @@ onBeforeUnmount(() => chat.stop())
         <ChatComposer
           :streaming="chat.streaming.value"
           :seed="chat.unsentText.value"
-          @send="chat.send($event)"
+          @send="chat.send($event, scopeSlug)"
           @stop="chat.stop()"
         />
       </section>
@@ -302,6 +369,16 @@ onBeforeUnmount(() => chat.stop())
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* P11-9: a scope change, in the flow of the conversation it changed. */
+.scope-mark {
+  margin: 10px 0;
+  padding: 4px 0;
+  font-size: 12px;
+  color: var(--blo-stone);
+  text-align: center;
+  border-top: 1px solid var(--blo-cream-divider);
 }
 
 .messages {

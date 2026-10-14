@@ -272,11 +272,27 @@ export function toolSummary(name: string, args: Record<string, unknown>, result?
  * Static (no question, no excerpts) so it caches across turns, and library
  * text stays out of the system role where it would read as instruction.
  */
-export function buildChatSystemPrompt(): string {
+export function buildChatSystemPrompt(
+  scope?: { slug: string; name: string; members: string[] } | null,
+): string {
   return [
     'You are the research assistant for an internal library about Black land ownership and livability, in conversation with one person on the team.',
     'Your reader is a researcher or an organizer, not an engineer.',
     '',
+    // P11-9: a scoped conversation is scoped for the person, so it has to be
+    // scoped for the model too — otherwise the chip says "this set" and the
+    // answer quietly comes from everywhere. Names, not ids: the person asked
+    // about a set, and the slugs are what the tools take.
+    ...(scope
+      ? [
+          `## This conversation is scoped to the working set "${scope.name}"`,
+          '',
+          `Answer from that set's members and nothing else: ${scope.members.join(', ') || '(it names none yet)'}.`,
+          'If the answer is not in them, say so and say what the set would need, rather than reaching past it into the rest of the library.',
+          'The person can widen the scope themselves; do not do it for them.',
+          '',
+        ]
+      : []),
     '## Rules',
     '',
     '1. Answer from the excerpts, the conversation so far, and your tools. Never use outside knowledge about the world, and never guess.',
@@ -383,6 +399,12 @@ export interface ChatTurnOptions {
   client?: AnthropicLike
   index?: KbIndex
   clientIp?: string
+  /**
+   * P11-9: the working set this turn is scoped to, when the person has
+   * scoped the conversation. Absent means the whole library, which is every
+   * turn before this phase and most turns after it.
+   */
+  workingSet?: { slug: string; name: string; members: string[] } | null
 }
 
 export interface ChatTurnResult {
@@ -441,7 +463,7 @@ export async function runChatTurn(options: ChatTurnOptions): Promise<ChatTurnRes
       message = await client.messages.create({
         model: chatModel(),
         max_tokens: chatMaxTokens(),
-        system: buildChatSystemPrompt(),
+        system: buildChatSystemPrompt(options.workingSet),
         // On the last round the tools are withdrawn so the turn has to end in
         // prose — otherwise a model that keeps calling tools answers nothing.
         ...(lastRound ? {} : { tools: definitions }),

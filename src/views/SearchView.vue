@@ -18,6 +18,7 @@ import {
   FILTER_KEYS,
   INSIDE_DOCUMENTS,
   searchEverything,
+  narrowToSet,
   searchUrl,
   filtersFromQuery,
   type FilterKey,
@@ -25,6 +26,8 @@ import {
   type SearchOutcome,
 } from '@/lib/search'
 import { friendlyError } from '@/lib/errors'
+import ScopeChip from '@/components/ScopeChip.vue'
+import { fetchWorkingSet, type WorkingSetDetail } from '@/lib/workingSets'
 
 const route = useRoute()
 const router = useRouter()
@@ -69,7 +72,9 @@ async function run(): Promise<void> {
   error.value = ''
   try {
     const result = await searchEverything(searched.value, filters.value)
-    if (current()) outcome.value = result
+    if (current()) {
+      outcome.value = scopeSet.value ? narrowToSet(result, scopeSlugs.value) : result
+    }
   } catch (err: unknown) {
     if (current()) {
       outcome.value = null
@@ -80,13 +85,61 @@ async function run(): Promise<void> {
   }
 }
 
+/**
+ * P11-8: the working set this search is scoped to, or '' for the library.
+ *
+ * A set is the thing an analysis runs against, so "find me the EPA source in
+ * THIS set" is the question somebody standing on a set actually has — and
+ * before this the only answer was to search everything and read past the
+ * rest.
+ */
+const scopeSlug = computed(() => {
+  const raw = route.query.set
+  const slug = Array.isArray(raw) ? raw[0] : raw
+  return typeof slug === 'string' ? slug.trim() : ''
+})
+
+const scopeSet = ref<WorkingSetDetail | null>(null)
+const scopeGone = ref(false)
+
+/** What the scope keeps: the set's members, plus the set itself — looking
+ *  for a set by name while standing in it should still find it. */
+const scopeSlugs = computed(() =>
+  scopeSet.value ? [scopeSet.value.slug, ...scopeSet.value.members.map(m => m.slug)] : [],
+)
+
+async function loadScope(): Promise<void> {
+  scopeGone.value = false
+  if (!scopeSlug.value) {
+    scopeSet.value = null
+    return
+  }
+  if (scopeSet.value?.slug === scopeSlug.value) return
+  try {
+    const detail = await fetchWorkingSet(scopeSlug.value)
+    scopeSet.value = detail
+    // A slug that names nothing searches the library rather than nothing,
+    // and says so once — an empty page would read as "no matches".
+    if (!detail) scopeGone.value = true
+  } catch {
+    scopeSet.value = null
+    scopeGone.value = true
+  }
+}
+
+function clearScope(): void {
+  const query = { ...route.query } as Record<string, unknown>
+  delete query.set
+  void router.replace({ query: query as Record<string, string> })
+}
+
 /** The route is the truth: read it, then search. */
 function syncFromRoute(): void {
   const q = typeof route.query.q === 'string' ? route.query.q.trim() : ''
   typed.value = q
   searched.value = q
   filters.value = filtersFromQuery(route.query)
-  void run()
+  void loadScope().then(run)
 }
 
 watch(() => route.fullPath, syncFromRoute)
@@ -137,8 +190,24 @@ const nothingMatched = computed(() => !loading.value && !error.value && !!search
       <KbNav />
       <header class="search-header">
         <h1>Search</h1>
-        <p class="search-sub">Everything in the knowledge base — datasets, pages, analyses, documents, notes, layers and sources.</p>
+        <p class="search-sub">
+          <template v-if="scopeSet">The datasets and sources this working set names, and nothing else.</template>
+          <template v-else>Everything in the knowledge base — datasets, pages, analyses, documents, notes, layers and sources.</template>
+        </p>
       </header>
+
+      <!-- P11-8: scope as a removable chip, not a mode. -->
+      <ScopeChip
+        v-if="scopeSet"
+        :slug="scopeSet.slug"
+        :name="scopeSet.name"
+        label="Searching in"
+        clear-label="Search the whole library instead"
+        @clear="clearScope"
+      />
+      <p v-else-if="scopeGone" class="state-note" data-testid="scope-gone">
+        There is no working set called “{{ scopeSlug }}”, so this searched the whole library.
+      </p>
 
       <form class="search-box" role="search" @submit.prevent="submit">
         <input

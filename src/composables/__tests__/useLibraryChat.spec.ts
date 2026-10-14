@@ -149,7 +149,8 @@ describe('a turn', () => {
     ])
     await chat$.send('  what is in Shelby?  ')
 
-    expect(mockedSend).toHaveBeenCalledWith(1, 'what is in Shelby?', expect.any(Function), expect.any(Object))
+    // P11-9's fifth argument: the working set the turn is scoped to, '' for none.
+    expect(mockedSend).toHaveBeenCalledWith(1, 'what is in Shelby?', expect.any(Function), expect.any(Object), '')
     const [question, answer] = chat$.messages.value
     expect(question).toMatchObject({ id: 8, role: 'user', text: 'what is in Shelby?' })
     // Joined with a blank line, exactly as the server stores it.

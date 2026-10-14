@@ -73,7 +73,7 @@ export interface LibraryChat {
   loadThreads: () => Promise<void>
   openThread: (chatId: number) => Promise<void>
   startThread: () => Promise<void>
-  send: (text: string) => Promise<void>
+  send: (text: string, workingSet?: string) => Promise<void>
   stop: () => void
   rename: (chatId: number, title: string) => Promise<void>
   archive: (chatId: number) => Promise<void>
@@ -240,7 +240,7 @@ export function useLibraryChat(hooks: LibraryChatHooks = {}): LibraryChat {
     }
   }
 
-  async function send(text: string): Promise<void> {
+  async function send(text: string, workingSet = ''): Promise<void> {
     const body = text.trim()
     if (!body || streaming.value) return
     error.value = ''
@@ -281,7 +281,13 @@ export function useLibraryChat(hooks: LibraryChatHooks = {}): LibraryChat {
     inFlight = controller
     streaming.value = true
     try {
-      const done = await sendMessage(chatId, body, event => applyEvent(answer, event), controller.signal)
+      const done = await sendMessage(
+        chatId,
+        body,
+        event => applyEvent(answer, event),
+        controller.signal,
+        workingSet,
+      )
       if (id !== turnId) return
       question.id = done.userMessageId ?? question.id
       answer.id = done.messageId

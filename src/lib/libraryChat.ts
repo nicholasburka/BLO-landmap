@@ -294,13 +294,15 @@ export async function sendMessage(
   text: string,
   onEvent: (event: ChatEvent) => void,
   signal?: AbortSignal,
+  /** P11-9: the working set this turn is scoped to, or '' for the library. */
+  workingSet = '',
 ): Promise<ChatDoneEvent> {
   let res: Response
   try {
     res = await internalFetch(`/api/chats/${chatId}/messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, ...(workingSet ? { workingSet } : {}) }),
       ...(signal ? { signal } : {}),
     })
   } catch (err) {
