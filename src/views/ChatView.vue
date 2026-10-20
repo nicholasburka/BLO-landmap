@@ -58,9 +58,11 @@ const mapTools = ref(null) as Ref<ToolContext | null>
 const queuedToolCalls: ChatToolCall[] = []
 
 function runMapTool(call: ChatToolCall): void {
-  // Without arguments there is nothing to run: a read tool's line is a
-  // summary for the reader, not a call this page can replay.
-  if (!MAP_TOOLS.has(call.tool) || !call.args) return
+  // P14-1 made `kind` the real test: a client call is one the server
+  // dispatched for this page to run, and it is the only kind that carries
+  // arguments as its payload. The name check stays as the second half of the
+  // contract — this page can run the four map tools and nothing else.
+  if (call.kind !== 'client' || !MAP_TOOLS.has(call.tool) || !call.args) return
   // The assistant showing something on the map is reason enough to open it.
   pane.open()
   if (!mapTools.value) {
@@ -70,7 +72,7 @@ function runMapTool(call: ChatToolCall): void {
   void executeTool(call.tool, call.args, mapTools.value)
 }
 
-const chat = useLibraryChat({ onToolCall: runMapTool })
+const chat = useLibraryChat({ onToolCall: runMapTool, canShowMap: () => pane.canOpen.value })
 
 const isPhone = usePhoneLayout()
 

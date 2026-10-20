@@ -28,11 +28,18 @@ const CHAT = {
   updatedAt: '2026-09-23T10:00:00.000Z',
 }
 
-/** A map tool the page runs itself, with the arguments to run it with. */
+/**
+ * A map tool the page runs itself, with the arguments to run it with.
+ *
+ * `kind: 'client'` is the real wire shape (P14-1/P14-2): a read carries no
+ * arguments at all, so the `read` this stub used to claim was a shape the
+ * server has never emitted. The four are registered for the library chat as
+ * of P14-2, so this is now a stub of something that happens.
+ */
 const SHOW_LAYER = {
   id: 'call-map-1',
   tool: 'show_layer',
-  kind: 'read',
+  kind: 'client',
   status: 'running',
   summary: 'Showed Percent Black on the map',
   args: { layerId: 'pct_Black', on: true },

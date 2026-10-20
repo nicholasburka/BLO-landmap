@@ -297,7 +297,14 @@ describe('ChatView arriving with ?q= (P6-5: the Ask boxes land here)', () => {
     streams([{ type: 'text', text: 'Two sources cover it.' }])
     const w = await mountView('/chat?q=what%20floods%20Shelby')
     expect(mockedCreate).toHaveBeenCalledWith({ message: 'what floods Shelby' })
-    expect(mockedSend).toHaveBeenCalledWith(1, 'what floods Shelby', expect.any(Function), expect.anything(), '')
+    expect(mockedSend).toHaveBeenCalledWith(
+      1,
+      'what floods Shelby',
+      expect.any(Function),
+      expect.anything(),
+      '',
+      expect.any(Boolean),
+    )
     // The newest existing thread is NOT opened over the top of the new one.
     expect(mockedGet).not.toHaveBeenCalled()
     expect(router.currentRoute.value.fullPath).toBe('/chat')
@@ -394,7 +401,14 @@ describe('ChatView (P6-7b) — a turn', () => {
     const wrapper = await mountView()
 
     await type(wrapper, 'what is in Shelby?')
-    expect(mockedSend).toHaveBeenCalledWith(1, 'what is in Shelby?', expect.any(Function), expect.any(Object), '')
+    expect(mockedSend).toHaveBeenCalledWith(
+      1,
+      'what is in Shelby?',
+      expect.any(Function),
+      expect.any(Object),
+      '',
+      expect.any(Boolean),
+    )
     expect(wrapper.get('[data-testid="chat-user-text"]').text()).toBe('what is in Shelby?')
     expect(wrapper.get('[data-testid="chat-answer"]').html()).toContain('<strong>County</strong>')
     expect(wrapper.get('[data-testid="chat-citations"]').text()).toContain('Where this came from')
@@ -640,6 +654,7 @@ describe('ChatView scoped to a working set (P11-9)', () => {
       expect.any(Function),
       expect.anything(),
       'memphis-redevelopment',
+      expect.any(Boolean),
     )
   })
 

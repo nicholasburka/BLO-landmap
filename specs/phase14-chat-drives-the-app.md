@@ -129,7 +129,7 @@ not deleting anything, so the MCP guarantee is untouched and parity is kept.
 
 ---
 
-## P14-1 [CHORE] A tool call can carry what it was called with
+## P14-1 [CHORE] A tool call can carry what it was called with — DONE 2026-10-20
 
 **Type:** Chore · **Size:** M · **Depends:** none
 
@@ -182,7 +182,7 @@ Registering any actual map tool (P14-2). Replaying stored calls on reload.
 
 ---
 
-## P14-2 [FEATURE] The assistant can put something on the chat's map
+## P14-2 [FEATURE] The assistant can put something on the chat's map — DONE 2026-10-20
 
 **Type:** Feature · **Size:** M · **Depends:** P14-1
 
@@ -213,8 +213,17 @@ answer says what it showed.
 **Given** the pane is closed, **when** a map call arrives, **then** it opens
 and the queued call drains in order once the canvas is ready.
 
-**Given** a window under 1024px, **when** a map call arrives, **then** the
-answer says so in words and nothing throws.
+**Given** a window under 1024px, **when** the reader asks to see something,
+**then** the answer is in words and nothing throws.
+
+> **Built differently from how this was written, and better.** The criterion
+> said the answer should "say so" — which needs the model to be told about a
+> map and then told it cannot use it. Instead the four tools are simply **not
+> in the table** for a reader with no pane (`chatTools({ map: false })`), and
+> the rule about having a map is not in the prompt either. A capability you
+> do not have is one you cannot call, and no explanation has to be written,
+> read, or kept true. `ChatView` passes `pane.canOpen` — the same 1024px test
+> that decides whether the column renders — so the two can never disagree.
 
 **Given** the public map at `/`, **when** anything in this ticket ships,
 **then** its six tools and its behaviour are unchanged — pinned by its

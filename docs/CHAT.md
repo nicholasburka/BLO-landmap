@@ -221,8 +221,19 @@ Write tools, proposed only: `create_note`, `append_to_page`, `update_page`,
 `drop_link`, `save_view`, `measure_proximity`, `rename_column`, `build_index`,
 and — chat-only, because MCP never deletes — `remove_column`.
 
-Client tools, run in the browser: none yet. `clientTool()` and the dispatch
-branch are in place (P14-1); the four map tools arrive in P14-2.
+Client tools, run in the browser: `show_layer`, `zoom_to_county`,
+`show_county_details`, `set_query_state` (P14-2). They are declared once, in
+`prompt/mapToolDefinitions.ts`, and the public map's prompt box imports the
+same four — identity, not a copy, and a test asserts it.
+
+**A reader without a pane is not offered them.** `chatTools({ map: false })`
+leaves all four out and `buildChatSystemPrompt(scope, { map: false })` drops
+the rule about having a map, so a phone's turn is simply a turn with no map
+rather than one that is told about a map and then has to be told it cannot
+use it. The client decides: `ChatView` passes `pane.canOpen` — the same
+1024px test that decides whether the column renders — and the route reads
+`mapPane` off the message body. `/api/chat-context?map=0` renders exactly
+what that turn is given.
 
 These are the MCP tools (`docs/MCP.md`) — the same handlers, the same
 validation, the same audit rows — so a question asked here and the same question

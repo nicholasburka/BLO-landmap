@@ -46,7 +46,10 @@ interface ToolRow {
 
 router.get('/api/chat-context', requireInternalUser, internalRateLimit, privateNoCache, async (req, res) => {
   try {
-    const tools = chatTools()
+    // `?map=0` renders what a phone's turn is given — four fewer tools and
+    // no rule about a pane it does not have.
+    const map = req.query.map !== '0'
+    const tools = chatTools({ map })
     const rows: ToolRow[] = tools.map(t => ({
       name: t.name,
       description: String(t.definition.description ?? ''),
@@ -66,7 +69,7 @@ router.get('/api/chat-context', requireInternalUser, internalRateLimit, privateN
     // The layer manifest is the other half of what a logged-in reader's
     // prompt carries, and it is the half that changes as the library grows.
     const layers = isLibraryEnabled() ? await listInternalLayers().catch(() => []) : []
-    const systemPrompt = buildChatSystemPrompt(scope)
+    const systemPrompt = buildChatSystemPrompt(scope, { map })
     const layersContext = renderInternalLayersContext(layers)
 
     res.json({
@@ -81,6 +84,7 @@ router.get('/api/chat-context', requireInternalUser, internalRateLimit, privateN
       systemPrompt,
       layersContext,
       scope,
+      map,
       // A rough sense of what the fixed part of every turn costs, before the
       // question, the excerpts and the history. Characters/4 is the usual
       // rule of thumb and is labelled as an estimate on the page.

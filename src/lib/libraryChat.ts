@@ -298,13 +298,20 @@ export async function sendMessage(
   signal?: AbortSignal,
   /** P11-9: the working set this turn is scoped to, or '' for the library. */
   workingSet = '',
+  /** P14-2: whether this page can show a map. A reader without a pane is not
+   *  offered the four tools that draw on one. */
+  mapPane = true,
 ): Promise<ChatDoneEvent> {
   let res: Response
   try {
     res = await internalFetch(`/api/chats/${chatId}/messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, ...(workingSet ? { workingSet } : {}) }),
+      body: JSON.stringify({
+        text,
+        ...(workingSet ? { workingSet } : {}),
+        ...(mapPane ? {} : { mapPane: false }),
+      }),
       ...(signal ? { signal } : {}),
     })
   } catch (err) {

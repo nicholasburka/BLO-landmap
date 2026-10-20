@@ -90,6 +90,12 @@ export interface LibraryChatHooks {
    * pane executes those itself against its canvas's `ToolContext`.
    */
   onToolCall?: (call: ChatToolCall) => void
+  /**
+   * P14-2: whether this page can show a map right now. A page with no pane —
+   * and a page whose window is narrower than the pane's breakpoint — says
+   * false, and the turn is not offered the four tools that draw on one.
+   */
+  canShowMap?: () => boolean
 }
 
 export function useLibraryChat(hooks: LibraryChatHooks = {}): LibraryChat {
@@ -287,6 +293,7 @@ export function useLibraryChat(hooks: LibraryChatHooks = {}): LibraryChat {
         event => applyEvent(answer, event),
         controller.signal,
         workingSet,
+        hooks.canShowMap?.() ?? false,
       )
       if (id !== turnId) return
       question.id = done.userMessageId ?? question.id

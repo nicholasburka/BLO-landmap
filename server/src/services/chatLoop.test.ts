@@ -45,6 +45,7 @@ const {
   clientToolResult,
 } = await import('./chatLoop.js')
 const { MODEL_UNAVAILABLE: ASK_MODEL_UNAVAILABLE } = await import('../routes/libraryAsk.js')
+const { TOOL_DEFINITIONS } = await import('../prompt/toolDefinitions.js')
 
 type AnthropicLike = import('./askKb.js').AnthropicLike
 type KbIndexType = Awaited<ReturnType<typeof buildKbIndex>>
@@ -656,9 +657,13 @@ describe('the prompt says propose first, then summarise (P13-5)', () => {
  * This is the third kind of call that makes the seam live.
  */
 describe('a tool the browser runs (P14-1)', () => {
-  /** A stand-in for the map tools P14-2 registers. */
+  /** A stand-in shaped the way the real ones are: a raw tool definition. */
   function paneTool() {
-    return clientTool('show_pane', 'Show something on the page.', { what: z.string() })
+    return clientTool({
+      name: 'show_pane',
+      description: 'Show something on the page.',
+      input_schema: { type: 'object', properties: { what: { type: 'string' } }, required: ['what'] },
+    } as any)
   }
 
   it('is dispatched with its arguments and never run here', async () => {
@@ -711,5 +716,80 @@ describe('a tool the browser runs (P14-1)', () => {
     )
     expect(started?.call.kind).toBe('read')
     expect(started?.call.args).toBeUndefined()
+  })
+})
+
+/**
+ * P14-2 — the four that drive the pane.
+ *
+ * They were declared once, for the PUBLIC map's prompt box, while the chat
+ * page had its own canvas and a dispatcher for exactly these four. One
+ * declaration now, two buses, and the library chat registers them as client
+ * tools — dispatched to the browser, never run here.
+ */
+describe('the map tools reach the library chat (P14-2)', () => {
+  const MAP = ['show_layer', 'zoom_to_county', 'show_county_details', 'set_query_state']
+
+  it('offers all four, as client tools, to a reader with a pane', () => {
+    const byName = new Map(chatTools().map(t => [t.name, t]))
+    for (const name of MAP) {
+      const tool = byName.get(name)
+      expect(tool, `${name} should be in the table`).toBeTruthy()
+      expect(tool!.client).toBe(true)
+      expect(tool!.write).toBe(false)
+    }
+  })
+
+  it('offers none of them to a reader without one', () => {
+    const names = chatTools({ map: false }).map(t => t.name)
+    for (const name of MAP) expect(names).not.toContain(name)
+    // And loses nothing else: a phone can still read the library.
+    expect(names).toContain('search_library')
+    expect(names).toContain('create_note')
+  })
+
+  it('does not offer the public map’s own chrome', () => {
+    const names = chatTools().map(t => t.name)
+    // `search_housing` and `toggle_ranking_panel` belong to the public map;
+    // the chat page has no listings search and no ranking panel.
+    expect(names).not.toContain('search_housing')
+    expect(names).not.toContain('toggle_ranking_panel')
+  })
+
+  it('tells a reader with a pane that they have one, and nobody else', () => {
+    expect(buildChatSystemPrompt()).toMatch(/You have a map/)
+    expect(buildChatSystemPrompt(null, { map: false })).not.toMatch(/You have a map/)
+  })
+
+  it('shares one declaration with the public map’s bus', () => {
+    const chat = new Map(chatTools().map(t => [t.name, t.definition]))
+    const publicBus = new Map(TOOL_DEFINITIONS.map(t => [t.name, t]))
+    for (const name of MAP) {
+      // Identity, not equality: a copy is what this ticket removed.
+      expect(chat.get(name)).toBe(publicBus.get(name))
+    }
+  })
+
+  it('refuses a call it could not dispatch, and lets the browser judge the rest', () => {
+    const show = chatTools().find(t => t.name === 'show_layer')!
+    expect(show.parse('not an object').ok).toBe(false)
+    expect(show.parse({}).ok).toBe(false)
+    // `executeTool` in the browser validates properly — it is the thing that
+    // runs it. This parser only refuses what cannot be dispatched at all.
+    expect(show.parse({ layerId: 'pct_Black', on: true })).toEqual({
+      ok: true,
+      value: { layerId: 'pct_Black', on: true },
+    })
+  })
+
+  it('writes a line about what the reader can now see', () => {
+    expect(toolSummary('show_layer', { layerId: 'pct_Black', on: true })).toBe(
+      'Put the layer “pct_Black” on the map',
+    )
+    expect(toolSummary('zoom_to_county', { county_name: 'Shelby', state: 'TN' })).toBe(
+      'Moved the map to “Shelby, TN”',
+    )
+    expect(toolSummary('set_query_state', { layers: [1, 2] })).toBe('Recoloured the map by 2 layers')
+    expect(toolSummary('set_query_state', { layers: [] })).toBe('Reset the map')
   })
 })

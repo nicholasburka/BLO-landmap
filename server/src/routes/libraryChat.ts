@@ -252,6 +252,9 @@ router.post(
         emit: send,
         clientIp,
         workingSet: scope,
+        // P14-2: a phone and a narrow window have no map pane, and a reader
+        // without one must not be offered the four tools that draw on it.
+        canShowMap: req.body?.mapPane !== false,
       })
     } catch (err) {
       // Not the model — our own retrieval or store. Ask calls this a 502 and
