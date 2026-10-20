@@ -33,10 +33,11 @@ describe('renderMarkdown (LLM output sanitization)', () => {
     expect(html).toContain('plain text')
   })
 
-  it('does NOT allow headings or tables (wiki-only tags)', () => {
+  it('does NOT allow headings (an answer is a message, not a page)', () => {
     const html = renderMarkdown('# Title\n\n| a | b |\n| - | - |\n| 1 | 2 |')
     expect(html).not.toContain('<h1')
-    expect(html).not.toContain('<table')
+    // Tables moved into this profile in P14-4 — see the suite at the bottom.
+    expect(html).toContain('<table')
   })
 })
 
@@ -191,5 +192,43 @@ describe('renderWikiMarkdown map blocks (P7-4)', () => {
     const html = renderMarkdown('```map:memphis-siting\n```')
     expect(html).not.toContain('data-embed')
     expect(html).not.toContain('<div')
+  })
+})
+
+/**
+ * P14-4 — an answer comparing things is a table.
+ *
+ * The LLM profile allowed no table tags, so a model that answered with a
+ * markdown comparison had its pipes and dashes sanitised into running prose.
+ * The reader got the data and lost the shape of it.
+ */
+describe('tables in an answer (P14-4)', () => {
+  const TABLE = [
+    '| County | Flood | Black % |',
+    '| --- | --- | --- |',
+    '| Shelby | 0.41 | 54.1 |',
+    '| Fulton | 0.22 | 44.5 |',
+  ].join('\n')
+
+  it('renders a markdown table as a table', () => {
+    const html = renderMarkdown(TABLE)
+    expect(html).toContain('<table>')
+    expect(html).toContain('<th>County</th>')
+    expect(html).toContain('<td>Shelby</td>')
+  })
+
+  it('still refuses what an answer is not', () => {
+    // An answer is a message, not a page: no headings, no code blocks, no
+    // images, and certainly no script.
+    const html = renderMarkdown('# Heading\n\n```js\nalert(1)\n```\n\n![x](/a.png)\n\n<script>alert(2)</script>')
+    expect(html).not.toContain('<h1')
+    expect(html).not.toContain('<pre')
+    expect(html).not.toContain('<img')
+    expect(html).not.toContain('<script')
+  })
+
+  it('strips a handler smuggled into a cell', () => {
+    const html = renderMarkdown('| a |\n| --- |\n| <td onclick="alert(1)">x</td> |')
+    expect(html).not.toContain('onclick')
   })
 })

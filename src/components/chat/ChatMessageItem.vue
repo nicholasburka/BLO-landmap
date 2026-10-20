@@ -153,6 +153,46 @@ const outcomeFailed = computed(() => props.message.toolCalls.some(call => call.s
   margin-bottom: 4px;
 }
 
+/* P14-4. `display: block` is what makes a table scroll on its own: the answer
+   column must never scroll sideways, and there is no wrapper to hang
+   `overflow` on because the markup comes from `v-html`. */
+.answer :deep(table) {
+  display: block;
+  overflow-x: auto;
+  width: max-content;
+  max-width: 100%;
+  margin: 10px 0;
+  border-collapse: collapse;
+  font-size: var(--blo-text-meta, 13px);
+  line-height: 1.45;
+}
+
+.answer :deep(th),
+.answer :deep(td) {
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--blo-cream-divider, #e2ddd2);
+  white-space: nowrap;
+}
+
+.answer :deep(th) {
+  font-size: var(--blo-text-caption, 12px);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blo-stone, #6b6560);
+}
+
+.answer :deep(tbody tr:last-child td) {
+  border-bottom: none;
+}
+
+/* Numbers line up, which is most of why a table was wanted. */
+.answer :deep(td) {
+  font-variant-numeric: tabular-nums;
+}
+
 .thinking,
 .stopped {
   margin: 4px 0 0;

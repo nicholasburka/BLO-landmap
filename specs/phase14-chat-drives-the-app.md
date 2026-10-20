@@ -293,7 +293,7 @@ The public map's state. Click-to-rewind. Persisting context with the thread.
 
 ---
 
-## P14-4 [BUG] A table in an answer is flattened into prose
+## P14-4 [BUG] A table in an answer is flattened into prose — DONE 2026-10-20
 
 **Type:** Bug · **Size:** S · **Depends:** none
 

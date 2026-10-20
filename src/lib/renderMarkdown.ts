@@ -96,12 +96,16 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
 const LLM_TAGS = [
   'p', 'br', 'strong', 'em', 'b', 'i', 'u', 'code',
   'ul', 'ol', 'li', 'blockquote', 'a', 'span', 'hr',
+  // P14-4: an answer comparing four counties across three columns IS a table,
+  // and without these the pipes and dashes arrived as running prose. Tables
+  // only — an answer is still not a page, so no headings, no `pre`, no `div`,
+  // no `img`.
+  'table', 'thead', 'tbody', 'tr', 'th', 'td',
 ]
 
 const WIKI_TAGS = [
   ...LLM_TAGS,
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-  'table', 'thead', 'tbody', 'tr', 'th', 'td',
   'pre',
   'div', // embed placeholders (P5-17)
 ]
