@@ -8,11 +8,12 @@
  *
  *  - **The working set is the data** — its members, its anchor, and the derived
  *    columns P7-5 computes onto it. Loaded ONCE, here.
- *  - **The view is the framing** — which is why this component takes a
- *    `SavedView` and reads the set off it, rather than the other way round. A
- *    set holds no viewport, no sort and no palette, so there is nothing to show
- *    it *with* until a view supplies one; a set may carry several views, and
- *    each of them lands here over the same rows.
+ *  - **The set is also the framing now** (P11-1/P11-2) — this component takes
+ *    a SET SLUG and reads everything off the set, which is the other way round
+ *    from how it started. It used to take a `SavedView` and find the set on
+ *    it, and that indirection was the bug: a set with no view had no way to
+ *    be opened at all, and the Explore flow made sets with no view. A set
+ *    still may carry views; they are saved framings of it, not the way in.
  *  - **The interface is neither.** It is a query key, so switching is a
  *    `router.replace` on the path you are already on: nothing navigates,
  *    nothing unmounts that holds data, and nothing is fetched twice. A deep
@@ -41,6 +42,8 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import DatasetView from '@/views/DatasetView.vue'
 import KbNav from '@/components/KbNav.vue'
 import MapPane from '@/components/MapPane.vue'
+import SetCountyTable from '@/components/SetCountyTable.vue'
+import SetDatasetList from '@/components/SetDatasetList.vue'
 import SetLayerList from '@/components/SetLayerList.vue'
 import MapAddressSearch from '@/components/MapAddressSearch.vue'
 import IndexCompareCard from '@/components/IndexCompareCard.vue'
@@ -57,15 +60,7 @@ import { computeScores, rawLayerValues } from '@/composables/usePersonalizedScor
 import { friendlyError } from '@/lib/errors'
 import { clearIndexDraft, readIndexDraft, writeIndexDraft } from '@/lib/indexDraft'
 import { invalidateInternalManifest } from '@/lib/internalLayers'
-import {
-  SET_INTERFACE_KEY,
-  interfaceForViewType,
-  parseSetInterface,
-  tableStateOf,
-  tableViewQuery,
-  type SavedView,
-  type SetInterface,
-} from '@/lib/views'
+import { DEFAULT_SET_TAB, SET_OPEN_KEY, SET_TAB_KEY, parseSetTab, type SetTab } from '@/lib/views'
 import {
   derivedFreshnessBadge,
   derivedFreshnessLine,
@@ -74,6 +69,8 @@ import {
   derivedTableColumns,
   fetchWorkingSet,
   fetchWorkingSetColumns,
+  renameWorkingSetColumn,
+  removeWorkingSetColumn,
   rerunDerivedColumn,
   runComposite,
   workingSetDatasetsHref,
@@ -87,8 +84,8 @@ import {
 import type { ScoringQueryLayer } from '@/types/mapTypes'
 
 const props = defineProps<{
-  /** The view whose framing this is. Its `workingSet` is what gets loaded. */
-  view: SavedView
+  /** The working set this is. Everything else is read off it. */
+  slug: string
 }>()
 
 const route = useRoute()
@@ -109,29 +106,37 @@ const setGone = ref(false)
 
 // --- Which interface -------------------------------------------------------
 
-/** The interface the view's own type opens in — the view IS the framing, so a
- *  view saved off the map opens on the map and one saved off a table on the
- *  table. The set is the same either way, which is the point. */
-const defaultInterface = computed(() => interfaceForViewType(props.view.type))
+/** The three tabs, in the order a reader meets them: what it looks like,
+ *  what it says, what it is made of. */
+const TABS: { id: SetTab; label: string }[] = [
+  { id: 'map', label: 'Map' },
+  { id: 'counties', label: 'Counties' },
+  { id: 'datasets', label: 'Datasets' },
+]
 
-const iface = computed<SetInterface>(() =>
-  parseSetInterface(route.query[SET_INTERFACE_KEY], defaultInterface.value),
-)
+const iface = computed<SetTab>(() => parseSetTab(route.query[SET_TAB_KEY]))
 
 /**
- * Switch interface. `replace`, same path, every other query key untouched — so
- * the table's filters survive a look at the map and come back with it, and Back
- * does not walk a trail of interface switches.
+ * Switch tab (P11-4).
+ *
+ * **`push`, not `replace`.** It was `replace` with the reasoning that two
+ * interfaces over one object are not a navigation — sound for two tabs, and
+ * it cost the reader the Back button: Back from the Data tab left the
+ * workspace entirely rather than returning to the map. With three tabs and a
+ * dataset to drill into, Back has to walk them.
+ *
+ * Every other query key is untouched, so the explorer's filters survive a
+ * look at the map and come back with it.
  */
-function show(next: SetInterface): void {
+function show(next: SetTab): void {
   if (next === iface.value) return
   const query: Record<string, string | string[] | null> = { ...route.query } as Record<
     string,
     string | string[] | null
   >
-  if (next === defaultInterface.value) delete query[SET_INTERFACE_KEY]
-  else query[SET_INTERFACE_KEY] = next
-  void router.replace({ query })
+  if (next === DEFAULT_SET_TAB) delete query[SET_TAB_KEY]
+  else query[SET_TAB_KEY] = next
+  void router.push({ query })
 }
 
 // --- The data half ---------------------------------------------------------
@@ -139,15 +144,15 @@ function show(next: SetInterface): void {
 /**
  * Which table the data interface shows.
  *
- * The view's own dataset first, when it has one: a saved table view is about
- * that table and has to keep opening on it. Then the set's anchor — the held
- * dataset the set is *about* — then its first held member, so a map view over a
- * set still gets a table to explore. In practice these agree: the promote
- * action puts a table view's dataset into the set it makes.
+ * The set's anchor — the held dataset the set is *about* — then its first held
+ * member, so a set with no anchor still gets a table to explore.
+ *
+ * A saved TABLE view's own dataset used to win here. P11-2 drops that: the
+ * workspace no longer arrives through a view, and the preference was already
+ * noted as agreeing with the anchor in practice, because the promote action
+ * puts a table view's dataset into the set it makes.
  */
 const anchor = computed(() => {
-  const saved = tableStateOf(props.view)?.dataset
-  if (saved) return saved
   if (set.value?.sites) return set.value.sites
   return set.value?.members.find(member => member.kind === 'dataset')?.slug ?? ''
 })
@@ -180,6 +185,26 @@ function onShown(payload: { geoIds: string[]; rows: number; total: number; loadi
   shown.value = payload
   if (!payload.loading) subsetSettled.value = true
 }
+
+/** Which of the set's datasets is open inside the Datasets tab (P11-6), or
+ *  '' when the tab is showing its list. */
+const openDataset = computed(() => {
+  const raw = route.query[SET_OPEN_KEY]
+  const slug = Array.isArray(raw) ? raw[0] : raw
+  return typeof slug === 'string' ? slug : ''
+})
+
+/**
+ * Closing a dataset puts the map back on the whole layer.
+ *
+ * Without this the subset outlives the table that produced it: close the
+ * explorer and the map keeps drawing the rows it last filtered to, with
+ * nothing on screen to say why only eighteen counties are painted.
+ */
+watch(openDataset, slug => {
+  if (slug) return
+  shown.value = { geoIds: [], rows: 0, total: 0, loading: false }
+})
 
 // --- The map half (P6-14, six lines of it) ---------------------------------
 
@@ -237,7 +262,33 @@ const drawnLayerIds = computed(() => {
   const preview = previewQuery.value
   if (preview) return preview.map(term => term.layerId)
   if (drawnIndex.value) return [drawnIndex.value]
+  const framed = framingTerms.value
+  if (framed) return framed.map(term => term.layerId)
   return set.value?.layers ?? []
+})
+
+/**
+ * The set's own stored framing, as scoring terms (P11-1/P11-2).
+ *
+ * This is what the `framing` field is FOR: a set that has been weighed opens
+ * on that weighting instead of on an unweighted average of everything it
+ * names. Null when the set has never been framed — every set made before
+ * P11-1 — and then the layers draw at equal weight exactly as they did.
+ *
+ * It sits below a preview and below a drawn index for the same reason those
+ * two are ordered: each is a different claim about what the choropleth means,
+ * and the more deliberate, more recent one wins.
+ */
+const framingTerms = computed<ScoringQueryLayer[] | null>(() => {
+  const layers = set.value?.framing?.layers
+  if (!layers?.length) return null
+  return layers.map(term => ({
+    layerId: term.layerId,
+    weight: term.weight,
+    ...(term.direction === 'higher_better' || term.direction === 'lower_better'
+      ? { direction: term.direction }
+      : {}),
+  }))
 })
 
 /** The layers the set names, in its own order — what the list offers to
@@ -246,9 +297,11 @@ const setLayerIds = computed(() => drawnLayerIds.value)
 
 const map = useShowOnMap({
   layers: () => drawnLayerIds.value,
-  // Equal weight unless a formula is being tried out, which is the one case a
-  // page here has an opinion about how much each layer counts.
-  weights: () => previewQuery.value,
+  // Equal weight unless a formula is being tried out, or the set carries one
+  // of its own — the two cases a page here has an opinion about how much each
+  // layer counts. A live preview beats the stored framing, the way it beats
+  // everything else.
+  weights: () => previewQuery.value ?? framingTerms.value,
   only: () => shown.value.geoIds,
 })
 
@@ -690,12 +743,20 @@ async function saveIndex(input: { label: string; terms: WeightTerm[] }): Promise
  * so a reader who stays on the table never pays for them; closing it on the
  * way out is what stops a hidden map holding a WebGL context.
  *
- * It waits for the table's first answer (or for a set with no table at all),
- * so the pane's first paint is already the right subset rather than the whole
- * layer — which is what `useShowOnMap` promises and what the data half being
- * mounted all along makes possible.
+ * It waits for the table's first answer ONLY while a dataset is open.
+ *
+ * P11-6 broke the old rule, which was "wait for the table, because the data
+ * half is mounted all along". It is not any more: the Datasets tab opens on a
+ * LIST, and the explorer mounts only when a reader opens one of them. Waiting
+ * on a table nobody opened left the map permanently un-drawn — the map tab of
+ * every anchored set went blank, which is how this was caught.
+ *
+ * With nothing open there is no subset to wait for, and an empty `only` means
+ * the whole layer, which is the right answer.
  */
-const readyToDraw = computed(() => drawsLayers.value && (subsetSettled.value || !anchor.value))
+const readyToDraw = computed(
+  () => drawsLayers.value && (!openDataset.value || subsetSettled.value),
+)
 
 watch(
   [iface, readyToDraw],
@@ -821,6 +882,63 @@ const unsoundLine = computed(() => {
 const rerunning = ref('')
 const rerunError = ref('')
 
+// --- P10-5: changing a derived column --------------------------------------
+
+/** The column whose removal is being confirmed, or ''. */
+const removing = ref('')
+/** The column a rename or a remove is in flight for, or ''. */
+const busyColumn = ref('')
+const columnError = ref('')
+
+/**
+ * Rename a column.
+ *
+ * A prompt rather than an inline field, deliberately: this is a rare edit on
+ * a dense row that already carries five controls, and growing the row by a
+ * text input for the once-in-a-while case would cost every reader who is not
+ * doing it. If renaming becomes common, it earns the inline field then.
+ */
+async function startRename(id: string, current: string): Promise<void> {
+  const next = window.prompt('What should this column be called?', current)
+  if (next === null) return
+  const label = next.trim()
+  if (!label || label === current) return
+  columnError.value = ''
+  busyColumn.value = id
+  try {
+    await renameWorkingSetColumn(props.slug, id, label)
+    await reloadColumns()
+  } catch (err) {
+    columnError.value = friendlyError(err, 'That column could not be renamed.')
+  } finally {
+    busyColumn.value = ''
+  }
+}
+
+async function removeColumn(id: string): Promise<void> {
+  columnError.value = ''
+  busyColumn.value = id
+  try {
+    await removeWorkingSetColumn(props.slug, id)
+    // A drawn column that has just been deleted must not keep painting the
+    // map — the watcher on `columns` handles that, and this is what feeds it.
+    await reloadColumns()
+    removing.value = ''
+  } catch (err) {
+    columnError.value = friendlyError(err, 'That column could not be removed.')
+  } finally {
+    busyColumn.value = ''
+  }
+}
+
+/** Re-read the set's columns after an edit. One reader, so the map, the
+ *  table and this strip cannot disagree about what exists. */
+async function reloadColumns(): Promise<void> {
+  const stored = await fetchWorkingSetColumns(props.slug)
+  columns.value = stored.columns
+  unreadable.value = stored.unreadable
+}
+
 /**
  * Measure a stale column again, from where it is read.
  *
@@ -894,35 +1012,23 @@ const holds = computed(() => {
   return parts.join(' · ')
 })
 
-/** Every other view of this set. Several is the normal case, not an edge, and
- *  this is the one place a reader can see that they are all over one object. */
-const siblingViews = computed(() => (set.value?.views ?? []).filter(view => view.slug !== props.view.slug))
+/** The saved framings of this set, if anybody kept one. No longer "the OTHER
+ *  views" — there is no current view to be other than, because the set is
+ *  what you opened. Usually empty, and that is now a normal state. */
+const siblingViews = computed(() => set.value?.views ?? [])
 
 // --- Load, once ------------------------------------------------------------
 
-/**
- * A saved table view's query, put on the URL it is already on.
- *
- * The explorer reads its state from the URL, so restoring a table view is the
- * same job here as on the entry hub — the keys, not the destination
- * (`tableViewQuery`). Only when the URL carries none of them: a link somebody
- * shared with its own filters must win over the ones the document was saved
- * with.
- */
-function seedTableState(): void {
-  const saved = tableStateOf(props.view)
-  if (!saved) return
-  const query = tableViewQuery(saved, props.view.slug)
-  const owned = ['file', 'q', 'sort', 'dir', 'filter', 'page', 'limit', 'view']
-  if (owned.some(key => route.query[key] !== undefined)) return
-  void router.replace({ query: { ...route.query, ...query } })
-}
+// `seedTableState` went with P11-2. It replayed a saved TABLE view's filters
+// onto this URL, and there is no view in the way any more to have any — the
+// table tab opens on the set's anchor, and a link carrying its own filters is
+// read by the explorer exactly as before.
 
 onMounted(async () => {
   // P9-11: so an address can be named by the county it lands in. Cached for
   // the session and shared with the analyses; a failure costs only the name.
   void initCountyLookup().catch(() => {})
-  const slug = props.view.workingSet ?? ''
+  const slug = props.slug
   try {
     // Both at once: the set's members and its stored columns are two reads of
     // one object and neither waits on the other.
@@ -934,7 +1040,6 @@ onMounted(async () => {
     set.value = detail
     columns.value = stored.columns
     unreadable.value = stored.unreadable
-    seedTableState()
   } catch (err) {
     error.value = friendlyError(err, 'That working set could not be loaded.')
   } finally {
@@ -953,38 +1058,61 @@ onMounted(async () => {
     <p v-if="loading" class="state-note" data-testid="workspace-loading">Opening the working set…</p>
     <p v-else-if="error" class="state-note error" data-testid="workspace-error">{{ error }}</p>
 
-    <!-- A set can be archived or renamed out from under an open view. Say what
-         happened and offer the map, which is where this view used to go. -->
+    <!-- P11-2: the slug IS the set now, so this is a plain 404 rather than a
+         view pointing at something that moved. Name what was asked for — a
+         mistyped or archived slug is the common cause and the reader can see
+         it in the URL. -->
     <div v-else-if="setGone" class="state-note" data-testid="workspace-set-gone">
-      <p>
-        The view “{{ view.name }}” presents a working set called “{{ view.workingSet }}”, and the library does not have
-        one by that name any more.
-      </p>
+      <p>There is no working set called “{{ slug }}”.</p>
       <p class="gone-links">
-        <RouterLink :to="`/?view=${view.slug}`">Open it on the map</RouterLink>
-        ·
         <RouterLink to="/analysis">Working sets</RouterLink>
+        ·
+        <RouterLink to="/">The map</RouterLink>
       </p>
     </div>
 
     <template v-else-if="set">
       <header class="workspace-head">
-        <h1 data-testid="workspace-title">{{ view.name }}</h1>
-        <p class="set-line" data-testid="workspace-set">
-          Over
-          <RouterLink :to="workingSetHref(set.slug)" data-testid="workspace-set-link">{{ set.name }}</RouterLink>
-          <span class="set-holds" data-testid="workspace-holds"> · {{ holds }}</span>
+        <h1 data-testid="workspace-title">{{ set.name }}</h1>
+        <!-- P11-2 left this saying "Over <set name>" under an h1 that is now
+             the set's own name — the page introduced itself twice. What it is
+             for is the LINK (to the set's library entry, which is a different
+             thing from this working surface) and the counts. -->
+        <p class="blo-type-meta set-line" data-testid="workspace-set">
+          <span class="set-holds" data-testid="workspace-holds">{{ holds }}</span>
+          ·
+          <RouterLink :to="workingSetHref(set.slug)" data-testid="workspace-set-link">Its library entry</RouterLink>
         </p>
-        <p v-if="set.purpose" class="set-purpose" data-testid="workspace-purpose">{{ set.purpose }}</p>
+        <p v-if="set.purpose" class="blo-type-body blo-type-body--measure set-purpose" data-testid="workspace-purpose">{{ set.purpose }}</p>
         <!-- P7-6: in the HEADER, which is outside both interface panes, so a
              reader on the data interface is told too. Inside the explorer a
              derived column is indistinguishable from a county-context one, and
              a caveat that only holds on the map is not a caveat. -->
         <p v-if="unsoundLine" class="set-unsound" data-testid="workspace-unsound">{{ unsoundLine }}</p>
-        <!-- A set may carry several views, and all of them read these rows.
+        <!-- P11-8/P11-9: the two scoped surfaces, reached FROM the set they
+             scope to. The scope is a query key, so these are plain links. -->
+        <p class="blo-actions set-scoped" data-testid="workspace-scoped">
+          <RouterLink
+            :to="workingSetPlaceHref(set.slug)"
+            class="blo-type-action"
+            data-testid="scoped-place"
+          >Check a place</RouterLink>
+          <RouterLink
+            :to="`/search?set=${encodeURIComponent(set.slug)}`"
+            class="blo-type-action"
+            data-testid="scoped-search"
+          >Search in this set</RouterLink>
+          <RouterLink
+            :to="`/chat?set=${encodeURIComponent(set.slug)}`"
+            class="blo-type-action"
+            data-testid="scoped-chat"
+          >Ask about this set</RouterLink>
+        </p>
+
+        <!-- A set may carry saved framings, and all of them read these rows.
              Worth saying here, because it is the reason the set and the view
              are two objects at all. -->
-        <p v-if="siblingViews.length" class="set-siblings" data-testid="workspace-siblings">
+        <p v-if="siblingViews.length" class="blo-type-meta set-siblings" data-testid="workspace-siblings">
           Also presented by
           <RouterLink
             v-for="other in siblingViews"
@@ -996,27 +1124,20 @@ onMounted(async () => {
         </p>
       </header>
 
-      <!-- Two interfaces, one object, one URL. `replace` on the same path, so
-           this is not a navigation. -->
-      <nav class="tab-bar strip" role="tablist" aria-label="Interfaces" data-testid="interface-switch">
+      <!-- P11-4: three tabs over one object, each a real query change, so
+           Back walks them instead of leaving the set. -->
+      <nav class="tab-bar strip" role="tablist" aria-label="Tabs" data-testid="interface-switch">
         <button
+          v-for="tab in TABS"
+          :key="tab.id"
           type="button"
           role="tab"
           class="tab-btn"
-          :class="{ active: iface === 'map' }"
-          :aria-selected="iface === 'map'"
-          data-interface="map"
-          @click="show('map')"
-        >Map</button>
-        <button
-          type="button"
-          role="tab"
-          class="tab-btn"
-          :class="{ active: iface === 'data' }"
-          :aria-selected="iface === 'data'"
-          data-interface="data"
-          @click="show('data')"
-        >Data</button>
+          :class="{ active: iface === tab.id }"
+          :aria-selected="iface === tab.id"
+          :data-interface="tab.id"
+          @click="show(tab.id)"
+        >{{ tab.label }}</button>
       </nav>
 
       <!-- P9-14: what is on this page, and a way to it.
@@ -1059,6 +1180,10 @@ onMounted(async () => {
                the pane — so "there is not room for a map" could show on a
                desktop whenever the set named no layers. -->
           <template v-if="map.isOpen.value">
+            <!-- No `title`: MapPane falls back to the name of the layer it
+                 is drawing, which is the one thing on this page the heading
+                 does not already say. It used to be passed `set.name`, which
+                 after P11-2 was the third copy of that name on the page. -->
             <MapPane
               class="workspace-pane"
               testid="set-map-pane"
@@ -1066,10 +1191,9 @@ onMounted(async () => {
               :query="map.state.query"
               :data="map.state.data"
               :fit="addressFit ?? map.fit.value"
-              :title="set.name"
               :note="paneNote"
               label="This working set on the map"
-              @close="show('data')"
+              @close="show('counties')"
               @county-click="clickedGeoId = $event"
             >
               <!-- P9-10: the layer list floats ON the map, the way the public
@@ -1155,7 +1279,7 @@ onMounted(async () => {
                link is still how this view is shared, and still works. -->
           <p v-else class="state-note" data-testid="map-too-narrow">
             There is not room for a map here.
-            <RouterLink :to="`/?view=${view.slug}`">Open it on the full map</RouterLink>.
+            <RouterLink :to="`/?set=${set.slug}`">Open it on the full map</RouterLink>.
             <!-- P9-10/P9-11: the layer list, the address search, the free
                  analyses and the comparison all live with the map and all
                  read the county data it loads, so they go when it goes. They
@@ -1177,7 +1301,7 @@ onMounted(async () => {
         <!-- The map's reading of the set's derived columns: the same values the
              table is sorting, over the counties this map is drawing. -->
         <section v-if="mapColumns.length" id="set-derived" class="derived" data-testid="derived-columns">
-          <h2 class="derived-heading">Derived columns</h2>
+          <h2 class="blo-type-section derived-heading">Derived columns</h2>
           <ul class="derived-list">
             <li
               v-for="column in mapColumns"
@@ -1244,11 +1368,47 @@ onMounted(async () => {
               <span v-else-if="column.isIndex" class="derived-why" data-testid="derived-weigh-why">
                 Weigh it differently — needs a wider window, so the map can show what the weights do
               </span>
+              <!-- P10-5: a column could be made and never changed. Iterating
+                   on a formula left dead columns behind against a cap of 24,
+                   and this set carries two from exactly that. Rename is a
+                   header edit — no recompute, the id is untouched because the
+                   layer and any saved framing are built from it. Remove is a
+                   WRITE and unrecoverable, so it asks first. -->
+              <button
+                type="button"
+                class="blo-act"
+                data-testid="derived-rename"
+                @click="startRename(column.id, column.label)"
+              >Rename</button>
+              <button
+                v-if="removing !== column.id"
+                type="button"
+                class="blo-act"
+                data-testid="derived-remove"
+                @click="removing = column.id"
+              >Remove</button>
+              <template v-else>
+                <span class="blo-type-unavailable" data-testid="derived-remove-ask">
+                  Remove “{{ column.label }}” for good?
+                </span>
+                <button
+                  type="button"
+                  class="blo-act blo-act--write"
+                  :disabled="busyColumn === column.id"
+                  data-testid="derived-remove-confirm"
+                  @click="removeColumn(column.id)"
+                >{{ busyColumn === column.id ? 'Removing…' : 'Remove it' }}</button>
+                <button type="button" class="blo-act" data-testid="derived-remove-cancel" @click="removing = ''">
+                  Keep it
+                </button>
+              </template>
+
               <span class="derived-provenance" data-testid="derived-provenance">{{ column.provenance }}</span>
               <span v-if="column.method" class="derived-method" data-testid="derived-method">{{ column.method }}</span>
             </li>
           </ul>
           <p v-if="rerunError" class="state-note error" data-testid="derived-rerun-error">{{ rerunError }}</p>
+          <p v-if="columnError" class="state-note error" data-testid="derived-column-error">{{ columnError }}</p>
           <p class="derived-note">
             Stored on the set, not recomputed to draw this. The table sorts these same numbers.
           </p>
@@ -1269,19 +1429,37 @@ onMounted(async () => {
 
       <!-- DATA. Kept mounted: the map draws the rows this is showing, so they
            have to survive a switch. -->
-      <section v-show="iface === 'data'" class="interface" data-testid="interface-data">
-        <DatasetView
-          v-if="anchor"
-          embedded
-          host-map
-          :slug="anchor"
+      <!-- P11-5: what the set says per county. `v-if`, not `v-show`: the
+           rollup is real work and a reader on another tab must not pay it. -->
+      <section v-if="iface === 'counties'" class="interface" data-testid="interface-counties">
+        <SetCountyTable
+          :layers="analysableLayers"
+          :columns="columns"
+          :values-for="analysisValues"
+          :universe="analysisUniverse"
+        />
+      </section>
+
+      <!-- P11-6: what the set is made of, each one openable in place.
+           Mounted while the tab is on OR a dataset is open, and only SHOWN on
+           the tab. That is what keeps P6-10 working under three tabs: open a
+           dataset, filter it, switch to the map, and the map draws those rows
+           — the explorer is still alive behind the tab, feeding `shown`.
+           With nothing open it does not mount at all, so a reader who never
+           opens a table never pays for one. -->
+      <section
+        v-if="iface === 'datasets' || openDataset"
+        v-show="iface === 'datasets'"
+        class="interface"
+        data-testid="interface-datasets"
+      >
+        <SetDatasetList
+          :members="set.members"
+          :missing="set.missing"
+          :set-name="set.name"
           :extra-columns="joined"
           @shown="onShown"
         />
-        <p v-else class="state-note" data-testid="data-no-anchor">
-          This set is not anchored on a table we hold, so there are no rows to explore yet.
-          <RouterLink :to="workingSetDatasetsHref(set.slug)">Its datasets, and what is still missing</RouterLink>
-        </p>
       </section>
     </template>
   </div>
@@ -1319,6 +1497,10 @@ onMounted(async () => {
 
 .set-line,
 .set-purpose,
+.set-scoped {
+  margin: 8px 0 0;
+}
+
 .set-siblings {
   margin: 6px 0 0;
   font-size: 13px;
@@ -1406,9 +1588,9 @@ onMounted(async () => {
 /* P9-15: 0.95rem like the other section headings beside it. At 13px this
    section heading was SMALLER than the card titles next to it, so the most
    substantial block on the page looked like the least. */
+/* P12-1: `.blo-type-section` owns the type. */
 .derived-heading {
   margin: 0 0 8px;
-  font-size: 0.95rem;
 }
 
 .derived-list {

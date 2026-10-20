@@ -116,7 +116,7 @@ defineExpose({ take, clear, count })
 .chosen {
   margin: 0;
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: var(--blo-text-body);
 }
 
 .drop-form input[type='text'],
@@ -165,7 +165,7 @@ defineExpose({ take, clear, count })
 
 .note {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: var(--blo-text-body);
   color: #5c5348;
 }
 

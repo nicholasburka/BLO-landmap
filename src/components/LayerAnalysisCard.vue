@@ -4,7 +4,7 @@
        so nothing on screen about where it runs — that is our problem, not the
        reader's. -->
   <section v-if="choices.length" class="analysis" data-testid="layer-analysis">
-    <h2 class="a-title">Look at a layer</h2>
+    <h2 class="blo-type-section a-title">Look at a layer</h2>
 
     <p class="a-pick">
       <label class="a-label" for="layer-analysis-pick">Layer</label>
@@ -250,26 +250,28 @@ const scatter = computed(() => {
   padding-top: 0.75rem;
   border-top: 1px solid #e7e2da;
 }
-.a-title { margin: 0 0 0.5rem; font-size: 0.95rem; }
+.a-title {
+  margin: 0 0 0.6rem;
+}
 .a-pick { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem; margin: 0 0 0.6rem; }
-.a-label { font-size: 0.82rem; color: #6b6560; }
+.a-label { font-size: var(--blo-text-meta); color: #6b6560; }
 
 /* The chart draws from a 320-wide viewBox and scales to whatever box it is
    given, so the box is what keeps its text the size of everything else. */
 .a-chart {
   max-width: 26rem;
 }
-.a-line { margin: 0.3rem 0; font-size: 0.86rem; }
-.a-note { margin: 0.3rem 0; font-size: 0.86rem; color: #6b6560; }
+.a-line { margin: 0.3rem 0; font-size: var(--blo-text-meta); }
+.a-note { margin: 0.3rem 0; font-size: var(--blo-text-meta); color: #6b6560; }
 .a-outlier { white-space: nowrap; }
 .a-ends { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 0.6rem; }
-.a-ends-title { margin: 0 0 0.2rem; font-size: 0.8rem; color: #6b6560; }
-.a-list { margin: 0; padding-left: 1.1rem; font-size: 0.84rem; }
+.a-ends-title { margin: 0 0 0.2rem; font-size: var(--blo-text-meta); color: #6b6560; }
+.a-list { margin: 0; padding-left: 1.1rem; font-size: var(--blo-text-meta); }
 .a-list li { margin: 0.1rem 0; }
 .a-place { margin-right: 0.4rem; }
 .a-value { font-variant-numeric: tabular-nums; color: #6b6560; }
-.a-tie { margin: 0.25rem 0 0; font-size: 0.78rem; color: #6b6560; }
+.a-tie { margin: 0.25rem 0 0; font-size: var(--blo-text-meta); color: #6b6560; }
 .a-correlation { margin-top: 0.8rem; }
 .a-scatter { width: 180px; height: 180px; display: block; margin-top: 0.3rem; }
-.a-axes { display: flex; gap: 1rem; margin: 0.2rem 0 0; font-size: 0.78rem; color: #6b6560; }
+.a-axes { display: flex; gap: 1rem; margin: 0.2rem 0 0; font-size: var(--blo-text-meta); color: #6b6560; }
 </style>

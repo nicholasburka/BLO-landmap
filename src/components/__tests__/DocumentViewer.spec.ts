@@ -212,7 +212,8 @@ describe('DocumentViewer — phone layout (P5-60)', () => {
     expect(input).toContain('min-height: 44px')
     // 16 px: anything smaller and iOS zooms the page when the field is tapped.
     expect(input).toContain('font-size: 16px')
-    expect(ruleFor(VIEWER_PHONE, '.doc-find-count')).toContain('font-size: 0.95rem')
+    // P12-1: `--blo-text-body` is 14px — the same size, named.
+    expect(ruleFor(VIEWER_PHONE, '.doc-find-count')).toContain('font-size: var(--blo-text-body)')
   })
 
   it('makes the bar’s controls 44 px targets', () => {

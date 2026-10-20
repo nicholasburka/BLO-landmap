@@ -12,6 +12,7 @@
     "library": "tsx src/cli/library.ts",
     "eval:inspect": "tsx eval/inspect/run.ts",
     "eval:capture": "tsx eval/inspect/capture.ts",
+    "eval:chat": "tsx eval/chat/starterPack.ts",
     "oauth-clients": "tsx src/cli/oauthClients.ts"
   },
   "dependencies": {

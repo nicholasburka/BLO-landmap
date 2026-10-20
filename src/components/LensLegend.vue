@@ -226,7 +226,7 @@ const scoringBreakdown = computed<ScoringBreakdownRow[]>(() => {
   display: flex;
   justify-content: space-between;
   margin-top: 5px;
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -242,7 +242,7 @@ const scoringBreakdown = computed<ScoringBreakdownRow[]>(() => {
 
 .lens-legend-breakdown-label {
   font-family: var(--blo-font-display, 'Fraunces', serif);
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -291,7 +291,7 @@ const scoringBreakdown = computed<ScoringBreakdownRow[]>(() => {
 .lens-legend-breakdown-arrow.dir-lower  { color: var(--blo-stone, #6b6560); }
 
 .lens-legend-breakdown-when {
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   color: var(--blo-stone, #6b6560);
   white-space: nowrap;
   font-feature-settings: "tnum";
@@ -299,7 +299,7 @@ const scoringBreakdown = computed<ScoringBreakdownRow[]>(() => {
 
 .lens-legend-breakdown-weight {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   color: var(--blo-stone, #6b6560);
   font-feature-settings: "tnum";
 }

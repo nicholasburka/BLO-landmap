@@ -212,17 +212,30 @@ datasets to each other. That is precisely the gap the workbook opens.
 Two nouns, and the distinction earns its keep:
 
 - A **working set** is the compound data object: the datasets in it, the sites that
-  anchor it, and the derived columns §F.2 computes onto it. It holds no framing — no
-  viewport, no sort, no chosen palette.
+  anchor it, the derived columns §F.2 computes onto it, and — **amended by P11-1** —
+  the default **framing** it opens on. It lives at `/sets/:slug`.
 - A **saved view** is one presentation of a working set: a map state, or a table
-  state. `/views/:slug` stays what it is today and gains a pointer to the set it
-  presents.
+  state. `/views/:slug` stays what it is today, and a view that presents a set
+  redirects to the set (P11-2).
 
-**A working set may have several views**, which is the part that matters. One set
-about Memphis redevelopment can carry a map framed on the cluster, a table sorted by
-distance to transmission, and a third framing written for a story — all reading the
-same rows and the same derived columns, none of them able to disagree about a number
-because none of them owns one.
+**Why the amendment.** As first written, a set held no framing at all, which meant a
+set could only be shown through a view — and so a set with no view could not be
+opened. That was not a theoretical gap: `createWorkingSet` writes a set and no view,
+and the Explore flow calls it, so the newest way of making a set made unreachable
+ones. Giving the set its own framing gives it an address.
+
+**A working set may still have several views**, and that is still the part that
+matters. One set about Memphis redevelopment can carry a map framed on the cluster, a
+table sorted by distance to transmission, and a third framing written for a story —
+all reading the same rows and the same derived columns, none of them able to disagree
+about a number because none of them owns one. **The guarantee is unchanged by P11-1**:
+the set's own framing is one more framing over the same rows, not a second copy of
+them.
+
+What changed is only that a view is no longer the way IN. A saved view is an optional
+kept framing — of a set, or of nothing at all. **An ad-hoc view, presenting no set,
+remains permanent and first-class, never legacy**, and not one line of its path was
+touched.
 
 That is also what settles §F.4c cleanly: **a derived column belongs to the working
 set, never to a view.** Proximity is computed once for the set, and every view of it

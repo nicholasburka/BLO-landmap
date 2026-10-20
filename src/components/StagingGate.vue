@@ -193,7 +193,7 @@ function signOutOfStaging() {
   bottom: -22px;
   right: 0;
   margin: 0;
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   color: #c0392b;
   white-space: nowrap;
 }

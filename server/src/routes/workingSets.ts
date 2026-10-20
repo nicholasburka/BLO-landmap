@@ -10,6 +10,8 @@ import {
   updateWorkingSet,
   workingSetMembers,
   type WorkingSet,
+  renameDerivedColumn,
+  removeDerivedColumn,
 } from '../services/libraryWorkingSets.js'
 import {
   MEMBER_KINDS,
@@ -18,6 +20,7 @@ import {
   WORKING_SET_PURPOSE_MAX,
   describeWorkingSet,
 } from '../services/workingSetMeta.js'
+import { parseFraming } from '../services/mapState.js'
 import {
   derivedColumnKey,
   readDerivedColumns,
@@ -67,6 +70,13 @@ const router = Router()
 router.use('/api/working-sets', requireInternalUser)
 
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,79}$/
+/** Matches the composite service's own ceiling on a column label. */
+const COLUMN_LABEL_MAX = 120
+
+/** One sentence, used by both column routes. */
+function notFoundSet(res: any, slug: string): void {
+  res.status(404).json({ error: `There is no working set called “${slug}”.` })
+}
 const NAME_MAX = 200
 
 /** Every layer id a set may name: the public registry, the five contamination
@@ -91,6 +101,8 @@ interface ParsedFields {
   datasets?: string[]
   layers?: string[]
   sites?: string | null
+  /** P11-1. `null` clears it, which puts the set back on a derived default. */
+  framing?: Record<string, unknown> | null
 }
 
 /**
@@ -152,6 +164,20 @@ async function parseFields(body: Record<string, unknown>): Promise<{ error: stri
         return { error: `The sites a set is anchored on have to be a dataset we hold; “${slug}” is not.` }
       }
       out.sites = slug
+    }
+  }
+
+  // P11-1: the map state this set opens on. Validated by the same parser a
+  // map VIEW's state goes through — one validator, or the two drift and a
+  // layer id the view route accepts is one the set route rejects.
+  if (body.framing !== undefined) {
+    if (body.framing === null) out.framing = null
+    else if (typeof body.framing !== 'object' || Array.isArray(body.framing)) {
+      return { error: 'A framing is a map state: {layers, filters, limit, regionStates, viewport}.' }
+    } else {
+      const parsed = await parseFraming(body.framing as Record<string, unknown>)
+      if ('error' in parsed) return { error: `This set's framing ${parsed.error}` }
+      out.framing = parsed.state
     }
   }
 
@@ -230,6 +256,9 @@ router.get('/api/working-sets/:slug', async (req, res) => {
     const [{ entries, missing }, views] = await Promise.all([workingSetMembers(set), viewsBySet()])
     res.json({
       ...setRow(set, views.get(set.slug) ?? []),
+      // P11-1: the detail carries the framing; the LIST does not, for the
+      // reason `derivedCount` is a count — /analysis draws no maps.
+      ...(set.framing ? { framing: set.framing } : {}),
       members: entries.map(e => ({
         slug: e.slug,
         kind: e.kind,
@@ -512,6 +541,78 @@ router.get('/api/working-sets/:slug/composite', async (req, res) => {
     res.json({ slug: set.slug, indices: await listWorkingSetComposites(set.slug) })
   } catch (err: any) {
     console.error('[working-sets] composite list failed:', err?.message || err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+/**
+ * Rename and remove a derived column (P10-5).
+ *
+ * Index modification was ADD-ONLY on every surface: the same formula returned
+ * the stored column, a different one made a new one, and nothing could rename
+ * or delete. A conversation that iterated on a formula left a trail of dead
+ * columns against a cap of 24, and dev carries two from exactly that.
+ *
+ * Re-weighting needed no new route and never did: `POST …/composite` with the
+ * existing `id` and new terms recomputes and replaces in place, because reuse
+ * matches on the TERMS and `putDerivedColumns` replaces by id. The tests pin
+ * that, because it is the kind of thing that is true until somebody changes
+ * the reuse key.
+ */
+router.patch('/api/working-sets/:slug/columns/:id', async (req, res) => {
+  if (unavailable(res)) return
+  try {
+    const body = (req.body ?? {}) as Record<string, unknown>
+    const label = typeof body.label === 'string' ? body.label.trim() : ''
+    if (!label) {
+      res.status(400).json({ error: 'A column needs a name.' })
+      return
+    }
+    if (label.length > COLUMN_LABEL_MAX) {
+      res.status(400).json({ error: `A name is at most ${COLUMN_LABEL_MAX} characters.` })
+      return
+    }
+    const updated = await renameDerivedColumn(req.params.slug, req.params.id, label)
+    if (!updated) return notFoundSet(res, req.params.slug)
+    if ('error' in updated) {
+      res.status(404).json({ error: `This set has no column called “${req.params.id}”.` })
+      return
+    }
+    const user = res.locals.internalUser
+    void writeAudit({
+      userId: user?.id ?? null,
+      actor: user?.username ?? 'unknown',
+      action: 'workingset.column.rename',
+      target: updated.slug,
+      detail: { column: req.params.id, label },
+    })
+    res.json({ slug: updated.slug, column: req.params.id, label })
+  } catch (err: any) {
+    console.error('[working-sets] rename column failed:', err?.message || err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+router.delete('/api/working-sets/:slug/columns/:id', async (req, res) => {
+  if (unavailable(res)) return
+  try {
+    const updated = await removeDerivedColumn(req.params.slug, req.params.id)
+    if (!updated) return notFoundSet(res, req.params.slug)
+    if ('error' in updated) {
+      res.status(404).json({ error: `This set has no column called “${req.params.id}”.` })
+      return
+    }
+    const user = res.locals.internalUser
+    void writeAudit({
+      userId: user?.id ?? null,
+      actor: user?.username ?? 'unknown',
+      action: 'workingset.column.remove',
+      target: updated.slug,
+      detail: { column: req.params.id },
+    })
+    res.json({ slug: updated.slug, removed: req.params.id })
+  } catch (err: any) {
+    console.error('[working-sets] remove column failed:', err?.message || err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })

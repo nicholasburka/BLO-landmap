@@ -344,6 +344,42 @@ function groupEntries(entries: CatalogEntry[]): SearchGroup[] {
  * the filter. A failed document search costs the reader nothing — the filed
  * rows are still the answer.
  */
+/**
+ * Narrow an outcome to one working set's members (P11-8).
+ *
+ * Client-side on purpose: the catalog has no "members of this set" filter,
+ * and adding one would mean the set's membership being read twice — once by
+ * the search and once by everything else — with the two able to disagree.
+ * The set is one row and the page has already fetched it.
+ *
+ * A key is `<kind>:<slug>` for a catalog row and `text:<entryId>:…` for a
+ * match found inside a document, so both are narrowed by the same slug set.
+ * `matched` is recounted, because a count that disagrees with the list under
+ * it is the bug P6-23 named.
+ */
+export function narrowToSet(outcome: SearchOutcome, slugs: readonly string[]): SearchOutcome {
+  const keep = new Set(slugs)
+  const inSet = (key: string): boolean => {
+    const parts = key.split(':')
+    if (parts[0] === 'text') return keep.has(parts[1] ?? '')
+    return keep.has(parts.slice(1).join(':'))
+  }
+  const groups = outcome.groups
+    .map(group => ({ ...group, items: group.items.filter(item => inSet(item.key)) }))
+    .filter(group => group.items.length > 0)
+  const matched = groups.reduce(
+    (n, group) => n + (group.name === INSIDE_DOCUMENTS ? 0 : group.items.length),
+    0,
+  )
+  // The facet chips go. They are counted off everything the QUERY matched,
+  // across the whole library — so a scoped search showed "source 17" over a
+  // list of two, which is precisely the disagreement between a count and the
+  // list under it that P6-23 forbids. Recounting them off the narrowed set
+  // would be a second, differently-derived answer to "what is in this set",
+  // and the set already answers that on its Datasets tab.
+  return { ...outcome, groups, matched, facets: facetsFor([]) }
+}
+
 export async function searchEverything(q: string, filters: SearchFilters = {}): Promise<SearchOutcome> {
   const query = q.trim()
   if (!query) return { groups: [], facets: facetsFor([]), matched: 0, searchedInsideDocuments: false }

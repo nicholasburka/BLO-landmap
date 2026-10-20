@@ -399,7 +399,18 @@ describe('a re-run with unchanged inputs', () => {
 // --- P7-6: stored, not recomputed -------------------------------------------
 
 /** Rewrite one of the inputs and let the catalog see it. */
-async function rewrite(key: string, body: string, at = new Date('2026-10-20T00:00:00.000Z')): Promise<void> {
+/**
+ * Rewrite an input and stamp it as having happened AFTER the analysis.
+ *
+ * The default was the literal date `2026-10-20`, which worked for as long as
+ * that was in the future and stopped on the morning of the 20th: staleness is
+ * "the input is newer than the result", the result is computed at `now`, and
+ * `now` caught up with the constant. A fixed future date in a test is a time
+ * bomb with its fuse written in the source.
+ *
+ * Relative to now instead, which is what the case always meant.
+ */
+async function rewrite(key: string, body: string, at = new Date(Date.now() + 60_000)): Promise<void> {
   fake.seed(key, body, at)
   await reindexCatalog()
   clearTabularCache()

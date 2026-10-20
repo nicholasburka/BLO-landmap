@@ -506,6 +506,26 @@ describe('held before indexed (P5-64)', () => {
     expect((await searchCatalog({ q: 'flood', sort: 'recent' })).map(r => r.slug)).toEqual(['fema-nfhl', 'flood-claims'])
   })
 
+  it('searches whatItAnswers, which is the field that says what it can be ASKED (P13-3)', async () => {
+    // This was missing from the haystack, while docs/MCP.md told readers all
+    // along that search matched on it. So an entry could carry a perfect
+    // one-line answer to the exact question somebody typed and still not
+    // come back — which is how a directory of 100 organizations stayed
+    // invisible to a lead asking for organizations.
+    fake.seed(
+      'library/datasets/org-directory/meta.json',
+      JSON.stringify({
+        title: 'Directory',
+        whatItAnswers: 'Which organizations work on land ownership, and who funds each one.',
+      }),
+    )
+    await reindexCatalog()
+    expect((await searchCatalog({ q: 'organizations' })).map(r => r.slug)).toContain('org-directory')
+    // And the AND rule still holds across it and the other fields.
+    expect((await searchCatalog({ q: 'organizations funds' })).map(r => r.slug)).toContain('org-directory')
+    expect((await searchCatalog({ q: 'organizations nowhere-such-word' })).map(r => r.slug)).toEqual([])
+  })
+
   it('names every kind the catalog indexes, so nothing sorts by accident', async () => {
     const kinds = (await searchCatalog({})).map(r => r.kind)
     expect(new Set(kinds).size).toBe(kinds.length)

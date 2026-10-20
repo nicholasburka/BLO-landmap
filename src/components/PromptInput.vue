@@ -803,7 +803,7 @@ watch(() => props.messages.length, () => {
   color: var(--blo-ink-soft);
   font-family: var(--blo-font-display);
   font-weight: 400;
-  font-size: 13.5px;
+  font-size: var(--blo-text-meta);
   line-height: 1.55;
   letter-spacing: -0.005em;
   padding: 4px 0;
@@ -999,7 +999,7 @@ watch(() => props.messages.length, () => {
   background: #fef3c7;
   border: 1px solid #f59e0b;
   color: #78350f;
-  font-size: 12.5px;
+  font-size: var(--blo-text-caption);
   line-height: 1.4;
 }
 .chat-error-icon {

@@ -25,6 +25,7 @@ import libraryPlaceRouter from './routes/libraryPlace.js'
 import libraryAskRouter from './routes/libraryAsk.js'
 import geocodeRouter from './routes/geocode.js'
 import libraryChatRouter from './routes/libraryChat.js'
+import chatContextRouter from './routes/chatContext.js'
 import kbRouter from './routes/kb.js'
 import libraryActivityRouter from './routes/libraryActivity.js'
 import wikiRouter from './routes/wiki.js'
@@ -209,6 +210,9 @@ export function createApp(): express.Express {
   // message route carries the daily budget (it is the only one that spends
   // model tokens) and streams its answer as newline-delimited JSON.
   app.use(libraryChatRouter)
+  // P13-1: what the chat model is given, read from the same source the turn
+  // reads. Internal-tier only.
+  app.use(chatContextRouter)
 
   // Wiki pages (P5-14) — flat markdown files in the bucket, internal-tier.
   app.use(wikiRouter)

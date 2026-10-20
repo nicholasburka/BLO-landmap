@@ -4,7 +4,7 @@
        costs nothing — where an analysis runs is our problem, not the
        reader's, and the answer here is "here, instantly". -->
   <section v-if="indices.length >= 2" class="index-compare" data-testid="index-compare">
-    <h2 class="ic-title">Compare two versions</h2>
+    <h2 class="blo-type-section ic-title">Compare two versions</h2>
 
     <p class="ic-pick">
       <select v-model="leftId" class="blo-select" aria-label="First index">
@@ -88,8 +88,7 @@ const verdict = computed(() => {
   border-top: 1px solid #e7e2da;
 }
 .ic-title {
-  margin: 0 0 0.5rem;
-  font-size: 0.95rem;
+  margin: 0 0 0.6rem;
 }
 .ic-pick {
   display: flex;
@@ -100,16 +99,16 @@ const verdict = computed(() => {
 }
 .ic-vs {
   color: #6b6560;
-  font-size: 0.85rem;
+  font-size: var(--blo-text-meta);
 }
 .ic-verdict {
   margin: 0 0 0.4rem;
-  font-size: 0.9rem;
+  font-size: var(--blo-text-body);
 }
 .ic-note {
   margin: 0;
   color: #6b6560;
-  font-size: 0.86rem;
+  font-size: var(--blo-text-meta);
 }
-.ic-shift { margin: 0.3rem 0 0; font-size: 0.86rem; }
+.ic-shift { margin: 0.3rem 0 0; font-size: var(--blo-text-meta); }
 </style>

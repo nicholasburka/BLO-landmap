@@ -727,10 +727,12 @@ describe('in a working set, as a chip row and a progress line (P7-1)', () => {
     const note = w.get('[data-testid="working-set-note"]')
     expect(note.text()).toContain('Memphis redevelopment')
     expect(note.text()).toContain('What bears on siting')
-    // Three named: one held, one indexed, one the library no longer has. The
-    // denominator stays 3 — P6-23's rule, and the honest number to act on.
+    // Three named, one of which the library no longer has. P12-1: the COUNT
+    // leads — "1 of 3 held" put a ratio first whose halves are the same
+    // number on every healthy set. The exception still earns its clause, and
+    // the denominator stays 3, which is P6-23's rule and the honest number.
     expect(w.get('[data-testid="working-set-progress"]').text()).toBe(
-      '1 of 3 held · 1 indexed · 1 no longer in the library',
+      '3 datasets · 1 no longer in the library',
     )
   })
 

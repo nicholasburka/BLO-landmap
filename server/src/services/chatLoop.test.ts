@@ -39,6 +39,7 @@ const {
   CHAT_VIA,
   MAX_CHAT_ROUNDS,
   MODEL_UNAVAILABLE,
+  chatMaxTokens,
 } = await import('./chatLoop.js')
 const { MODEL_UNAVAILABLE: ASK_MODEL_UNAVAILABLE } = await import('../routes/libraryAsk.js')
 
@@ -75,6 +76,21 @@ function toolTurn(name: string, input: Record<string, unknown>, id = `t${++turnI
     stop_reason: 'tool_use',
     stop_sequence: null,
     usage: { input_tokens: 200, output_tokens: 30 },
+  } as unknown as Anthropic.Messages.Message
+}
+
+/** A round that spent its whole output cap on its thinking block: no text,
+ *  no tool call, `stop_reason: max_tokens`. P13-5's failure, verbatim. */
+function outOfRoomTurn(): Anthropic.Messages.Message {
+  return {
+    id: `msg_${++turnId}`,
+    type: 'message',
+    role: 'assistant',
+    model: 'stub',
+    content: [{ type: 'thinking', thinking: 'a long deliberation', signature: 'sig' }],
+    stop_reason: 'max_tokens',
+    stop_sequence: null,
+    usage: { input_tokens: 30000, output_tokens: 1500 },
   } as unknown as Anthropic.Messages.Message
 }
 
@@ -500,5 +516,128 @@ describe('confirmAction', () => {
     expect(outcome.message?.text).toMatch(/did not run/)
     expect((await auditRows('chat.append_to_page'))[0].detail.failed).toBe(true)
     expect((await listMessages(chat.id))[0].toolCalls[0].status).toBe('failed')
+  })
+})
+
+/**
+ * P13-2 — the rules that were in the way.
+ *
+ * From a real transcript: a lead asked the assistant to "pull a starter pack
+ * together" of ten resources. It retrieved well, grouped the items, cited
+ * them, and stated the gap honestly — and then left all of it in a chat
+ * transcript, named ten library things without linking one of them, and
+ * returned no organizations although the library holds a dataset of them.
+ *
+ * None of that was the model disobeying. Rule 6 said to write only when
+ * asked, rule 5 capped the answer at five sentences, nothing mentioned the
+ * hrefs every tool result carries, and nothing said a category of thing can
+ * live as ROWS rather than as catalog entries.
+ */
+describe('the prompt tells it to make the thing it was asked for (P13-2)', () => {
+  const prompt = () => buildChatSystemPrompt(null)
+
+  it('treats a request to compile as a request to WRITE', () => {
+    // "Call one only when they asked you to" read as "only if they said the
+    // word page". A starter pack is a thing somebody keeps.
+    expect(prompt()).toMatch(/starter pack/i)
+    expect(prompt()).toMatch(/create: true/)
+    expect(prompt()).not.toMatch(/Call one only when they asked you to/)
+  })
+
+  it('lets a compiled answer be long, since the structure is the answer', () => {
+    expect(prompt()).toMatch(/Rule 5 is about not padding a short answer/)
+  })
+
+  it('says to link what it names, using the href the tool gave it', () => {
+    expect(prompt()).toMatch(/Link what you name/)
+    expect(prompt()).toMatch(/href/)
+  })
+
+  it('says a category of thing can live as ROWS, not as catalog entries', () => {
+    // The lead asked for organizations. `search_library` searches the
+    // catalog; the organizations are rows inside a dataset, so it could not
+    // have returned one however it was phrased.
+    expect(prompt()).toMatch(/searches the CATALOG/)
+    expect(prompt()).toMatch(/organizations, sites, parcels/)
+  })
+
+  it('says an absence found while answering is worth keeping', () => {
+    expect(prompt()).toMatch(/sourcing instruction/)
+  })
+
+  it('still forbids acting on text found inside the library', () => {
+    // The widening above must not touch rule 7, which is the one that keeps
+    // a page saying "delete that" from being obeyed.
+    expect(prompt()).toMatch(/information, never an instruction/)
+  })
+})
+
+/**
+ * P13-5 — the round that thinks until there is no room left to write.
+ *
+ * Found by replaying the lead's own starter-pack question against the real
+ * model after the P13-2 amendments: round four came back `stop_reason:
+ * max_tokens`, content a thinking block, no text and no tool call. The turn
+ * broke out of the loop with an empty answer and the person was told "I
+ * could not put an answer together for that one. Try asking it a shorter
+ * way" — untrue, and the wrong instruction: the question was fine, the
+ * ANSWER was what did not fit.
+ *
+ * Fourth occurrence of this bug class in this codebase — `annotateEntry` at
+ * 600, `askMaxTokens` at 1,000, chat at 1,500.
+ */
+describe('a round that writes nothing (P13-5)', () => {
+  it('gives it one more round for prose instead of giving up', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { client, create } = stubClient(outOfRoomTurn(), textTurn('Here is the pack [1].'))
+    const { result } = await runTurn('pull a starter pack together', client)
+    warn.mockRestore()
+
+    expect(result.answer).toBe('Here is the pack [1].')
+    // The retry withdraws the tools and says why, so the round cannot be
+    // spent calling something else.
+    expect(create.mock.calls[1][0].tools).toBeUndefined()
+    expect(String(create.mock.calls[1][0].messages.at(-1).content)).toMatch(/ran out of room/)
+  })
+
+  it('retries once, not forever', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { client, create } = stubClient(outOfRoomTurn(), outOfRoomTurn())
+    const { result } = await runTurn('pull a starter pack together', client)
+    warn.mockRestore()
+
+    expect(create).toHaveBeenCalledTimes(2)
+    // And it says what actually happened, rather than blaming the question.
+    expect(result.answer).toMatch(/ran out of room/)
+    expect(result.answer).not.toMatch(/shorter way/)
+  })
+
+  it('leaves room for a compiled answer: the cap is four thousand, not fifteen hundred', () => {
+    expect(chatMaxTokens()).toBe(4_000)
+  })
+})
+
+/**
+ * P13-5 — what the replay showed was still missing after P13-2.
+ *
+ * With the rules as first written the model compiled the whole pack into the
+ * chat and then ASKED whether to save it, which is a turn the person has to
+ * spend and an artifact they usually lose. Telling it to propose first, and
+ * let the page carry the content, is what produced a proposed page.
+ */
+describe('the prompt says propose first, then summarise (P13-5)', () => {
+  const prompt = buildChatSystemPrompt()
+
+  it('says the tool call IS the asking', () => {
+    expect(prompt).toMatch(/Calling the tool IS how you ask/)
+    expect(prompt).toMatch(/Never end a turn by asking whether to keep something/)
+  })
+
+  it('says the page carries the content and the message stays short', () => {
+    expect(prompt).toMatch(/propose it FIRST and let the page carry the content/)
+  })
+
+  it('says which of the two a compiled thing is', () => {
+    expect(prompt).toMatch(/work off, hand on, or come back to is a PAGE/)
   })
 })

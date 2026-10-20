@@ -6,6 +6,9 @@ import publicLayerRegistry from '../prompt/publicLayers.generated.json' with { t
 import { isLibraryEnabled } from './libraryDb.js'
 import { getFile, isBucketEnabled } from './libraryBucket.js'
 import { entryHref } from './kbConfig.js'
+import { getWorkingSet } from './libraryWorkingSets.js'
+import { listInternalLayers, INTERNAL_LAYER_ID_PREFIX } from './internalLayers.js'
+import { readDerivedColumns } from './workingSetColumns.js'
 import {
   getCatalogEntry,
   getSavedView,
@@ -785,6 +788,64 @@ export async function getView(args: { slug: string }): Promise<Record<string, un
   }
 }
 
+/**
+ * What a working set HOLDS (P10-2).
+ *
+ * The gap this fills: both surfaces could FIND a set (`search_library` with
+ * kind `working-set`) and WRITE columns onto it (`build_index`,
+ * `measure_proximity`), and neither could read what was in one. So
+ * `build_index` has to tell the model to source layer ids from `list_layers`
+ * — the whole library's layers — and then say "Must be one the working set
+ * names" and hope. This is the tool that makes that stop being a guess.
+ *
+ * Derived columns come back as metadata WITHOUT their values. A proximity
+ * column over 190,000 rows must never ride in a tool result; `county_values`
+ * on the column's own layer id is how a reader gets numbers, and the id is
+ * right here.
+ */
+export async function getWorkingSetTool(args: { slug: string }): Promise<Record<string, unknown>> {
+  requireLibrary()
+  const set = await getWorkingSet(args.slug)
+  if (!set) throw new McpToolError(`No working set with the slug "${args.slug}".`)
+
+  const internal = await listInternalLayers().catch(() => [])
+  const geometryOf = new Map(internal.map(l => [l.id, l.geometry]))
+  const nameOf = new Map(internal.map(l => [l.id, l.name]))
+
+  const columns = readDerivedColumns(set.derived).map(column => ({
+    id: column.id,
+    label: column.label ?? column.id,
+    unit: column.unit ?? '',
+    method: column.method ?? '',
+    computedAt: column.computedAt ?? '',
+    kind: typeof column.analysis?.type === 'string' ? column.analysis.type : 'unknown',
+    /** A composite draws as a county layer of its own; this is that id. */
+    layerId: `${INTERNAL_LAYER_ID_PREFIX}${set.slug}~${column.id}`,
+  }))
+
+  return {
+    slug: set.slug,
+    name: set.title,
+    purpose: set.purpose,
+    /** Catalog slugs. `get_entry` reads any one of them. */
+    datasets: set.datasets,
+    /** The held table the set is ABOUT, when it has one — what proximity
+     *  measures FROM, and why `measure_proximity` refuses without it. */
+    sites: set.sites,
+    layers: set.layers.map(id => ({
+      id,
+      name: nameOf.get(id) ?? id,
+      /** county layers can be weighed into an index; point and line cannot. */
+      geometry: geometryOf.get(id) ?? 'unknown',
+    })),
+    /** Metadata only — ask `county_values` for a column's numbers, by its
+     *  `layerId`. */
+    derivedColumns: columns,
+    countyLayers: set.layers.filter(id => geometryOf.get(id) === 'county').length,
+    href: appUrl(`/sets/${encodeURIComponent(set.slug)}`),
+  }
+}
+
 // --- ask ---------------------------------------------------------------------------
 
 export const ASK_QUESTION_MAX = 500
@@ -1060,6 +1121,14 @@ export const MCP_TOOLS: McpToolDefinition[] = [
       'One saved map view by slug: who saved it and when, its full definition (layers and weights, filters, region, viewport), its snapshotted result rows, and a link that opens the map with it restored.',
     inputSchema: { slug: slugArg },
     run: getView,
+  },
+  {
+    name: 'get_working_set',
+    title: 'Get a working set',
+    description:
+      'What one working set holds: the datasets it names, its map layers with the geometry of each (county layers can be weighed into an index; point and line layers cannot), the held table it is anchored on if it has one, and its derived columns — id, label, unit, how it was made, when, and the layer id each one draws as. Use it before build_index or measure_proximity so the layers you pass are the set\'s own, and before answering "what is in this set". Column VALUES are not included: ask county_values with a column\'s layerId for those.',
+    inputSchema: { slug: slugArg },
+    run: getWorkingSetTool,
   },
   {
     name: 'ask',

@@ -514,8 +514,11 @@ describe('on a phone (P5-60)', () => {
 
   it('keeps the zone text above the 14px floor', async () => {
     const phone = mediaBlock(readStyles('src/views/NewView.vue'), 640)
-    // 0.82rem is 13.1px at the default root size; the phone block raises it.
+    // P12-1: the floor is a token now. `--blo-text-body` IS 14px, which is
+    // what this case has always been about — the phone block raising these
+    // above the floor. Asserting the token rather than the number is what
+    // keeps the two from drifting apart again.
     expect(ruleFor(phone, '.zone-limit')).toContain('font-size: 0.875rem')
-    expect(ruleFor(phone, '.zone-next')).toContain('font-size: 0.95rem')
+    expect(ruleFor(phone, '.zone-next')).toContain('font-size: var(--blo-text-body)')
   })
 })

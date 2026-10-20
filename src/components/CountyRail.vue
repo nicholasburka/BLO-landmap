@@ -637,7 +637,7 @@ function formatRank(n: number): string {
 
 .rail-eyebrow {
   font-family: var(--blo-font-display, 'Fraunces', serif);
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -999,7 +999,7 @@ function formatRank(n: number): string {
 .rail-land-result,
 .rail-land-empty {
   margin: 0;
-  font-size: 11.5px;
+  font-size: var(--blo-text-eyebrow);
   color: var(--blo-stone, #6b6560);
 }
 .rail-land-clear {
@@ -1047,7 +1047,7 @@ function formatRank(n: number): string {
 }
 .rail-listings-eyebrow {
   font-family: var(--blo-font-display, 'Fraunces', serif);
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1062,7 +1062,7 @@ function formatRank(n: number): string {
 }
 .rail-listings-sub {
   margin: 2px 0 0 0;
-  font-size: 11.5px;
+  font-size: var(--blo-text-eyebrow);
   color: var(--blo-stone, #6b6560);
 }
 .rail-listings-csv {
@@ -1159,7 +1159,7 @@ function formatRank(n: number): string {
   font-feature-settings: "tnum";
 }
 .rail-listing-days {
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   color: var(--blo-stone, #6b6560);
   white-space: nowrap;
 }
@@ -1251,7 +1251,7 @@ function formatRank(n: number): string {
 }
 .rail-rank-eyebrow {
   font-family: var(--blo-font-display, 'Fraunces', serif);
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1283,7 +1283,7 @@ function formatRank(n: number): string {
 }
 .rail-rankings-eyebrow {
   font-family: var(--blo-font-display, 'Fraunces', serif);
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1378,7 +1378,7 @@ function formatRank(n: number): string {
   min-width: 0;
 }
 .rail-rank-county {
-  font-size: 12.5px;
+  font-size: var(--blo-text-caption);
   font-weight: 600;
   color: var(--blo-ink, #111);
   white-space: nowrap;
@@ -1393,7 +1393,7 @@ function formatRank(n: number): string {
 }
 
 .rail-rank-score {
-  font-size: 12.5px;
+  font-size: var(--blo-text-caption);
   font-weight: 600;
   color: var(--blo-ink, #111);
   white-space: nowrap;

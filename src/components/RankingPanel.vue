@@ -520,7 +520,7 @@ const countLabel = computed(() => {
 }
 .ranking-score-unit {
   font-weight: 500;
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   color: var(--blo-stone, #6b6560);
   margin-left: 1px;
   letter-spacing: 0.02em;

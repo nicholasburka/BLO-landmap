@@ -31,6 +31,7 @@ const { viaLabel, recentActivity } = await import('./libraryActivity.js')
 const { McpToolError, PUBLIC_LAYERS } = await import('./mcpTools.js')
 const {
   MCP_WRITE_TOOLS,
+  CHAT_ONLY_WRITE_TOOLS,
   WRITE_BODY_MAX,
   WRITE_TITLE_MAX,
   WRITE_TAGS_MAX,
@@ -453,14 +454,27 @@ describe('the write tool table', () => {
     expect(schema('save_view').safeParse({ name: 'n', type: 'compare', state: {} }).success).toBe(false)
   })
 
-  it('is exactly the seven tools, all marked as writes, none of them deletes', () => {
+  it('is exactly the eight tools, all marked as writes, none of them deletes', () => {
     expect(MCP_WRITE_TOOLS.map(t => t.name).sort()).toEqual(
       // P7-5's `measure_proximity` was the sixth and the first write that is
       // an ANALYSIS rather than a filing — the spec's own reason for the
       // analysis being server-side is that chat has to be able to ask for it.
       // P7-8's `build_index` is the seventh and the second analysis, which is
       // §F.5's "Build an index" card reaching chat as well as the page.
-      ['append_to_page', 'build_index', 'create_note', 'drop_link', 'measure_proximity', 'save_view', 'update_page'].sort(),
+      // P10-5's `rename_column` is the eighth. It edits a header and nothing
+      // else — no recompute, no id change — so it sits inside the no-delete
+      // rule below rather than against it. Its sibling `remove_column` does
+      // NOT: it is in `CHAT_ONLY_WRITE_TOOLS`, because MCP never deletes.
+      [
+        'append_to_page',
+        'build_index',
+        'create_note',
+        'drop_link',
+        'measure_proximity',
+        'rename_column',
+        'save_view',
+        'update_page',
+      ].sort(),
     )
     for (const t of MCP_WRITE_TOOLS) {
       expect(t.write, t.name).toBe(true)
@@ -576,5 +590,32 @@ describe('drop_link and the ingest plan', () => {
     const result = (await run('drop_link', { url: 'https://hazards.fema.gov/downloads/nri.csv' })) as any
     expect(result.plan).toBeUndefined()
     expect(result.planIgnored).toBeUndefined()
+  })
+})
+
+/**
+ * P10-5 over the tool surface. The routes are covered in
+ * routes/workingSets.test.ts; what matters here is that both chats can reach
+ * them and that a wrong name is refused with something a model can act on.
+ */
+describe('rename_column and remove_column (P10-5)', () => {
+  it('puts the RENAME on MCP and keeps the DELETE off it', () => {
+    // The divergence is deliberate and is the one place phase 10's parity
+    // rule does not hold. MCP has a stated guarantee that it never deletes
+    // (docs/MCP.md) because its token is handed to third-party assistants;
+    // the in-app chat is first-party, session-authed, and confirms.
+    expect(MCP_WRITE_TOOLS.map(t => t.name)).toContain('rename_column')
+    expect(MCP_WRITE_TOOLS.map(t => t.name)).not.toContain('remove_column')
+    expect(CHAT_ONLY_WRITE_TOOLS.map(t => t.name)).toEqual(['remove_column'])
+    for (const t of CHAT_ONLY_WRITE_TOOLS) expect(t.write, t.name).toBe(true)
+  })
+
+  it('validates a rename before the handler is reached', () => {
+    expect(schema('rename_column').safeParse({ workingSet: 'a', column: 'b', name: 'New name' }).success).toBe(true)
+    expect(schema('rename_column').safeParse({ workingSet: 'a', column: 'b', name: '' }).success).toBe(false)
+  })
+
+  it('refuses a set that does not exist, by name', async () => {
+    await expect(run('rename_column', { workingSet: 'nope', column: 'x', name: 'y' })).rejects.toThrow(/nope/)
   })
 })

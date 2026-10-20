@@ -302,7 +302,7 @@ function roundToStep(n: number): number {
 .direction-toggle {
   align-self: flex-start;
   padding: 3px 8px;
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 600;
   color: var(--blo-green-deep, #1f7a2e);
   background: white;
@@ -319,7 +319,7 @@ function roundToStep(n: number): number {
 
 .filter-add {
   padding: 3px 8px;
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 600;
   color: var(--blo-stone, #6b6560);
   background: transparent;
@@ -347,7 +347,7 @@ function roundToStep(n: number): number {
 }
 
 .filter-label {
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 600;
   color: var(--blo-ink-soft, #2a2a2a);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -380,7 +380,7 @@ function roundToStep(n: number): number {
 
 .filter-mode {
   padding: 2px 8px;
-  font-size: 9.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 600;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -410,7 +410,7 @@ function roundToStep(n: number): number {
 }
 
 .filter-range-bound {
-  font-size: 9.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;

@@ -488,7 +488,7 @@ onBeforeUnmount(() => {
 .popover-label {
   display: block;
   margin-bottom: 4px;
-  font-size: 12.5px;
+  font-size: var(--blo-text-caption);
   font-weight: 600;
   color: var(--blo-stone);
 }
@@ -510,7 +510,7 @@ onBeforeUnmount(() => {
 
 .popover-note {
   margin: 6px 0 0;
-  font-size: 12.5px;
+  font-size: var(--blo-text-caption);
   color: var(--blo-stone);
 }
 
@@ -533,7 +533,7 @@ onBeforeUnmount(() => {
   gap: 10px;
   width: 100%;
   padding: 6px 8px;
-  font-size: 13.5px;
+  font-size: var(--blo-text-meta);
   text-align: left;
   color: var(--blo-ink);
   background: transparent;

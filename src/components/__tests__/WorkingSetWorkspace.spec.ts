@@ -59,6 +59,8 @@ vi.mock('@/lib/workingSets', async importOriginal => {
     fetchWorkingSetColumns: vi.fn(),
     rerunDerivedColumn: vi.fn(),
     runComposite: vi.fn(),
+    renameWorkingSetColumn: vi.fn(),
+    removeWorkingSetColumn: vi.fn(),
   }
 })
 
@@ -81,6 +83,8 @@ import {
   type DerivedColumn,
   type WorkingSetColumns,
   type WorkingSetDetail,
+  renameWorkingSetColumn,
+  removeWorkingSetColumn,
 } from '@/lib/workingSets'
 import { indexDraftKey, readIndexDraft } from '@/lib/indexDraft'
 import { sharedManifest, clearInternalLayerCache, type InternalLayerManifestEntry } from '@/lib/internalLayers'
@@ -100,6 +104,8 @@ const mockedFetchView = vi.mocked(fetchView)
 const mockedFetchViews = vi.mocked(fetchViews)
 const mockedSet = vi.mocked(fetchWorkingSet)
 const mockedColumns = vi.mocked(fetchWorkingSetColumns)
+const mockedRenameColumn = vi.mocked(renameWorkingSetColumn)
+const mockedRemoveColumn = vi.mocked(removeWorkingSetColumn)
 const mockedManifest = vi.mocked(sharedManifest)
 const mockedComposite = vi.mocked(runComposite)
 
@@ -255,12 +261,20 @@ let network: CountyDataFetchStub
  * global, because this file was one of twenty-seven that never unmounted and
  * the next one written would have been twenty-eight.
  */
-async function mountAt(view: SavedView, path = '/views/memphis-map') {
+/**
+ * P11-2: the component takes a SET SLUG now, not a view. The fixtures still
+ * build a `SavedView` because that is what the library mocks return and what
+ * most of these cases are about; the slug is read off its `workingSet`
+ * pointer, which is the same set the old prop would have resolved to. One
+ * line changed here instead of twenty-eight call sites.
+ */
+async function mountAt(view: SavedView, path = '/sets/memphis-redevelopment') {
   router = createRouter({
     history: createMemoryHistory(),
     routes: [
       { path: '/', component: { template: '<div>map</div>' } },
-      { path: '/views/:slug', component: WorkingSetWorkspace, props: true },
+      { path: '/sets/:slug', component: WorkingSetWorkspace, props: true },
+      { path: '/views/:slug', component: { template: '<div />' } },
       { path: '/analysis', component: { template: '<div />' } },
       { path: '/datasets', component: { template: '<div />' } },
       { path: '/place', component: { template: '<div />' } },
@@ -270,7 +284,10 @@ async function mountAt(view: SavedView, path = '/views/memphis-map') {
   })
   await router.push(path)
   await router.isReady()
-  const wrapper = mount(WorkingSetWorkspace, { props: { view }, global: { plugins: [router] } })
+  const wrapper = mount(WorkingSetWorkspace, {
+    props: { slug: view.workingSet ?? '' },
+    global: { plugins: [router] },
+  })
   await flushPromises()
   return wrapper
 }
@@ -286,7 +303,7 @@ function paneOnly(w: VueWrapper): string[] | null {
   return w.findComponent(MapPane).props('query').only.value
 }
 
-async function switchTo(w: VueWrapper, iface: 'map' | 'data'): Promise<void> {
+async function switchTo(w: VueWrapper, iface: 'map' | 'counties' | 'datasets'): Promise<void> {
   await w.get(`[data-interface="${iface}"]`).trigger('click')
   await settleMap()
 }
@@ -339,48 +356,65 @@ afterEach(() => {
 })
 
 describe('the two interfaces', () => {
-  it('names the set both interfaces are over, and the other views reading the same rows', async () => {
+  it('is titled with the SET, and lists the framings saved of it', async () => {
     const w = await mountAt(mapView())
-    expect(w.get('[data-testid="workspace-title"]').text()).toBe('Memphis map')
-    expect(w.get('[data-testid="workspace-set-link"]').text()).toBe('Memphis redevelopment')
+    // P11-2: the page is the set, so the set names it. It used to be titled
+    // with whichever VIEW you arrived through, which meant one object had as
+    // many names as it had views.
+    expect(w.get('[data-testid="workspace-title"]').text()).toBe('Memphis redevelopment')
+    // The name is said ONCE. This line used to read "Over Memphis
+    // redevelopment" under an h1 that is now the same words; what it is for
+    // is the link to the set's library ENTRY, which is a different object
+    // from this working surface.
+    expect(w.get('[data-testid="workspace-set-link"]').text()).toBe('Its library entry')
     expect(w.get('[data-testid="workspace-holds"]').text()).toContain('2 datasets · 1 layer')
     expect(w.get('[data-testid="workspace-purpose"]').text()).toBe('What bears on siting')
-    // A set may carry several views; this one says which the others are.
+    // Every saved framing of the set, not "the others" — there is no current
+    // view to be other than.
     expect(w.findAll('[data-testid="workspace-sibling"]').map(a => a.text())).toEqual([
+      'Memphis map',
       'Memphis sites by distance',
     ])
   })
 
-  it('reads the set and its columns ONCE, however often the interface is switched', async () => {
+  it('reads the set and its columns ONCE, however often the tab is switched', async () => {
     const w = await mountAt(mapView())
     await settleMap()
-    await switchTo(w, 'data')
+    await switchTo(w, 'counties')
     await switchTo(w, 'map')
-    await switchTo(w, 'data')
+    await switchTo(w, 'datasets')
     expect(mockedSet).toHaveBeenCalledTimes(1)
     expect(mockedColumns).toHaveBeenCalledTimes(1)
-    // And the rows the table fetched are not re-fetched to feed the map.
-    expect(mockedRows).toHaveBeenCalledTimes(1)
   })
 
-  it('switches without navigating: same path, a replace, nothing else in the query touched', async () => {
-    const w = await mountAt(mapView(), '/views/memphis-map?q=River')
-    const push = vi.spyOn(router, 'push')
-    await switchTo(w, 'data')
-    expect(router.currentRoute.value.path).toBe('/views/memphis-map')
-    expect(router.currentRoute.value.query.interface).toBe('data')
+  it('switches on the same path, leaving every other query key alone', async () => {
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?q=River')
+    await switchTo(w, 'counties')
+    expect(router.currentRoute.value.path).toBe('/sets/memphis-redevelopment')
+    expect(router.currentRoute.value.query.tab).toBe('counties')
     expect(router.currentRoute.value.query.q).toBe('River')
-    expect(push).not.toHaveBeenCalled()
   })
 
-  it('leaves the default interface unsaid in the URL', async () => {
+  it('PUSHES, so Back walks the tabs instead of leaving the set (P11-4)', async () => {
+    // It was `replace`, with the reasoning that two interfaces over one object
+    // are not a navigation. That cost the reader the Back button: Back from
+    // the Data tab left the workspace entirely.
     const w = await mountAt(mapView())
-    await switchTo(w, 'data')
-    expect(router.currentRoute.value.query.interface).toBe('data')
+    await switchTo(w, 'counties')
+    expect(router.currentRoute.value.query.tab).toBe('counties')
+    router.back()
+    await flushPromises()
+    expect(router.currentRoute.value.query.tab).toBeUndefined()
+  })
+
+  it('leaves the default tab unsaid in the URL', async () => {
+    const w = await mountAt(mapView())
+    await switchTo(w, 'counties')
+    expect(router.currentRoute.value.query.tab).toBe('counties')
     await switchTo(w, 'map')
-    // A map view's default IS the map, so the key goes away rather than
-    // restating what the document says.
-    expect(router.currentRoute.value.query.interface).toBeUndefined()
+    // The map is where a set opens, so the key goes away rather than
+    // restating the default.
+    expect(router.currentRoute.value.query.tab).toBeUndefined()
   })
 })
 
@@ -392,49 +426,49 @@ describe('a deep link to either interface', () => {
     expect(w.findComponent(MapPane).exists()).toBe(true)
   })
 
-  it('opens a table view on the data interface, because that view IS a table', async () => {
-    const w = await mountAt(tableView(), '/views/memphis-table')
-    expect(w.get('[data-interface="data"]').attributes('aria-selected')).toBe('true')
-    expect(w.findComponent(MapPane).exists()).toBe(false)
-  })
-
-  it('opens ?interface=data there, whatever the view’s own kind', async () => {
-    const w = await mountAt(mapView(), '/views/memphis-map?interface=data')
-    expect(w.get('[data-interface="data"]').attributes('aria-selected')).toBe('true')
-    expect(w.findComponent(MapPane).exists()).toBe(false)
-  })
-
-  it('opens ?interface=map on a table view', async () => {
-    const w = await mountAt(tableView(), '/views/memphis-table?interface=map')
+  it('opens on the map, whatever framing it was reached through', async () => {
+    // P11-2: a set has ONE default interface and the map is it. This used to
+    // depend on the type of the view you arrived through, so the same set
+    // opened differently depending on the link — and a set with no view had
+    // no answer at all.
+    const w = await mountAt(tableView(), '/sets/memphis-redevelopment')
     await settleMap()
     expect(w.get('[data-interface="map"]').attributes('aria-selected')).toBe('true')
     expect(w.findComponent(MapPane).exists()).toBe(true)
   })
 
-  it('degrades a hand-edited interface rather than breaking the page', async () => {
-    const w = await mountAt(mapView(), '/views/memphis-map?interface=sideways')
+  it('opens ?tab=counties when the URL asks for it', async () => {
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=counties')
+    expect(w.get('[data-interface="counties"]').attributes('aria-selected')).toBe('true')
+    expect(w.findComponent(MapPane).exists()).toBe(false)
+    expect(w.find('[data-testid="set-counties"]').exists()).toBe(true)
+  })
+
+  it('degrades a hand-edited tab rather than breaking the page', async () => {
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=sideways')
     expect(w.get('[data-interface="map"]').attributes('aria-selected')).toBe('true')
   })
 
-  it('restores a saved table view’s own query into the URL it is already on', async () => {
-    await mountAt(tableView(), '/views/memphis-table')
-    const query = router.currentRoute.value.query
-    expect(router.currentRoute.value.path).toBe('/views/memphis-table')
-    expect(query.filter).toBe(JSON.stringify([{ column: 'Site', op: 'contains', value: 'River' }]))
-    expect(query.sort).toBe('Site')
-    expect(query.view).toBe('memphis-table')
-  })
-
-  it('lets a shared link’s own filters win over the ones the document was saved with', async () => {
-    await mountAt(tableView(), '/views/memphis-table?q=Rail')
+  it('leaves the explorer’s own URL keys alone', async () => {
+    // `seedTableState` went with P11-2 — it replayed a saved TABLE view's
+    // filters onto this URL, and there is no view in the way to have any.
+    // What a shared link carries is the explorer's to read, untouched.
+    await mountAt(tableView(), '/sets/memphis-redevelopment?q=Rail')
     expect(router.currentRoute.value.query.q).toBe('Rail')
     expect(router.currentRoute.value.query.filter).toBeUndefined()
+    expect(router.currentRoute.value.query.view).toBeUndefined()
   })
 })
 
 describe('the filtered subset reaching the map (query.only, P6-10)', () => {
   it('draws the rows the table is showing, and says what the subset is', async () => {
-    const w = await mountAt(mapView())
+    // P11-6: the subset comes from an OPEN dataset, and survives the tab
+    // switch — the explorer stays mounted behind the Map tab while one is
+    // open, which is what keeps this working under three tabs. With nothing
+    // open there is no subset and the map draws the whole layer.
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets&open=memphis-sites')
+    await flushPromises()
+    await switchTo(w, 'map')
     await settleMap()
     // The blank GEOID is not a county, so the map says nothing about it.
     expect(paneOnly(w)).toEqual(['47157', '28033'])
@@ -443,9 +477,12 @@ describe('the filtered subset reaching the map (query.only, P6-10)', () => {
   })
 
   it('shows THAT subset when a filter is applied in the data interface first', async () => {
-    const w = await mountAt(mapView(), '/views/memphis-map?interface=data')
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets&open=memphis-sites')
     mockedRows.mockResolvedValue({ rows: [PAGE.rows[1]], total: 1, page: 1, limit: 50 })
-    await router.replace({ path: '/views/memphis-map', query: { interface: 'data', q: 'River' } })
+    await router.replace({
+      path: '/sets/memphis-redevelopment',
+      query: { tab: 'datasets', open: 'memphis-sites', q: 'River' },
+    })
     await flushPromises()
 
     await switchTo(w, 'map')
@@ -455,15 +492,18 @@ describe('the filtered subset reaching the map (query.only, P6-10)', () => {
     expect(router.currentRoute.value.query.q).toBe('River')
   })
 
-  it('names the set on the pane and draws the set’s own layers', async () => {
+  it('names the LAYER on the pane and draws the set’s own layers', async () => {
+    // The pane used to be titled with the set, which after P11-2 was the
+    // third copy of that name on one page — h1, the line under it, and this.
+    // Naming what it is DRAWING is the one thing the headings do not say.
     const w = await mountAt(mapView())
     await settleMap()
-    expect(w.get('[data-testid="set-map-pane-layer"]').text()).toBe('Memphis redevelopment')
+    expect(w.get('[data-testid="set-map-pane-layer"]').text()).toBe('Sites by county')
     expect(w.findComponent(MapPane).props('layers').internal.value).toEqual(['internal-sites'])
   })
 
   it('fetches no county file while the data interface is the one showing', async () => {
-    await mountAt(mapView(), '/views/memphis-map?interface=data')
+    await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets&open=memphis-sites')
     await settleMap()
     expect(network.askedForCountyData()).toBe(false)
   })
@@ -476,9 +516,13 @@ describe('the filtered subset reaching the map (query.only, P6-10)', () => {
    * once drawn, a later filter must not tear the canvas down and rebuild it.
    */
   it('waits for the table’s first answer before opening the pane, and never closes it again', async () => {
+    // Only while a dataset is open: waiting on a table nobody opened left the
+    // map permanently blank, which is what P11-6 broke and this pins.
     let releaseRows: (page: RowsPage) => void = () => {}
     mockedRows.mockReturnValue(new Promise<RowsPage>(resolve => { releaseRows = resolve }))
-    const w = await mountAt(mapView())
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets&open=memphis-sites')
+    await flushPromises()
+    await switchTo(w, 'map')
     await settleMap()
     expect(w.findComponent(MapPane).exists()).toBe(false)
 
@@ -492,7 +536,12 @@ describe('the filtered subset reaching the map (query.only, P6-10)', () => {
     // the instance's identity — `vm` is a fresh proxy on every lookup.
     const uid = w.findComponent(MapPane).vm.$.uid
     mockedRows.mockResolvedValue({ rows: [PAGE.rows[1]], total: 1, page: 1, limit: 50 })
-    await router.replace({ path: '/views/memphis-map', query: { q: 'River' } })
+    // `open` stays: it is what keeps the explorer mounted behind the map, and
+    // dropping it is how the subset would be lost rather than narrowed.
+    await router.replace({
+      path: '/sets/memphis-redevelopment',
+      query: { open: 'memphis-sites', q: 'River' },
+    })
     await settleMap()
     expect(w.findComponent(MapPane).vm.$.uid).toBe(uid)
     expect(paneOnly(w)).toEqual(['28033'])
@@ -537,7 +586,7 @@ describe('a derived column, in both interfaces, from one computation', () => {
   })
 
   it('is a sortable column in the data interface', async () => {
-    const w = await mountAt(mapView(), '/views/memphis-map?interface=data')
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets&open=memphis-sites')
     const headers = w.findAll('[data-testid="context-header"]').map(th => th.text())
     expect(headers.some(h => h.includes('Miles to nearest transmission line'))).toBe(true)
     expect(w.findAll('[data-testid="context-cell"]').map(td => td.text())).toEqual(['1.4 mi', '6.2 mi', '—'])
@@ -554,9 +603,12 @@ describe('a derived column, in both interfaces, from one computation', () => {
   })
 
   it('narrows its reported range with the table’s filter — one column, one filter, two readings', async () => {
-    const w = await mountAt(mapView(), '/views/memphis-map?interface=data')
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets&open=memphis-sites')
     mockedRows.mockResolvedValue({ rows: [PAGE.rows[0]], total: 1, page: 1, limit: 50 })
-    await router.replace({ path: '/views/memphis-map', query: { interface: 'data', q: 'Rail' } })
+    await router.replace({
+      path: '/sets/memphis-redevelopment',
+      query: { tab: 'datasets', open: 'memphis-sites', q: 'Rail' },
+    })
     await flushPromises()
     await switchTo(w, 'map')
     expect(w.get('[data-testid="derived-range"]').text()).toBe('1.4 mi across 1 county')
@@ -575,7 +627,10 @@ describe('a derived column, in both interfaces, from one computation', () => {
     const w = await mountAt(mapView())
     await settleMap()
     expect(w.get('[data-testid="derived-range"]').text()).toBe('1.4 mi to 6.2 mi across 2 counties')
-    await switchTo(w, 'data')
+    // The same column, joined onto a table opened from the Datasets tab —
+    // one computation, read twice.
+    await router.push({ query: { tab: 'datasets', open: 'memphis-sites' } })
+    await flushPromises()
     expect(w.findAll('[data-testid="context-cell"]').length).toBe(3)
     expect(mockedColumns).toHaveBeenCalledTimes(1)
   })
@@ -589,7 +644,7 @@ describe('a derived column, in both interfaces, from one computation', () => {
 
   it('says a column with no numbers for this subset rather than printing a range of nothing', async () => {
     mockedColumns.mockResolvedValue(columnsBody({ columns: [{ ...COLUMN, values: { '13121': 4 }, rows: 1 }] }))
-    const w = await mountAt(mapView())
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets&open=memphis-sites')
     await settleMap()
     expect(w.get('[data-testid="derived-range"]').text()).toBe('No numbers for the counties on the map')
   })
@@ -636,7 +691,7 @@ describe('a derived column whose inputs have moved', () => {
   it('says so in the HEADER, so the data interface is told too', async () => {
     // The derived list lives inside the map pane. A caveat only the map shows
     // is not a caveat, so the count sits in the header, outside both panes.
-    const w = await mountAt(mapView(), '/views/memphis-map?interface=data')
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets&open=memphis-sites')
     const line = w.get('[data-testid="workspace-unsound"]').text()
     expect(line).toContain('A derived column is out of date')
     expect(line).toContain('Miles to nearest transmission line')
@@ -646,7 +701,7 @@ describe('a derived column whose inputs have moved', () => {
 
   it('says nothing in the header when every column is fresh', async () => {
     mockedColumns.mockResolvedValue(columnsBody({ columns: [COLUMN] }))
-    const w = await mountAt(mapView(), '/views/memphis-map?interface=data')
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets&open=memphis-sites')
     // A label on every column makes the label invisible on the one that needs
     // one.
     expect(w.find('[data-testid="workspace-unsound"]').exists()).toBe(false)
@@ -705,15 +760,19 @@ describe('a derived column whose inputs have moved', () => {
 })
 
 describe('what the set does not have', () => {
-  it('says so when the set is not anchored on a table we hold', async () => {
-    mockedSet.mockResolvedValue(detail({ sites: null, members: [], datasets: ['epa-superfund-npl'] }))
-    const w = await mountAt(mapView(), '/views/memphis-map?interface=data')
-    expect(w.get('[data-testid="data-no-anchor"]').text()).toContain('not anchored on a table we hold')
+  it('says the set is empty rather than that it is unanchored', async () => {
+    // "This set is not anchored on a table we hold" was the Data tab's only
+    // answer for a set of county layers — true, and useless, because being
+    // unanchored is not what the reader wanted to know. The Datasets tab
+    // lists what IS there, and says plainly when that is nothing.
+    mockedSet.mockResolvedValue(detail({ sites: null, members: [], datasets: [] }))
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets')
+    expect(w.get('[data-testid="datasets-empty"]').text()).toContain('Nothing in this set yet')
   })
 
   it('falls back to the first held member when nothing names an anchor', async () => {
     mockedSet.mockResolvedValue(detail({ sites: null }))
-    await mountAt(mapView(), '/views/memphis-map?interface=data')
+    await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets&open=memphis-sites')
     expect(mockedSchema).toHaveBeenCalledWith('memphis-sites', undefined)
   })
 
@@ -723,12 +782,16 @@ describe('what the set does not have', () => {
     expect(w.get('[data-testid="workspace-missing"]').text()).toContain('eia-transmission')
   })
 
-  it('says what happened when the set itself is gone, and offers the map', async () => {
+  it('says there is no such set, and offers the two places worth going', async () => {
+    // P11-2: the slug IS the set, so a miss is a plain 404 — name what was
+    // asked for, because a mistyped or archived slug is visible in the URL.
+    // It used to be "the view you came through points at a set that moved",
+    // which is a sentence only the old indirection could produce.
     mockedSet.mockResolvedValue(null)
     const w = await mountAt(mapView())
     const panel = w.get('[data-testid="workspace-set-gone"]')
     expect(panel.text()).toContain('memphis-redevelopment')
-    expect(panel.findAll('a').map(a => a.attributes('href'))).toEqual(['/?view=memphis-map', '/analysis'])
+    expect(panel.findAll('a').map(a => a.attributes('href'))).toEqual(['/analysis', '/'])
     expect(w.find('[data-testid="interface-switch"]').exists()).toBe(false)
   })
 
@@ -741,7 +804,7 @@ describe('what the set does not have', () => {
 
 describe('the data interface does not offer a second map', () => {
   it('leaves the map to the host, because the host draws the whole set', async () => {
-    const w = await mountAt(mapView(), '/views/memphis-map?interface=data')
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets&open=memphis-sites')
     expect(w.find('[data-testid="show-on-map-open"]').exists()).toBe(false)
     expect(w.find('[data-testid="show-on-map"]').exists()).toBe(false)
     expect(w.findAllComponents(MapPane)).toHaveLength(0)
@@ -816,7 +879,7 @@ describe('a composite index on the map interface', () => {
   })
 
   it('prints as a bare 0-100 number in both interfaces', async () => {
-    const data = await mountAt(mapView(), '/views/memphis-map?interface=data')
+    const data = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets&open=memphis-sites')
     expect(data.findAll('[data-testid="context-cell"]').map(td => td.text())).toEqual(['71.4', '38.0', '—'])
     const map = await mountAt(mapView())
     await settleMap()
@@ -1235,7 +1298,7 @@ describe('a composite index on the map interface', () => {
       // saved weight.
       await slider(w, 0).setValue('0')
       await settleMap()
-      await switchTo(w, 'data')
+      await switchTo(w, 'datasets')
       await switchTo(w, 'map')
       expect((slider(w, 1).element as HTMLInputElement).value).toBe('9')
       expect((slider(w, 0).element as HTMLInputElement).value).toBe('0')
@@ -1483,5 +1546,232 @@ describe('a composite index on the map interface', () => {
       expect(w.find('[data-testid="index-draft-restored"]').exists()).toBe(false)
       expect([slider(w, 0), slider(w, 1)].map(i => (i.element as HTMLInputElement).value)).toEqual(['6', '4'])
     })
+  })
+})
+
+/**
+ * P11-2 — the defect this phase exists for.
+ *
+ * The workspace used to render only from a saved VIEW that presented a set,
+ * so a set with no view could not be opened at all. `createWorkingSet` makes
+ * sets with no view, and it is what the Explore flow calls, so the newest
+ * creation path shipped unreachable sets.
+ */
+describe('a set opens on its own, with or without a saved framing (P11-2)', () => {
+  it('opens a set that has no views at all', async () => {
+    mockedSet.mockResolvedValue(detail({ views: [] }))
+    const w = await mountAt(mapView())
+    await settleMap()
+    expect(w.get('[data-testid="workspace-title"]').text()).toBe('Memphis redevelopment')
+    expect(w.get('[data-testid="interface-switch"]').exists()).toBe(true)
+    expect(w.findComponent(MapPane).exists()).toBe(true)
+    // Nothing anywhere says a view is missing, because nothing is.
+    expect(w.find('[data-testid="workspace-sibling"]').exists()).toBe(false)
+  })
+
+  it('draws the set’s stored framing, weights and all', async () => {
+    mockedSet.mockResolvedValue(
+      detail({
+        framing: {
+          layers: [
+            { layerId: 'internal-sites', weight: 7, direction: 'higher_better' },
+            { layerId: 'pct_Black', weight: 3, direction: 'higher_better' },
+          ],
+          filters: [],
+          limit: null,
+          regionStates: [],
+          viewport: null,
+        },
+      }),
+    )
+    const w = await mountAt(mapView())
+    await settleMap()
+    const query = w.findComponent(MapPane).props('query')
+    // The framing's own weighting, not the equal weight every layer gets
+    // when a set has never been framed. (`weights` is a per-id record by the
+    // time it reaches the pane — the Lens scores from ids, not from terms.)
+    expect(query.weights.value).toEqual({ 'internal-sites': 7, pct_Black: 3 })
+  })
+
+  it('falls back to equal weight when the set has never been framed', async () => {
+    const w = await mountAt(mapView())
+    await settleMap()
+    // Every layer the set names, counting the same — a page naming layers is
+    // asking to see them, not proposing a weighting.
+    expect(w.findComponent(MapPane).props('query').weights.value).toEqual({ 'internal-sites': 5 })
+    expect(w.findComponent(MapPane).props('layers').internal.value).toEqual(['internal-sites'])
+  })
+})
+
+/**
+ * The two tabs P11-5 and P11-6 added, and the questions the single Data tab
+ * could not answer: what does this set SAY per county, and what is it MADE OF.
+ */
+describe('the Counties tab (P11-5)', () => {
+  it('puts a row per county, with the set’s derived columns as columns', async () => {
+    mockedColumns.mockResolvedValue(columnsBody({ columns: [COLUMN] }))
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=counties')
+    await flushPromises()
+    const table = w.get('[data-testid="set-counties"]')
+    expect(table.text()).toContain('Miles to nearest transmission line')
+    const rows = w.findAll('[data-testid="county-row"]')
+    // The derived column carries two counties, and a county it names is a
+    // county this table has to show even when no raw layer reaches it.
+    expect(rows.length).toBeGreaterThanOrEqual(2)
+    expect(table.text()).toContain('1.4')
+    expect(table.text()).toContain('6.2')
+  })
+
+  it('sorts by a column, highest first, when its header is pressed', async () => {
+    mockedColumns.mockResolvedValue(columnsBody({ columns: [COLUMN] }))
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=counties')
+    await flushPromises()
+    await w.get('[data-testid="county-sort-transmission-miles"]').trigger('click')
+    await flushPromises()
+    const first = w.findAll('[data-testid="county-row"]')[0]
+    // 6.2 beats 1.4: the useful direction for a number is the top of it.
+    expect(first.text()).toContain('6.2')
+    expect(w.get('[data-testid="counties-line"]').text()).toContain('highest first')
+  })
+
+  it('says what a blank means rather than leaving an empty cell', async () => {
+    mockedColumns.mockResolvedValue(columnsBody({ columns: [COLUMN] }))
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=counties')
+    await flushPromises()
+    const key = w.find('[data-testid="counties-key"]')
+    if (key.exists()) expect(key.text()).toContain('measured-but-missing')
+  })
+
+  it('says so when a set has nothing to show per county', async () => {
+    mockedSet.mockResolvedValue(detail({ layers: [] }))
+    mockedColumns.mockResolvedValue(columnsBody({ columns: [] }))
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=counties')
+    await flushPromises()
+    expect(w.get('[data-testid="counties-empty"]').text()).toContain('no county layers')
+  })
+})
+
+describe('the Datasets tab (P11-6)', () => {
+  it('lists what the set is made of, held and not-held apart', async () => {
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets')
+    await flushPromises()
+    const rows = w.findAll('[data-testid="dataset-row"]')
+    expect(rows.map(r => r.text())).toEqual([
+      expect.stringContaining('Memphis candidate sites'),
+      expect.stringContaining('EPA Superfund NPL'),
+    ])
+    expect(rows[0].text()).toContain('held')
+    // A source we point at has no rows to open, so it offers where it lives.
+    expect(rows[1].text()).toContain('indexed, not held')
+    expect(w.get('[data-testid="dataset-source"]').attributes('href')).toBe('/library/epa-superfund-npl')
+  })
+
+  it('opens one in place, on the URL, so Back closes it', async () => {
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets')
+    await flushPromises()
+    await w.get('[data-testid="dataset-open-memphis-sites"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.query.open).toBe('memphis-sites')
+    expect(w.get('[data-testid="dataset-open-name"]').text()).toBe('Memphis candidate sites')
+
+    router.back()
+    await flushPromises()
+    expect(router.currentRoute.value.query.open).toBeUndefined()
+    // Back on the list, still in the set — not out of the workspace.
+    expect(w.findAll('[data-testid="dataset-row"]').length).toBe(2)
+  })
+
+  it('closes back to the list without leaving the set', async () => {
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets&open=memphis-sites')
+    await flushPromises()
+    await w.get('[data-testid="dataset-close"]').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.path).toBe('/sets/memphis-redevelopment')
+    expect(router.currentRoute.value.query.tab).toBe('datasets')
+    expect(w.findAll('[data-testid="dataset-row"]').length).toBe(2)
+  })
+
+  it('reports a member the library no longer has, rather than a tidier list', async () => {
+    mockedSet.mockResolvedValue(detail({ missing: ['gone-dataset'] }))
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets')
+    await flushPromises()
+    expect(w.get('[data-testid="dataset-missing"]').text()).toContain('gone-dataset')
+  })
+
+  it('ignores a hand-edited ?open= naming something the set does not hold', async () => {
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets&open=somebody-elses-table')
+    await flushPromises()
+    expect(w.find('[data-testid="dataset-open-name"]').exists()).toBe(false)
+    expect(w.findAll('[data-testid="dataset-row"]').length).toBe(2)
+  })
+})
+
+/**
+ * P10-5 on the page — where the person who made the dead columns is.
+ *
+ * This set carries two columns created by iterating on a formula and never
+ * removable, which is the whole argument for the ticket.
+ */
+describe('changing a derived column (P10-5)', () => {
+  beforeEach(() => {
+    mockedColumns.mockResolvedValue(columnsBody({ columns: [COLUMN] }))
+    // This suite does not reset mocks globally, and two of the cases below
+    // assert a spy was NOT called.
+    mockedRenameColumn.mockReset()
+    mockedRemoveColumn.mockReset()
+  })
+
+  it('removes a column only after asking, and re-reads what is left', async () => {
+    const w = await mountAt(mapView())
+    await settleMap()
+    // Nothing destructive on one press: the ask comes first.
+    await w.get('[data-testid="derived-remove"]').trigger('click')
+    await flushPromises()
+    expect(w.get('[data-testid="derived-remove-ask"]').text()).toContain(COLUMN.label)
+    expect(mockedRemoveColumn).not.toHaveBeenCalled()
+
+    mockedColumns.mockResolvedValue(columnsBody({ columns: [] }))
+    await w.get('[data-testid="derived-remove-confirm"]').trigger('click')
+    await flushPromises()
+    expect(mockedRemoveColumn).toHaveBeenCalledWith('memphis-redevelopment', COLUMN.id)
+    // Re-read rather than spliced locally: one reader, so the map, the table
+    // and this strip cannot disagree about what exists.
+    expect(mockedColumns).toHaveBeenCalledTimes(2)
+    expect(w.find('[data-testid="derived-row"]').exists()).toBe(false)
+  })
+
+  it('keeps the column when the ask is declined', async () => {
+    const w = await mountAt(mapView())
+    await settleMap()
+    await w.get('[data-testid="derived-remove"]').trigger('click')
+    await flushPromises()
+    await w.get('[data-testid="derived-remove-cancel"]').trigger('click')
+    await flushPromises()
+    expect(mockedRemoveColumn).not.toHaveBeenCalled()
+    expect(w.find('[data-testid="derived-row"]').exists()).toBe(true)
+  })
+
+  it('renames a column and says so when it cannot', async () => {
+    const w = await mountAt(mapView())
+    await settleMap()
+    vi.spyOn(window, 'prompt').mockReturnValue('Civic participation')
+    mockedRenameColumn.mockRejectedValueOnce(new Error('library unavailable'))
+    await w.get('[data-testid="derived-rename"]').trigger('click')
+    await flushPromises()
+    expect(mockedRenameColumn).toHaveBeenCalledWith(
+      'memphis-redevelopment',
+      COLUMN.id,
+      'Civic participation',
+    )
+    expect(w.get('[data-testid="derived-column-error"]').text()).toContain('library unavailable')
+  })
+
+  it('does nothing when the rename is cancelled', async () => {
+    const w = await mountAt(mapView())
+    await settleMap()
+    vi.spyOn(window, 'prompt').mockReturnValue(null)
+    await w.get('[data-testid="derived-rename"]').trigger('click')
+    await flushPromises()
+    expect(mockedRenameColumn).not.toHaveBeenCalled()
   })
 })

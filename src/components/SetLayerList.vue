@@ -182,7 +182,7 @@ function toggle(row: Row): void {
 
 .set-layers-head {
   margin: 0 0 5px;
-  font-size: 0.72rem;
+  font-size: var(--blo-text-eyebrow);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -201,7 +201,7 @@ function toggle(row: Row): void {
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  font-size: 0.86rem;
+  font-size: var(--blo-text-meta);
 }
 /* Nothing to press, so nothing that looks pressable. */
 .set-layer-label.fixed {
@@ -218,11 +218,11 @@ function toggle(row: Row): void {
   overflow-wrap: anywhere;
 }
 .set-layer-shape {
-  font-size: 0.74rem;
+  font-size: var(--blo-text-eyebrow);
   color: #6b7280;
 }
 .set-layer-missing {
-  font-size: 0.82rem;
+  font-size: var(--blo-text-meta);
   color: #92400e;
   overflow-wrap: anywhere;
 }

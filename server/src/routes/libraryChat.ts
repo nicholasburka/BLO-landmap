@@ -25,6 +25,7 @@ import {
   type ChatRow,
 } from '../services/libraryChat.js'
 import { compactIfNeeded, confirmAction, runChatTurn, MODEL_UNAVAILABLE, type ChatEvent } from '../services/chatLoop.js'
+import { getWorkingSet } from '../services/libraryWorkingSets.js'
 
 /**
  * Chat (P6-7a): conversations with the library's own tools.
@@ -187,6 +188,17 @@ router.post(
       return notFound(res)
     }
 
+    // P11-9: the working set this turn is scoped to, if the person scoped
+    // the conversation. A slug that names nothing is answered library-wide
+    // rather than refused — the chip is a convenience, not a gate, and a
+    // deleted set must not make a thread unusable.
+    let scope: { slug: string; name: string; members: string[] } | null = null
+    const askedScope = typeof req.body?.workingSet === 'string' ? req.body.workingSet.trim() : ''
+    if (askedScope) {
+      const set = await getWorkingSet(askedScope).catch(() => null)
+      if (set) scope = { slug: set.slug, name: set.title, members: set.datasets }
+    }
+
     let history
     let userMessage
     try {
@@ -232,7 +244,15 @@ router.post(
 
     let result
     try {
-      result = await runChatTurn({ chat, user, question: parsed.text, history, emit: send, clientIp })
+      result = await runChatTurn({
+        chat,
+        user,
+        question: parsed.text,
+        history,
+        emit: send,
+        clientIp,
+        workingSet: scope,
+      })
     } catch (err) {
       // Not the model — our own retrieval or store. Ask calls this a 502 and
       // so do we; here it is the last event on the stream.

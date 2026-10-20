@@ -230,7 +230,7 @@ function canEmbedAsMap(entry: CatalogEntry): boolean {
 .picker-hint,
 .picker-note {
   margin: 0 0 8px;
-  font-size: 12.5px;
+  font-size: var(--blo-text-caption);
   color: var(--blo-stone);
 }
 
@@ -264,7 +264,7 @@ function canEmbedAsMap(entry: CatalogEntry): boolean {
   gap: 10px;
   width: 100%;
   padding: 6px 8px;
-  font-size: 13.5px;
+  font-size: var(--blo-text-meta);
   text-align: left;
   color: var(--blo-ink);
   background: transparent;
@@ -285,7 +285,7 @@ function canEmbedAsMap(entry: CatalogEntry): boolean {
 .result-kind {
   flex-shrink: 0;
   padding: 1px 7px;
-  font-size: 11.5px;
+  font-size: var(--blo-text-eyebrow);
   color: var(--blo-stone);
   background: rgba(17, 17, 17, 0.05);
   border-radius: 999px;

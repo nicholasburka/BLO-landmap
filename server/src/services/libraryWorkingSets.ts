@@ -13,7 +13,7 @@
  * asks that set's sources, 11 instead of 40.
  */
 
-import { putFile, isBucketEnabled, listFiles } from './libraryBucket.js'
+import { putFile, deleteFile, isBucketEnabled, listFiles } from './libraryBucket.js'
 import { libraryQuery } from './libraryDb.js'
 import {
   getCatalogEntry,
@@ -197,12 +197,83 @@ export async function putDerivedColumns(
   return { ...doc, slug }
 }
 
+/**
+ * Rename a derived column (P10-5).
+ *
+ * The LABEL only, never the id: the id is what the layer
+ * `internal-<set>~<id>` is built from and what a saved framing names, so
+ * changing it would break a map somebody has open. A header is what a reader
+ * sees; an id is what the system joins on, and they are allowed to differ.
+ *
+ * Nothing is recomputed. The numbers did not change — only what they are
+ * called — and recomputing to rename would make a cheap edit expensive and
+ * would restamp `computedAt` with a lie.
+ */
+export async function renameDerivedColumn(
+  slug: string,
+  id: string,
+  label: string,
+): Promise<WorkingSet | null | { error: 'no-column' }> {
+  const existing = await getWorkingSet(slug)
+  if (!existing) return null
+  const kept = Array.isArray(existing.derived) ? [...existing.derived] : []
+  const at = kept.findIndex(
+    item => item && typeof item === 'object' && (item as { id?: unknown }).id === id,
+  )
+  if (at < 0) return { error: 'no-column' }
+  kept[at] = { ...(kept[at] as Record<string, unknown>), label }
+  const doc: WorkingSetDoc = { ...existing, derived: kept }
+  await writeWorkingSet(slug, doc)
+  return { ...doc, slug }
+}
+
+/**
+ * Remove a derived column (P10-5).
+ *
+ * There was no way to do this at all, so a conversation that iterated on a
+ * formula left a trail of dead columns behind it against a cap of 24 — dev
+ * carries two from exactly that.
+ *
+ * The column's FILE goes with it when it had one. A derived column over the
+ * inline cap lives at `derived/<id>.json`, and leaving that behind would mean
+ * a reindex could resurrect a column somebody deleted.
+ *
+ * The set's FRAMING is left alone deliberately. A framing naming a layer that
+ * no longer exists already degrades — `readMapState` drops what it cannot
+ * resolve — and silently rewriting somebody's saved framing as a side effect
+ * of a delete is a bigger surprise than a layer that stops drawing.
+ */
+export async function removeDerivedColumn(
+  slug: string,
+  id: string,
+): Promise<WorkingSet | null | { error: 'no-column' }> {
+  const existing = await getWorkingSet(slug)
+  if (!existing) return null
+  const kept = Array.isArray(existing.derived) ? [...existing.derived] : []
+  const at = kept.findIndex(
+    item => item && typeof item === 'object' && (item as { id?: unknown }).id === id,
+  )
+  if (at < 0) return { error: 'no-column' }
+  const file = (kept[at] as { file?: unknown }).file
+  kept.splice(at, 1)
+  const doc: WorkingSetDoc = { ...existing, derived: kept }
+  await writeWorkingSet(slug, doc)
+  if (typeof file === 'string' && file) {
+    // After the manifest, never before: a delete that failed here would
+    // otherwise leave a column pointing at a file that is gone.
+    await deleteFile(`${workingSetPrefix(slug)}${file}`).catch(() => {})
+  }
+  return { ...doc, slug }
+}
+
 export interface WorkingSetInput {
   name: string
   purpose?: string
   datasets?: string[]
   layers?: string[]
   sites?: string | null
+  /** P11-1: the map state this set opens on. Validated by the route. */
+  framing?: Record<string, unknown> | null
   fromView?: string
   savedBy: string
   savedById: number | null
@@ -231,6 +302,7 @@ export async function createWorkingSet(input: WorkingSetInput): Promise<WorkingS
     datasets: withAnchor(members(input.datasets, WORKING_SET_DATASETS_MAX), sites),
     layers: members(input.layers, WORKING_SET_LAYERS_MAX),
     sites,
+    ...(input.framing ? { framing: input.framing } : {}),
     savedBy: input.savedBy,
     savedById: input.savedById,
     savedAt: new Date().toISOString(),
@@ -246,6 +318,8 @@ export interface WorkingSetUpdates {
   datasets?: string[]
   layers?: string[]
   sites?: string | null
+  /** P11-1. `null` clears it; omitted leaves it exactly as it was. */
+  framing?: Record<string, unknown> | null
 }
 
 /**
@@ -271,6 +345,10 @@ export async function updateWorkingSet(slug: string, updates: WorkingSetUpdates)
     ...(updates.layers === undefined ? {} : { layers: members(updates.layers, WORKING_SET_LAYERS_MAX) }),
     sites,
   }
+  // P11-1: omitted leaves the framing alone (it rode in on `...existing`);
+  // null clears it, which puts the set back on a derived default.
+  if (updates.framing === null) delete doc.framing
+  else if (updates.framing !== undefined) doc.framing = updates.framing
   await writeWorkingSet(slug, doc)
   return { ...doc, slug }
 }

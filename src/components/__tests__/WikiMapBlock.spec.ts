@@ -296,10 +296,14 @@ describe('the phone path', () => {
     wrapper.unmount()
   })
 
-  it('sends a set-backed view to the set, since that is where its two interfaces are', async () => {
+  it('sends a set-backed view to the SET’s own page (P11-2)', async () => {
+    // It used to go to `/views/<view-slug>`, where a set's interfaces lived
+    // when a set had no address of its own. The set is the object now.
     viewport = stubViewportWidth(390)
     const wrapper = await mountBlock({ view: view({ workingSet: 'memphis-redevelopment' }) })
-    expect(wrapper.get('[data-testid="wiki-map-standin"] a').attributes('href')).toBe('/views/memphis-siting')
+    expect(wrapper.get('[data-testid="wiki-map-standin"] a').attributes('href')).toBe(
+      '/sets/memphis-redevelopment',
+    )
     wrapper.unmount()
   })
 

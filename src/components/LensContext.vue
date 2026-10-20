@@ -96,7 +96,7 @@ const rows = computed<Row[]>(() => {
 .lens-context-label {
   margin: 0;
   font-family: var(--blo-font-display, 'Fraunces', serif);
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -126,7 +126,7 @@ const rows = computed<Row[]>(() => {
 }
 
 .lens-context-name {
-  font-size: 12.5px;
+  font-size: var(--blo-text-caption);
   color: var(--blo-ink-soft, #2a2a2a);
 }
 
@@ -167,7 +167,7 @@ const rows = computed<Row[]>(() => {
 
 .lens-context-note {
   margin: 0;
-  font-size: 10.5px;
+  font-size: var(--blo-text-micro);
   color: var(--blo-stone, #6b6560);
 }
 

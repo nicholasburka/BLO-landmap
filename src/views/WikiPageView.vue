@@ -566,7 +566,7 @@ function onContentClick(event: MouseEvent): void {
 }
 
 .wiki-content .embed-meta {
-  font-size: 12.5px;
+  font-size: var(--blo-text-caption);
   color: var(--blo-stone);
   margin-bottom: 8px;
 }
@@ -581,7 +581,7 @@ function onContentClick(event: MouseEvent): void {
 }
 
 .wiki-content .embed-more {
-  font-size: 12.5px;
+  font-size: var(--blo-text-caption);
   color: var(--blo-stone);
   margin-bottom: 6px;
 }
@@ -600,7 +600,7 @@ function onContentClick(event: MouseEvent): void {
 
 .wiki-content .embed-table {
   border-collapse: collapse;
-  font-size: 12.5px;
+  font-size: var(--blo-text-caption);
   width: 100%;
 }
 

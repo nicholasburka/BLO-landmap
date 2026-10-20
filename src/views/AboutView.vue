@@ -365,7 +365,7 @@ section {
   padding: 1rem;
   border-radius: 4px;
   font-family: monospace;
-  font-size: 0.95rem;
+  font-size: var(--blo-text-body);
   color: #2d5016;
   margin-top: 1rem;
 }
@@ -411,7 +411,7 @@ section {
   color: #667eea;
   text-decoration: none;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: var(--blo-text-body);
 }
 
 .dataset-item a:hover {

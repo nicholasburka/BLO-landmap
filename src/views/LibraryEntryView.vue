@@ -2443,7 +2443,7 @@ h2 {
 }
 .set-member-kind,
 .set-member-status {
-  font-size: 0.78rem;
+  font-size: var(--blo-text-caption);
   color: #6b7280;
 }
 .set-member-status {

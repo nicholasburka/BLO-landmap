@@ -170,13 +170,13 @@ watch(
 }
 
 .file {
-  font-size: 0.82rem;
+  font-size: var(--blo-text-meta);
   color: #7a7063;
   word-break: break-all;
 }
 
 .chip {
-  font-size: 0.75rem;
+  font-size: var(--blo-text-caption);
   padding: 2px 8px;
   border-radius: 999px;
   background: #f0ece2;
@@ -211,7 +211,7 @@ watch(
 
 .badge {
   margin-left: 6px;
-  font-size: 0.68rem;
+  font-size: var(--blo-text-micro);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 2px 6px;
@@ -227,7 +227,7 @@ watch(
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 2px 10px;
-  font-size: 0.88rem;
+  font-size: var(--blo-text-body);
 }
 
 .fields dt {
@@ -241,7 +241,7 @@ watch(
 .why,
 .filed {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: var(--blo-text-body);
   color: #5c5348;
 }
 

@@ -18,28 +18,24 @@ const mockFetchView = vi.mocked(fetchView)
  * here, then sent on to whichever surface restores that kind of view.
  */
 let router: Router
-async function openViewLink(slug: string) {
+async function openViewLink(slug: string, query: Record<string, string> = {}) {
   router = createRouter({
     history: createMemoryHistory(),
     routes: [
       { path: '/', component: { template: '<div>map</div>' } },
       { path: '/views/:slug', component: ViewRedirect },
+      // P11-2: where a set-backed view now lands. Stubbed, because this file
+      // is about the FORK — which branch a document takes — and
+      // `WorkingSetWorkspace.spec.ts` is where the set page is exercised.
+      { path: '/sets/:slug', component: { template: '<div data-testid="set-stub">set</div>' } },
       { path: '/library', component: { template: '<div>library</div>' } },
       { path: '/library/:slug', component: { template: '<div>table</div>' } },
       { path: '/compare', component: { template: '<div>compare</div>' } },
     ],
   })
-  await router.push(`/views/${slug}`)
+  await router.push({ path: `/views/${slug}`, query })
   await router.isReady()
-  const wrapper = mount(ViewRedirect, {
-    global: {
-      plugins: [router],
-      // P7-2: the workspace is the explorer plus a map. This file is about the
-      // FORK — which branch a document takes — so the heavy half is stubbed
-      // and `WorkingSetWorkspace.spec.ts` is where it is really exercised.
-      stubs: { WorkingSetWorkspace: { props: ['view'], template: '<div data-testid="workspace-stub">{{ view.slug }}</div>' } },
-    },
-  })
+  const wrapper = mount(ViewRedirect, { global: { plugins: [router] } })
   await flushPromises()
   return wrapper
 }
@@ -184,29 +180,30 @@ describe('ViewRedirect', () => {
  * path it took before, because a view with no set is permanent and
  * first-class — ad-hoc, not legacy (spec §F.1).
  */
-describe('ViewRedirect — a view that presents a working set (P7-2)', () => {
-  it('stays put and renders the set’s two interfaces', async () => {
+describe('ViewRedirect — a view that presents a working set (P11-2)', () => {
+  // P7-2 rendered the workspace right here, because `/views/<slug>` was the
+  // only address a set's interfaces had. P11-2 gives the SET an address, so
+  // this file is a shim again and the set-backed branch redirects like every
+  // other branch does.
+  it('redirects to the set’s own page', async () => {
     mockFetchView.mockResolvedValue({ ...mapView(), workingSet: 'memphis-redevelopment' })
     const w = await openViewLink('tn-target-counties')
-    expect(router.currentRoute.value.path).toBe('/views/tn-target-counties')
-    expect(w.get('[data-testid="workspace-stub"]').text()).toBe('tn-target-counties')
-    // Not the shim's line, and not the missing panel.
-    expect(w.find('[data-testid="view-redirect"]').exists()).toBe(false)
+    expect(router.currentRoute.value.path).toBe('/sets/memphis-redevelopment')
+    // Not the missing panel: the view resolved, it just lives elsewhere now.
     expect(w.find('[data-testid="view-missing"]').exists()).toBe(false)
   })
 
-  it('hands the workspace the view, because the view is the framing', async () => {
-    const view = { ...mapView(), workingSet: 'memphis-redevelopment' }
-    mockFetchView.mockResolvedValue(view)
-    const w = await openViewLink('tn-target-counties')
-    expect(w.findComponent(WorkingSetWorkspace).props('view')).toEqual(view)
+  it('carries the link’s query across, so a shared deep link keeps its tab', async () => {
+    mockFetchView.mockResolvedValue({ ...mapView(), workingSet: 'memphis-redevelopment' })
+    await openViewLink('tn-target-counties', { tab: 'counties' })
+    expect(router.currentRoute.value.path).toBe('/sets/memphis-redevelopment')
+    expect(router.currentRoute.value.query.tab).toBe('counties')
   })
 
-  it('does not redirect a set-backed TABLE view to the explorer any more', async () => {
+  it('sends a set-backed TABLE view to the set too, not to the explorer', async () => {
     mockFetchView.mockResolvedValue({ ...tableView(), workingSet: 'memphis-redevelopment' } as SavedView)
-    const w = await openViewLink('georgia-orgs')
-    expect(router.currentRoute.value.path).toBe('/views/georgia-orgs')
-    expect(w.find('[data-testid="workspace-stub"]').exists()).toBe(true)
+    await openViewLink('georgia-orgs')
+    expect(router.currentRoute.value.path).toBe('/sets/memphis-redevelopment')
   })
 
   it('redirects a view whose pointer is empty — absent and blank both mean ad-hoc', async () => {

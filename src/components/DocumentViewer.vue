@@ -246,13 +246,13 @@ onBeforeUnmount(revoke)
 .doc-state.error { color: #b71c1c; }
 .doc-find { display: flex; align-items: center; gap: 0.6rem; }
 .doc-find-input { flex: 1; min-width: 0; max-width: 22rem; padding: 0.35rem 0.5rem; border: 1px solid #cfd8dc; border-radius: 4px; font: inherit; }
-.doc-find-count { color: #607d8b; font-size: 0.85rem; }
+.doc-find-count { color: #607d8b; font-size: var(--blo-text-meta); }
 .doc-find-next { border: 1px solid #cfd8dc; background: #fff; border-radius: 4px; color: #1b5e20; cursor: pointer; font: inherit; padding: 0.3rem 0.6rem; }
 .doc-pdf { width: 100%; height: min(80vh, 900px); border: 1px solid #cfd8dc; border-radius: 6px; }
 .doc-image-wrap { text-align: center; }
 .doc-image { max-width: 100%; height: auto; border-radius: 6px; }
 .doc-markdown { line-height: 1.55; }
-.doc-text { max-height: min(80vh, 900px); overflow: auto; padding: 1rem; background: #263238; color: #eceff1; border-radius: 6px; white-space: pre-wrap; word-break: break-word; font-size: 0.85rem; }
+.doc-text { max-height: min(80vh, 900px); overflow: auto; padding: 1rem; background: #263238; color: #eceff1; border-radius: 6px; white-space: pre-wrap; word-break: break-word; font-size: var(--blo-text-meta); }
 .doc-text :deep(mark) { background: #ffe082; color: #263238; }
 .doc-text :deep(.doc-hit-active) { background: #ffab40; }
 .doc-text :deep(.doc-page-mark) { display: block; color: #90a4ae; margin: 0.75rem 0 0.25rem; }
@@ -268,14 +268,14 @@ onBeforeUnmount(revoke)
   .doc-name { flex: 1 1 100%; order: -1; white-space: normal; overflow-wrap: anywhere; font-size: 1rem; }
   .doc-back,
   .doc-toggle,
-  .doc-download { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 0.75rem; font-size: 0.95rem; }
+  .doc-download { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 0.75rem; font-size: var(--blo-text-body); }
   .doc-back { padding-left: 0; }
   .doc-find { flex-wrap: wrap; }
   .doc-find-input { flex: 1 1 100%; max-width: none; min-height: 44px; font-size: 16px; }
-  .doc-find-count { font-size: 0.95rem; }
-  .doc-find-next { min-height: 44px; padding: 0 0.9rem; font-size: 0.95rem; }
-  .doc-state { font-size: 0.95rem; }
+  .doc-find-count { font-size: var(--blo-text-body); }
+  .doc-find-next { min-height: 44px; padding: 0 0.9rem; font-size: var(--blo-text-body); }
+  .doc-state { font-size: var(--blo-text-body); }
   .doc-pdf { height: 70svh; }
-  .doc-text { max-height: 70svh; padding: 0.75rem; font-size: 0.95rem; }
+  .doc-text { max-height: 70svh; padding: 0.75rem; font-size: var(--blo-text-body); }
 }
 </style>

@@ -406,7 +406,19 @@ function readViewport(value: unknown): SavedMapViewState['viewport'] {
  */
 export function mapStateOf(view: SavedView): SavedMapViewState | null {
   if (view.type !== 'map') return null
-  const raw = (view.state ?? {}) as unknown as Record<string, unknown>
+  return readMapState((view.state ?? {}) as unknown as Record<string, unknown>)
+}
+
+/**
+ * The same reading, over a bare map state (P11-2).
+ *
+ * A working set's `framing` is a map state that never belonged to a view, so
+ * it has no `type` to check and no document around it. Everything below used
+ * to live inside `mapStateOf`; it is lifted so the set and the view are read
+ * by one function and cannot drift — the client half of the same argument
+ * that put `parseMapState` in one place on the server.
+ */
+export function readMapState(raw: Record<string, unknown>): SavedMapViewState {
   const layers = (Array.isArray(raw.layers) ? raw.layers : [])
     .filter(
       (l): l is { layerId: string; weight: number; direction?: unknown } =>
@@ -527,41 +539,47 @@ export function compareViewUrl(state: SavedCompareViewState, slug?: string): str
  * not a route: switching is a `router.replace`, nothing unmounts that holds
  * data, and nothing is fetched twice. A deep link to either opens there.
  */
-export type SetInterface = 'map' | 'data'
+export type SetTab = 'map' | 'counties' | 'datasets'
 
-export const SET_INTERFACE_KEY = 'interface'
+export const SET_TAB_KEY = 'tab'
+
+/** Which of the set's datasets is open inside the Datasets tab (P11-6).
+ *  A second key rather than a path segment, so closing it is a query change
+ *  and Back walks out of the dataset into the list. */
+export const SET_OPEN_KEY = 'open'
+
+/** The tab a set opens on when the URL does not say. A set has one answer
+ *  now: it used to depend on the type of the VIEW you arrived through. */
+export const DEFAULT_SET_TAB: SetTab = 'map'
 
 /**
- * Which interface a view opens in when the URL does not say.
+ * `?tab=` → a tab (P11-4).
  *
- * The view's own type is the answer, because the view IS the framing: a view
- * somebody saved off the map opens on the map, one saved off a table opens on
- * the table. The set is the same either way, which is the point.
+ * Was `?interface=` over `map | data`. The key is `tab` because there are
+ * three of them now and they are tabs in the markup already; `data` split
+ * into `counties` (the set's numbers per county) and `datasets` (what it is
+ * made of), which are the two questions the single Data tab could not answer.
+ *
+ * An unknown value degrades to the default rather than throwing: a
+ * hand-edited link should still open the set.
  */
-export function interfaceForViewType(type: string): SetInterface {
-  return type === 'table' ? 'data' : 'map'
-}
-
-/** `?interface=` → an interface, falling back to the view's own kind. An
- *  unknown value degrades rather than throwing: a hand-edited link should
- *  still open the view. */
-export function parseSetInterface(value: unknown, fallback: SetInterface): SetInterface {
+export function parseSetTab(value: unknown): SetTab {
   const raw = Array.isArray(value) ? value[0] : value
-  if (raw === 'map' || raw === 'data') return raw
-  return fallback
+  if (raw === 'map' || raw === 'counties' || raw === 'datasets') return raw
+  return DEFAULT_SET_TAB
 }
 
 /**
- * A deep link to one interface of a set-backed view.
+ * A deep link to one tab of a working set (P11-4).
  *
- * The interface is omitted when it is the one the view's own type opens in, so
- * the canonical link to a map view stays `/views/<slug>` and does not grow a
- * parameter restating what the document already says.
+ * The tab is omitted when it is the default, so the canonical link to a set
+ * stays `/sets/<slug>` and does not grow a parameter restating where a set
+ * opens anyway.
  */
-export function workingSetViewHref(viewSlug: string, iface?: SetInterface, viewType = 'map'): string {
-  const path = `/views/${encodeURIComponent(viewSlug)}`
-  if (!iface || iface === interfaceForViewType(viewType)) return path
-  return `${path}?${SET_INTERFACE_KEY}=${iface}`
+export function workingSetTabHref(setSlug: string, tab?: SetTab): string {
+  const path = `/sets/${encodeURIComponent(setSlug)}`
+  if (!tab || tab === DEFAULT_SET_TAB) return path
+  return `${path}?${SET_TAB_KEY}=${tab}`
 }
 
 /**
@@ -569,14 +587,14 @@ export function workingSetViewHref(viewSlug: string, iface?: SetInterface, viewT
  * table view, /compare for a comparison. Falls back to the map shim if the
  * document is unreadable.
  *
- * P7-2: a view that PRESENTS a working set opens on `/views/:slug` instead,
- * where the set's two interfaces are, in whichever one the view's own type
- * names. That is not a special case bolted on — it is the same rule as the rest
- * of this function, which has always sent a view to the surface that can show
- * what it is of.
+ * P11-2: a view that PRESENTS a working set opens at the SET — `/sets/<slug>`
+ * — because that is the surface that can show what it is of, which is the
+ * same rule the rest of this function has always followed. It used to open at
+ * `/views/:slug`, where the set's interfaces lived when a set had no address
+ * of its own.
  */
 export function viewOpenUrl(view: SavedView): string {
-  if (view.workingSet) return workingSetViewHref(view.slug, undefined, view.type)
+  if (view.workingSet) return `/sets/${encodeURIComponent(view.workingSet)}`
   const table = tableStateOf(view)
   if (table) return tableViewUrl(table, view.slug)
   const compare = compareStateOf(view)

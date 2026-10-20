@@ -95,8 +95,26 @@ export interface WorkingSetMember {
   readiness?: { as: string; placeReport: string; notes: string[] }
 }
 
+/**
+ * What a set opens on (P11-1) — a map state, minus the `prompt` a saved view
+ * carries. Absent means none was stored: every set made before P11-1, and
+ * every set whose framing has been cleared. The reader derives a default from
+ * the set's own county layers rather than showing an empty map.
+ */
+export interface SetFraming {
+  layers: { layerId: string; weight: number; direction?: string }[]
+  filters: unknown[]
+  limit: number | null
+  regionStates: string[]
+  viewport: { center: [number, number]; zoom: number } | null
+  pointLayers?: { id: string; name: string }[]
+  siteLayers?: string[]
+}
+
 export interface WorkingSetDetail extends WorkingSetSummary {
   members: WorkingSetMember[]
+  /** P11-1. Absent on a set that has never been framed. */
+  framing?: SetFraming
   /**
    * Slugs the set names that the library no longer has.
    *
@@ -137,6 +155,14 @@ export interface WorkingSetFields {
   datasets?: string[]
   layers?: string[]
   sites?: string | null
+  /**
+   * P11-1: the map state this set opens on.
+   *
+   * `null` clears it and puts the set back on a default derived from its own
+   * county layers. Validated server-side by the same parser a saved view's
+   * state goes through, so a layer id refused there is refused here.
+   */
+  framing?: SetFraming | null
 }
 
 export async function createWorkingSet(input: { name: string } & WorkingSetFields): Promise<{ slug: string; name: string }> {
@@ -289,15 +315,24 @@ export function workingSetProgress(
 /**
  * That progress, in words.
  *
- * "9 of 11 held" leads because getting a table into the library is the work
- * the number is tracking. The rest is only said when it is true — a set with
- * nothing missing should not carry a "0 missing" clause for somebody to read
- * past.
+ * **The COUNT leads, not the ratio.** This used to open with "9 of 11 held",
+ * and on a set where everything is sourced that reads "4 of 4 held" — a ratio
+ * whose two halves are always the same number, over an assumption nobody
+ * questions. If a set names four datasets we have four datasets; that is what
+ * naming them means. The information is *four*.
+ *
+ * The exceptions still earn their place, because they are the cases the
+ * reader can act on: something named that the library has lost, something we
+ * hold but could not reach. Those are said only when true — a set with
+ * nothing missing should not carry a "0 missing" clause to read past.
+ *
+ * `indexed` is no longer broken out here. A source we point at rather than
+ * hold is a real distinction, and the Datasets tab makes it per row (P11-6),
+ * which is where somebody deciding about one of them is looking.
  */
 export function progressLine(progress: WorkingSetProgress): string {
   if (progress.total === 0) return 'Nothing in this set yet'
-  const parts = [`${progress.held} of ${progress.total} held`]
-  if (progress.indexed) parts.push(`${progress.indexed} indexed`)
+  const parts = [`${progress.total} ${progress.total === 1 ? 'dataset' : 'datasets'}`]
   if (progress.unreached) parts.push(`${progress.unreached} could not be reached`)
   if (progress.missing) {
     parts.push(`${progress.missing} no longer in the library`)
@@ -309,15 +344,30 @@ export function progressLine(progress: WorkingSetProgress): string {
  * Where a working set opens: its catalog entry, like anything else in the
  * library.
  *
- * P7-2 gave a set its two interfaces and they are deliberately NOT here. A set
- * holds no framing — no viewport, no sort, no palette — so there is nothing to
- * show it WITH until a view supplies one; the interfaces live on
- * `/views/:slug` (`workingSetViewHref`), over the set the view presents. A set
- * with no view yet has an entry page and a sourcing checklist, which is the
- * honest amount of surface for an object that has not been framed.
+ * The set's WORKING surface is `setWorkspaceHref` (P11-2); this is its entry
+ * in the library — what the thing is, who saved it, what it holds.
+ *
+ * P7-2 put the interfaces on `/views/:slug`, because a set held no framing and
+ * so had nothing to be shown with until a view supplied one. P11-1 gave the set
+ * a framing of its own and P11-2 gave it an address, which is what fixed the
+ * case that reasoning could not reach: a set with no view at all.
  */
 export function workingSetHref(slug: string): string {
   return `/library/${encodeURIComponent(slug)}`
+}
+
+/**
+ * Where a working set is WORKED ON (P11-2) — its map, its counties, its
+ * datasets, its analyses.
+ *
+ * Distinct from `workingSetHref`, which is the set's catalog entry: the
+ * library's record of what this thing is, who saved it and what it holds.
+ * The entry is the provenance; this is the surface. Before P11-2 there was
+ * no address for the surface at all — you reached it through a saved view,
+ * and a set without one could not be opened.
+ */
+export function setWorkspaceHref(slug: string): string {
+  return `/sets/${encodeURIComponent(slug)}`
 }
 
 /** The datasets browser, narrowed to one set — the list its progress line
@@ -451,6 +501,34 @@ const NO_COLUMNS: WorkingSetColumns = { slug: '', name: '', columns: [], unreada
  * anything. A 404 answers as "no columns" rather than throwing — a set can be
  * renamed out from under an open page, and the view is still worth drawing.
  */
+/**
+ * Rename a derived column (P10-5).
+ *
+ * The LABEL only. The id stays, because the layer `internal-<set>~<id>` is
+ * built from it and a saved framing names that — renaming the id would stop
+ * a map somebody has open from drawing.
+ */
+export async function renameWorkingSetColumn(slug: string, id: string, label: string): Promise<void> {
+  const res = await internalFetch(
+    `/api/working-sets/${encodeURIComponent(slug)}/columns/${encodeURIComponent(id)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ label }),
+    },
+  )
+  if (!res.ok) throw new Error(await errorMessage(res, `That column could not be renamed (${res.status})`))
+}
+
+/** Remove a derived column and its stored values (P10-5). Unrecoverable. */
+export async function removeWorkingSetColumn(slug: string, id: string): Promise<void> {
+  const res = await internalFetch(
+    `/api/working-sets/${encodeURIComponent(slug)}/columns/${encodeURIComponent(id)}`,
+    { method: 'DELETE' },
+  )
+  if (!res.ok) throw new Error(await errorMessage(res, `That column could not be removed (${res.status})`))
+}
+
 export async function fetchWorkingSetColumns(slug: string): Promise<WorkingSetColumns> {
   const res = await internalFetch(`/api/working-sets/${encodeURIComponent(slug)}/columns`)
   if (res.status === 404) return { ...NO_COLUMNS, slug }

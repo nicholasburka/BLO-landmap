@@ -181,7 +181,7 @@ const box = ref<HTMLInputElement | null>(null)
 .addr-label {
   display: block;
   margin-bottom: 4px;
-  font-size: 0.72rem;
+  font-size: var(--blo-text-eyebrow);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -191,7 +191,7 @@ const box = ref<HTMLInputElement | null>(null)
   width: 100%;
   box-sizing: border-box;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: var(--blo-text-meta);
   padding: 4px 6px;
   border: 1px solid var(--blo-cream-divider, #e0d9ca);
   border-radius: 6px;
@@ -208,7 +208,7 @@ const box = ref<HTMLInputElement | null>(null)
   width: 100%;
   text-align: left;
   font: inherit;
-  font-size: 0.78rem;
+  font-size: var(--blo-text-meta);
   padding: 4px 6px;
   background: none;
   border: none;
@@ -221,7 +221,7 @@ const box = ref<HTMLInputElement | null>(null)
 }
 .addr-note {
   margin: 4px 0 0;
-  font-size: 0.76rem;
+  font-size: var(--blo-text-eyebrow);
   color: var(--blo-stone, #6b6560);
 }
 .addr-found {
@@ -231,12 +231,12 @@ const box = ref<HTMLInputElement | null>(null)
 }
 .addr-place {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: var(--blo-text-meta);
   font-weight: 600;
 }
 .addr-county {
   margin: 2px 0 4px;
-  font-size: 0.76rem;
+  font-size: var(--blo-text-eyebrow);
   color: var(--blo-stone, #6b6560);
 }
 .addr-values {
@@ -244,7 +244,7 @@ const box = ref<HTMLInputElement | null>(null)
   grid-template-columns: 1fr auto;
   gap: 1px 8px;
   margin: 0;
-  font-size: 0.76rem;
+  font-size: var(--blo-text-eyebrow);
 }
 .addr-values dt {
   overflow-wrap: anywhere;
@@ -260,7 +260,7 @@ const box = ref<HTMLInputElement | null>(null)
 .addr-clear {
   margin-top: 6px;
   font: inherit;
-  font-size: 0.76rem;
+  font-size: var(--blo-text-eyebrow);
   background: none;
   border: none;
   padding: 0;

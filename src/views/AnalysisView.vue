@@ -54,6 +54,7 @@ import { fetchViews, type SavedViewSummary } from '@/lib/views'
 import { relativeTime } from '@/lib/kb'
 import { fetchCatalog, type CatalogEntry } from '@/lib/libraryCatalog'
 import {
+  setWorkspaceHref,
   fetchWorkingSets,
   compositeLine,
   compositeServedLine,
@@ -94,18 +95,26 @@ interface Tool {
    * one opening a pane in place. The `hint` line under each card existed to
    * compensate, which is the tell that the label was doing no work.
    *
-   * Absent for a tool that lives inside a set: there is no control to label.
+   * P11-7: required now. Every tool in this list can be started, because the
+   * ones that could not are no longer in it — `needsSet` and `opensPane`
+   * went with them.
    */
-  start?: string
-  /** P9-12: Start opens a pane on this page instead of navigating. `href`
-   *  stays the fallback below the pane's breakpoint. */
-  opensPane?: boolean
-  /** P9-14: lives inside a working set, so this card names it and says so
-   *  rather than the tool being invisible until somebody stumbles on it. */
-  needsSet?: boolean
+  start: string
 }
 
-const TOOLS: Tool[] = [
+/**
+ * The tools that run over the WHOLE library (P11-7).
+ *
+ * This list had six entries, three of which could not be started — they need
+ * a working set, and said so in their own copy. P9-14 added them so a reader
+ * would know they exist, which was right; making them cards was not, because
+ * a card you cannot press is an advertisement. They are a sentence under the
+ * set list now, and they work on the set page where they always did.
+ *
+ * "Show on map" also left: it is how a working set gets MADE, so it sits with
+ * the sets rather than here.
+ */
+const LIBRARY_TOOLS: Tool[] = [
   {
     id: 'place',
     name: 'Check a place',
@@ -125,53 +134,7 @@ const TOOLS: Tool[] = [
     name: 'Explore a dataset',
     description: 'Filter, sort and summarise a table we hold, with the county context beside it.',
     href: '/datasets?readiness=held',
-    // P9-13: the hint used to say "Opens the datasets browser — pick a table,
-    // then its Data tab", which existed only because the label said "Start".
     start: 'Browse the tables we hold',
-  },
-  {
-    id: 'map',
-    name: 'Show on map',
-    description: 'Draw any of our layers over the counties, together, and keep the combination.',
-    // P9-12: opens the pane HERE rather than navigating to `/`. The href is
-    // kept as the narrow-window fallback and as a real link to right-click.
-    href: '/',
-    // Reads differently from the three above on purpose: it is the one that
-    // does not take you anywhere.
-    start: 'Open a map on this page',
-    opensPane: true,
-  },
-  // P9-14: the tools that need a SET. They were missing from this list
-  // entirely — the page's answer to "what can I run?" omitted six of the
-  // things you can run, because they were built as parts of a set's page
-  // rather than as tools, and a reader who had not been told they exist
-  // would not find them four levels down.
-  //
-  // P9-3's rule rather than silence: a gated capability says why. These
-  // carry no Start, because the honest answer is "open a set" and the sets
-  // are listed directly below.
-  {
-    id: 'weigh',
-    name: 'Weigh an index differently',
-    description:
-      'Drag the weights of a combined ranking and watch the map and the order move, then keep the version you like.',
-    href: '',
-    needsSet: true,
-  },
-  {
-    id: 'describe',
-    name: 'Look at a layer',
-    description:
-      'How much of the country it covers, how it spreads out, who is at each end, and how two layers relate.',
-    href: '',
-    needsSet: true,
-  },
-  {
-    id: 'address',
-    name: 'Find an address in the data',
-    description: 'A street address, the county it lands in, and what every layer in the set says there.',
-    href: '',
-    needsSet: true,
   },
 ]
 
@@ -351,6 +314,26 @@ const indexRun = ref<CompositeRun | null>(null)
 
 /** The layers an index can weigh: county layers only — internal ones off the
  *  catalog this page already loaded, public ones off the static registry. */
+/**
+ * What this set cannot do yet, and why (P9-3's rule, P12-1's placement).
+ *
+ * Both halves used to be `<span>`s inside the action row, which made the one
+ * thing a reader could NOT press the largest text in it. They are one quiet
+ * line under the row now. Said as plain sentences rather than as
+ * "Verb — needs X": the verb is not a control here, and writing it like one
+ * is what made them read as broken links.
+ */
+function unavailableIn(set: WorkingSetSummary): string[] {
+  const out: string[] = []
+  if (measurableLayers(set).length && !set.sites) {
+    out.push('Measuring proximity needs an anchor table — the rows to measure from.')
+  }
+  if (indexableLayers(set).length < 2) {
+    out.push('A combined ranking needs two or more county layers to weigh against each other.')
+  }
+  return out
+}
+
 function indexableLayers(set: WorkingSetSummary) {
   return indexableLayersOf(set, entries.value, LAYER_REGISTRY)
 }
@@ -431,44 +414,29 @@ function whoAndWhen(analysis: Analysis): string {
       <KbNav />
       <header class="analysis-header">
         <h1>Analysis</h1>
-        <p class="lede">What you can run over what the library holds, and what has been run lately.
-          Some tools work on the whole library; others need a working set, and say so.</p>
+        <p class="blo-type-body blo-type-body--measure lede">The working sets you analyse against, and the tools that run over the whole
+          library.</p>
       </header>
 
-      <ul class="tool-cards" data-testid="tool-cards">
-        <li v-for="tool in TOOLS" :key="tool.id" class="tool-card" :data-tool="tool.id" data-testid="tool-card">
-          <h2 class="tool-name">{{ tool.name }}</h2>
-          <p class="tool-description">{{ tool.description }}</p>
-          <!-- P9-14: a gated capability says why (P9-3's rule), instead of
-               being absent from the list of what you can run. -->
-          <p v-if="tool.needsSet" class="tool-needs" data-testid="tool-needs-set">
-            Inside a working set — open one below, on its Map.
-          </p>
-          <!-- P9-12: the map tool opens in place, because what a reader turns
-               on is the thing worth keeping and navigating away loses it. -->
-          <button
-            v-else-if="tool.opensPane"
-            type="button"
-            class="blo-act blo-act--lg tool-start"
-            data-testid="tool-start"
-            :aria-expanded="exploring"
-            @click="exploring = !exploring"
-          >
-            {{ exploring ? 'Close the map' : tool.start }}
-          </button>
-          <RouterLink v-else :to="tool.href" class="blo-act blo-act--lg tool-start" data-testid="tool-start">{{ tool.start }}</RouterLink>
-        </li>
-      </ul>
-
-      <ExploreMapPane v-if="exploring" @close="exploring = false" />
-
-      <!-- P7-1: what an analysis runs AGAINST, above the record of what has
-           been run. -->
+      <!-- P11-7: the SETS lead.
+           This page opened with six tool cards and put the sets below them —
+           but five of the six need a set and said so in their own copy
+           ("Inside a working set — open one below"). The page led with things
+           you could not use yet, on an object you had not chosen. -->
       <section class="sets" data-testid="working-sets">
-        <h2 class="recent-heading">Working sets</h2>
-        <p class="section-lede">
+        <h2 class="blo-type-section section-head">Working sets</h2>
+        <p class="blo-type-body blo-type-body--measure section-lede">
           A named set of datasets and the sites they bear on. A place report run inside one asks that set's sources and
           no others.
+        </p>
+
+        <!-- P11-7: P9-14 made these three their own cards so a reader would
+             know they exist. They cannot be STARTED from here — every one of
+             them needs a set — so they are a line naming what a set opens
+             into, and the sets are directly below it. -->
+        <p class="blo-type-body blo-type-body--measure set-inside" data-testid="set-inside">
+          Open a set to weigh an index differently, look at how a layer covers the country, or find an
+          address in its data.
         </p>
 
         <p v-if="loading" class="state-note" data-testid="sets-loading">Looking for working sets…</p>
@@ -478,17 +446,18 @@ function whoAndWhen(analysis: Analysis): string {
         <ul v-else class="set-list">
           <li v-for="row in setRows" :key="row.set.slug" class="set-row" data-testid="set-row">
             <div class="row-title-line">
-              <RouterLink :to="workingSetHref(row.set.slug)" class="row-title" data-testid="set-title">
+              <RouterLink :to="setWorkspaceHref(row.set.slug)" class="blo-type-item row-title" data-testid="set-title">
                 {{ row.set.name }}
               </RouterLink>
               <span class="badge kind-set" data-testid="set-progress">{{ row.progress }}</span>
             </div>
-            <p v-if="row.set.purpose" class="row-line" data-testid="set-purpose">{{ row.set.purpose }}</p>
-            <!-- A set may carry SEVERAL views, which is the point of the two
-                 objects being two objects. -->
-            <p class="set-views" data-testid="set-views">
+            <p v-if="row.set.purpose" class="blo-type-body blo-type-body--measure row-line" data-testid="set-purpose">{{ row.set.purpose }}</p>
+            <!-- P11-2: saved framings of the set, when somebody kept one. No
+                 longer the way IN — the title is — so a set with none says
+                 nothing rather than announcing an absence as a dead end. -->
+            <p v-if="row.set.views.length" class="blo-type-meta set-views" data-testid="set-views">
               <template v-if="row.set.views.length">
-                <span class="set-views-label">{{ row.set.views.length === 1 ? 'One view' : `${row.set.views.length} views` }}:</span>
+                <span class="set-views-label">{{ row.set.views.length === 1 ? 'Saved framing' : 'Saved framings' }}:</span>
                 <RouterLink
                   v-for="view in row.set.views"
                   :key="view.slug"
@@ -499,51 +468,56 @@ function whoAndWhen(analysis: Analysis): string {
                   {{ view.name }}
                 </RouterLink>
               </template>
-              <span v-else class="set-views-label" data-testid="set-no-views">No views of it yet</span>
             </p>
-            <p class="set-actions">
-              <RouterLink :to="workingSetPlaceHref(row.set.slug)" data-testid="set-place">Check a place in this set</RouterLink>
-              ·
-              <RouterLink :to="workingSetDatasetsHref(row.set.slug)" data-testid="set-datasets">Its datasets</RouterLink>
+            <!-- P12-1: a ROW of controls, not a sentence. The middots were
+                 what let two links, a button and a refusal read as one
+                 paragraph — and the refusal was the largest text in it. -->
+            <p class="blo-actions set-actions">
+              <RouterLink
+                :to="workingSetPlaceHref(row.set.slug)"
+                class="blo-type-action"
+                data-testid="set-place"
+              >Check a place</RouterLink>
+              <RouterLink
+                :to="workingSetDatasetsHref(row.set.slug)"
+                class="blo-type-action"
+                data-testid="set-datasets"
+              >Its datasets</RouterLink>
               <!-- P7-5, spec §F.5: a tool that operates on THIS set. It needs
                    both halves of the question — rows to measure FROM and a
-                   feature layer to measure TO.
-                   P9-3: when a half is missing, SAY SO rather than vanish.
-                   P7-5 hid the control so it could not be refused, which is
-                   right when a reader cannot act on the reason and wrong when
-                   they can: both of these are things they set on the set. A
-                   capability nobody can see is one nobody knows exists. -->
-              <template v-if="measurableLayers(row.set).length">
-                ·
-                <button
-                  v-if="row.set.sites"
-                  type="button"
-                  class="blo-act"
-                  data-testid="set-proximity"
-                  @click="openProximity(row.set)"
-                >
-                  {{ proximityFor === row.set.slug ? 'Close' : 'Measure proximity' }}
-                </button>
-                <span v-else class="set-tool-why" data-testid="set-proximity-why">
-                  Measure proximity — needs an anchor table, the rows to measure from
-                </span>
-              </template>
+                   feature layer to measure TO. -->
+              <button
+                v-if="measurableLayers(row.set).length && row.set.sites"
+                type="button"
+                class="blo-act"
+                data-testid="set-proximity"
+                @click="openProximity(row.set)"
+              >
+                {{ proximityFor === row.set.slug ? 'Close' : 'Measure proximity' }}
+              </button>
               <!-- P7-8, spec §F.5: over ONE layer an index is that layer
-                   rescaled, which the server refuses. Same P9-3 change: name
-                   the missing half instead of disappearing. -->
-              <template v-if="indexableLayers(row.set).length >= 2">
-                ·
-                <button type="button" class="blo-act" data-testid="set-index" @click="openIndex(row.set)">
-                  {{ indexFor === row.set.slug ? 'Close' : 'Create a combined ranking (index)' }}
-                </button>
-              </template>
-              <template v-else>
-                ·
-                <span class="set-tool-why" data-testid="set-index-why">
-                  Create a combined ranking — needs two or more county layers to weigh against each other
-                </span>
-              </template>
+                   rescaled, which the server refuses. -->
+              <button
+                v-if="indexableLayers(row.set).length >= 2"
+                type="button"
+                class="blo-act"
+                data-testid="set-index"
+                @click="openIndex(row.set)"
+              >
+                {{ indexFor === row.set.slug ? 'Close' : 'Create a combined ranking' }}
+              </button>
             </p>
+
+            <!-- P9-3's rule holds — a gated capability says WHY rather than
+                 vanishing — but P12-1 moves it out of the action row and into
+                 the quietest type on the page. It was a 13.8px span wedged
+                 between two 13px links: the one thing you could not press was
+                 the largest thing in the row. -->
+            <p
+              v-if="unavailableIn(row.set).length"
+              class="blo-type-unavailable set-unavailable"
+              data-testid="set-unavailable"
+            >{{ unavailableIn(row.set).join(' ') }}</p>
 
             <form
               v-if="indexFor === row.set.slug"
@@ -754,10 +728,52 @@ function whoAndWhen(analysis: Analysis): string {
           </p>
           <p v-if="promoteError" class="promote-note error" data-testid="promote-error">{{ promoteError }}</p>
         </form>
+
+        <!-- P9-12/P11-7: the other way a set comes into being — turn layers
+             on, keep the combination. It opens in place, because what a
+             reader switches on is the thing worth keeping and navigating away
+             loses it. Here rather than in the tool strip because making a set
+             is a thing you do to this list, not a tool over the library. -->
+        <p class="sets-new">
+          <button
+            type="button"
+            class="blo-act blo-act--write blo-act--lg"
+            data-testid="tool-start"
+            :aria-expanded="exploring"
+            @click="exploring = !exploring"
+          >
+            {{ exploring ? 'Close the map' : 'New working set' }}
+          </button>
+          <span class="blo-type-meta sets-new-why">Draw any of our layers together, and keep the combination.</span>
+        </p>
+        <ExploreMapPane v-if="exploring" @close="exploring = false" />
+      </section>
+
+      <!-- P11-7: the three that genuinely run over the whole library. The
+           three that need a set are not cards any more — they are on the set
+           page, named in one line under the list above, because a card you
+           cannot start is not a tool, it is an advertisement. -->
+      <section class="tools" data-testid="library-tools">
+        <h2 class="blo-type-section section-head">Across the whole library</h2>
+        <ul class="tool-cards" data-testid="tool-cards">
+          <li
+            v-for="tool in LIBRARY_TOOLS"
+            :key="tool.id"
+            class="tool-card"
+            :data-tool="tool.id"
+            data-testid="tool-card"
+          >
+            <h3 class="blo-type-item tool-name">{{ tool.name }}</h3>
+            <p class="blo-type-body tool-description">{{ tool.description }}</p>
+            <RouterLink :to="tool.href" class="blo-act blo-act--lg tool-start" data-testid="tool-start">{{
+              tool.start
+            }}</RouterLink>
+          </li>
+        </ul>
       </section>
 
       <section class="recent">
-        <h2 class="recent-heading">Recent analyses</h2>
+        <h2 class="blo-type-section section-head">Recent analyses</h2>
         <p v-if="loading" class="state-note" data-testid="analyses-loading">Looking for what has been run…</p>
         <p v-else-if="analyses.length === 0" class="state-note empty" data-testid="analyses-empty">
           Nothing has been run yet. Check a place or save a view and it will appear here.
@@ -813,8 +829,6 @@ function whoAndWhen(analysis: Analysis): string {
 
 .lede {
   margin: 0 0 18px;
-  font-size: 14px;
-  color: var(--blo-stone);
 }
 
 .tool-cards {
@@ -834,8 +848,6 @@ function whoAndWhen(analysis: Analysis): string {
 
 .section-lede {
   margin: 0 0 10px;
-  font-size: 13px;
-  color: var(--blo-stone);
 }
 
 .set-list {
@@ -849,9 +861,10 @@ function whoAndWhen(analysis: Analysis): string {
   border-top: 1px solid var(--blo-cream-divider);
 }
 
+/* P12-1: `.blo-type-item` owns size, weight and colour. What is left is the
+   one thing a link needs here — the title is the set's name, so it carries
+   no underline until it is hovered. */
 .set-row .row-title {
-  font-size: 14px;
-  color: var(--blo-ink);
   text-decoration: none;
 }
 
@@ -863,11 +876,17 @@ function whoAndWhen(analysis: Analysis): string {
   font-variant-numeric: tabular-nums;
 }
 
-.set-views,
-.set-actions {
+.set-views {
   margin: 4px 0 0;
-  font-size: 13px;
-  color: var(--blo-stone);
+}
+
+.set-actions {
+  margin: 8px 0 0;
+}
+
+/* P12-1: the quiet line under the row. */
+.set-unavailable {
+  margin: 5px 0 0;
 }
 
 .set-views-label {
@@ -879,10 +898,23 @@ function whoAndWhen(analysis: Analysis): string {
   color: var(--blo-stone);
 }
 
-.set-view-link,
-.set-actions a {
-  margin-right: 4px;
-  color: inherit;
+/* A saved framing is a link to a framing, so it is an action — not the
+   bordered panel it briefly became when the rule it shared a selector with
+   was removed out from under it. */
+.set-view-link {
+  font-size: var(--blo-text-meta);
+  font-weight: 500;
+  color: var(--blo-green-deep);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--blo-green-deep) 32%, transparent);
+}
+
+.set-view-link:hover {
+  border-bottom-color: var(--blo-green-deep);
+}
+
+.set-view-link:not(:last-child) {
+  margin-right: 10px;
 }
 
 .promote {
@@ -946,15 +978,10 @@ function whoAndWhen(analysis: Analysis): string {
 
 .tool-name {
   margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--blo-ink);
 }
 
 .tool-description {
   margin: 0;
-  font-size: 13px;
-  color: var(--blo-stone);
 }
 
 
@@ -977,13 +1004,26 @@ function whoAndWhen(analysis: Analysis): string {
   text-decoration: none;
 }
 
-.recent-heading {
-  margin: 0 0 10px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--blo-ink);
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--blo-cream-divider);
+/* P11-7: what a set opens into, where the three un-startable cards were. */
+.set-inside {
+  margin: 0 0 14px;
+}
+
+.sets-new {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 16px 0 0;
+}
+
+
+
+/* P12-1: `.blo-type-section` owns the type. A section heading is an eyebrow
+   now, so the rule under it would cut it off from what it heads — space does
+   that job, and more of it above than below. */
+.section-head {
+  margin: 26px 0 10px;
 }
 
 .state-note {
@@ -1022,10 +1062,9 @@ a.analysis-row:hover {
   gap: 8px;
 }
 
+/* `.blo-type-item` owns the type. */
 .row-title {
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--blo-ink);
+  text-decoration: none;
 }
 
 .row-meta-line {
@@ -1072,10 +1111,13 @@ a.analysis-row:hover {
   background: #f1edfb;
 }
 
-.row-line,
 .row-who {
-  font-size: 12px;
+  font-size: var(--blo-text-meta);
   color: var(--blo-stone);
+}
+
+.row-line {
+  margin: 2px 0 0;
 }
 
 /* --- Phone (P5-60) ---------------------------------------------------------
@@ -1122,10 +1164,7 @@ a.analysis-row:hover {
 }
 
 /* P7-5: the proximity tool on a set's row. */
-.set-tool-why {
-  color: #6b6560;
-  font-size: 0.86rem;
-}
+
 
 .proximity {
   margin: 10px 0 0;
@@ -1197,7 +1236,7 @@ a.analysis-row:hover {
 
 
 .index-hint {
-  font-size: 0.82rem;
+  font-size: var(--blo-text-meta);
   color: var(--blo-muted, #5a6472);
 }
 

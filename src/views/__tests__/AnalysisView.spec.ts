@@ -181,32 +181,24 @@ describe('the tool cards (P6-4)', () => {
   it('offers every tool, each saying where it goes rather than "Start"', async () => {
     const w = await mountIt()
     const cards = w.findAll('[data-testid="tool-card"]')
-    // P9-14: the last three need a working set and were missing from this
-    // list entirely — the page's answer to "what can I run?" omitted the
-    // things built in P9-6a…P9-12 because they live inside a set's page.
+    // P11-7: three, and every one can be started. The three that need a set
+    // are not cards any more — a card you cannot press is an advertisement,
+    // and they live on the set page where they always worked. "Show on map"
+    // left too: it is how a set gets MADE, so it sits with the sets.
     expect(cards.map(c => c.get('.tool-name').text())).toEqual([
       'Check a place',
       'Compare',
       'Explore a dataset',
-      'Show on map',
-      'Weigh an index differently',
-      'Look at a layer',
-      'Find an address in the data',
     ])
     // P9-13: four controls labelled "Start" were four different behaviours —
     // two tools, a filtered list, and a pane that opens in place. The label
     // does the work now, which is why the hint line under each card is gone.
-    // Only the four that go somewhere carry a control; the rest say why.
-    expect(
-      cards
-        .map(c => c.find('[data-testid="tool-start"]'))
-        .filter(b => b.exists())
-        .map(b => b.text()),
-    ).toEqual([
+    // P11-7: every card carries a control, because a card that could not be
+    // started is not in this list any more.
+    expect(cards.map(c => c.get('[data-testid="tool-start"]').text())).toEqual([
       'Open the place report',
       'Open the comparison',
       'Browse the tables we hold',
-      'Open a map on this page',
     ])
     for (const card of cards) {
       expect(card.get('.tool-description').text().length).toBeGreaterThan(10)
@@ -214,16 +206,18 @@ describe('the tool cards (P6-4)', () => {
     }
   })
 
-  it('says why the set-scoped tools have no Start, rather than hiding them', async () => {
-    // P9-3's rule, applied to the cards: a gated capability says why.
+  it('names what a set opens into, in one line above the sets', async () => {
+    // P9-14 made these three their own cards so a reader would know they
+    // exist, which was right. P11-7 keeps the knowing and drops the cards:
+    // none of them could be started from here.
     const w = await mountIt()
-    const gated = ['weigh', 'describe', 'address']
-    for (const id of gated) {
-      expect(w.get(`[data-tool="${id}"] [data-testid="tool-needs-set"]`).text()).toContain('working set')
-      expect(w.find(`[data-tool="${id}"] [data-testid="tool-start"]`).exists()).toBe(false)
+    const inside = w.get('[data-testid="set-inside"]').text()
+    expect(inside).toContain('weigh an index differently')
+    expect(inside).toContain('look at how a layer covers the country')
+    expect(inside).toContain('find an address in its data')
+    for (const id of ['weigh', 'describe', 'address']) {
+      expect(w.find(`[data-tool="${id}"]`).exists()).toBe(false)
     }
-    // And the ungated ones still start.
-    expect(w.find('[data-tool="place"] [data-testid="tool-start"]').exists()).toBe(true)
   })
 
   it('sends each Start somewhere real', async () => {
@@ -234,23 +228,25 @@ describe('the tool cards (P6-4)', () => {
     // Not a route of its own: the explorer is a tab on an entry, so this
     // opens the browser narrowed to the tables we hold.
     expect(hrefOf('explore')).toBe('/datasets?readiness=held')
-    // P9-12: the map tool is a BUTTON now — it opens a pane on this page,
+    // P9-12/P11-7: making a set is a BUTTON, and it sits with the sets —
+    // it opens a pane on this page,
     // because navigating to `/` lost whatever combination a reader built.
-    expect(hrefOf('map')).toBeUndefined()
-    expect(w.get('[data-tool="map"] [data-testid="tool-start"]').element.tagName).toBe('BUTTON')
+    // There is no `map` card to ask for a href any more.
+    expect(w.find('[data-tool="map"]').exists()).toBe(false)
+    expect(w.get('[data-testid="working-sets"] [data-testid="tool-start"]').element.tagName).toBe('BUTTON')
   })
 
   it('opens the map on this page, with everything off and nothing to keep yet', async () => {
     const w = await mountIt()
     expect(w.find('[data-testid="explore-map"]').exists()).toBe(false)
-    await w.get('[data-tool="map"] [data-testid="tool-start"]').trigger('click')
+    await w.get('[data-testid="working-sets"] [data-testid="tool-start"]').trigger('click')
     expect(w.find('[data-testid="explore-map"]').exists()).toBe(true)
     // Nothing is selected, so there is nothing to name yet — a picker that
     // pre-selects has made the choice the reader came to make.
     expect(w.find('[data-testid="explore-chosen"]').exists()).toBe(false)
     // And it closes again from the same control.
-    expect(w.get('[data-tool="map"] [data-testid="tool-start"]').text()).toBe('Close the map')
-    await w.get('[data-tool="map"] [data-testid="tool-start"]').trigger('click')
+    expect(w.get('[data-testid="working-sets"] [data-testid="tool-start"]').text()).toBe('Close the map')
+    await w.get('[data-testid="working-sets"] [data-testid="tool-start"]').trigger('click')
     expect(w.find('[data-testid="explore-map"]').exists()).toBe(false)
   })
 
@@ -319,7 +315,7 @@ describe('recent analyses (P6-4)', () => {
     expect(w.get('[data-testid="analyses-empty"]').text()).toContain('Nothing has been run yet')
     // The tools are still there — an empty library is where you start, not a
     // dead end.
-    expect(w.findAll('[data-testid="tool-card"]')).toHaveLength(7)
+    expect(w.findAll('[data-testid="tool-card"]')).toHaveLength(3)
   })
 
   it('says it is looking while the two lists are on their way', async () => {
@@ -404,24 +400,31 @@ describe('working sets (P7-1)', () => {
     const w = await mountIt()
     const row = w.get('[data-testid="set-row"]')
     expect(row.get('[data-testid="set-title"]').text()).toBe('Memphis redevelopment')
-    expect(row.get('[data-testid="set-title"]').attributes('href')).toBe('/library/memphis-redevelopment')
-    expect(row.get('[data-testid="set-progress"]').text()).toBe('1 of 2 held · 1 indexed')
+    // P11-2: the primary click on a set OPENS it. It used to go to the set's
+    // catalog entry, which is its provenance record — so the working surface
+    // was reachable only through a saved view, if it had one.
+    expect(row.get('[data-testid="set-title"]').attributes('href')).toBe('/sets/memphis-redevelopment')
+    expect(row.get('[data-testid="set-progress"]').text()).toBe('2 datasets')
     expect(row.get('[data-testid="set-purpose"]').text()).toBe('Which parcels can be redeveloped')
   })
 
-  /** §F.1's load-bearing claim, made visible: one set, several framings. */
-  it('shows the several views a set carries, each as its own link', async () => {
+  /** Still one set, several framings — they are just no longer the way in. */
+  it('shows the framings saved of a set, each as its own link', async () => {
     const w = await mountIt()
     const links = w.findAll('[data-testid="set-view-link"]')
     expect(links.map(l => l.text())).toEqual(['Memphis cluster', 'Memphis by distance'])
     expect(links[0].attributes('href')).toBe('/views/memphis-cluster')
-    expect(w.get('[data-testid="set-views"]').text()).toContain('2 views')
+    expect(w.get('[data-testid="set-views"]').text()).toContain('Saved framings')
   })
 
-  it('says so when a set has no views yet, rather than drawing an empty strip', async () => {
+  it('says nothing at all when a set has no saved framing', async () => {
+    // P11-2: "No views of it yet" was a dead end — it announced an absence
+    // and offered nowhere to go, on the very sets the Explore flow makes.
+    // The title opens the set now, so an absent framing is not worth a line.
     mockedSets.mockResolvedValue([{ ...SETS[0], views: [] }])
     const w = await mountIt()
-    expect(w.get('[data-testid="set-no-views"]').text()).toBe('No views of it yet')
+    expect(w.find('[data-testid="set-views"]').exists()).toBe(false)
+    expect(w.get('[data-testid="set-title"]').attributes('href')).toBe('/sets/memphis-redevelopment')
   })
 
   it('offers the scoped place report and the set’s own datasets', async () => {
@@ -441,7 +444,7 @@ describe('working sets (P7-1)', () => {
   it('still shows the tools and the recent list when the sets could not be loaded', async () => {
     mockedSets.mockRejectedValue(new Error('bucket unhappy'))
     const w = await mountIt()
-    expect(w.findAll('[data-testid="tool-card"]')).toHaveLength(7)
+    expect(w.findAll('[data-testid="tool-card"]')).toHaveLength(3)
     expect(rowTitles(w).length).toBeGreaterThan(0)
     expect(w.find('[data-testid="sets-empty"]').exists()).toBe(true)
   })
@@ -594,12 +597,14 @@ describe('the proximity tool on a set', () => {
    * nobody can see is a tool nobody knows exists.
    */
   it('names the missing anchor table instead of hiding the tool', async () => {
+    // P9-3's rule holds; P12-1 moved WHERE it is said. It was a span inside
+    // the action row, at 13.8px — larger than the links it sat between, so
+    // the one thing you could not press was the biggest text in the row.
+    // It is one quiet line under the row now, in the page's lightest type.
     mockedSets.mockResolvedValue([{ ...MEASURABLE[0], sites: null }])
     const w = await mountIt()
     expect(w.find('[data-testid="set-proximity"]').exists()).toBe(false)
-    const why = w.get('[data-testid="set-proximity-why"]').text()
-    expect(why).toContain('Measure proximity')
-    expect(why).toContain('anchor table')
+    expect(w.get('[data-testid="set-unavailable"]').text()).toContain('anchor table')
   })
 
   /** Nothing to measure TO is not a precondition a reader can read off the
@@ -615,7 +620,7 @@ describe('the proximity tool on a set', () => {
     mockedSets.mockResolvedValue([{ ...MEASURABLE[0], layers: ['internal-sites', 'internal-one-county'] }])
     const w = await mountIt()
     expect(w.find('[data-testid="set-index"]').exists()).toBe(false)
-    expect(w.get('[data-testid="set-index-why"]').text()).toContain('two or more county layers')
+    expect(w.get('[data-testid="set-unavailable"]').text()).toContain('two or more county layers')
   })
 
   it('lists only the point and line layers, by the layer’s own name', async () => {
@@ -801,7 +806,7 @@ describe('the index tool on a set', () => {
     const w = await mountIt()
     // P9-6a: "Build an index" read like a commitment; this is the start of an
     // experiment whose weights are draggable the moment it exists.
-    expect(w.get('[data-testid="set-index"]').text()).toBe('Create a combined ranking (index)')
+    expect(w.get('[data-testid="set-index"]').text()).toBe('Create a combined ranking')
   })
 
   it('does NOT offer it on a set with only one county layer — that is the layer', async () => {

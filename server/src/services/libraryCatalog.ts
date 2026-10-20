@@ -1500,9 +1500,23 @@ export async function searchCatalog(filters: CatalogFilters): Promise<CatalogEnt
       // P5-56: "what datasets tell me about contamination?" has to find the
       // EPA source whose title says none of those words — so provider,
       // program, topics and field names are searched too.
-      const haystack = [r.title, r.slug, r.category ?? '', description, ...asStringArray(r.tags), ...sourceSearchText(r.meta)].map(v =>
-        v.toLowerCase(),
-      )
+      // P13-3: `whatItAnswers` belongs here and was missing. It is the one
+      // field on an entry that says what the data can be ASKED rather than
+      // what subject it belongs to — P7-7 added it and an attention queue
+      // for entries lacking it — and `docs/MCP.md` has told readers all along
+      // that search matches on it. It did not. So an entry could carry a
+      // perfect one-line answer to the exact question somebody typed and
+      // still not come back.
+      const answers = typeof r.meta?.whatItAnswers === 'string' ? r.meta.whatItAnswers : ''
+      const haystack = [
+        r.title,
+        r.slug,
+        r.category ?? '',
+        description,
+        answers,
+        ...asStringArray(r.tags),
+        ...sourceSearchText(r.meta),
+      ].map(v => v.toLowerCase())
       if (words.length && words.every(word => haystack.some(v => v.includes(word)))) {
         return true
       }
