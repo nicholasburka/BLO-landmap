@@ -22,6 +22,9 @@
           <span><strong>{{ ctx.counts.tools }}</strong> tools</span>
           <span><strong>{{ ctx.counts.reads }}</strong> read</span>
           <span><strong>{{ ctx.counts.writes }}</strong> write, each confirmed first</span>
+          <span v-if="ctx.counts.clients">
+            <strong>{{ ctx.counts.clients }}</strong> run in your browser
+          </span>
           <span><strong>{{ ctx.counts.internalLayers }}</strong> internal layers named</span>
           <span class="counts-est">
             ≈{{ Math.round(ctx.approxPromptChars / 4).toLocaleString() }} tokens before the question
@@ -47,9 +50,7 @@
           <li v-for="tool in ctx.tools" :key="tool.name" class="tool-row" data-testid="ctx-tool">
             <p class="tool-head">
               <code class="tool-name">{{ tool.name }}</code>
-              <span class="tag" :class="tool.write ? 'tag-write' : 'tag-read'">
-                {{ tool.write ? 'write' : 'read' }}
-              </span>
+              <span class="tag" :class="`tag-${kindOf(tool)}`">{{ kindOf(tool) }}</span>
               <span class="blo-type-meta">{{ tool.descriptionChars.toLocaleString() }} chars</span>
               <button
                 type="button"
@@ -112,16 +113,24 @@ interface ToolRow {
   description: string
   inputSchema: unknown
   write: boolean
+  client: boolean
   descriptionChars: number
 }
 
 interface ChatContext {
   tools: ToolRow[]
-  counts: { tools: number; reads: number; writes: number; internalLayers: number }
+  counts: { tools: number; reads: number; writes: number; clients: number; internalLayers: number }
   systemPrompt: string
   layersContext: string
   scope: { slug: string; name: string; members: string[] } | null
   approxPromptChars: number
+}
+
+/** Three kinds, and the one that is easy to miss: a client tool never runs
+ *  here at all. */
+function kindOf(tool: ToolRow): 'read' | 'write' | 'client' {
+  if (tool.write) return 'write'
+  return tool.client ? 'client' : 'read'
 }
 
 const route = useRoute()
@@ -271,6 +280,13 @@ h2 {
 .tag-write {
   color: var(--blo-green-deep);
   background: var(--blo-green-soft);
+}
+
+/* Not a write — it changes nothing stored — but not an ordinary read either,
+   because it is the only kind that reaches out of the server. */
+.tag-client {
+  color: var(--blo-orange-deep);
+  background: var(--blo-orange-soft, rgba(200, 110, 40, 0.12));
 }
 
 .tool-desc {

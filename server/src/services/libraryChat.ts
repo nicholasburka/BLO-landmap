@@ -33,11 +33,22 @@ export interface ChatToolCall {
   /** Stable within the thread; the confirm route addresses an action by it. */
   id: string
   tool: string
-  kind: 'read' | 'write'
+  /**
+   * `read` runs on the server. `write` is proposed and runs only once the
+   * person confirms it. `client` runs in the BROWSER — the map tools drive a
+   * canvas the server does not have (P14-1), so the server dispatches them
+   * and never executes them.
+   */
+  kind: 'read' | 'write' | 'client'
   status: 'done' | 'failed' | 'proposed' | 'confirmed'
   /** One line for the reader: "Searched the library for … · 6 results". */
   summary: string
-  /** Writes only: what would run. Kept so confirming cannot change it. */
+  /**
+   * Writes and client tools: what would run, and what the browser runs.
+   * Reads carry none — a read's arguments are the model's business and its
+   * line is a summary for the reader. Kept on a write so confirming cannot
+   * change it; kept on a client call so reopening a thread can replay it.
+   */
   args?: Record<string, unknown>
   /** Writes only: what running it returned (slug, url, …). */
   result?: Record<string, unknown>

@@ -38,6 +38,8 @@ interface ToolRow {
   inputSchema: unknown
   /** A write is proposed rather than run — the person confirms it. */
   write: boolean
+  /** P14-1: a client tool runs in the reader's browser, never here. */
+  client: boolean
   /** Characters the description costs, which is what a long one really is. */
   descriptionChars: number
 }
@@ -50,6 +52,7 @@ router.get('/api/chat-context', requireInternalUser, internalRateLimit, privateN
       description: String(t.definition.description ?? ''),
       inputSchema: t.definition.input_schema ?? null,
       write: t.write,
+      client: t.client,
       descriptionChars: String(t.definition.description ?? '').length,
     }))
 
@@ -70,8 +73,9 @@ router.get('/api/chat-context', requireInternalUser, internalRateLimit, privateN
       tools: rows,
       counts: {
         tools: rows.length,
-        reads: rows.filter(r => !r.write).length,
+        reads: rows.filter(r => !r.write && !r.client).length,
         writes: rows.filter(r => r.write).length,
+        clients: rows.filter(r => r.client).length,
         internalLayers: layers.length,
       },
       systemPrompt,

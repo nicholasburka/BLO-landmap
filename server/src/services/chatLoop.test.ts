@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { z } from 'zod'
 import { newDb } from 'pg-mem'
 import type { Pool as PgPool } from 'pg'
 import type { S3Client } from '@aws-sdk/client-s3'
@@ -40,6 +41,8 @@ const {
   MAX_CHAT_ROUNDS,
   MODEL_UNAVAILABLE,
   chatMaxTokens,
+  clientTool,
+  clientToolResult,
 } = await import('./chatLoop.js')
 const { MODEL_UNAVAILABLE: ASK_MODEL_UNAVAILABLE } = await import('../routes/libraryAsk.js')
 
@@ -639,5 +642,74 @@ describe('the prompt says propose first, then summarise (P13-5)', () => {
 
   it('says which of the two a compiled thing is', () => {
     expect(prompt).toMatch(/work off, hand on, or come back to is a PAGE/)
+  })
+})
+
+/**
+ * P14-1 — a tool the browser runs.
+ *
+ * The chat page has had a real Mapbox pane since P6-10 and a dispatcher for
+ * four map tools since the same ticket, and neither has ever fired: the four
+ * are defined only for the PUBLIC map's prompt box, and `runMapTool` bails
+ * unless `call.args` is set — which a read's event never carries. Registering
+ * the four as reads would therefore have produced a dead seam a second time.
+ * This is the third kind of call that makes the seam live.
+ */
+describe('a tool the browser runs (P14-1)', () => {
+  /** A stand-in for the map tools P14-2 registers. */
+  function paneTool() {
+    return clientTool('show_pane', 'Show something on the page.', { what: z.string() })
+  }
+
+  it('is dispatched with its arguments and never run here', async () => {
+    const pane = paneTool()
+    const ran = vi.fn()
+    const { client } = stubClient(toolTurn('show_pane', { what: 'flood-risk' }))
+    const events: ChatEvent[] = []
+    const chat = await newChat()
+
+    const result = await runChatTurn({
+      chat,
+      user: USER,
+      question: 'show me flood risk',
+      history: [],
+      emit: event => void events.push(event),
+      client,
+      index,
+      // The tool table a turn uses is `chatTools()`; this turn is given one
+      // extra so the mechanism can be tested without waiting for P14-2.
+      tools: [...chatTools(), pane],
+    })
+
+    const calls = events.filter((e): e is Extract<ChatEvent, { type: 'tool_call' }> => e.type === 'tool_call')
+    expect(calls.map(c => c.phase)).toEqual(['started', 'finished'])
+    // Both phases carry the arguments: for a client tool they ARE the payload.
+    expect(calls[0].call).toMatchObject({ kind: 'client', status: 'running', args: { what: 'flood-risk' } })
+    expect(calls[1].call).toMatchObject({ kind: 'client', status: 'done', args: { what: 'flood-risk' } })
+    expect(ran).not.toHaveBeenCalled()
+    expect(result.toolCalls[0]).toMatchObject({ kind: 'client', args: { what: 'flood-risk' } })
+  })
+
+  it('tells the model it already happened, and to say what it showed', () => {
+    const said = clientToolResult('show_layer')
+    expect(said).toMatch(/Done/)
+    expect(said).toMatch(/say in your answer what you showed/i)
+    // Not the write wording — a write has NOT happened when the model reads it.
+    expect(said).not.toMatch(/Not run/)
+  })
+
+  it('refuses to run on the server if the dispatch branch is ever removed', async () => {
+    const pane = paneTool()
+    await expect(pane.run({ what: 'x' }, {} as any)).rejects.toThrow(/runs in the browser/)
+  })
+
+  it('leaves a read carrying no arguments, which is why this kind exists', async () => {
+    const { client } = stubClient(toolTurn('list_topics', {}))
+    const { events } = await runTurn('what subjects are there?', client)
+    const started = events.find(
+      (e): e is Extract<ChatEvent, { type: 'tool_call' }> => e.type === 'tool_call' && e.phase === 'started',
+    )
+    expect(started?.call.kind).toBe('read')
+    expect(started?.call.args).toBeUndefined()
   })
 })

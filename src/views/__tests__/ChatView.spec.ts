@@ -248,7 +248,7 @@ describe('ChatView — the map pane (P6-10)', () => {
         call: {
           id: 'm1',
           tool: 'show_layer',
-          kind: 'read',
+          kind: 'client',
           status: 'running',
           summary: 'Showed Percent Black on the map',
           args: { layerId: 'pct_Black', on: true },
@@ -721,5 +721,41 @@ describe('ChatView — keeping an answer as a new page (P13-4)', () => {
     await wrapper.get('[data-testid="chat-keep-page"]').trigger('click')
     await flushPromises()
     expect(wrapper.get('[data-testid="chat-page-error"]').text()).toContain('library unavailable')
+  })
+})
+
+/**
+ * P14-1 — a client call is a line in the transcript, not a silent effect.
+ *
+ * `ChatMessageItem` filtered its lines on `kind === 'read'`, so a dispatched
+ * map tool would have moved the reader's map and left the conversation
+ * saying nothing about why.
+ */
+describe('ChatView — a client call is visible (P14-1)', () => {
+  it('renders a dispatched tool as a line, like a read', async () => {
+    stubViewportWidth(1280)
+    mockedList.mockResolvedValue([THREAD])
+    streams([
+      {
+        type: 'tool_call',
+        phase: 'finished',
+        call: {
+          id: 'm9',
+          tool: 'show_layer',
+          kind: 'client',
+          status: 'done',
+          summary: 'Showed Percent Black on the map',
+          args: { layerId: 'pct_Black', on: true },
+        },
+      },
+      { type: 'text', text: 'There it is.' },
+    ])
+    const wrapper = await mountView()
+    await type(wrapper, 'show me percent Black')
+    await flushPromises()
+
+    const lines = wrapper.findAll('[data-testid="chat-tool-summary"]').map(n => n.text())
+    expect(lines.some(line => line.includes('Showed Percent Black on the map'))).toBe(true)
+    wrapper.unmount()
   })
 })

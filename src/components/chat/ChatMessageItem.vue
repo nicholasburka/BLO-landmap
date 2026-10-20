@@ -35,7 +35,13 @@ const html = computed(() => (props.message.text ? renderMarkdown(props.message.t
 
 /** Reads happened; writes are waiting. The two are not the same kind of line,
  *  so they are not rendered in the same place. */
-const reads = computed(() => props.message.toolCalls.filter(call => call.kind === 'read'))
+/** P14-1: a client call happened too — it ran in this browser — so it belongs
+ *  with the reads. Filtering on `read` alone made it render nowhere, which is
+ *  the worst of the three outcomes: the map moves and the transcript is
+ *  silent about why. */
+const reads = computed(() =>
+  props.message.toolCalls.filter(call => call.kind === 'read' || call.kind === 'client'),
+)
 const writes = computed(() => props.message.toolCalls.filter(call => call.kind === 'write'))
 
 const citations = computed(() => props.message.citations ?? [])

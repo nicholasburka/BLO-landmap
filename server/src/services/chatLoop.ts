@@ -129,6 +129,14 @@ export function chatMaxTokens(): number {
 export interface ChatTool {
   name: string
   write: boolean
+  /**
+   * P14-1 — this one runs in the BROWSER, not here. The map tools drive the
+   * chat page's own canvas, which the server has no access to, so the loop
+   * emits the call with its arguments and the page executes it. Never both
+   * `write` and `client`: a write is proposed and waits for a person, a
+   * client tool is dispatched and does not.
+   */
+  client: boolean
   /** What the model is shown. */
   definition: Anthropic.Tool
   /** The model's arguments, checked against the tool's own zod shape — the
@@ -164,8 +172,51 @@ function tool(
   shape: z.ZodRawShape,
   run: ChatTool['run'],
   write = false,
+  client = false,
 ): ChatTool {
-  return { name, write, definition: definitionOf(name, description, shape), parse: parserFor(shape), run }
+  return {
+    name,
+    write,
+    client,
+    definition: definitionOf(name, description, shape),
+    parse: parserFor(shape),
+    run,
+  }
+}
+
+/**
+ * A tool the browser runs (P14-1).
+ *
+ * It has no server handler at all — `run` exists to satisfy the shape and
+ * throws if anything ever calls it, because a client tool reaching the
+ * server's executor would mean the loop's dispatch branch had been removed.
+ */
+export function clientTool(name: string, description: string, shape: z.ZodRawShape): ChatTool {
+  return tool(
+    name,
+    description,
+    shape,
+    async () => {
+      throw new Error(`${name} runs in the browser; the server must never execute it`)
+    },
+    false,
+    true,
+  )
+}
+
+/**
+ * What the model is told after a client tool is dispatched.
+ *
+ * It must read as a thing that HAPPENED — the page has already run it by the
+ * time the next round starts — and it must ask for the answer to say so,
+ * because otherwise the reader sees their map change with no explanation of
+ * what they are now looking at.
+ */
+export function clientToolResult(name: string): string {
+  return (
+    `Done — ${name} ran on the person's screen and they can see the result. ` +
+    'Say in your answer what you showed them and what it means. Do not call it again for the same thing.'
+  )
 }
 
 let cachedTools: ChatTool[] | null = null
@@ -419,6 +470,9 @@ export interface ChatTurnOptions {
   emit: (event: ChatEvent) => void
   client?: AnthropicLike
   index?: KbIndex
+  /** The tool table, defaulting to `chatTools()`. Overridden only by tests —
+   *  the same seam `client` and `index` are. */
+  tools?: ChatTool[]
   clientIp?: string
   /**
    * P11-9: the working set this turn is scoped to, when the person has
@@ -458,7 +512,7 @@ export async function runChatTurn(options: ChatTurnOptions): Promise<ChatTurnRes
   const client = options.client ?? getAssistantClient()
   const selection = selectContext(index, options.question)
   const chunks = selection.chunks
-  const tools = chatTools()
+  const tools = options.tools ?? chatTools()
   const byName = new Map(tools.map(t => [t.name, t]))
   const definitions = tools.map(t => t.definition)
   const ctx: McpToolContext = { user: options.user, via: CHAT_VIA, clientIp: options.clientIp }
@@ -548,6 +602,30 @@ export async function runChatTurn(options: ChatTurnOptions): Promise<ChatTurnRes
         continue
       }
       const args = parsed.value
+
+      if (tool.client) {
+        // P14-1: the browser runs this one. Both phases are emitted — the
+        // page's `onToolCall` fires on `started` ONLY (so a tool runs once
+        // per call) and `finished` settles the line — and both carry `args`,
+        // because for a client tool the arguments ARE the payload rather
+        // than the model's business.
+        const id = randomUUID()
+        const summary = toolSummary(tool.name, args)
+        const started: ChatToolEventCall = {
+          id,
+          tool: tool.name,
+          kind: 'client',
+          status: 'running',
+          summary,
+          args,
+        }
+        options.emit({ type: 'tool_call', phase: 'started', call: started })
+        const call: ChatToolCall = { id, tool: tool.name, kind: 'client', status: 'done', summary, args }
+        toolCalls.push(call)
+        options.emit({ type: 'tool_call', phase: 'finished', call })
+        results.push({ type: 'tool_result', tool_use_id: use.id, content: clientToolResult(tool.name) })
+        continue
+      }
 
       if (tool.write) {
         // The model asked to change the library. It does not get to.

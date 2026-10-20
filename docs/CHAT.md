@@ -218,7 +218,11 @@ Read tools, run as the model asks for them: `search_library`, `list_topics`,
 `fetch_for_place`, `place_report`, `list_place_slices`.
 
 Write tools, proposed only: `create_note`, `append_to_page`, `update_page`,
-`drop_link`, `save_view`.
+`drop_link`, `save_view`, `measure_proximity`, `rename_column`, `build_index`,
+and — chat-only, because MCP never deletes — `remove_column`.
+
+Client tools, run in the browser: none yet. `clientTool()` and the dispatch
+branch are in place (P14-1); the four map tools arrive in P14-2.
 
 These are the MCP tools (`docs/MCP.md`) — the same handlers, the same
 validation, the same audit rows — so a question asked here and the same question
@@ -294,10 +298,27 @@ the page as a `tool_call` event whose `call.tool` is one of the four and whose
 `executeTool` against the canvas's context, opening the pane if it is shut and
 queueing the call until the map exists. A call without `args` is skipped: a
 read tool's line is a summary for the reader, not a call the page can replay.
-Server-side registration of the four in the library chat's tool table is
-follow-up work; `onToolCall` in `useLibraryChat` is the seam it will arrive
-through, and `cypress/e2e/chatMapPane.cy.ts` drives it today with a stubbed
-stream.
+
+**The third kind of call (P14-1).** For two phases this seam was dead, and for
+a reason nobody had written down: a read's `tool_call` event carries no `args`
+at all, so even registering the four server-side would not have made
+`runMapTool` fire. `ChatToolCall.kind` is now `read | write | client`:
+
+| kind | Who runs it | Carries `args`? | Gated? |
+|---|---|---|---|
+| `read` | the server | no — the summary is for the reader | no |
+| `write` | nobody, until confirmed | yes, so confirming cannot change it | yes, by a person |
+| `client` | **the browser** | yes — they are the payload | no: showing is not writing |
+
+A client tool is declared with `clientTool()` and has no server handler —
+`run` rejects if anything ever calls it, because a client tool reaching the
+server's executor would mean this branch had been deleted. The loop emits
+**both** phases (`started` carries the args and is what `onToolCall` fires on;
+`finished` settles the line), records the call with its args so reopening a
+thread can replay it, and hands the model `clientToolResult(name)` — a
+sentence saying it already happened and asking the answer to say what was
+shown. A client line renders beside the reads, so the transcript is never
+silent about why the map moved.
 
 ### Adding an event type
 

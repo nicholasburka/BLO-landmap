@@ -51,11 +51,13 @@ export interface ChatToolCall {
   /** What the confirm route addresses. */
   id: string
   tool: string
-  kind: 'read' | 'write'
+  /** `client` runs HERE rather than on the server (P14-1) — the map tools
+   *  drive this page's canvas, which the server cannot reach. */
+  kind: 'read' | 'write' | 'client'
   status: ChatToolStatus
   /** One line, already written for a reader. */
   summary: string
-  /** Writes: what would run / did run. */
+  /** Writes: what would run / did run. Client tools: what to run here. */
   args?: Record<string, unknown>
   /** Writes: what running it returned. */
   result?: Record<string, unknown>
