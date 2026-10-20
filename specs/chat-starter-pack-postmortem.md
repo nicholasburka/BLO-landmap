@@ -120,3 +120,97 @@ the single thing the person most needed**, produced by an empty description
 field on one catalog entry. Worth remembering the next time the assistant
 says the library holds nothing: the honest-sounding answer and the wrong one
 look identical from the outside.
+
+---
+
+# The replay (P13-5)
+
+The amendments above were tested, and the tests were worthless for the thing
+that mattered: they pin that the rules **say** what they should, not that the
+model **acts** on them. So the lead's question was asked again, verbatim,
+against the real model — `npm run eval:chat`, a script rather than a test
+because every run is a real call.
+
+Three runs, and the first one failed outright.
+
+## Run 1 — "I could not put an answer together. Try asking it a shorter way."
+
+The model made nine tool calls, including six `query_dataset` calls against
+the organizations rows — rule 4b working exactly as intended — and then:
+
+```
+[round 4] tools:25 → stop:max_tokens content:thinking in:32762 out:1500
+```
+
+**It spent its whole output cap on a thinking block and wrote nothing.** No
+text, no tool call, so the loop broke out with an empty answer and the person
+got the honesty line. Which is not honest: the question was fine, the ANSWER
+was what did not fit, and "ask it a shorter way" sends somebody to rewrite the
+one part of this that was already right.
+
+This is the **fourth** time this codebase has sized an output cap too small
+and been bitten the same way — `annotateEntry` at 600, `askMaxTokens` at
+1,000, now chat at 1,500. The cap is spent by the thinking block as well as
+the answer, and the failure is always silent.
+
+It was also **self-inflicted**: rule 5b invites a compiled answer, and nothing
+raised the ceiling to let one be written. Three fixes:
+
+- `chatMaxTokens()` 1,500 → **4,000**. An output cap is a ceiling, not a
+  spend; headroom is free.
+- A round that ends `max_tokens` with no text now gets **one more round**,
+  tools withdrawn, told to write from what it has.
+- If it still writes nothing, the message **says what happened** instead of
+  blaming the question.
+
+## Run 2 — a good answer, kept nowhere
+
+2,676 characters, four sections, ten items, seven links, nine citations. It
+named the **Land Loss Prevention Project** as legal aid for heirs' property —
+the exact thing the original transcript said the library did not have.
+
+Then it ended: *"I can save this as a note so it is easy to come back to —
+want me to create it?"*
+
+So rule 6 was still being read as "ask permission", and it said **note** for a
+thing somebody would hand off. But calling a write tool **is** asking: the
+person sees a proposal and confirms it. Offering in prose costs them a turn
+and usually loses the artifact.
+
+Run 2b, with "the tool call IS how you ask" added, did the same thing in a
+different order — announced *"I'll compile ten resources and propose a new
+wiki page"*, wrote all ten into the chat, and then asked anyway. The reason is
+plain once you see it: proposing the page means writing the whole pack a
+second time, as a tool argument.
+
+So the fix was an **ordering**, not more insistence: propose the page FIRST
+and let the page carry the content, then write a short message saying what is
+in it. The content is written once, and the short message is rule 5 again
+rather than an exception to it.
+
+## Run 3 — the ideal result
+
+```
+[round 4] … ✎ PROPOSED update_page: Replace the page "heirs-property-starter-pack"
+[round 5] → end_turn
+```
+
+- **A page is proposed**, unasked, named by the model, carrying all ten items.
+- The chat message is **1,104 characters** — it says what is on the page and
+  links to it.
+- The Land Loss Prevention Project, the Federation of Southern Cooperatives
+  and Black Farmer Fund are all named, **from the organizations rows**.
+- Seven library links in the message, every item linked on the page.
+- The gap — no plain-language guide to clearing title — is recorded **on the
+  page**, not left in the transcript.
+
+Against the six-point list at the top of this document, that is all six.
+
+## What to take from it
+
+The gap between "the rule says so" and "the model does so" was three real
+defects, and **none of them were visible to a test**. One was a hard failure
+that would have hit a person the first time they asked for anything long.
+
+`npm run eval:chat` is the check. It costs a few cents and takes a minute, and
+it is the only thing that would have caught any of this.
