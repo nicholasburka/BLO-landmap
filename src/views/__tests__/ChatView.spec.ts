@@ -29,7 +29,7 @@ vi.mock('@/lib/libraryChat', async importOriginal => {
 
 vi.mock('@/lib/ask', async importOriginal => {
   const actual = await importOriginal<typeof import('@/lib/ask')>()
-  return { ...actual, saveAnswerAsNote: vi.fn(), addAnswerToPage: vi.fn() }
+  return { ...actual, saveAnswerAsNote: vi.fn(), saveAnswerAsPage: vi.fn(), addAnswerToPage: vi.fn() }
 })
 
 vi.mock('@/lib/libraryCatalog', async importOriginal => {
@@ -65,7 +65,7 @@ import {
   type ChatToolCall,
 } from '@/lib/libraryChat'
 import { fetchWorkingSet } from '@/lib/workingSets'
-import { saveAnswerAsNote } from '@/lib/ask'
+import { saveAnswerAsNote, saveAnswerAsPage } from '@/lib/ask'
 import { fetchCatalog, type CatalogEntry } from '@/lib/libraryCatalog'
 import { resetCountyDataCache } from '@/composables/useMapData'
 import { stubCountyDataFetch, type CountyDataFetchStub } from '@/testing/countyData'
@@ -86,6 +86,7 @@ const mockedConfirm = vi.mocked(confirmAction)
 const mockedSend = vi.mocked(sendMessage)
 const mockedWorkingSet = vi.mocked(fetchWorkingSet)
 const mockedSaveNote = vi.mocked(saveAnswerAsNote)
+const mockedSavePage = vi.mocked(saveAnswerAsPage)
 const mockedCatalog = vi.mocked(fetchCatalog)
 
 const THREAD: Chat = { id: 1, title: 'Shelby follow-up', createdAt: '2026-09-20T10:00:00Z', updatedAt: '2026-09-20T10:00:00Z' }
@@ -560,6 +561,9 @@ describe('ChatView (P6-7b) — keeping an answer', () => {
     const wrapper = await mountView()
     await type(wrapper, 'what is in Shelby?')
 
+    // P13-4: the three ways to keep an answer sit behind one decision now.
+    await wrapper.get('[data-testid="chat-keep"]').trigger('click')
+    await flushPromises()
     await wrapper.get('[data-testid="chat-save-note"]').trigger('click')
     await flushPromises()
     // The question titles the note; the citations become its numbered sources.
@@ -594,6 +598,8 @@ describe('ChatView (P6-7b) — keeping an answer', () => {
     const wrapper = await mountView()
     await type(wrapper, 'what is in Shelby?')
 
+    await wrapper.get('[data-testid="chat-keep"]').trigger('click')
+    await flushPromises()
     await wrapper.get('[data-testid="chat-add-to-page"]').trigger('click')
     await flushPromises()
     expect(mockedCatalog).toHaveBeenCalledWith({ kind: 'wiki' })
@@ -657,5 +663,63 @@ describe('ChatView scoped to a working set (P11-9)', () => {
   it('asks the whole library when nothing is scoped', async () => {
     const w = await mountView('/chat')
     expect(w.find('[data-testid="scope-chip"]').exists()).toBe(false)
+  })
+})
+
+/**
+ * P13-4 — the option that was missing.
+ *
+ * A lead asked the assistant to "pull a starter pack together", got a good
+ * ten-item answer, and it stayed in the transcript. The controls offered a
+ * NOTE, an append to a page that already existed, and Open. There was no way
+ * to make a new page from an answer at all.
+ */
+describe('ChatView — keeping an answer as a new page (P13-4)', () => {
+  it('makes a page named after the question, and links to it', async () => {
+    mockedList.mockResolvedValue([THREAD])
+    mockedSavePage.mockResolvedValue({ slug: 'what-is-in-shelby', title: 'what is in Shelby?' })
+    streams([{ type: 'text', text: 'Three parcels [1].' }, { type: 'citations', citations: [CITATION] }])
+    const wrapper = await mountView()
+    await type(wrapper, 'what is in Shelby?')
+
+    await wrapper.get('[data-testid="chat-keep"]').trigger('click')
+    await flushPromises()
+    await wrapper.get('[data-testid="chat-keep-page"]').trigger('click')
+    await flushPromises()
+
+    expect(mockedSavePage).toHaveBeenCalledWith(
+      'what is in Shelby?',
+      expect.objectContaining({ answer: 'Three parcels [1].', sources: [CITATION] }),
+      // Defaulted from the question, which is almost always the right name.
+      'what is in Shelby?',
+    )
+    expect(wrapper.get('[data-testid="chat-made-link"]').attributes('href')).toBe('/wiki/what-is-in-shelby')
+  })
+
+  it('takes a title the reader types instead', async () => {
+    mockedList.mockResolvedValue([THREAD])
+    mockedSavePage.mockResolvedValue({ slug: 'starter-pack', title: 'Starter pack' })
+    streams([{ type: 'text', text: 'Ten resources.' }])
+    const wrapper = await mountView()
+    await type(wrapper, 'pull a starter pack together')
+    await wrapper.get('[data-testid="chat-keep"]').trigger('click')
+    await flushPromises()
+    await wrapper.get('[data-testid="chat-keep-title"]').setValue('Starter pack')
+    await wrapper.get('[data-testid="chat-keep-page"]').trigger('click')
+    await flushPromises()
+    expect(mockedSavePage).toHaveBeenCalledWith(expect.any(String), expect.any(Object), 'Starter pack')
+  })
+
+  it('says so when the page cannot be made', async () => {
+    mockedList.mockResolvedValue([THREAD])
+    mockedSavePage.mockRejectedValue(new Error('library unavailable'))
+    streams([{ type: 'text', text: 'Three parcels.' }])
+    const wrapper = await mountView()
+    await type(wrapper, 'what is in Shelby?')
+    await wrapper.get('[data-testid="chat-keep"]').trigger('click')
+    await flushPromises()
+    await wrapper.get('[data-testid="chat-keep-page"]').trigger('click')
+    await flushPromises()
+    expect(wrapper.get('[data-testid="chat-page-error"]').text()).toContain('library unavailable')
   })
 })

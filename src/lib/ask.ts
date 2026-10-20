@@ -9,7 +9,7 @@
 import { internalFetch } from './apiBase'
 import { createNoteEntry, type CatalogEntry } from './libraryCatalog'
 import type { FilterOp, RowFilter } from './libraryData'
-import { fetchWikiPage, saveWikiPage } from './wiki'
+import { fetchWikiPage, saveWikiPage, slugifyWikiTitle } from './wiki'
 
 export interface AskSource {
   /** The bracketed number the answer cites, e.g. [2]. */
@@ -342,6 +342,37 @@ export function saveAnswerAsNote(question: string, answer: AskAnswer, dataset?: 
     category: ANSWER_NOTE_CATEGORY,
     tags: [ANSWER_NOTE_TAG],
   })
+}
+
+/**
+ * Keep an answer as its own NEW wiki page (P13-4).
+ *
+ * The missing third option. An answer could be filed as a note, or appended
+ * to a page that already existed — and a lead who asked the assistant to
+ * "pull a starter pack together" wanted neither: they wanted the thing they
+ * had just been given to become a page they could work off. There was no
+ * control for that at all, which is why the pack stayed in a transcript.
+ *
+ * A page rather than a note because the two are different objects here: a
+ * note is a short record filed under `ideas`, and a compiled thing is a
+ * reference somebody returns to and edits. The server reads the title off
+ * the first `#` heading, which `answerNoteMarkdown` already writes.
+ */
+export async function saveAnswerAsPage(
+  question: string,
+  answer: AskAnswer,
+  title: string,
+  dataset?: string,
+): Promise<{ slug: string; title: string }> {
+  const named = title.replace(/\s+/g, ' ').trim() || noteTitleFromQuestion(question)
+  const slug = slugifyWikiTitle(named)
+  if (!slug) throw new Error('That title has no letters or numbers in it.')
+  const body = answerMarkdown(question, answer, dataset, {
+    heading: `# ${named}`,
+    sourcesHeading: '## Where this came from',
+  })
+  await saveWikiPage(slug, body)
+  return { slug, title: named }
 }
 
 /** Append an answer to an existing wiki page: read it, add the section at the

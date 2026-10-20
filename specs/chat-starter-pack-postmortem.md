@@ -84,10 +84,39 @@ That is a cataloguing fix, not a code one, and it is exactly the kind of thing
 the assistant's own gap sentence should be feeding back. Two sentences on that
 entry would have changed this transcript more than any rule here.
 
-## Open question for Nick
+## Decided — the affordance, and the content gap
 
-**"Save as note" on an answer is probably the wrong affordance for a
-deliverable.** A starter pack wants to be a page; the control offers a note,
-filed under answers. Worth deciding whether that button becomes "Keep
-this…" with a choice of page or note, and whether it earns more weight than
-the two controls beside it. Not changed yet — it is a UI decision, not a bug.
+Both of the things left open above were closed the same day.
+
+**"Keep this…" (P13-4).** The three equal-weight verbs became one decision.
+It opens onto three lines — a **new page** with a title defaulted from the
+question, a note, or an append to a page that already exists — and the new
+page is the first line and the only solid button in the panel. Making a new
+page from an answer was not possible at all before this; `saveAnswerAsPage`
+in `src/lib/ask.ts` is the path that did not exist.
+
+**The `organizations` metadata (P13-3).** Written from the data rather than
+imagined: 100 organizations, tiered 27 / 40 / 32 / 1, across 26 states, 99
+geocoded, 82 with an EIN. "organizations", "land loss prevention", "who funds
+Black farming organizations" and "legal assistance organizations" all return
+the dataset at **#1** now; every one of them returned nothing before.
+
+And a second bug fell out of writing it: **`whatItAnswers` was never in the
+search haystack**, although `docs/MCP.md` says it is and the field exists for
+exactly that purpose. Fixed in `libraryCatalog.ts`, with a test.
+
+## The sentence this all turns on
+
+The lead was told *"the library has no entry for a legal aid organization that
+handles heirs' property cases."*
+
+**The Land Loss Prevention Project is in the `organizations` dataset** —
+Durham NC, legal assistance for Black landowners facing land loss. So is the
+Federation of Southern Cooperatives, which the transcript searched for by
+name. Eleven of the 100 organizations match legal / law / heirs / title.
+
+That was not a gap honestly reported. It was a **confident false negative on
+the single thing the person most needed**, produced by an empty description
+field on one catalog entry. Worth remembering the next time the assistant
+says the library holds nothing: the honest-sounding answer and the wrong one
+look identical from the outside.
