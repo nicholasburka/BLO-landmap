@@ -172,6 +172,14 @@ const router = createRouter({
       meta: { requiresInternal: true }
     },
     {
+      // P13-1: what the chat model is given — every tool and the whole system
+      // prompt, read from the same functions the turn reads. A team tool.
+      path: '/chat-context',
+      name: 'chat-context',
+      component: () => import('../views/ChatContextView.vue'),
+      meta: { requiresInternal: true }
+    },
+    {
       // P11-2: a working set's own page. The workspace lives here now; it
       // used to be reachable only through a view that presented a set, which
       // left a set with no view unopenable.

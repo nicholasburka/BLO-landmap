@@ -3,6 +3,27 @@
 Opened 2026-10-13, from asking a simple question — *how much of phase 9 can you
 do by talking to it?* — and tracing both chat surfaces end to end.
 
+> ## ⚠ CORRECTED 2026-10-20 — the central claim below is WRONG
+>
+> **The in-app chat has 22 tools, not six, and has had the whole MCP surface
+> all along** — `build_index` and `measure_proximity` included. The table and
+> most of the tickets under it were written against the wrong file.
+>
+> The mistake: this audit read `server/src/prompt/toolDefinitions.ts` and
+> `src/lib/mapTools.ts`. Those belong to the **public map's prompt box**
+> (`POST /api/chat` → `chatHaiku`), which genuinely does have six synchronous,
+> map-only tools. The **library chat** at `/chat` is a different path —
+> `runChatTurn` → `chatTools()` (`services/chatLoop.ts:162`) — which composes
+> `MCP_TOOLS` minus `ask`, three place tools, and all of `MCP_WRITE_TOOLS` as
+> proposals the person confirms.
+>
+> Two chats, two tool buses, and I checked one and reported on the other.
+> Verified by enumerating `chatTools()` directly: 22 tools.
+>
+> **`/chat-context` now answers this question from the source** (P13-1), so it
+> cannot be got wrong by reading again. What survives of the analysis below is
+> noted at the end.
+
 The answer is **almost none in the in-app chat, and about half over MCP**. The
 focus here is the in-app chat, with MCP kept at parity: every capability below
 lands on both surfaces, because the day they diverge is the day a person is
@@ -253,3 +274,35 @@ find them.
 the goal is "show that chat can work with a working set" sooner than that,
 P10-2 + P10-8 alone make the MCP surface genuinely usable today — because MCP
 already has the async bus the in-app chat lacks.
+
+---
+
+## What survives the correction (2026-10-20)
+
+Most of this file was answering a question that had the wrong premise. Three
+findings stand, and one of them is now the only real gap.
+
+**P10-2 still stands and is still the gap.** There is no `get_working_set` on
+either surface. `build_index` really does tell the model to source layer ids
+from `list_layers` rather than from the set, and really does have to say "Must
+be one the working set names" and hope. This was the cheapest ticket with the
+widest effect when it was written and it still is.
+
+**P10-5 still stands.** Index modification is add-only everywhere: the same
+formula returns the stored column, a different one makes a new one, and there
+is no re-weight, rename or remove. Same hole as P8-2.
+
+**P10-8 is half done and half wrong.** `build_index`, `measure_proximity` and
+the `working-set` search kind were undocumented, which is true and still is.
+But the fix is no longer only a docs edit: `/chat-context` renders every tool
+and the whole system prompt from the functions the turn reads, so the docs
+have something that cannot drift to point at.
+
+**P10-1, P10-3, P10-4 are void.** They were written to add an async tool bus,
+a working-set concept and `build_index` to a chat that already had all three.
+P11-9 separately gave chat a visible, rescopable set scope, which is the part
+of P10-3 that was real.
+
+**P10-6, P10-7, P10-9 are unaffected** — server-side index comparison, an
+address→county tool, and a set-scoped place report are missing from both
+surfaces regardless of which tool list is in front of the model.

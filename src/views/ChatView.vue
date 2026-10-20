@@ -18,7 +18,7 @@
  * and the thread list is a select above the conversation.
  */
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick, type Ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import KbNav from '@/components/KbNav.vue'
 import ChatThreadList from '@/components/chat/ChatThreadList.vue'
 import ChatMessageItem from '@/components/chat/ChatMessageItem.vue'
@@ -205,6 +205,15 @@ onBeforeUnmount(() => chat.stop())
       <section class="conversation" data-testid="chat-conversation">
         <div class="chat-head">
           <h1 class="chat-title" data-testid="chat-title">{{ chat.currentChat.value?.title ?? 'Chat' }}</h1>
+          <!-- P13-1: a team tool, so a quiet link rather than a control. It
+               answers "what can it actually do" from the same functions the
+               turn reads — a question that had a wrong answer in writing for
+               a week. -->
+          <RouterLink
+            to="/chat-context"
+            class="blo-type-action chat-context-link"
+            data-testid="chat-context-link"
+          >What it can do</RouterLink>
           <!-- P11-9: what this conversation is scoped to, and the way out. -->
           <ScopeChip
             v-if="scopeSet"
@@ -360,6 +369,11 @@ onBeforeUnmount(() => chat.stop())
   .pane-open {
     display: none;
   }
+}
+
+.chat-context-link {
+  margin-left: auto;
+  white-space: nowrap;
 }
 
 .chat-title {
