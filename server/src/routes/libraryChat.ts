@@ -25,6 +25,9 @@ import {
   type ChatRow,
 } from '../services/libraryChat.js'
 import { compactIfNeeded, confirmAction, runChatTurn, MODEL_UNAVAILABLE, type ChatEvent } from '../services/chatLoop.js'
+import { renderPaneContext, type PaneContext } from '../services/chatSituation.js'
+import { listInternalLayers } from '../services/internalLayers.js'
+import { countyLabel } from '../services/placeFetch.js'
 import { getWorkingSet } from '../services/libraryWorkingSets.js'
 
 /**
@@ -158,6 +161,21 @@ router.delete(`${PATH_PREFIX}/:id`, requireInternalUser, internalRateLimit, asyn
   res.json({ archived: true })
 })
 
+/**
+ * P14-3 — what the reader is looking at, resolved server-side.
+ *
+ * The request carries pointers (layer ids, a GEOID, state codes) and the
+ * server supplies every name, so nothing a client sends can arrive in the
+ * prompt as prose of its own choosing.
+ */
+async function renderSituation(pane: PaneContext | undefined): Promise<string> {
+  if (!pane) return ''
+  const layers = isLibraryEnabled() ? await listInternalLayers().catch(() => []) : []
+  const geoId = typeof pane.county?.geoId === 'string' ? pane.county.geoId : ''
+  const countyName = /^\d{5}$/.test(geoId) ? await countyLabel(geoId).catch(() => '') : ''
+  return renderPaneContext(pane, layers, countyName)
+}
+
 // --- Sending a message ---------------------------------------------------------
 
 router.post(
@@ -255,6 +273,9 @@ router.post(
         // P14-2: a phone and a narrow window have no map pane, and a reader
         // without one must not be offered the four tools that draw on it.
         canShowMap: req.body?.mapPane !== false,
+        // P14-3: resolved against the server's own layer registry, so a
+        // client cannot put text of its choosing into the prompt.
+        situation: await renderSituation(req.body?.pane as PaneContext | undefined),
       })
     } catch (err) {
       // Not the model — our own retrieval or store. Ask calls this a 502 and

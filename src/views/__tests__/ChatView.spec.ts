@@ -304,6 +304,8 @@ describe('ChatView arriving with ?q= (P6-5: the Ask boxes land here)', () => {
       expect.anything(),
       '',
       expect.any(Boolean),
+      // P14-3: null unless the pane is open.
+      null,
     )
     // The newest existing thread is NOT opened over the top of the new one.
     expect(mockedGet).not.toHaveBeenCalled()
@@ -408,6 +410,8 @@ describe('ChatView (P6-7b) — a turn', () => {
       expect.any(Object),
       '',
       expect.any(Boolean),
+      // P14-3: null unless the pane is open.
+      null,
     )
     expect(wrapper.get('[data-testid="chat-user-text"]').text()).toBe('what is in Shelby?')
     expect(wrapper.get('[data-testid="chat-answer"]').html()).toContain('<strong>County</strong>')
@@ -655,6 +659,7 @@ describe('ChatView scoped to a working set (P11-9)', () => {
       expect.anything(),
       'memphis-redevelopment',
       expect.any(Boolean),
+      null,
     )
   })
 
@@ -771,6 +776,48 @@ describe('ChatView — a client call is visible (P14-1)', () => {
 
     const lines = wrapper.findAll('[data-testid="chat-tool-summary"]').map(n => n.text())
     expect(lines.some(line => line.includes('Showed Percent Black on the map'))).toBe(true)
+    wrapper.unmount()
+  })
+})
+
+/**
+ * P14-3 — the page says what it is showing.
+ *
+ * Until now the whole message body was `{ text, workingSet? }`, so the
+ * assistant had a map pane beside it, the power to draw on it since P14-2,
+ * and no idea what was already there.
+ */
+describe('ChatView — what the reader is looking at (P14-3)', () => {
+  it('sends nothing about a pane that is shut', async () => {
+    stubViewportWidth(1280)
+    mockedList.mockResolvedValue([THREAD])
+    streams([{ type: 'text', text: 'ok' } as ChatEvent])
+    const wrapper = await mountView()
+    await type(wrapper, 'what is here?')
+    await flushPromises()
+
+    expect(mockedSend.mock.calls[0][6]).toBeNull()
+    wrapper.unmount()
+  })
+
+  it('sends the layers on the open pane, as ids', async () => {
+    stubViewportWidth(1280)
+    mockedList.mockResolvedValue([THREAD])
+    streams([{ type: 'text', text: 'ok' } as ChatEvent])
+    const wrapper = await mountView()
+    await wrapper.get('[data-testid="chat-pane-open"]').trigger('click')
+    await settleMap()
+
+    streams([{ type: 'text', text: 'ok' } as ChatEvent])
+    await type(wrapper, 'what am I looking at?')
+    await flushPromises()
+
+    const pane = mockedSend.mock.calls.at(-1)![6] as any
+    expect(pane).not.toBeNull()
+    // The pane opens on the default livability layer.
+    expect(pane.layers.map((l: any) => l.id)).toContain('combined_scores_v2')
+    // Ids and codes only — the server supplies every name.
+    expect(JSON.stringify(pane)).not.toMatch(/[A-Z][a-z]+ [A-Z][a-z]+/)
     wrapper.unmount()
   })
 })

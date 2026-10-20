@@ -107,7 +107,7 @@ let countyNames: Map<string, string> | null = null
 /** "Fulton County, GA" for a FIPS code, so slices read like places rather than
  *  numbers. The lookup is the map's own county file; if it is not beside the
  *  server (a deployment without the repo's public tree) the code stands in. */
-async function countyLabel(geoid: string): Promise<string> {
+export async function countyLabel(geoid: string): Promise<string> {
   if (!countyNames) {
     try {
       const path = fileURLToPath(new URL('../../../public/datasets/geographic/county-lookup.json', import.meta.url))

@@ -31,7 +31,7 @@ import { useMapState } from '@/composables/useMapState'
 import { executeTool, type ToolContext } from '@/lib/mapTools'
 import ScopeChip from '@/components/ScopeChip.vue'
 import { fetchWorkingSet, type WorkingSetDetail } from '@/lib/workingSets'
-import type { ChatToolCall } from '@/lib/libraryChat'
+import type { ChatToolCall, PaneContext } from '@/lib/libraryChat'
 
 /**
  * The four map tools run here rather than on the server: they are about this
@@ -47,7 +47,12 @@ const mapState = useMapState()
  *  so the "Show on map" pages get the same pane). Letting go of the canvas's
  *  context is this page's own business, so it rides on `onClose` — which runs
  *  whether the X was pressed or the window narrowed past the breakpoint. */
-const pane = useMapPane({ onClose: () => { mapTools.value = null } })
+const pane = useMapPane({
+  onClose: () => {
+    mapTools.value = null
+    focusedCounty.value = null
+  },
+})
 
 /** The canvas's tool context, once it has a map to drive. Cast rather than
  *  `ref<ToolContext | null>`: the context holds a `mapboxgl.Map`, and letting
@@ -72,7 +77,55 @@ function runMapTool(call: ChatToolCall): void {
   void executeTool(call.tool, call.args, mapTools.value)
 }
 
-const chat = useLibraryChat({ onToolCall: runMapTool, canShowMap: () => pane.canOpen.value })
+/** The county the reader last pressed on this page's map, if any. The pane
+ *  has no county of its own otherwise — `activeEntity` is a feature in a
+ *  point layer, not a place. */
+const focusedCounty = ref<{ geoId: string } | null>(null)
+
+function onCountyClick(geoId: string): void {
+  // The id only: the server names the county from it.
+  focusedCounty.value = /^\d{5}$/.test(geoId) ? { geoId } : null
+}
+
+/**
+ * What the pane is showing, read at the moment a question is sent (P14-3).
+ *
+ * Shut means null: a closed pane has nothing to say, and the turn then
+ * carries no situational block at all. Everything here is a POINTER — layer
+ * ids, a GEOID, two-letter state codes — because the server resolves each
+ * one against its own registry and drops what it cannot name. That is the
+ * whole reason the page does not send names.
+ */
+function paneContext(): PaneContext | null {
+  if (!pane.isOpen.value) return null
+  const weights = mapState.query.weights.value
+  return {
+    layers: [
+      ...mapState.layers.demographic.value,
+      ...mapState.layers.economic.value,
+      ...mapState.layers.housing.value,
+      ...mapState.layers.equity.value,
+      ...mapState.layers.transportation.value,
+      ...mapState.layers.internal.value,
+      ...mapState.layers.points.value,
+    ].map(id => ({ id, weight: weights[id] })),
+    filters: mapState.query.filters.value.map(filter => ({
+      layerId: filter.layerId,
+      // One shape for the model: a threshold is a floor, a ceiling, or both.
+      ...(filter.operator === 'less_than' ? { max: filter.value } : { min: filter.value }),
+      ...(filter.operator === 'between' && filter.max !== undefined ? { max: filter.max } : {}),
+    })),
+    states: mapState.query.regionStates.value,
+    limit: mapState.query.limit.value,
+    county: focusedCounty.value,
+  }
+}
+
+const chat = useLibraryChat({
+  onToolCall: runMapTool,
+  canShowMap: () => pane.canOpen.value,
+  paneContext,
+})
 
 const isPhone = usePhoneLayout()
 
@@ -292,6 +345,7 @@ onBeforeUnmount(() => chat.stop())
         :query="mapState.query"
         :data="mapState.data"
         @ready="onMapReady"
+        @county-click="onCountyClick"
         @close="pane.close()"
       />
     </div>

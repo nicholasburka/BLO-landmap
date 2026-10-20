@@ -3,6 +3,7 @@ import { requireInternalUser } from '../middleware/requireInternalUser.js'
 import { internalRateLimit } from '../middleware/internalRateLimit.js'
 import { privateNoCache } from '../middleware/privateCache.js'
 import { chatTools, buildChatSystemPrompt } from '../services/chatLoop.js'
+import { renderPaneContext } from '../services/chatSituation.js'
 import { listInternalLayers } from '../services/internalLayers.js'
 import { renderInternalLayersContext } from '../prompt/internalLayersContext.js'
 import { getWorkingSet } from '../services/libraryWorkingSets.js'
@@ -46,6 +47,10 @@ interface ToolRow {
 
 router.get('/api/chat-context', requireInternalUser, internalRateLimit, privateNoCache, async (req, res) => {
   try {
+    // The layer manifest is the other half of what a logged-in reader's
+    // prompt carries, and it is the half that changes as the library grows.
+    const layers = isLibraryEnabled() ? await listInternalLayers().catch(() => []) : []
+
     // `?map=0` renders what a phone's turn is given — four fewer tools and
     // no rule about a pane it does not have.
     const map = req.query.map !== '0'
@@ -68,7 +73,25 @@ router.get('/api/chat-context', requireInternalUser, internalRateLimit, privateN
 
     // The layer manifest is the other half of what a logged-in reader's
     // prompt carries, and it is the half that changes as the library grows.
-    const layers = isLibraryEnabled() ? await listInternalLayers().catch(() => []) : []
+
+    // P14-3: the block is a worked EXAMPLE and is returned beside the prompt
+    // rather than inside it. This page exists because the hand-written answer
+    // to "what is chat given?" was already wrong once; a fabricated Shelby
+    // County in the middle of the real prompt would be the same mistake in a
+    // new place. What a turn actually carries depends on the reader's pane.
+    const situationExample = map
+      ? renderPaneContext(
+          {
+            layers: [{ id: 'pct_Black', weight: 1 }, { id: 'median_home_value', weight: 0.5 }],
+            filters: [{ layerId: 'median_home_value', max: 250000 }],
+            states: ['TN', 'MS', 'AR'],
+            limit: 10,
+            county: { geoId: '47157' },
+          },
+          layers,
+          'Shelby County, TN',
+        )
+      : ''
     const systemPrompt = buildChatSystemPrompt(scope, { map })
     const layersContext = renderInternalLayersContext(layers)
 
@@ -85,6 +108,7 @@ router.get('/api/chat-context', requireInternalUser, internalRateLimit, privateN
       layersContext,
       scope,
       map,
+      situationExample,
       // A rough sense of what the fixed part of every turn costs, before the
       // question, the excerpts and the history. Characters/4 is the usual
       // rule of thumb and is labelled as an estimate on the page.

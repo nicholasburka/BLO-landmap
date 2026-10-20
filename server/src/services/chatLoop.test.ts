@@ -793,3 +793,19 @@ describe('the map tools reach the library chat (P14-2)', () => {
     expect(toolSummary('set_query_state', { layers: [] })).toBe('Reset the map')
   })
 })
+
+/** P14-3 — the block rides in the prompt, and only when there is one. */
+describe('the prompt carries what they are looking at (P14-3)', () => {
+  it('includes the block, after the rules', () => {
+    const prompt = buildChatSystemPrompt(null, { situation: '## What they are looking at\n\nA map.' })
+    expect(prompt).toContain('## What they are looking at')
+    // After the rules and before the sources: it is circumstance, not a rule.
+    expect(prompt.indexOf('9. You have a map')).toBeLessThan(prompt.indexOf('## What they are looking at'))
+    expect(prompt.indexOf('## What they are looking at')).toBeLessThan(prompt.indexOf('## Sources'))
+  })
+
+  it('carries nothing when the pane is shut', () => {
+    expect(buildChatSystemPrompt()).not.toContain('What they are looking at')
+    expect(buildChatSystemPrompt(null, { situation: '' })).not.toContain('What they are looking at')
+  })
+})

@@ -33,6 +33,7 @@ import {
   type ChatEvent,
   type ChatMessage,
   type ChatToolCall,
+  type PaneContext,
 } from '@/lib/libraryChat'
 import { useAuth } from '@/composables/useAuth'
 
@@ -96,6 +97,12 @@ export interface LibraryChatHooks {
    * false, and the turn is not offered the four tools that draw on one.
    */
   canShowMap?: () => boolean
+  /**
+   * P14-3: what the pane is showing, read at the moment the question is sent.
+   * Returns null when it is shut — a closed pane has nothing to say and the
+   * prompt then carries no block at all.
+   */
+  paneContext?: () => PaneContext | null
 }
 
 export function useLibraryChat(hooks: LibraryChatHooks = {}): LibraryChat {
@@ -294,6 +301,7 @@ export function useLibraryChat(hooks: LibraryChatHooks = {}): LibraryChat {
         controller.signal,
         workingSet,
         hooks.canShowMap?.() ?? false,
+        hooks.paneContext?.() ?? null,
       )
       if (id !== turnId) return
       question.id = done.userMessageId ?? question.id

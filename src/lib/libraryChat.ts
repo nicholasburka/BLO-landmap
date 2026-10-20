@@ -47,6 +47,21 @@ export const CHAT_TITLE_MAX = 120
 /** `running` exists only on the wire, while a read is in flight. */
 export type ChatToolStatus = 'running' | 'done' | 'failed' | 'proposed' | 'confirmed'
 
+/**
+ * What the chat page tells the server it is showing (P14-3).
+ *
+ * Capped and plain on purpose: the server resolves every id against its own
+ * registry and drops what it cannot name, so this is a set of pointers, not
+ * text the page gets to put in the prompt.
+ */
+export interface PaneContext {
+  layers: { id: string; weight?: number }[]
+  filters: { layerId: string; min?: number; max?: number }[]
+  states: string[]
+  limit: number | null
+  county: { geoId: string } | null
+}
+
 export interface ChatToolCall {
   /** What the confirm route addresses. */
   id: string
@@ -301,6 +316,8 @@ export async function sendMessage(
   /** P14-2: whether this page can show a map. A reader without a pane is not
    *  offered the four tools that draw on one. */
   mapPane = true,
+  /** P14-3: what that pane is showing right now. Omitted when it is shut. */
+  pane?: PaneContext | null,
 ): Promise<ChatDoneEvent> {
   let res: Response
   try {
@@ -311,6 +328,7 @@ export async function sendMessage(
         text,
         ...(workingSet ? { workingSet } : {}),
         ...(mapPane ? {} : { mapPane: false }),
+        ...(pane ? { pane } : {}),
       }),
       ...(signal ? { signal } : {}),
     })

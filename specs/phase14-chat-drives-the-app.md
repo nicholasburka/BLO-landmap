@@ -243,7 +243,7 @@ chat's). Layer controls inside the pane (P14-7).
 
 ---
 
-## P14-3 [FEATURE] The assistant is told what the reader is looking at
+## P14-3 [FEATURE] The assistant is told what the reader is looking at — DONE 2026-10-20
 
 **Type:** Feature · **Size:** M · **Depends:** P14-2
 
@@ -262,8 +262,10 @@ library chat's own pane.
       *"They are looking at …"* — not as excerpts, and never as instructions.
 - [ ] It is **absent when the pane is closed**, so a closed pane costs nothing
       and says nothing.
-- [ ] The block is visible on `/chat-context`, like everything else the model
-      is given.
+- [x] The block is visible on `/chat-context` — as a worked **example beside**
+      the prompt, not inside it. Putting a fabricated Shelby County into the
+      rendered prompt would be this page's original mistake in a new place:
+      what a turn actually carries depends on the reader's pane.
 - [ ] Capped: a fixed, small set of fields, so the turn cannot grow with the
       page.
 

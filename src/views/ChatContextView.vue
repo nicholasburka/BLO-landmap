@@ -74,6 +74,17 @@
         </p>
         <pre class="prompt" data-testid="ctx-prompt">{{ ctx.systemPrompt }}</pre>
 
+        <h2 class="blo-type-section">What they are looking at</h2>
+        <p class="blo-type-body blo-type-body--measure">
+          When the map pane is open, the turn carries a short block saying what is on it, so
+          <em>“add flood risk to this”</em> has a <em>this</em>. Every value in it is a pointer the
+          server resolves against its own registry — a layer id it cannot name is dropped, and a
+          county is named from its GEOID — so nothing the page sends arrives as prose.
+          <strong>This is an example, not part of the prompt above:</strong> a shut pane sends
+          nothing and the block is absent entirely.
+        </p>
+        <pre class="prompt" data-testid="ctx-situation">{{ ctx.situationExample || '(no map pane — nothing is sent)' }}</pre>
+
         <h2 class="blo-type-section">The internal layers, as the prompt names them</h2>
         <p class="blo-type-body blo-type-body--measure">
           Only a logged-in reader's prompt carries this. It is generated from the catalog, so it
@@ -123,6 +134,8 @@ interface ChatContext {
   systemPrompt: string
   layersContext: string
   scope: { slug: string; name: string; members: string[] } | null
+  map: boolean
+  situationExample: string
   approxPromptChars: number
 }
 

@@ -400,7 +400,7 @@ export function toolSummary(name: string, args: Record<string, unknown>, result?
  */
 export function buildChatSystemPrompt(
   scope?: { slug: string; name: string; members: string[] } | null,
-  options: { map?: boolean } = {},
+  options: { map?: boolean; situation?: string } = {},
 ): string {
   // Said only to a reader who has a pane — see `chatTools`.
   const mapRule =
@@ -441,6 +441,10 @@ export function buildChatSystemPrompt(
     '8. Link what you name. Every tool result carries an href for the thing it describes; when you name a page, dataset, document, note or source the library holds, write it as a markdown link to that href. A list of titles nobody can click is a list somebody has to go and search for a second time.',
     ...mapRule,
     '',
+    // P14-3: what is on their screen. Last, and labelled as state rather
+    // than instruction, because it is the one input that is neither a rule
+    // we wrote nor a document the library holds.
+    ...(options.situation ? ['', options.situation, ''] : []),
     '## Sources',
     '',
     'Each excerpt is introduced by a numbered header naming its title and what kind of thing it is (page, dataset, document, note, data source). Those numbers are what you cite.',
@@ -543,6 +547,9 @@ export interface ChatTurnOptions {
    *  window under the pane's breakpoint, and then the map tools are not
    *  offered at all. */
   canShowMap?: boolean
+  /** P14-3: what is on that pane right now, already rendered by
+   *  `renderPaneContext`. Empty when the pane is shut. */
+  situation?: string
   clientIp?: string
   /**
    * P11-9: the working set this turn is scoped to, when the person has
@@ -612,7 +619,10 @@ export async function runChatTurn(options: ChatTurnOptions): Promise<ChatTurnRes
       message = await client.messages.create({
         model: chatModel(),
         max_tokens: chatMaxTokens(),
-        system: buildChatSystemPrompt(options.workingSet, { map: canShowMap }),
+        system: buildChatSystemPrompt(options.workingSet, {
+          map: canShowMap,
+          situation: options.situation,
+        }),
         // On the last round the tools are withdrawn so the turn has to end in
         // prose — otherwise a model that keeps calling tools answers nothing.
         ...(lastRound ? {} : { tools: definitions }),

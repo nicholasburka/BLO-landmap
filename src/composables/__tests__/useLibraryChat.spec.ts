@@ -156,8 +156,10 @@ describe('a turn', () => {
       expect.any(Function),
       expect.any(Object),
       '',
-      // P14-2: no `canShowMap` hook here, so this page has no pane.
+      // P14-2/P14-3: no hooks here, so this page has no pane and sends
+      // nothing about one.
       false,
+      null,
     )
     const [question, answer] = chat$.messages.value
     expect(question).toMatchObject({ id: 8, role: 'user', text: 'what is in Shelby?' })
