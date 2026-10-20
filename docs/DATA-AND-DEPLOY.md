@@ -261,9 +261,52 @@ cd server && railway up --service blo-map-api --detach   # from server/, not the
 railway status                                            # confirm a new deployment appeared
 ```
 
-`railway up` honours neither `.gitignore` nor `.railwayignore`: from the repo
-root it packs ~389 MB and Cloudflare 413s it. `server/` is ~6 MB. Details and
-the 401-vs-404 trap are in `DEPLOY.md` → "Deploying the API is MANUAL".
+**`railway up` DOES honour `.gitignore`** (CLI 4.30.1 — there is a
+`--no-gitignore` flag to turn it off; this doc said the opposite until
+2026-10-20, and it was never true of this CLI). That is load-bearing, not a
+detail: `server/library-data` is the bucket mirror and is **412 MB**. Ignored,
+the upload is a few MB; unignored it is ~423 MB and Cloudflare 413s it. From
+the repo ROOT it packs ~389 MB regardless, because `public/datasets` is
+tracked. So: run it from `server/`, and before you run it confirm the four
+paths that must not ship are ignored —
+
+```bash
+git check-ignore -v server/library-data server/node_modules server/dist server/.env
+```
+
+**Did it actually deploy? You cannot tell from the API.** Two things that
+look like controls are not:
+
+- `/api/health` returns `{"status":"ok"}` on old and new code alike.
+- **A route that only the new code has returns 401, and so does a route that
+  exists nowhere.** A gate in front of `/api/*` answers before routing, so
+  401-vs-404 cannot tell you whether a new route shipped. Measured
+  2026-10-20: `/api/chat-context` (new), `/api/working-sets` (old) and
+  `/api/definitely-not-a-route-xyz` (never existed) all returned 401.
+
+Read the deployment itself instead — the build URL the upload printed, or:
+
+```bash
+railway status --json   # latestDeployment.status, and its commit/message
+```
+
+### Did the FRONTEND deploy? Two false signals there too
+
+- **The bundle hash will not match your local build.** `VITE_API_URL` is
+  inlined at build time and Netlify's value differs from yours, so
+  `index-<hash>.js` legitimately differs. A mismatch proves nothing.
+- **Most views are lazy chunks**, so a string from a new page is NOT in
+  `index-*.js` — grepping the live index bundle for it reports a confident
+  false negative. (Measured 2026-10-20: polled "What chat is given" for seven
+  minutes and never saw it; it lives in `ChatContextView-<hash>.js`.)
+
+What does work: the **route table** is in the index bundle, so the lazy
+import path is there as a string. Grep for the view's NAME.
+
+```bash
+js=$(curl -s https://map.blacklandownership.com/ | grep -o 'assets/index-[A-Za-z0-9_-]*\.js' | head -1)
+curl -s "https://map.blacklandownership.com/$js" | grep -c ChatContextView   # 2 = new code is live
+```
 
 1. **`LIBRARY_REMEDIATE=0` on Railway** before the API redeploys (§3).
 2. **Push data and verify `status` is clean.** A deploy re-syncs prod's mirror
