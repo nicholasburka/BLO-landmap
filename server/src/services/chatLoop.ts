@@ -2,7 +2,7 @@ import type Anthropic from '@anthropic-ai/sdk'
 import { z } from 'zod'
 import { randomUUID } from 'node:crypto'
 import { MCP_TOOLS, McpToolError, type McpToolContext } from './mcpTools.js'
-import { MCP_WRITE_TOOLS } from './mcpWriteTools.js'
+import { MCP_WRITE_TOOLS, CHAT_ONLY_WRITE_TOOLS } from './mcpWriteTools.js'
 import {
   FETCH_FOR_PLACE_INPUT,
   LIST_SLICES_INPUT,
@@ -184,7 +184,9 @@ export function chatTools(): ChatTool[] {
       args => runListPlaceSlices(args),
     ),
   ]
-  const writes = MCP_WRITE_TOOLS.map(t =>
+  // P10-5: `CHAT_ONLY_WRITE_TOOLS` is the one place the two chats diverge —
+  // MCP never deletes, and the in-app chat is first-party and confirms.
+  const writes = [...MCP_WRITE_TOOLS, ...CHAT_ONLY_WRITE_TOOLS].map(t =>
     tool(
       t.name,
       `${t.description} This is not run when you call it: the person is shown what you propose and has to confirm it.`,

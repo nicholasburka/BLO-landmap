@@ -59,6 +59,8 @@ vi.mock('@/lib/workingSets', async importOriginal => {
     fetchWorkingSetColumns: vi.fn(),
     rerunDerivedColumn: vi.fn(),
     runComposite: vi.fn(),
+    renameWorkingSetColumn: vi.fn(),
+    removeWorkingSetColumn: vi.fn(),
   }
 })
 
@@ -81,6 +83,8 @@ import {
   type DerivedColumn,
   type WorkingSetColumns,
   type WorkingSetDetail,
+  renameWorkingSetColumn,
+  removeWorkingSetColumn,
 } from '@/lib/workingSets'
 import { indexDraftKey, readIndexDraft } from '@/lib/indexDraft'
 import { sharedManifest, clearInternalLayerCache, type InternalLayerManifestEntry } from '@/lib/internalLayers'
@@ -100,6 +104,8 @@ const mockedFetchView = vi.mocked(fetchView)
 const mockedFetchViews = vi.mocked(fetchViews)
 const mockedSet = vi.mocked(fetchWorkingSet)
 const mockedColumns = vi.mocked(fetchWorkingSetColumns)
+const mockedRenameColumn = vi.mocked(renameWorkingSetColumn)
+const mockedRemoveColumn = vi.mocked(removeWorkingSetColumn)
 const mockedManifest = vi.mocked(sharedManifest)
 const mockedComposite = vi.mocked(runComposite)
 
@@ -1697,5 +1703,75 @@ describe('the Datasets tab (P11-6)', () => {
     await flushPromises()
     expect(w.find('[data-testid="dataset-open-name"]').exists()).toBe(false)
     expect(w.findAll('[data-testid="dataset-row"]').length).toBe(2)
+  })
+})
+
+/**
+ * P10-5 on the page — where the person who made the dead columns is.
+ *
+ * This set carries two columns created by iterating on a formula and never
+ * removable, which is the whole argument for the ticket.
+ */
+describe('changing a derived column (P10-5)', () => {
+  beforeEach(() => {
+    mockedColumns.mockResolvedValue(columnsBody({ columns: [COLUMN] }))
+    // This suite does not reset mocks globally, and two of the cases below
+    // assert a spy was NOT called.
+    mockedRenameColumn.mockReset()
+    mockedRemoveColumn.mockReset()
+  })
+
+  it('removes a column only after asking, and re-reads what is left', async () => {
+    const w = await mountAt(mapView())
+    await settleMap()
+    // Nothing destructive on one press: the ask comes first.
+    await w.get('[data-testid="derived-remove"]').trigger('click')
+    await flushPromises()
+    expect(w.get('[data-testid="derived-remove-ask"]').text()).toContain(COLUMN.label)
+    expect(mockedRemoveColumn).not.toHaveBeenCalled()
+
+    mockedColumns.mockResolvedValue(columnsBody({ columns: [] }))
+    await w.get('[data-testid="derived-remove-confirm"]').trigger('click')
+    await flushPromises()
+    expect(mockedRemoveColumn).toHaveBeenCalledWith('memphis-redevelopment', COLUMN.id)
+    // Re-read rather than spliced locally: one reader, so the map, the table
+    // and this strip cannot disagree about what exists.
+    expect(mockedColumns).toHaveBeenCalledTimes(2)
+    expect(w.find('[data-testid="derived-row"]').exists()).toBe(false)
+  })
+
+  it('keeps the column when the ask is declined', async () => {
+    const w = await mountAt(mapView())
+    await settleMap()
+    await w.get('[data-testid="derived-remove"]').trigger('click')
+    await flushPromises()
+    await w.get('[data-testid="derived-remove-cancel"]').trigger('click')
+    await flushPromises()
+    expect(mockedRemoveColumn).not.toHaveBeenCalled()
+    expect(w.find('[data-testid="derived-row"]').exists()).toBe(true)
+  })
+
+  it('renames a column and says so when it cannot', async () => {
+    const w = await mountAt(mapView())
+    await settleMap()
+    vi.spyOn(window, 'prompt').mockReturnValue('Civic participation')
+    mockedRenameColumn.mockRejectedValueOnce(new Error('library unavailable'))
+    await w.get('[data-testid="derived-rename"]').trigger('click')
+    await flushPromises()
+    expect(mockedRenameColumn).toHaveBeenCalledWith(
+      'memphis-redevelopment',
+      COLUMN.id,
+      'Civic participation',
+    )
+    expect(w.get('[data-testid="derived-column-error"]').text()).toContain('library unavailable')
+  })
+
+  it('does nothing when the rename is cancelled', async () => {
+    const w = await mountAt(mapView())
+    await settleMap()
+    vi.spyOn(window, 'prompt').mockReturnValue(null)
+    await w.get('[data-testid="derived-rename"]').trigger('click')
+    await flushPromises()
+    expect(mockedRenameColumn).not.toHaveBeenCalled()
   })
 })

@@ -30,6 +30,7 @@ const { reindexCatalog } = await import('../services/libraryCatalog.js')
 const { SESSION_COOKIE } = await import('../services/internalSessions.js')
 const { clearTabularCache } = await import('../services/libraryTabular.js')
 const { clearAnalysisInputMemo, fingerprintOf } = await import('../services/analysisInputs.js')
+const { getWorkingSetTool } = await import('../services/mcpTools.js')
 
 let passwordHash: string
 beforeAll(async () => {
@@ -1292,5 +1293,180 @@ describe('a set carries its own framing (P11-1)', () => {
     for (const row of list.body.sets) {
       expect(row.framing).toBeUndefined()
     }
+  })
+})
+
+/**
+ * P10-5 — a derived column can be changed, not only added.
+ *
+ * Modification was add-only on every surface: the same formula returned the
+ * stored column, a different one made a NEW one, and nothing could rename or
+ * delete. A conversation that iterated on a formula left dead columns behind
+ * it against a cap of 24 — dev carries two from exactly that.
+ */
+describe('changing a derived column (P10-5)', () => {
+  const VOTES_CSV = ['GEOID,registered_pct', '47157,61.4', '51760,72.8', '04019,44.1', '13121,80.2'].join('\n')
+  const TURNOUT_CSV = ['GEOID,turnout_pct', '47157,48.2', '51760,66.0', '13121,70.9'].join('\n')
+
+  function countyMeta(title: string, file: string, valueKey: string) {
+    return {
+      title,
+      status: 'published',
+      category: 'equity',
+      layer: { geometry: 'county', name: title, file, geoKey: 'GEOID', valueKey, unit: 'percent', direction: 'higher_better' },
+    }
+  }
+
+  const TERMS = [
+    { layer: 'internal-votes', weight: 6, direction: 'higher_better' },
+    { layer: 'internal-turnout', weight: 4, direction: 'higher_better' },
+  ]
+
+  async function setWithIndex(auth: { cookie: string; csrf: string }): Promise<string> {
+    fake.seed('library/datasets/votes/meta.json', JSON.stringify(countyMeta('Black voter registration', 'votes.csv', 'registered_pct')))
+    fake.seed('library/datasets/votes/votes.csv', VOTES_CSV)
+    fake.seed('library/datasets/turnout/meta.json', JSON.stringify(countyMeta('Local election turnout', 'turnout.csv', 'turnout_pct')))
+    fake.seed('library/datasets/turnout/turnout.csv', TURNOUT_CSV)
+    await reindexCatalog()
+    clearTabularCache()
+    clearAnalysisInputMemo()
+    const slug = await makeSet(auth, { datasets: ['votes', 'turnout'], layers: ['internal-votes', 'internal-turnout'] })
+    const made = await post(auth, `/api/working-sets/${slug}/composite`, { label: 'Political efficacy', terms: TERMS })
+    expect(made.status).toBe(200)
+    return slug
+  }
+
+  it('RE-WEIGHTS in place when the same id is given new terms', async () => {
+    // This needed no new route and never did — but it is true only while
+    // reuse matches on the TERMS and `putDerivedColumns` replaces by id, so
+    // it is pinned here rather than assumed.
+    const auth = await login()
+    const slug = await setWithIndex(auth)
+    const before = await get(auth, `/api/working-sets/${slug}/columns`)
+    const was = before.body.columns[0].values['47157']
+
+    const again = await post(auth, `/api/working-sets/${slug}/composite`, {
+      id: 'political-efficacy',
+      label: 'Political efficacy',
+      terms: [
+        { layer: 'internal-votes', weight: 1, direction: 'higher_better' },
+        { layer: 'internal-turnout', weight: 9, direction: 'higher_better' },
+      ],
+    })
+    expect(again.status).toBe(200)
+    expect(again.body.served).toBe('computed')
+    expect(again.body.column).toBe('political-efficacy')
+
+    const after = await get(auth, `/api/working-sets/${slug}/columns`)
+    // One column, not two: a re-weighting replaces rather than accumulates.
+    expect(after.body.columns).toHaveLength(1)
+    expect(after.body.columns[0].values['47157']).not.toBe(was)
+  })
+
+  it('renames a column without recomputing it', async () => {
+    const auth = await login()
+    const slug = await setWithIndex(auth)
+    const before = await get(auth, `/api/working-sets/${slug}/columns`)
+    const values = before.body.columns[0].values
+    const computedAt = before.body.columns[0].computedAt
+
+    const res = await request(app)
+      .patch(`/api/working-sets/${slug}/columns/political-efficacy`)
+      .set('Cookie', auth.cookie)
+      .set('X-CSRF-Token', auth.csrf)
+      .send({ label: 'Civic participation' })
+    expect(res.status).toBe(200)
+
+    const after = await get(auth, `/api/working-sets/${slug}/columns`)
+    expect(after.body.columns[0].label).toBe('Civic participation')
+    // The id is untouched: the layer `internal-<set>~<id>` is built from it
+    // and a saved framing names that.
+    expect(after.body.columns[0].id).toBe('political-efficacy')
+    // And nothing was recomputed — the numbers and the stamp are the same.
+    expect(after.body.columns[0].values).toEqual(values)
+    expect(after.body.columns[0].computedAt).toBe(computedAt)
+  })
+
+  it('removes a column, and says so in the audit log', async () => {
+    const auth = await login()
+    const slug = await setWithIndex(auth)
+    const res = await request(app)
+      .delete(`/api/working-sets/${slug}/columns/political-efficacy`)
+      .set('Cookie', auth.cookie)
+      .set('X-CSRF-Token', auth.csrf)
+    expect(res.status).toBe(200)
+
+    const after = await get(auth, `/api/working-sets/${slug}/columns`)
+    expect(after.body.columns).toHaveLength(0)
+
+    const rows = await libraryQuery(`SELECT detail FROM library_audit WHERE action = 'workingset.column.remove'`)
+    expect(rows.rows).toHaveLength(1)
+    expect((rows.rows[0] as any).detail).toMatchObject({ column: 'political-efficacy' })
+  })
+
+  it('refuses a column the set does not have, by name', async () => {
+    const auth = await login()
+    const slug = await setWithIndex(auth)
+    for (const res of [
+      await request(app).patch(`/api/working-sets/${slug}/columns/not-a-column`).set('Cookie', auth.cookie).set('X-CSRF-Token', auth.csrf).send({ label: 'x' }),
+      await request(app).delete(`/api/working-sets/${slug}/columns/not-a-column`).set('Cookie', auth.cookie).set('X-CSRF-Token', auth.csrf),
+    ]) {
+      expect(res.status).toBe(404)
+      expect(res.body.error).toContain('not-a-column')
+    }
+  })
+
+  it('refuses a rename with no name', async () => {
+    const auth = await login()
+    const slug = await setWithIndex(auth)
+    const res = await request(app)
+      .patch(`/api/working-sets/${slug}/columns/political-efficacy`)
+      .set('Cookie', auth.cookie)
+      .set('X-CSRF-Token', auth.csrf)
+      .send({ label: '   ' })
+    expect(res.status).toBe(400)
+  })
+})
+
+/**
+ * P10-2 — the tool that stops `build_index` guessing.
+ *
+ * Both surfaces could FIND a set and WRITE columns onto it, and neither could
+ * read what was in one. So `build_index` told the model to source layer ids
+ * from `list_layers` — the whole library's — and then said "Must be one the
+ * working set names" and hoped.
+ */
+describe('get_working_set (P10-2)', () => {
+  it('says what the set holds, with the geometry of each layer', async () => {
+    const auth = await login()
+    const slug = await makeSet(auth)
+    const got = (await getWorkingSetTool({ slug })) as any
+    expect(got.slug).toBe(slug)
+    expect(got.datasets).toContain('epa-superfund-npl')
+    // The held table the set is ABOUT — what proximity measures FROM, and
+    // why `measure_proximity` refuses without it.
+    expect(got.sites).toBe('memphis-sites')
+    // Every layer carries its geometry, which is the half that matters: a
+    // county layer can be weighed into an index and a point layer cannot,
+    // and that is exactly the distinction `build_index` had no way to see.
+    for (const layer of got.layers) expect(layer).toHaveProperty('geometry')
+    expect(got).toHaveProperty('countyLayers')
+    expect(got.href).toContain(`/sets/${slug}`)
+  })
+
+  it('lists derived columns as metadata, never as values', async () => {
+    const auth = await login()
+    const slug = await makeSet(auth)
+    const got = (await getWorkingSetTool({ slug })) as any
+    expect(Array.isArray(got.derivedColumns)).toBe(true)
+    // A proximity column over 190,000 rows must never ride in a tool result.
+    for (const column of got.derivedColumns) {
+      expect(column).not.toHaveProperty('values')
+      expect(column).toHaveProperty('layerId')
+    }
+  })
+
+  it('refuses a slug that names nothing, by name', async () => {
+    await expect(getWorkingSetTool({ slug: 'not-a-set' })).rejects.toThrow(/not-a-set/)
   })
 })

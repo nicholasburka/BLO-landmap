@@ -97,7 +97,7 @@ Whatever the new class returns needs the same treatment.
 
 **Size: M.**
 
-## P10-2 [FEATURE] Nothing can read what a working set holds
+## P10-2 — DONE 2026-10-20 [FEATURE] Nothing can read what a working set holds
 
 Neither surface has a tool that answers *"what is in this set?"*. MCP can
 **find** a set (`search_library` accepts kind `working-set` —
@@ -160,7 +160,7 @@ write came from chat, the way MCP's does.
 
 **Depends on:** P10-1, P10-2. **Size: M.**
 
-## P10-5 [FEATURE] An index can be created but never changed
+## P10-5 — DONE 2026-10-20 [FEATURE] An index can be created but never changed
 
 Modification is **add-only on both surfaces**. `build_index` with the same
 formula returns the stored column; with a different formula it creates a *new*
@@ -216,7 +216,7 @@ so it stays metered and the usage dashboard keeps seeing it under one `path`.
 
 **Size: S.**
 
-## P10-8 [CHORE] The working-set tools are undocumented
+## P10-8 — DONE 2026-10-20 [CHORE] The working-set tools are undocumented
 
 `build_index`, `measure_proximity` and the `working-set` search kind have
 **zero mentions** across `docs/MCP.md` and `docs/CHAT.md`. Worse than absent:
@@ -306,3 +306,48 @@ of P10-3 that was real.
 **P10-6, P10-7, P10-9 are unaffected** — server-side index comparison, an
 address→county tool, and a set-scoped place report are missing from both
 surfaces regardless of which tool list is in front of the model.
+
+---
+
+## Remediated 2026-10-20
+
+**P10-2 — `get_working_set`.** One read tool on both surfaces returning a
+set's datasets, its layers *with the geometry of each*, its anchor table and
+its derived columns as metadata. Values are deliberately absent: a proximity
+column over 190,000 rows must never ride in a tool result, so `county_values`
+with the column's `layerId` is how a reader gets numbers. `build_index` and
+`measure_proximity` now point at it instead of telling the model to source
+layer ids from `list_layers` and hope.
+
+**P10-5 — a column can be changed, not only added.**
+
+*Re-weighting needed no new route and never did.* `POST …/composite` with an
+existing `id` and new terms recomputes and replaces in place, because reuse
+matches on the TERMS and `putDerivedColumns` replaces by id. That was true
+before this ticket and nobody knew; there is now a test pinning it, because it
+stops being true the moment somebody changes the reuse key.
+
+*Rename* is a header edit — no recompute, and the **id is untouched**, because
+the layer `internal-<set>~<id>` is built from it and a saved framing names it.
+
+*Remove* is new, and it is **the one place the two surfaces deliberately
+diverge.** `docs/MCP.md` guarantees MCP never deletes, and that guarantee is
+about third-party assistants: an MCP token is handed to ChatGPT or Claude
+Desktop, and what it buys them is the ability to add and never to destroy. So
+`remove_column` lives in `CHAT_ONLY_WRITE_TOOLS` — the in-app chat and the
+set's own page, both first-party and session-authed, and the page asks before
+it does it. Phase 10's parity rule holds everywhere else; it should not hold
+here.
+
+**P10-8 — documented.** `get_working_set`, `measure_proximity`, `build_index`
+and `rename_column` are in `MCP.md`'s tables, the `search_library` kind list
+includes `working-set`, and the no-delete section says what it is a guarantee
+*about*. `/chat-context` (P13-1) is the version that cannot go stale.
+
+### Still open
+
+**P10-6** (server-side index comparison — `src/lib/indexCompare.ts` has no
+server counterpart, so "what moved" cannot be asked for), **P10-7** (an
+address→county tool; P9-11's geocode route still reaches one caller), and
+**P10-9** (a place report scoped to a set). None of them were affected by the
+tool-surface correction: they are missing from both surfaces either way.

@@ -501,6 +501,34 @@ const NO_COLUMNS: WorkingSetColumns = { slug: '', name: '', columns: [], unreada
  * anything. A 404 answers as "no columns" rather than throwing — a set can be
  * renamed out from under an open page, and the view is still worth drawing.
  */
+/**
+ * Rename a derived column (P10-5).
+ *
+ * The LABEL only. The id stays, because the layer `internal-<set>~<id>` is
+ * built from it and a saved framing names that — renaming the id would stop
+ * a map somebody has open from drawing.
+ */
+export async function renameWorkingSetColumn(slug: string, id: string, label: string): Promise<void> {
+  const res = await internalFetch(
+    `/api/working-sets/${encodeURIComponent(slug)}/columns/${encodeURIComponent(id)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ label }),
+    },
+  )
+  if (!res.ok) throw new Error(await errorMessage(res, `That column could not be renamed (${res.status})`))
+}
+
+/** Remove a derived column and its stored values (P10-5). Unrecoverable. */
+export async function removeWorkingSetColumn(slug: string, id: string): Promise<void> {
+  const res = await internalFetch(
+    `/api/working-sets/${encodeURIComponent(slug)}/columns/${encodeURIComponent(id)}`,
+    { method: 'DELETE' },
+  )
+  if (!res.ok) throw new Error(await errorMessage(res, `That column could not be removed (${res.status})`))
+}
+
 export async function fetchWorkingSetColumns(slug: string): Promise<WorkingSetColumns> {
   const res = await internalFetch(`/api/working-sets/${encodeURIComponent(slug)}/columns`)
   if (res.status === 404) return { ...NO_COLUMNS, slug }

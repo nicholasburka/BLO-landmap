@@ -290,6 +290,9 @@ describe('the MCP endpoint', () => {
         'get_entry',
         'get_layer',
         'get_view',
+        // P10-2: the tool that stops build_index sourcing layer ids from the
+        // whole library and hoping they are the set's.
+        'get_working_set',
         'inspect_link',
         'list_layers',
         'list_place_slices',
@@ -300,12 +303,20 @@ describe('the MCP endpoint', () => {
         'query_dataset',
         'read_document',
         'read_page',
+        // P10-5: the rename. Its sibling `remove_column` is deliberately NOT
+        // here — see below.
+        'rename_column',
         'save_view',
         'search_library',
         'update_page',
       ].sort(),
     )
-    // No delete tool exists, on any surface.
+    // No delete tool exists ON MCP, which is the guarantee docs/MCP.md makes
+    // and the reason it matters: this token is handed to a third-party
+    // assistant. P10-5 added `remove_column` for the IN-APP chat only
+    // (`CHAT_ONLY_WRITE_TOOLS`) — first-party, session-authed, and it shows
+    // the person what it proposes. That divergence is the point, so this
+    // assertion is about this endpoint and says so.
     expect(names.some((n: string) => /delete|remove|purge/.test(n))).toBe(false)
 
     const writeNames = new Set(WRITE_TOOL_NAMES)
@@ -1013,6 +1024,9 @@ describe('the write tools', () => {
         url: 'https://example.org/x',
         workingSet: 'memphis-redevelopment',
         to: 'internal-transmission',
+        // P10-5's rename_column: a real column id, so the refusal under test
+        // is the scope check and not the schema.
+        column: 'political-efficacy',
         // P7-8's build_index: valid args, so the refusal under test is the
         // scope check and not the schema.
         layers: [

@@ -10,6 +10,7 @@ import {
 } from './libraryCatalog.js'
 import { createLinkEntry } from './libraryLinks.js'
 import { listInternalLayers } from './internalLayers.js'
+import { renameDerivedColumn, removeDerivedColumn } from './libraryWorkingSets.js'
 import { parseMapState } from './mapState.js'
 import { ProximityError, runWorkingSetProximity } from './workingSetProximity.js'
 import { CompositeError, runWorkingSetComposite } from './workingSetComposite.js'
@@ -551,6 +552,48 @@ async function measureProximity(args: Record<string, any>, ctx: McpToolContext) 
  *    the local batch pass — the fix is a developer running it, not a narrower
  *    question.
  */
+/**
+ * Rename a derived column (P10-5).
+ *
+ * The label, never the id: the id builds the layer `internal-<set>~<id>` and
+ * a saved framing names that, so changing it would break a map somebody has
+ * open. Nothing is recomputed — the numbers did not change.
+ */
+async function renameColumn(args: Record<string, any>, ctx: McpToolContext) {
+  requireLibrary()
+  const done = await renameDerivedColumn(args.workingSet, args.column, String(args.name).trim())
+  if (!done) throw new McpToolError(`No working set with the slug "${args.workingSet}".`)
+  if ('error' in done) {
+    throw new McpToolError(
+      `That set has no column called "${args.column}". Call get_working_set to see what it holds.`,
+    )
+  }
+  auditWrite(ctx, 'workingset.column.rename', args.workingSet, {
+    column: args.column,
+    label: String(args.name).trim(),
+  })
+  return { workingSet: args.workingSet, column: args.column, name: String(args.name).trim() }
+}
+
+/**
+ * Remove a derived column (P10-5).
+ *
+ * There was no way to do this at all, so a conversation that iterated on a
+ * formula left dead columns behind it against a cap of 24.
+ */
+async function removeColumn(args: Record<string, any>, ctx: McpToolContext) {
+  requireLibrary()
+  const done = await removeDerivedColumn(args.workingSet, args.column)
+  if (!done) throw new McpToolError(`No working set with the slug "${args.workingSet}".`)
+  if ('error' in done) {
+    throw new McpToolError(
+      `That set has no column called "${args.column}". Call get_working_set to see what it holds.`,
+    )
+  }
+  auditWrite(ctx, 'workingset.column.remove', args.workingSet, { column: args.column })
+  return { workingSet: args.workingSet, removed: args.column }
+}
+
 async function buildIndex(args: Record<string, any>, ctx: McpToolContext) {
   requireLibrary()
   try {
@@ -735,7 +778,7 @@ export const MCP_WRITE_TOOLS: McpToolDefinition[] = [
       'For each row of a working set\'s site table, measure the distance in miles to the nearest feature of one of that set\'s layers — and optionally count how many features lie within n miles. Answers questions like "how far is each site from a transmission line" and "which of these brownfields has a line within five miles". The result is written back onto the working set as a derived column, so the map and the data table both show it; neither source dataset is changed. Both the table and the layer must already be in the working set. ' +
       `Small-N only: past ${PROXIMITY_ROWS_MAX.toLocaleString()} rows it refuses with a sentence naming a local batch pass — relay that sentence, do not retry with a narrower question, because the answer is for a developer to run the batch. Asking the same question twice returns the STORED result and computes nothing ("served": "stored"); it only measures again when one of the input datasets has actually changed, and then "staleNote" says which. When "freshness" is not "fresh", relay "staleNote" alongside the number rather than quoting the number alone.`,
     inputSchema: {
-      workingSet: z.string().trim().min(1).max(80).describe('Slug of the working set the column lands on. From search_library with kind "working-set".'),
+      workingSet: z.string().trim().min(1).max(80).describe('Slug of the working set the column lands on. From search_library with kind "working-set"; call get_working_set first to see its site table and its layers.'),
       to: z
         .string()
         .trim()
@@ -760,13 +803,26 @@ export const MCP_WRITE_TOOLS: McpToolDefinition[] = [
     run: measureProximity,
   },
   {
+    name: 'rename_column',
+    title: 'Rename a derived column',
+    description:
+      "Change what a working set's derived column is CALLED. The numbers are untouched and nothing is recomputed — only the header a reader sees. The column's id does not change, because the map layer it draws as is built from that id and a saved framing names it. Call get_working_set for the column ids a set holds.",
+    inputSchema: {
+      workingSet: z.string().trim().min(1).max(80).describe('Slug of the working set the column is on.'),
+      column: z.string().trim().min(1).max(80).describe("The column's id, from get_working_set."),
+      name: z.string().trim().min(1).max(120).describe('What it should be called, in plain words.'),
+    },
+    write: true,
+    run: renameColumn,
+  },
+  {
     name: 'build_index',
     title: 'Build an index',
     description:
       'Combine several of a working set\'s county layers into one weighted index, 0-100 per county, written back onto the set as a derived column that then draws as a county layer of its own. This is how a story cites a number it invented — "a political efficacy layer from class and race based indicators" is exactly this tool. Each layer is normalised over its own counties (its observed min to max), inverted when its direction is "lower_better", then weighted; weights are RELATIVE, so 6/4/4 and 3/2/2 are the same index. A county missing one of the layers is still scored but divided by the full declared weight, so incomplete counties score lower rather than tying complete ones \u2014 "partial" says how many. ' +
       `Every layer must already be in the working set, must be a COUNTY layer (a point or line layer has features, not values), and must not itself be a derived index. ${COMPOSITE_TERMS_MAX} layers is the most. A layer with the same value in every county is refused rather than quietly scaling the whole index down. Asking for the same formula twice returns the STORED result and computes nothing ("served": "stored"); it only recomputes when one of the input layers has actually changed, and then "staleNote" says which. When "freshness" is not "fresh", relay "staleNote" alongside the number. If it refuses for size, the sentence names a local batch pass — relay it rather than retrying with fewer layers.`,
     inputSchema: {
-      workingSet: z.string().trim().min(1).max(80).describe('Slug of the working set the index lands on. From search_library with kind "working-set".'),
+      workingSet: z.string().trim().min(1).max(80).describe('Slug of the working set the index lands on. From search_library with kind "working-set"; call get_working_set first to see which of its layers are county layers.'),
       name: z
         .string()
         .trim()
@@ -794,5 +850,41 @@ export const MCP_WRITE_TOOLS: McpToolDefinition[] = [
     },
     write: true,
     run: buildIndex,
+  },
+]
+
+/**
+ * Writes the IN-APP chat may make that MCP may not (P10-5).
+ *
+ * **MCP has a stated guarantee that it never deletes** — `docs/MCP.md`: "There
+ * is no delete tool, no unpublish, no archive" — and a test asserts no tool in
+ * `MCP_WRITE_TOOLS` is named like one. That guarantee is about third-party
+ * assistants: an MCP token is handed to ChatGPT or Claude Desktop, and what it
+ * buys them is the ability to ADD to the library and never to destroy part of
+ * it.
+ *
+ * Removing a derived column is a destructive, unrecoverable act, so it cannot
+ * go in that table. But P10-5 is real — index modification being add-only is
+ * what leaves a set full of dead columns against a cap of 24 — and the person
+ * who needs it is the one already looking at the set in the product.
+ *
+ * So the two surfaces deliberately DIVERGE here, and this is the one place
+ * phase 10's parity rule does not hold. The in-app chat is first-party,
+ * session-authed, on a page showing the column, and it shows the person what
+ * it proposes before running it. A connected assistant is none of those
+ * things.
+ */
+export const CHAT_ONLY_WRITE_TOOLS: McpToolDefinition[] = [
+  {
+    name: 'remove_column',
+    title: 'Remove a derived column',
+    description:
+      "Delete a derived column from a working set — the metadata and its stored values together. Use it to clear up after iterating on a formula: a set holds at most 24 derived columns, and build_index makes a NEW one every time the formula differs, so a conversation that tried five weightings has left four columns nobody wants. This cannot be undone and the numbers are not recoverable; name the column you mean, from get_working_set.",
+    inputSchema: {
+      workingSet: z.string().trim().min(1).max(80).describe('Slug of the working set the column is on.'),
+      column: z.string().trim().min(1).max(80).describe("The column's id, from get_working_set."),
+    },
+    write: true,
+    run: removeColumn,
   },
 ]

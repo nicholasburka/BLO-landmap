@@ -69,6 +69,8 @@ import {
   derivedTableColumns,
   fetchWorkingSet,
   fetchWorkingSetColumns,
+  renameWorkingSetColumn,
+  removeWorkingSetColumn,
   rerunDerivedColumn,
   runComposite,
   workingSetDatasetsHref,
@@ -880,6 +882,63 @@ const unsoundLine = computed(() => {
 const rerunning = ref('')
 const rerunError = ref('')
 
+// --- P10-5: changing a derived column --------------------------------------
+
+/** The column whose removal is being confirmed, or ''. */
+const removing = ref('')
+/** The column a rename or a remove is in flight for, or ''. */
+const busyColumn = ref('')
+const columnError = ref('')
+
+/**
+ * Rename a column.
+ *
+ * A prompt rather than an inline field, deliberately: this is a rare edit on
+ * a dense row that already carries five controls, and growing the row by a
+ * text input for the once-in-a-while case would cost every reader who is not
+ * doing it. If renaming becomes common, it earns the inline field then.
+ */
+async function startRename(id: string, current: string): Promise<void> {
+  const next = window.prompt('What should this column be called?', current)
+  if (next === null) return
+  const label = next.trim()
+  if (!label || label === current) return
+  columnError.value = ''
+  busyColumn.value = id
+  try {
+    await renameWorkingSetColumn(props.slug, id, label)
+    await reloadColumns()
+  } catch (err) {
+    columnError.value = friendlyError(err, 'That column could not be renamed.')
+  } finally {
+    busyColumn.value = ''
+  }
+}
+
+async function removeColumn(id: string): Promise<void> {
+  columnError.value = ''
+  busyColumn.value = id
+  try {
+    await removeWorkingSetColumn(props.slug, id)
+    // A drawn column that has just been deleted must not keep painting the
+    // map — the watcher on `columns` handles that, and this is what feeds it.
+    await reloadColumns()
+    removing.value = ''
+  } catch (err) {
+    columnError.value = friendlyError(err, 'That column could not be removed.')
+  } finally {
+    busyColumn.value = ''
+  }
+}
+
+/** Re-read the set's columns after an edit. One reader, so the map, the
+ *  table and this strip cannot disagree about what exists. */
+async function reloadColumns(): Promise<void> {
+  const stored = await fetchWorkingSetColumns(props.slug)
+  columns.value = stored.columns
+  unreadable.value = stored.unreadable
+}
+
 /**
  * Measure a stale column again, from where it is read.
  *
@@ -1309,11 +1368,47 @@ onMounted(async () => {
               <span v-else-if="column.isIndex" class="derived-why" data-testid="derived-weigh-why">
                 Weigh it differently — needs a wider window, so the map can show what the weights do
               </span>
+              <!-- P10-5: a column could be made and never changed. Iterating
+                   on a formula left dead columns behind against a cap of 24,
+                   and this set carries two from exactly that. Rename is a
+                   header edit — no recompute, the id is untouched because the
+                   layer and any saved framing are built from it. Remove is a
+                   WRITE and unrecoverable, so it asks first. -->
+              <button
+                type="button"
+                class="blo-act"
+                data-testid="derived-rename"
+                @click="startRename(column.id, column.label)"
+              >Rename</button>
+              <button
+                v-if="removing !== column.id"
+                type="button"
+                class="blo-act"
+                data-testid="derived-remove"
+                @click="removing = column.id"
+              >Remove</button>
+              <template v-else>
+                <span class="blo-type-unavailable" data-testid="derived-remove-ask">
+                  Remove “{{ column.label }}” for good?
+                </span>
+                <button
+                  type="button"
+                  class="blo-act blo-act--write"
+                  :disabled="busyColumn === column.id"
+                  data-testid="derived-remove-confirm"
+                  @click="removeColumn(column.id)"
+                >{{ busyColumn === column.id ? 'Removing…' : 'Remove it' }}</button>
+                <button type="button" class="blo-act" data-testid="derived-remove-cancel" @click="removing = ''">
+                  Keep it
+                </button>
+              </template>
+
               <span class="derived-provenance" data-testid="derived-provenance">{{ column.provenance }}</span>
               <span v-if="column.method" class="derived-method" data-testid="derived-method">{{ column.method }}</span>
             </li>
           </ul>
           <p v-if="rerunError" class="state-note error" data-testid="derived-rerun-error">{{ rerunError }}</p>
+          <p v-if="columnError" class="state-note error" data-testid="derived-column-error">{{ columnError }}</p>
           <p class="derived-note">
             Stored on the set, not recomputed to draw this. The table sorts these same numbers.
           </p>
