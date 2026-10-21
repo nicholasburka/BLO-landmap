@@ -308,6 +308,69 @@ export function chatToolByName(name: string): ChatTool | undefined {
   return chatTools().find(t => t.name === name)
 }
 
+/**
+ * What a read hands to the PAGE, as opposed to the model (P14-5).
+ *
+ * Two tools' value is the rows, and the reader saw only a count: "Queried the
+ * organizations table · 412 rows" while the model read the sample. This
+ * carries that same sample to the transcript so it can be rendered as a
+ * table — one query, one answer, two renderings.
+ *
+ * Deliberately only these two. A `place_report` payload is not a table and
+ * must not become one here, and a read's result is otherwise the model's
+ * business: every byte added here is stored on the message and replayed on
+ * every reload.
+ */
+/** Spread-friendly: omits the key entirely rather than storing `undefined`. */
+function withResult(result: Record<string, unknown> | undefined): { result?: Record<string, unknown> } {
+  return result ? { result } : {}
+}
+
+const MAX_RESULT_ROWS = 25
+const MAX_RESULT_COLUMNS = 8
+
+export function clientResult(name: string, data: unknown): Record<string, unknown> | undefined {
+  if (!data || typeof data !== 'object') return undefined
+  const out = data as Record<string, unknown>
+
+  if (name === 'query_dataset') {
+    const columns = Array.isArray(out.columns) ? (out.columns as string[]).slice(0, MAX_RESULT_COLUMNS) : []
+    const rows = Array.isArray(out.rows) ? (out.rows as Record<string, unknown>[]).slice(0, MAX_RESULT_ROWS) : []
+    const groups = Array.isArray(out.groups) ? (out.groups as unknown[]).slice(0, MAX_RESULT_ROWS) : []
+    if (groups.length) {
+      // A grouped query's answer IS the counts, so they are the table.
+      return {
+        columns: [String(out.groupBy ?? 'value'), 'rows'],
+        rows: groups.map(g => {
+          const group = g as { value?: unknown; count?: unknown }
+          return { [String(out.groupBy ?? 'value')]: group.value ?? '', rows: group.count ?? 0 }
+        }),
+        total: typeof out.rowCount === 'number' ? out.rowCount : groups.length,
+        href: typeof out.href === 'string' ? out.href : undefined,
+      }
+    }
+    if (!rows.length) return undefined
+    return {
+      columns,
+      rows,
+      total: typeof out.rowCount === 'number' ? out.rowCount : rows.length,
+      href: typeof out.href === 'string' ? out.href : undefined,
+    }
+  }
+
+  if (name === 'county_values') {
+    const rows = Array.isArray(out.values) ? (out.values as Record<string, unknown>[]) : []
+    if (!rows.length) return undefined
+    return {
+      columns: ['geoid', 'value'],
+      rows: rows.slice(0, MAX_RESULT_ROWS).map(r => ({ geoid: r.geoid, value: r.value })),
+      total: rows.length,
+    }
+  }
+
+  return undefined
+}
+
 // --- One-line summaries --------------------------------------------------------
 
 function quoted(value: unknown): string {
@@ -765,6 +828,9 @@ export async function runChatTurn(options: ChatTurnOptions): Promise<ChatTurnRes
         kind: 'read',
         status: outcome.ok ? 'done' : 'failed',
         summary: outcome.ok ? toolSummary(tool.name, args, outcome.data) : `${started.summary} — ${outcome.error}`,
+        // P14-5: the two tools whose value IS the rows carry a clipped copy
+        // to the page. Everything else carries none — see `clientResult`.
+        ...(outcome.ok ? withResult(clientResult(tool.name, outcome.data)) : {}),
       }
       toolCalls.push(call)
       options.emit({ type: 'tool_call', phase: 'finished', call })

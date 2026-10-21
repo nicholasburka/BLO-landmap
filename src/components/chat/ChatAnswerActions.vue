@@ -44,6 +44,13 @@ const props = defineProps<{
   /** The question this answered — the note's title and its "ask again" link. */
   question: string
   message: ChatMessage
+  /** P14-7: whether the host has a map pane to draw a saved view in. */
+  canShowHere?: boolean
+}>()
+
+const emit = defineEmits<{
+  /** Draw this saved view on the host's own map instead of navigating. */
+  'show-here': [slug: string]
 }>()
 
 /** A chat answer in the shape Ask's keep-this helpers read. */
@@ -184,6 +191,16 @@ async function addToPage(slug: string): Promise<void> {
       >
         {{ keepOpen ? 'Never mind' : 'Keep this…' }}
       </button>
+      <!-- P14-7: a saved view is exactly what the pane is for, and Open
+           navigates away from the conversation. Offered only where there is
+           a pane to draw in; the host decides, since it owns the map. -->
+      <button
+        v-if="openTarget?.viewSlug && canShowHere"
+        type="button"
+        class="action-btn"
+        data-testid="chat-show-here"
+        @click="emit('show-here', openTarget.viewSlug)"
+      >Show it here</button>
       <RouterLink
         v-if="openTarget"
         :to="openTarget.href"

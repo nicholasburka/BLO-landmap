@@ -32,6 +32,8 @@ import { executeTool, type ToolContext } from '@/lib/mapTools'
 import ScopeChip from '@/components/ScopeChip.vue'
 import { fetchWorkingSet, type WorkingSetDetail } from '@/lib/workingSets'
 import type { ChatToolCall, PaneContext } from '@/lib/libraryChat'
+import { fetchView, mapStateOf } from '@/lib/views'
+import { friendlyError } from '@/lib/errors'
 
 /**
  * The four map tools run here rather than on the server: they are about this
@@ -118,6 +120,50 @@ function paneContext(): PaneContext | null {
     states: mapState.query.regionStates.value,
     limit: mapState.query.limit.value,
     county: focusedCounty.value,
+  }
+}
+
+/**
+ * Draw a saved view on this page's own map (P14-7).
+ *
+ * `openTargetFor` matched four route shapes and every one of them navigated
+ * AWAY from the conversation — which is a strange thing to offer beside a
+ * pane built to show exactly this. The view's state is applied through the
+ * same `set_query_state` the assistant drives the map with, so there is one
+ * definition of "put this query on the map" rather than a second reader for
+ * saved views.
+ */
+const showing = ref('')
+const showError = ref('')
+
+async function showViewHere(slug: string): Promise<void> {
+  if (showing.value) return
+  showing.value = slug
+  showError.value = ''
+  pane.open()
+  try {
+    const view = await fetchView(slug)
+    const state = view && mapStateOf(view)
+    if (!state) throw new Error('That view has no map in it.')
+    // The canvas may still be starting: queue it the way a tool call is.
+    const call: ChatToolCall = {
+      id: `view-${slug}`,
+      tool: 'set_query_state',
+      kind: 'client',
+      status: 'done',
+      summary: `Showed the saved view “${slug}”`,
+      args: {
+        layers: state.layers,
+        filters: state.filters,
+        limit: state.limit,
+        regionStates: state.regionStates,
+      },
+    }
+    runMapTool(call)
+  } catch (err) {
+    showError.value = friendlyError(err, 'That view could not be shown here.')
+  } finally {
+    showing.value = ''
   }
 }
 
@@ -319,10 +365,13 @@ onBeforeUnmount(() => chat.stop())
             :message="entry.message"
             :question="entry.question"
             :running-actions="chat.runningActions.value"
+            :can-show-here="pane.canOpen.value"
             @run="chat.runAction($event)"
+            @show-here="showViewHere"
           />
         </div>
 
+        <p v-if="showError" class="chat-error" role="alert" data-testid="chat-show-error">{{ showError }}</p>
         <p v-if="chat.error.value" class="chat-error" role="alert" data-testid="chat-error">{{ chat.error.value }}</p>
         <p v-if="chat.actionError.value" class="chat-error" role="alert" data-testid="chat-action-error">{{ chat.actionError.value }}</p>
 

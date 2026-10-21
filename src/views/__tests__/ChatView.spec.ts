@@ -13,6 +13,11 @@ vi.mock('@/lib/internalLayers', async importOriginal => {
   return { ...actual, sharedManifest: vi.fn().mockResolvedValue([]) }
 })
 
+vi.mock('@/lib/views', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/lib/views')>()
+  return { ...actual, fetchView: vi.fn() }
+})
+
 vi.mock('@/lib/libraryChat', async importOriginal => {
   const actual = await importOriginal<typeof import('@/lib/libraryChat')>()
   return {
@@ -64,6 +69,7 @@ import {
   type ChatMessage,
   type ChatToolCall,
 } from '@/lib/libraryChat'
+import { fetchView } from '@/lib/views'
 import { fetchWorkingSet } from '@/lib/workingSets'
 import { saveAnswerAsNote, saveAnswerAsPage } from '@/lib/ask'
 import { fetchCatalog, type CatalogEntry } from '@/lib/libraryCatalog'
@@ -77,6 +83,7 @@ import ChatView from '../ChatView.vue'
 // is shared with the "Show on map" pages (P6-14).
 import { stubViewportWidth, restoreViewport } from '@/testing/viewport'
 
+const mockedFetchView = vi.mocked(fetchView)
 const mockedList = vi.mocked(listChats)
 const mockedCreate = vi.mocked(createChat)
 const mockedGet = vi.mocked(getChat)
@@ -818,6 +825,75 @@ describe('ChatView — what the reader is looking at (P14-3)', () => {
     expect(pane.layers.map((l: any) => l.id)).toContain('combined_scores_v2')
     // Ids and codes only — the server supplies every name.
     expect(JSON.stringify(pane)).not.toMatch(/[A-Z][a-z]+ [A-Z][a-z]+/)
+    wrapper.unmount()
+  })
+})
+
+/**
+ * P14-7 — a saved view belongs in the pane, not in a new page.
+ *
+ * `openTargetFor` matched four route shapes and every one of them navigated
+ * AWAY from the conversation, which is a strange thing to offer beside a map
+ * pane built to show exactly this.
+ */
+describe('ChatView — showing a saved view in the pane (P14-7)', () => {
+  const ANSWER = {
+    type: 'text',
+    text: 'Saved it: [the view](/views/memphis-2024).',
+  } as ChatEvent
+
+  it('offers both, and draws it here without navigating', async () => {
+    stubViewportWidth(1280)
+    mockedList.mockResolvedValue([THREAD])
+    mockedFetchView.mockResolvedValue({
+      slug: 'memphis-2024',
+      title: 'Memphis 2024',
+      type: 'map',
+      state: { layers: [{ layerId: 'pct_Black', weight: 5 }], filters: [], limit: null, regionStates: [] },
+      results: [],
+    } as never)
+    streams([ANSWER])
+    const wrapper = await mountView()
+    await type(wrapper, 'save the memphis view')
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="chat-open"]').exists()).toBe(true)
+    await wrapper.get('[data-testid="chat-show-here"]').trigger('click')
+    await settleMap()
+
+    expect(wrapper.find('[data-testid="chat-pane"]').exists()).toBe(true)
+    expect(mockedFetchView).toHaveBeenCalledWith('memphis-2024')
+    wrapper.unmount()
+  })
+
+  it('offers only Open on a phone, where there is no pane', async () => {
+    stubViewportWidth(600)
+    mockedList.mockResolvedValue([THREAD])
+    streams([ANSWER])
+    const wrapper = await mountView()
+    await type(wrapper, 'save the memphis view')
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="chat-open"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="chat-show-here"]').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
+  it('says so when the view cannot be drawn', async () => {
+    stubViewportWidth(1280)
+    mockedList.mockResolvedValue([THREAD])
+    // A table view has no map in it, and `mapStateOf` says so.
+    mockedFetchView.mockResolvedValue({
+      slug: 'memphis-2024', title: 'x', type: 'table', state: {}, results: [],
+    } as never)
+    streams([ANSWER])
+    const wrapper = await mountView()
+    await type(wrapper, 'save the memphis view')
+    await flushPromises()
+    await wrapper.get('[data-testid="chat-show-here"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.get('[data-testid="chat-show-error"]').text()).toContain('no map in it')
     wrapper.unmount()
   })
 })

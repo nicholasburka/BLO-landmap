@@ -408,6 +408,13 @@ export interface ChatOpenTarget {
   /** A same-origin path — Open is always a link inside this app. */
   href: string
   label: string
+  /**
+   * P14-7: the saved view's slug, when the target is one. A view is exactly
+   * what the map pane is for, and every one of these four routes navigates
+   * AWAY from the conversation — so a page with a pane can offer to draw it
+   * here instead.
+   */
+  viewSlug?: string
 }
 
 /**
@@ -431,6 +438,15 @@ export function toAppPath(href: string): string | null {
 
 function routeLabel(path: string): string | null {
   return ANALYSIS_ROUTES.find(route => route.test.test(path))?.label ?? null
+}
+
+/** The saved view a path names, if it names one. Both spellings: the route
+ *  shim at `/views/<slug>` and the public map's `/?view=<slug>`. */
+export function viewSlugIn(path: string): string {
+  const direct = /^\/views\/([^/?#\s)]+)/.exec(path)
+  if (direct) return decodeURIComponent(direct[1])
+  const query = /^\/\?view=([^&#\s)]+)/.exec(path)
+  return query ? decodeURIComponent(query[1]) : ''
 }
 
 /** Every link in a piece of markdown, in the order they were written. */
@@ -458,7 +474,10 @@ export function openTargetFor(message: Pick<ChatMessage, 'text' | 'toolCalls' | 
   for (const candidate of candidates) {
     const href = toAppPath(candidate)
     const label = href && routeLabel(href)
-    if (href && label) return { href, label }
+    if (href && label) {
+      const viewSlug = viewSlugIn(href)
+      return { href, label, ...(viewSlug ? { viewSlug } : {}) }
+    }
   }
   return null
 }

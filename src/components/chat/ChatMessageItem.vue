@@ -17,6 +17,7 @@ import { RouterLink } from 'vue-router'
 import { renderMarkdown } from '@/lib/renderMarkdown'
 import { kindLabel } from '@/lib/kb'
 import ChatToolLine from './ChatToolLine.vue'
+import ChatResultTable from './ChatResultTable.vue'
 import ChatProposedAction from './ChatProposedAction.vue'
 import ChatAnswerActions from './ChatAnswerActions.vue'
 import { actionStateOf, type ChatMessageView } from '@/composables/useLibraryChat'
@@ -27,9 +28,15 @@ const props = defineProps<{
   question: string
   /** Ids of the proposals whose confirm is in flight. */
   runningActions: string[]
+  /** P14-7: whether the host has a map pane a saved view can be drawn in. */
+  canShowHere?: boolean
 }>()
 
-defineEmits<{ (e: 'run', actionId: string): void }>()
+const emit = defineEmits<{
+  (e: 'run', actionId: string): void
+  /** P14-7: draw a saved view on the host's map rather than navigating. */
+  (e: 'show-here', slug: string): void
+}>()
 
 const html = computed(() => (props.message.text ? renderMarkdown(props.message.text) : ''))
 
@@ -75,7 +82,12 @@ const outcomeFailed = computed(() => props.message.toolCalls.some(call => call.s
 
     <!-- An answer -->
     <template v-else>
-      <ChatToolLine v-for="call in reads" :key="call.id" :call="call" />
+      <template v-for="call in reads" :key="call.id">
+        <ChatToolLine :call="call" />
+        <!-- P14-5: the rows behind the line, for the two tools whose value
+             IS the rows. The server decides which carry one. -->
+        <ChatResultTable v-if="call.result" :result="call.result" />
+      </template>
 
       <p v-if="message.pending && !message.text" class="thinking" data-testid="chat-thinking">Reading the library…</p>
       <!-- eslint-disable-next-line vue/no-v-html -- sanitized by renderMarkdown -->
@@ -104,7 +116,13 @@ const outcomeFailed = computed(() => props.message.toolCalls.some(call => call.s
         </ol>
       </section>
 
-      <ChatAnswerActions v-if="keepable" :question="question" :message="message" />
+      <ChatAnswerActions
+        v-if="keepable"
+        :question="question"
+        :message="message"
+        :can-show-here="canShowHere"
+        @show-here="emit('show-here', $event)"
+      />
     </template>
   </article>
 </template>

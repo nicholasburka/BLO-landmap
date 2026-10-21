@@ -331,7 +331,7 @@ it is a `<table>`.
 
 ---
 
-## P14-5 [FEATURE] A dataset answer shows its rows
+## P14-5 [FEATURE] A dataset answer shows its rows — DONE 2026-10-20
 
 **Type:** Feature · **Size:** M · **Depends:** P14-1, P14-4
 
@@ -437,7 +437,7 @@ the set gains the dataset through the same call the tool makes.
 
 ---
 
-## P14-7 [FEATURE] Open a view in the pane instead of leaving the page
+## P14-7 [FEATURE] Open a view in the pane instead of leaving the page — DONE 2026-10-20
 
 **Type:** Feature · **Size:** S · **Depends:** P14-2
 
@@ -468,6 +468,25 @@ appears.
   `src/views/ChatView.vue`
 
 ---
+
+## Shipped — all seven, 2026-10-20
+
+Against the six-point ideal at the top:
+
+1. **A map answers a map question.** The four tools reach the library chat
+   and the pane opens itself (P14-1, P14-2).
+2. **The assistant knows what is on it** (P14-3).
+3. **Ten rows render as ten rows** — in an answer (P14-4) and under the tool
+   line that fetched them (P14-5).
+4. **"Build me a set and index it" completes**, and so does changing one by
+   hand, which nothing in the product could do before (P14-6).
+5. **A saved view draws in the pane** rather than ending the conversation
+   (P14-7).
+6. **Nothing weakened.** MCP still has no delete tool; every write is still
+   proposed and confirmed; the public map's six tools are untouched.
+
+Gates at the end: server 2,805 passed / 14 skipped, client 2,450, both
+typechecks clean.
 
 ## Order and critical path
 

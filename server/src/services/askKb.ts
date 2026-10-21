@@ -194,6 +194,10 @@ export interface AskQueryCard {
   groups?: GroupCount[]
   /** Rows matching the filters (the full match count, not the sample size). */
   rowCount: number
+  /** P14-5: the sample itself, so a reader can see rows and not only a count.
+   *  Same rows the model is shown — one query, one answer, two renderings. */
+  columns?: string[]
+  rows?: Record<string, unknown>[]
   href: string
   mapHref?: string
 }
@@ -291,6 +295,16 @@ export async function runQueryDataset(rawInput: unknown, index: KbIndex): Promis
       card,
     }
   }
+
+  // P14-5: the same rows the prose sample is built from, structured, so the
+  // page can render them as a table instead of the reader seeing only "412
+  // rows match".
+  card.columns = columns.slice(0, SAMPLE_COLUMNS)
+  card.rows = page.rows.slice(0, SAMPLE_ROWS).map(row => {
+    const out: Record<string, unknown> = {}
+    for (const column of card.columns!) out[column] = (row as Record<string, unknown>)[column] ?? ''
+    return out
+  })
 
   const sample = renderSample(page.rows, columns)
   return {

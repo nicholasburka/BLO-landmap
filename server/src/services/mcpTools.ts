@@ -530,6 +530,8 @@ export async function queryDataset(args: {
     ...(card.groupBy ? { groupBy: card.groupBy } : {}),
     ...(card.groups ? { groups: card.groups } : {}),
     rowCount: card.rowCount,
+    ...(card.columns ? { columns: card.columns } : {}),
+    ...(card.rows ? { rows: card.rows } : {}),
     summary: text,
     href: appUrl(card.href),
     ...(card.mapHref ? { mapHref: appUrl(card.mapHref) } : {}),

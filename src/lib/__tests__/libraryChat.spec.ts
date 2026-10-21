@@ -285,7 +285,22 @@ describe('openTargetFor', () => {
         { id: 'a1', tool: 'save_view', kind: 'write', status: 'confirmed', summary: 'Save the map view', result: { href: `${window.location.origin}/?view=shelby` } },
       ],
     })
-    expect(target).toEqual({ href: '/?view=shelby', label: 'Open the saved view' })
+    expect(target).toEqual({
+      href: '/?view=shelby',
+      label: 'Open the saved view',
+      viewSlug: 'shelby',
+    })
+  })
+
+  it('names the saved view so a pane can draw it instead (P14-7)', () => {
+    const both = ['/views/memphis-2024', '/?view=memphis-2024']
+    for (const href of both) {
+      const target = openTargetFor({ ...base, text: `Saved it: [the view](${href}).`, toolCalls: [] })
+      expect(target?.viewSlug, href).toBe('memphis-2024')
+    }
+    // A report and a comparison are not views: nothing to draw in a pane.
+    expect(openTargetFor({ ...base, text: 'See [the report](/place?geoid=47157).', toolCalls: [] })?.viewSlug)
+      .toBeUndefined()
   })
 
   it('takes a cited place report', () => {

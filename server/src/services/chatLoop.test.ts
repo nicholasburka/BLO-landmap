@@ -43,6 +43,7 @@ const {
   chatMaxTokens,
   clientTool,
   clientToolResult,
+  clientResult,
 } = await import('./chatLoop.js')
 const { MODEL_UNAVAILABLE: ASK_MODEL_UNAVAILABLE } = await import('../routes/libraryAsk.js')
 const { TOOL_DEFINITIONS } = await import('../prompt/toolDefinitions.js')
@@ -807,5 +808,68 @@ describe('the prompt carries what they are looking at (P14-3)', () => {
   it('carries nothing when the pane is shut', () => {
     expect(buildChatSystemPrompt()).not.toContain('What they are looking at')
     expect(buildChatSystemPrompt(null, { situation: '' })).not.toContain('What they are looking at')
+  })
+})
+
+/**
+ * P14-5 — the rows behind the line.
+ *
+ * `query_dataset` returning 412 rows rendered as "Queried the organizations
+ * table · 412 rows". The model read the sample; the reader got a number.
+ */
+describe('a read that carries its rows (P14-5)', () => {
+  it('hands the page the sample a query returned', () => {
+    const result = clientResult('query_dataset', {
+      columns: ['Name', 'HQ State'],
+      rows: [{ Name: 'Land Loss Prevention Project', 'HQ State': 'NC' }],
+      rowCount: 412,
+      href: 'https://app.example/library/organizations/data',
+    })
+    expect(result).toMatchObject({
+      columns: ['Name', 'HQ State'],
+      rows: [{ Name: 'Land Loss Prevention Project', 'HQ State': 'NC' }],
+      total: 412,
+    })
+  })
+
+  it('renders a grouped query as its counts, because that IS the answer', () => {
+    const result = clientResult('query_dataset', {
+      groupBy: 'HQ State',
+      groups: [{ value: 'GA', count: 12 }, { value: 'NC', count: 9 }],
+      rowCount: 100,
+    }) as any
+    expect(result.columns).toEqual(['HQ State', 'rows'])
+    expect(result.rows[0]).toEqual({ 'HQ State': 'GA', rows: 12 })
+  })
+
+  it('clips, because every row is stored on the message and replayed', () => {
+    const rows = Array.from({ length: 80 }, (_, i) => ({ a: i, b: i, c: i, d: i, e: i, f: i, g: i, h: i, i: i, j: i }))
+    const result = clientResult('query_dataset', {
+      columns: Object.keys(rows[0]),
+      rows,
+      rowCount: 80,
+    }) as any
+    expect(result.rows).toHaveLength(25)
+    expect(result.columns).toHaveLength(8)
+    // The count still tells the truth about how many matched.
+    expect(result.total).toBe(80)
+  })
+
+  it('carries county values as a two-column table', () => {
+    const result = clientResult('county_values', {
+      values: [{ geoid: '47157', value: 54.1 }, { geoid: '13121', value: 44.5 }],
+    }) as any
+    expect(result.columns).toEqual(['geoid', 'value'])
+    expect(result.rows).toHaveLength(2)
+  })
+
+  it('carries nothing for every other tool', () => {
+    // A place report is not a table and must not become one here; a read's
+    // result is otherwise the model's business.
+    expect(clientResult('place_report', { sources: [{ a: 1 }] })).toBeUndefined()
+    expect(clientResult('search_library', { results: [{ a: 1 }] })).toBeUndefined()
+    expect(clientResult('read_page', { markdown: '# x' })).toBeUndefined()
+    // And nothing at all when there is nothing to show.
+    expect(clientResult('query_dataset', { rowCount: 0, rows: [] })).toBeUndefined()
   })
 })

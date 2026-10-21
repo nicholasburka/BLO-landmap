@@ -358,6 +358,25 @@ sentence saying it already happened and asking the answer to say what was
 shown. A client line renders beside the reads, so the transcript is never
 silent about why the map moved.
 
+### Rows under a line (P14-5)
+
+A read's `result` is normally the model's business and never reaches the page.
+Two tools are the exception, because their value IS the rows: `query_dataset`
+and `county_values` carry a clipped copy (25 rows, 8 columns) that
+`ChatResultTable` renders under the line, collapsed. `clientResult` in
+`chatLoop.ts` decides — not the component — so nothing else can start
+carrying a payload by accident. A grouped query renders its counts, since
+those are its answer. Every byte here is stored on the message and replayed
+on every reload, which is why the clip is small and the list is two.
+
+### Showing a saved view in the pane (P14-7)
+
+`openTargetFor` returns `viewSlug` when the target is a saved view, and a page
+with a pane offers **Show it here** beside **Open**. It applies the view's
+state through the same `set_query_state` the assistant drives the map with, so
+there is one definition of "put this query on the map" rather than a second
+reader for saved views. Under 1024px only **Open** renders.
+
 ### Adding an event type
 
 1. Add the interface and put it in the `ChatEvent` union in
