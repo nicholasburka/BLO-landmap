@@ -51,6 +51,11 @@ vi.mock('@/lib/libraryData', async importOriginal => {
 // P7-6: `rerunDerivedColumn` is faked too. The arithmetic that decides whether
 // a re-run is OFFERED — the verdict, the badge, the sentence — is the real
 // code, which is what the copy is judged on.
+vi.mock('@/lib/libraryCatalog', async importOriginal => {
+  const actual = await importOriginal<typeof import('@/lib/libraryCatalog')>()
+  return { ...actual, fetchCatalog: vi.fn() }
+})
+
 vi.mock('@/lib/workingSets', async importOriginal => {
   const actual = await importOriginal<typeof import('@/lib/workingSets')>()
   return {
@@ -61,6 +66,7 @@ vi.mock('@/lib/workingSets', async importOriginal => {
     runComposite: vi.fn(),
     renameWorkingSetColumn: vi.fn(),
     removeWorkingSetColumn: vi.fn(),
+    updateWorkingSet: vi.fn(),
   }
 })
 
@@ -73,6 +79,7 @@ import {
   type RowsPage,
 } from '@/lib/libraryData'
 import { loadCountyRows } from '@/lib/publicLayers'
+import { fetchCatalog } from '@/lib/libraryCatalog'
 import { fetchView, fetchViews, type SavedView } from '@/lib/views'
 import {
   fetchWorkingSet,
@@ -85,6 +92,7 @@ import {
   type WorkingSetDetail,
   renameWorkingSetColumn,
   removeWorkingSetColumn,
+  updateWorkingSet,
 } from '@/lib/workingSets'
 import { indexDraftKey, readIndexDraft } from '@/lib/indexDraft'
 import { sharedManifest, clearInternalLayerCache, type InternalLayerManifestEntry } from '@/lib/internalLayers'
@@ -1773,5 +1781,76 @@ describe('changing a derived column (P10-5)', () => {
     await w.get('[data-testid="derived-rename"]').trigger('click')
     await flushPromises()
     expect(mockedRenameColumn).not.toHaveBeenCalled()
+  })
+})
+
+/**
+ * P14-6 — changing what a set holds.
+ *
+ * `updateWorkingSet` has been written since phase 5 with **no caller in any
+ * view**, so adding a dataset to a set was impossible from the product, not
+ * merely from a conversation. These are that function's first callers.
+ */
+describe('changing what a set holds (P14-6)', () => {
+  beforeEach(() => {
+    vi.mocked(updateWorkingSet).mockReset()
+    vi.mocked(fetchCatalog).mockResolvedValue([
+      { slug: 'memphis-sites', title: 'Memphis candidate sites', kind: 'dataset' },
+      { slug: 'flood-claims', title: 'Flood claims', kind: 'dataset' },
+    ] as never)
+  })
+
+  it('offers only what the set does not already hold', async () => {
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets')
+    await flushPromises()
+    await w.get('[data-testid="dataset-add-open"]').trigger('click')
+    await flushPromises()
+
+    const options = w.findAll('[data-testid="dataset-add-pick"] option').map(o => o.text())
+    expect(options).toContain('Flood claims')
+    // Already in the set, so not offered again.
+    expect(options).not.toContain('Memphis candidate sites')
+    w.unmount()
+  })
+
+  it('adds one by sending the whole membership, since the endpoint replaces', async () => {
+    vi.mocked(updateWorkingSet).mockResolvedValue({ slug: 'memphis-redevelopment', name: 'x' } as never)
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets')
+    await flushPromises()
+    await w.get('[data-testid="dataset-add-open"]').trigger('click')
+    await flushPromises()
+    await w.get('[data-testid="dataset-add-pick"]').setValue('flood-claims')
+    await w.get('[data-testid="dataset-add"]').trigger('click')
+    await flushPromises()
+
+    expect(updateWorkingSet).toHaveBeenCalledWith('memphis-redevelopment', {
+      datasets: ['memphis-sites', 'epa-superfund-npl', 'flood-claims'],
+    })
+    w.unmount()
+  })
+
+  it('removes one the same way, by sending what is left', async () => {
+    vi.mocked(updateWorkingSet).mockResolvedValue({ slug: 'memphis-redevelopment', name: 'x' } as never)
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets')
+    await flushPromises()
+    await w.get('[data-testid="dataset-remove-memphis-sites"]').trigger('click')
+    await flushPromises()
+
+    expect(updateWorkingSet).toHaveBeenCalledWith('memphis-redevelopment', {
+      datasets: ['epa-superfund-npl'],
+    })
+    w.unmount()
+  })
+
+  it('says so when the change does not save, and keeps the set on screen', async () => {
+    vi.mocked(updateWorkingSet).mockRejectedValue(new Error('the library is read-only'))
+    const w = await mountAt(mapView(), '/sets/memphis-redevelopment?tab=datasets')
+    await flushPromises()
+    await w.get('[data-testid="dataset-remove-memphis-sites"]').trigger('click')
+    await flushPromises()
+
+    expect(w.get('[data-testid="dataset-change-error"]').text()).toContain('read-only')
+    expect(w.findAll('[data-testid="dataset-row"]').length).toBe(2)
+    w.unmount()
   })
 })

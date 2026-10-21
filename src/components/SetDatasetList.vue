@@ -26,20 +26,31 @@
               <template v-if="member.status && member.status !== 'published'"> · {{ member.status }}</template>
             </span>
           </span>
-          <button
-            v-if="member.kind === 'dataset'"
-            type="button"
-            class="blo-act"
-            :data-testid="`dataset-open-${member.slug}`"
-            @click="openOne(member.slug)"
-          >
-            Open
-          </button>
-          <!-- A source we point at but do not hold has no rows to open. Say
-               what it is instead of offering a button that cannot work. -->
-          <RouterLink v-else :to="`/library/${member.slug}`" class="blo-act" data-testid="dataset-source">
-            Where it lives
-          </RouterLink>
+          <span class="d-acts">
+            <button
+              v-if="member.kind === 'dataset'"
+              type="button"
+              class="blo-act"
+              :data-testid="`dataset-open-${member.slug}`"
+              @click="openOne(member.slug)"
+            >
+              Open
+            </button>
+            <!-- A source we point at but do not hold has no rows to open. Say
+                 what it is instead of offering a button that cannot work. -->
+            <RouterLink v-else :to="`/library/${member.slug}`" class="blo-act" data-testid="dataset-source">
+              Where it lives
+            </RouterLink>
+            <!-- P14-6: takes it out of the SET. Nothing leaves the library,
+                 which is why this is quiet and not a destructive red. -->
+            <button
+              type="button"
+              class="blo-act"
+              :disabled="!!saving"
+              :data-testid="`dataset-remove-${member.slug}`"
+              @click="removeOne(member.slug)"
+            >{{ saving === member.slug ? 'Removing…' : 'Remove' }}</button>
+          </span>
         </li>
 
         <!-- P6-23's rule: a set that names something the library lost says so,
@@ -51,6 +62,34 @@
           </span>
         </li>
       </ul>
+
+      <!-- P14-6: the control the product never had. `updateWorkingSet` has
+           been written since phase 5 with no caller anywhere. -->
+      <p class="add-row">
+        <button type="button" class="blo-act" :aria-expanded="adding" data-testid="dataset-add-open" @click="openAdd">
+          {{ adding ? 'Never mind' : 'Add a dataset…' }}
+        </button>
+      </p>
+
+      <p v-if="adding" class="add-panel" data-testid="dataset-add-panel">
+        <span v-if="choicesLoading" class="blo-type-meta">Reading the library…</span>
+        <template v-else>
+          <select v-model="pick" class="blo-select" aria-label="A dataset to add" data-testid="dataset-add-pick">
+            <option value="">Choose a dataset…</option>
+            <option v-for="entry in available" :key="entry.slug" :value="entry.slug">{{ entry.title }}</option>
+          </select>
+          <button
+            type="button"
+            class="blo-act blo-act--write"
+            :disabled="!pick || !!saving"
+            data-testid="dataset-add"
+            @click="addPicked"
+          >{{ saving ? 'Adding…' : 'Add it' }}</button>
+          <span v-if="!available.length" class="blo-type-meta">This set already holds every dataset the library has.</span>
+        </template>
+      </p>
+
+      <p v-if="changeError" class="state-note error" data-testid="dataset-change-error">{{ changeError }}</p>
     </template>
   </section>
 </template>
@@ -68,8 +107,11 @@
  * the workspace. The standalone page stays and keeps working: it is what the
  * set's progress line counts, and the two must not disagree.
  */
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { updateWorkingSet } from '@/lib/workingSets'
+import { fetchCatalog, type CatalogEntry } from '@/lib/libraryCatalog'
+import { friendlyError } from '@/lib/errors'
 import DatasetView from '@/views/DatasetView.vue'
 import type { WorkingSetMember } from '@/lib/workingSets'
 import type { JoinedColumn } from '@/lib/countyJoin'
@@ -82,14 +124,82 @@ const props = defineProps<{
   setName: string
   /** The set's derived columns, joined onto whatever table is opened. */
   extraColumns?: JoinedColumn[]
+  /** The set's slug, for the two controls that change what it holds (P14-6). */
+  slug: string
 }>()
 
 const emit = defineEmits<{
   shown: [payload: { geoIds: string[]; rows: number; total: number; loading: boolean }]
+  /** The membership changed — the host refetches rather than guessing. */
+  changed: []
 }>()
 
 const route = useRoute()
 const router = useRouter()
+
+// --- P14-6: changing what the set holds ------------------------------------
+//
+// `updateWorkingSet` has existed since phase 5 with NO caller in any view, so
+// adding a dataset to a set was impossible from the product — not merely
+// from a conversation. The endpoint replaces the list, so both controls send
+// the whole membership rather than a delta.
+
+const adding = ref(false)
+const choices = ref<CatalogEntry[]>([])
+const choicesLoading = ref(false)
+const pick = ref('')
+const saving = ref('')
+const changeError = ref('')
+
+/** Everything dataset-shaped the library holds that this set does not. */
+const available = computed(() => {
+  const held = new Set(props.members.map(m => m.slug))
+  return choices.value.filter(entry => !held.has(entry.slug))
+})
+
+async function openAdd(): Promise<void> {
+  adding.value = !adding.value
+  if (!adding.value || choices.value.length || choicesLoading.value) return
+  choicesLoading.value = true
+  changeError.value = ''
+  try {
+    choices.value = await fetchCatalog({ kind: 'dataset' })
+  } catch (err) {
+    changeError.value = friendlyError(err, 'The library could not be read.')
+  } finally {
+    choicesLoading.value = false
+  }
+}
+
+async function replaceMembers(datasets: string[], busy: string): Promise<void> {
+  if (saving.value) return
+  saving.value = busy
+  changeError.value = ''
+  try {
+    await updateWorkingSet(props.slug, { datasets })
+    emit('changed')
+  } catch (err) {
+    changeError.value = friendlyError(err, 'That change could not be saved.')
+  } finally {
+    saving.value = ''
+  }
+}
+
+function held(): string[] {
+  return props.members.map(m => m.slug)
+}
+
+async function addPicked(): Promise<void> {
+  const slug = pick.value
+  if (!slug) return
+  await replaceMembers([...held(), slug], slug)
+  pick.value = ''
+  adding.value = false
+}
+
+async function removeOne(slug: string): Promise<void> {
+  await replaceMembers(held().filter(s => s !== slug), slug)
+}
 
 /** Only a slug this set actually holds. A hand-edited `&open=` naming
  *  something else opens the list, not someone else's table. */
@@ -183,6 +293,31 @@ function close(): void {
 
 .d-missing .d-name {
   color: var(--blo-stone);
+}
+
+.d-acts {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.add-row,
+.add-panel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.add-panel select {
+  flex: 1 1 20rem;
+  min-width: 0;
+}
+
+.state-note.error {
+  color: var(--blo-orange-deep);
 }
 
 @media (max-width: 640px) {

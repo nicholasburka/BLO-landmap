@@ -285,6 +285,10 @@ describe('the MCP endpoint', () => {
         'build_index',
         'county_values',
         'create_note',
+        // P14-6: making a set and changing what it HOLDS. Both go to MCP —
+        // neither deletes anything, and without them every analysis write
+        // needed a set somebody had made by hand first.
+        'create_working_set',
         'drop_link',
         'fetch_for_place',
         'get_entry',
@@ -308,6 +312,7 @@ describe('the MCP endpoint', () => {
         'rename_column',
         'save_view',
         'search_library',
+        'set_working_set_datasets',
         'update_page',
       ].sort(),
     )
@@ -1012,6 +1017,14 @@ describe('the write tools', () => {
 
   it('refuses every write tool on a read-only personal token, and audits the refusal', async () => {
     const { token } = await ready('maria')
+    // P14-6: one bag of arguments cannot satisfy every tool any more —
+    // `build_index` wants `layers` as objects and `create_working_set` wants
+    // them as slugs. These override per tool so that in every case the
+    // refusal under test is the SCOPE check and not the schema.
+    const perTool: Record<string, Record<string, unknown>> = {
+      create_working_set: { layers: ['pct_Black'] },
+      set_working_set_datasets: { datasets: ['organizations'] },
+    }
     for (const name of WRITE_TOOL_NAMES) {
       const call = await callTool(token, name, {
         title: 'x',
@@ -1033,6 +1046,7 @@ describe('the write tools', () => {
           { layer: 'internal-a', weight: 1, direction: 'higher_better' },
           { layer: 'internal-b', weight: 1, direction: 'lower_better' },
         ],
+        ...perTool[name],
       })
       expect(call.isError, name).toBe(true)
       expect(call.text, name).toMatch(/insufficient_scope/)

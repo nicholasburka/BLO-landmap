@@ -371,6 +371,15 @@ export function toolSummary(name: string, args: Record<string, unknown>, result?
       return `Moved the map to ${quoted([args.county_name, args.state].filter(Boolean).join(', '))}`
     case 'show_county_details':
       return `Opened ${quoted((args.county_name as string) || (args.geoid as string))} on the map`
+    case 'create_working_set':
+      return `Make the working set ${quoted(args.name)}${
+        Array.isArray(args.datasets) && args.datasets.length ? ` from ${args.datasets.length} datasets` : ''
+      }`
+    case 'set_working_set_datasets':
+      return `Change ${quoted(args.workingSet)} to hold ${
+        Array.isArray(args.datasets) ? args.datasets.length : 0
+      } datasets`
+
     case 'set_query_state': {
       const layers = Array.isArray(args.layers) ? args.layers.length : 0
       return layers

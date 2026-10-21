@@ -397,8 +397,18 @@ audited.
 | `rename_column` | `workingSet`, `column`, `name` | Change what a derived column is called (P10-5). The numbers are untouched and nothing is recomputed — only the header. The column's **id does not change**, because the layer it draws as is built from that id and a saved framing names it |
 | `save_view` | `name`, `type` (`map`\|`table`), `state` | Saves a named view and returns a link that opens it. A map view's layers, weights and filters are checked against the real layer registry and the internal layer manifest, and `state.siteLayers` — the EPA contamination overlays the view opens with (`acres_brownfields`, `air_pollution_sources`, `hazardous_waste_sites`, `superfund_sites`, `toxic_release_inventory`) — against those five ids; a table view's state goes through the same validator `POST /api/views` uses, against the dataset's real columns |
 
+| `create_working_set` | `name`, `purpose?`, `datasets?`, `layers?` | Makes a working set — the named group of datasets and layers that `build_index`, `measure_proximity` and the county table all run over. The server owns the slug, so two sets named the same thing are two sets rather than one overwriting the other. Returns `/sets/<slug>` |
+| `set_working_set_datasets` | `workingSet`, `datasets` | **Replaces** the list of datasets a set holds — send the whole list you want, not a delta. Derived columns survive: an eleventh dataset does not discard an index somebody is already quoting. Nothing leaves the library; only what the set names changes |
+
 Size caps: page markdown and note bodies 200,000 characters, titles and headings
-160, at most 20 tags.
+160, at most 20 tags; a set holds at most 100 datasets and 24 layers.
+
+**Why the two working-set writes are here and not chat-only.** They were the
+missing first step of "build me a set and index it" — every analysis write
+takes a set that already exists, so without them a conversation could compute
+nothing it had not been handed. Neither deletes: making a set deletes nothing,
+and changing what one *holds* changes which of the library it names, not the
+library. The no-delete guarantee below is unchanged.
 
 ### Attribution
 

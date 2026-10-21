@@ -10,7 +10,14 @@ import {
 } from './libraryCatalog.js'
 import { createLinkEntry } from './libraryLinks.js'
 import { listInternalLayers } from './internalLayers.js'
-import { renameDerivedColumn, removeDerivedColumn } from './libraryWorkingSets.js'
+import {
+  renameDerivedColumn,
+  removeDerivedColumn,
+  createWorkingSet,
+  updateWorkingSet,
+  getWorkingSet,
+} from './libraryWorkingSets.js'
+import { WORKING_SET_DATASETS_MAX, WORKING_SET_LAYERS_MAX } from './workingSetMeta.js'
 import { parseMapState } from './mapState.js'
 import { ProximityError, runWorkingSetProximity } from './workingSetProximity.js'
 import { CompositeError, runWorkingSetComposite } from './workingSetComposite.js'
@@ -576,6 +583,68 @@ async function renameColumn(args: Record<string, any>, ctx: McpToolContext) {
 }
 
 /**
+ * Make a working set (P14-6).
+ *
+ * The gap this closes is not only chat's. `PUT /api/working-sets/:slug` has
+ * been implemented the whole time and `updateWorkingSet` had **no caller in
+ * any view**, so adding a dataset to a set was impossible from the product,
+ * not merely from a conversation. Shipping the tool without the control would
+ * have meant the assistant could do something the person it is helping
+ * cannot.
+ *
+ * The server owns the slug, as it does for a note and a view, so two sets
+ * named the same thing are two sets rather than one overwriting the other.
+ */
+async function createSet(args: Record<string, any>, ctx: McpToolContext) {
+  requireLibrary()
+  const name = String(args.name).trim()
+  const made = await createWorkingSet({
+    name,
+    purpose: args.purpose ? String(args.purpose).trim() : '',
+    datasets: Array.isArray(args.datasets) ? args.datasets.map(String) : [],
+    layers: Array.isArray(args.layers) ? args.layers.map(String) : [],
+    savedBy: ctx.user?.username ?? 'unknown',
+    savedById: ctx.user?.id ?? null,
+  })
+  if (made.error === 'bad-name') {
+    throw new McpToolError('That name has no letters or numbers in it, so it cannot be a set.')
+  }
+  auditWrite(ctx, 'workingset.create', made.slug, {
+    name: made.name,
+    datasets: Array.isArray(args.datasets) ? args.datasets.length : 0,
+  })
+  return { slug: made.slug, name: made.name, href: `/sets/${made.slug}` }
+}
+
+/**
+ * Replace which datasets a set holds (P14-6).
+ *
+ * Replace, not merge: "which datasets are in it" is a list the person is
+ * deciding, and a tool that could only add would have no way to take one out.
+ * The derived columns survive — P7-6 keys a stored result on its inputs, and
+ * an eleventh dataset must not throw away a proximity column somebody is
+ * already quoting.
+ */
+async function setSetDatasets(args: Record<string, any>, ctx: McpToolContext) {
+  requireLibrary()
+  const slug = String(args.workingSet).trim()
+  const before = await getWorkingSet(slug)
+  if (!before) throw new McpToolError(`No working set with the slug "${slug}".`)
+  const datasets = Array.isArray(args.datasets) ? args.datasets.map(String) : []
+  const after = await updateWorkingSet(slug, { datasets })
+  if (!after) throw new McpToolError(`No working set with the slug "${slug}".`)
+  auditWrite(ctx, 'workingset.datasets', slug, { was: before.datasets.length, now: after.datasets.length })
+  return {
+    slug,
+    name: after.title,
+    datasets: after.datasets,
+    added: after.datasets.filter(d => !before.datasets.includes(d)),
+    removed: before.datasets.filter(d => !after.datasets.includes(d)),
+    href: `/sets/${slug}`,
+  }
+}
+
+/**
  * Remove a derived column (P10-5).
  *
  * There was no way to do this at all, so a conversation that iterated on a
@@ -801,6 +870,54 @@ export const MCP_WRITE_TOOLS: McpToolDefinition[] = [
     },
     write: true,
     run: measureProximity,
+  },
+  {
+    name: 'create_working_set',
+    title: 'Create a working set',
+    description:
+      'Make a working set: a named group of the library\'s datasets and map layers that analysis then runs over. This is the FIRST step of "build me a set for the Delta and index it" — build_index, measure_proximity and the county table all take a set that already exists, so without this there is nothing for them to run on. Every dataset is a catalog slug from search_library; every layer is a public layer id from list_layers or an internal one (internal-<slug>). The set opens at /sets/<slug>. Two sets named the same thing are two sets: the server owns the slug and never overwrites one.',
+    inputSchema: {
+      name: z
+        .string()
+        .trim()
+        .min(1)
+        .max(120)
+        .describe('What the set is called, in plain words — "Memphis redevelopment". It becomes the page\'s title.'),
+      purpose: z
+        .string()
+        .trim()
+        .max(600)
+        .optional()
+        .describe('One or two sentences on what this set is for, for the next person who opens it.'),
+      datasets: z
+        .array(z.string().trim().min(1).max(120))
+        .max(WORKING_SET_DATASETS_MAX)
+        .optional()
+        .describe('Catalog slugs of the datasets and sources in the set, from search_library.'),
+      layers: z
+        .array(z.string().trim().min(1).max(90))
+        .max(WORKING_SET_LAYERS_MAX)
+        .optional()
+        .describe('Map layer ids: a public one from list_layers (pct_Black) or an internal one (internal-<slug>).'),
+    },
+    write: true,
+    run: createSet,
+  },
+  {
+    name: 'set_working_set_datasets',
+    title: 'Change what a working set holds',
+    description:
+      "Replace the list of datasets a working set holds. This REPLACES rather than adds, so call get_working_set first and send the whole list you want: the ones to keep plus the ones to add, or the ones to keep minus the one to drop. Derived columns are untouched — an eleventh dataset does not discard an index or a proximity column already computed on the set. Nothing is deleted from the library; this only changes which of it this set names.",
+    inputSchema: {
+      workingSet: z.string().trim().min(1).max(80).describe('Slug of the set to change.'),
+      datasets: z
+        .array(z.string().trim().min(1).max(120))
+        .max(WORKING_SET_DATASETS_MAX)
+        .describe('The complete list of catalog slugs the set should hold afterwards.'),
+    },
+    write: true,
+    idempotent: true,
+    run: setSetDatasets,
   },
   {
     name: 'rename_column',

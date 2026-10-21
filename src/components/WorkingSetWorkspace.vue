@@ -1024,6 +1024,18 @@ const siblingViews = computed(() => set.value?.views ?? [])
 // table tab opens on the set's anchor, and a link carrying its own filters is
 // read by the explorer exactly as before.
 
+/** P14-6: the membership changed, so re-read it rather than patching the
+ *  local copy — the server owns the anchor rule (`withAnchor`) and the order
+ *  it stores them in. */
+async function reloadSet(): Promise<void> {
+  try {
+    const detail = await fetchWorkingSet(props.slug)
+    if (detail) set.value = detail
+  } catch (err) {
+    error.value = friendlyError(err, 'That change was saved but the set could not be re-read.')
+  }
+}
+
 onMounted(async () => {
   // P9-11: so an address can be named by the county it lands in. Cached for
   // the session and shared with the analyses; a failure costs only the name.
@@ -1457,8 +1469,10 @@ onMounted(async () => {
           :members="set.members"
           :missing="set.missing"
           :set-name="set.name"
+          :slug="set.slug"
           :extra-columns="joined"
           @shown="onShown"
+          @changed="reloadSet"
         />
       </section>
     </template>

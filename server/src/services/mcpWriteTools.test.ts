@@ -39,6 +39,7 @@ const {
   appendedMarkdown,
   setAppendRaceHook,
 } = await import('./mcpWriteTools.js')
+const { getWorkingSet } = await import('./libraryWorkingSets.js')
 
 const CTX = { user: { id: 1, username: 'maria', role: 'internal' as const }, via: 'ChatGPT' }
 
@@ -454,7 +455,7 @@ describe('the write tool table', () => {
     expect(schema('save_view').safeParse({ name: 'n', type: 'compare', state: {} }).success).toBe(false)
   })
 
-  it('is exactly the eight tools, all marked as writes, none of them deletes', () => {
+  it('is exactly the ten tools, all marked as writes, none of them deletes', () => {
     expect(MCP_WRITE_TOOLS.map(t => t.name).sort()).toEqual(
       // P7-5's `measure_proximity` was the sixth and the first write that is
       // an ANALYSIS rather than a filing — the spec's own reason for the
@@ -465,14 +466,22 @@ describe('the write tool table', () => {
       // else — no recompute, no id change — so it sits inside the no-delete
       // rule below rather than against it. Its sibling `remove_column` does
       // NOT: it is in `CHAT_ONLY_WRITE_TOOLS`, because MCP never deletes.
+      // P14-6's `create_working_set` and `set_working_set_datasets` are the
+      // ninth and tenth, and they go to MCP rather than staying chat-only:
+      // making a set deletes nothing, and changing what one HOLDS deletes
+      // nothing from the library either — it changes which of it the set
+      // names. Without them "build a set and index it" died at step one,
+      // because every analysis write takes a set that already exists.
       [
         'append_to_page',
         'build_index',
         'create_note',
+        'create_working_set',
         'drop_link',
         'measure_proximity',
         'rename_column',
         'save_view',
+        'set_working_set_datasets',
         'update_page',
       ].sort(),
     )
@@ -482,7 +491,12 @@ describe('the write tool table', () => {
       expect(t.name, 'no delete tool exists').not.toMatch(/delete|remove|purge/)
     }
     // Only a whole-page replace is idempotent; the rest add a thing per call.
-    expect(MCP_WRITE_TOOLS.filter(t => t.idempotent).map(t => t.name)).toEqual(['update_page'])
+    // Replacing a list with the same list leaves the same set, so
+    // `set_working_set_datasets` joins the whole-page replace.
+    expect(MCP_WRITE_TOOLS.filter(t => t.idempotent).map(t => t.name).sort()).toEqual([
+      'set_working_set_datasets',
+      'update_page',
+    ])
   })
 
   it('tells a model what a served result is, and to relay the caveat (P7-6)', async () => {
@@ -617,5 +631,74 @@ describe('rename_column and remove_column (P10-5)', () => {
 
   it('refuses a set that does not exist, by name', async () => {
     await expect(run('rename_column', { workingSet: 'nope', column: 'x', name: 'y' })).rejects.toThrow(/nope/)
+  })
+})
+
+/**
+ * P14-6 — a working set can be made, and changed.
+ *
+ * The gap was not only chat's: `PUT /api/working-sets/:slug` has been
+ * implemented the whole time and `updateWorkingSet` had no caller in any
+ * view, so adding a dataset to a set was impossible from the product. And
+ * every analysis write — build_index, measure_proximity — takes a set that
+ * already exists, so "build me a set for the Delta and index it" died at
+ * step one.
+ */
+describe('making and changing a working set (P14-6)', () => {
+  it('makes one, and hands back where it lives', async () => {
+    const made: any = await run('create_working_set', {
+      name: 'Delta counties',
+      purpose: 'Land loss in the Mississippi Delta.',
+      datasets: ['organizations', 'heirs-property-research'],
+    })
+    expect(made.slug).toBe('delta-counties')
+    expect(made.href).toBe('/sets/delta-counties')
+
+    const set = await getWorkingSet('delta-counties')
+    expect(set?.datasets).toEqual(['organizations', 'heirs-property-research'])
+    expect(set?.purpose).toContain('Mississippi Delta')
+  })
+
+  it('never overwrites a set that is already there', async () => {
+    const first: any = await run('create_working_set', { name: 'Delta counties', datasets: ['organizations'] })
+    const second: any = await run('create_working_set', { name: 'Delta counties', datasets: [] })
+    expect(second.slug).not.toBe(first.slug)
+    // Two people naming a set the same thing get two sets.
+    expect(second.slug).toMatch(/^delta-counties-\d$/)
+    expect((await getWorkingSet(first.slug))?.datasets).toEqual(['organizations'])
+  })
+
+  it('refuses a name with nothing in it', async () => {
+    await expect(run('create_working_set', { name: '—' })).rejects.toThrow(/letters or numbers/)
+  })
+
+  it('replaces what a set holds, and says what moved', async () => {
+    await run('create_working_set', { name: 'Delta counties', datasets: ['organizations', 'flood-claims'] })
+    const changed: any = await run('set_working_set_datasets', {
+      workingSet: 'delta-counties',
+      datasets: ['organizations', 'heirs-property-research'],
+    })
+    expect(changed.added).toEqual(['heirs-property-research'])
+    expect(changed.removed).toEqual(['flood-claims'])
+    expect((await getWorkingSet('delta-counties'))?.datasets).toEqual([
+      'organizations',
+      'heirs-property-research',
+    ])
+  })
+
+  it('is a 404 for a set that is not there', async () => {
+    await expect(
+      run('set_working_set_datasets', { workingSet: 'not-a-set', datasets: [] }),
+    ).rejects.toThrow(/No working set/)
+  })
+
+  it('leaves the derived columns alone', async () => {
+    // P7-6 keys a stored result on its inputs: an eleventh dataset must not
+    // throw away an index somebody is already quoting.
+    await run('create_working_set', { name: 'Delta counties', datasets: ['organizations'] })
+    const before = await getWorkingSet('delta-counties')
+    await run('set_working_set_datasets', { workingSet: 'delta-counties', datasets: ['organizations', 'flood-claims'] })
+    const after = await getWorkingSet('delta-counties')
+    expect(after?.derived).toEqual(before?.derived)
   })
 })

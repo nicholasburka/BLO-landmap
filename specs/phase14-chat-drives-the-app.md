@@ -379,7 +379,7 @@ there.
 
 ---
 
-## P14-6 [FEATURE] A working set's membership can be changed at all
+## P14-6 [FEATURE] A working set's membership can be changed at all — DONE 2026-10-20
 
 **Type:** Feature · **Size:** M · **Depends:** none
 
