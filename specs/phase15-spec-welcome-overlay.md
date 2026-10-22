@@ -472,7 +472,7 @@ in parallel. Roughly a week.
 
 ---
 
-## P15-1 [CHORE] A focus trap, once
+## P15-1 [CHORE] A focus trap, once — DONE 2026-10-22
 
 **Type:** Chore · **Size:** S · **Depends:** none
 
@@ -520,7 +520,7 @@ Help trigger — as it does today.
 
 ---
 
-## P15-2 [FEATURE] The national leaderboard has a front door
+## P15-2 [FEATURE] The national leaderboard has a front door — DONE 2026-10-22
 
 **Type:** Feature · **Size:** S · **Depends:** none
 
@@ -576,7 +576,7 @@ Restyling the "rank N of M" line, and the `RankingPanel`'s own rankings.
 
 ---
 
-## P15-3 [FEATURE] The welcome overlay
+## P15-3 [FEATURE] The welcome overlay — DONE 2026-10-22
 
 **Type:** Feature · **Size:** L · **Depends:** P15-1, P15-2
 
@@ -667,7 +667,7 @@ both too conditional (see the spec).
 
 ---
 
-## P15-4 [FEATURE] A way back to it
+## P15-4 [FEATURE] A way back to it — DONE 2026-10-22
 
 **Type:** Feature · **Size:** XS · **Depends:** P15-3
 
@@ -700,6 +700,25 @@ reloaded, **then** it does not appear.
 `src/components/__tests__/LensHeader.spec.ts`
 
 ---
+
+## What the build taught us
+
+- **The typecheck gate had a hole all along.** `tsconfig.app.json` excludes
+  `src/**/__tests__/*`, so the command used after every ticket never checked
+  a test file — and `type-check` already existed in `package.json`, unwired.
+  It is in `build` now, and it immediately caught a `never[]` inference error
+  in a brand-new spec. Two pre-existing errors fixed with it.
+- **`CountyRail.spec.ts` and `LensHeader.spec.ts` did not exist.** A
+  1,440-line component with four views had no tests and no test ids.
+- **The rank view's Back arrow was a trap.** Opened standalone it led to a
+  blank detail view with a live "View full details" button firing for a null
+  county — so `standaloneRank` hides it and × is the way out.
+- **`useFocusTrap` shipped with a bug** found while using it: Shift+Tab off a
+  container-focused dialog walked straight out, because `contains()` says yes
+  about an element's own self. It would have shipped in all three overlays.
+- **The e2e suite was hiding the bug this phase fixed.** A "press Got it
+  first" line stood before a deep-link test; it is now
+  `cy.get('[data-testid="welcome"]').should('not.exist')`.
 
 ## Backlog, from this audit
 

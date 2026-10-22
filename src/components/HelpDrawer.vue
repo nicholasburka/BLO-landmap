@@ -20,12 +20,17 @@ import {
   closeHelpDrawer,
 } from '@/lib/helpRecipes'
 import { lockBodyScroll, unlockBodyScroll } from '@/lib/scrollLock'
+import { useFocusTrap } from '@/composables/useFocusTrap'
 
 const query = ref('')
 const expandedId = ref<string | null>(null)
 const panelEl = ref<HTMLElement | null>(null)
 const inputEl = ref<HTMLInputElement | null>(null)
 const triggerEl = ref<HTMLButtonElement | null>(null)
+
+// P15-1: Tab stays inside the panel and focus goes back to the Help button,
+// both of them the shared trap's job now rather than a copy kept here.
+const focusTrap = useFocusTrap(panelEl)
 
 const matches = computed(() => searchRecipes(query.value, HELP_RECIPES))
 const groups = computed(() => groupRecipes(matches.value))
@@ -44,7 +49,7 @@ function close(): void {
   closeHelpDrawer()
   // Send focus back where it came from, so keyboard users are not dumped at
   // the top of the document.
-  triggerEl.value?.focus()
+  focusTrap.release()
 }
 
 // Opening can happen from here or from the landing page — either way the
@@ -60,6 +65,9 @@ watch(helpDrawerOpen, async isOpen => {
     return
   }
   lockBodyScroll()
+  // Whichever way it was opened — the trigger, `?`, the landing-page link —
+  // closing it returns to the Help button, so the button is what we record.
+  focusTrap.capture(triggerEl.value)
   await nextTick()
   inputEl.value?.focus()
 })
@@ -67,32 +75,6 @@ watch(helpDrawerOpen, async isOpen => {
 watch(matches, list => {
   if (query.value.trim() && list.length === 1) expandedId.value = list[0].id
 })
-
-function focusables(): HTMLElement[] {
-  if (!panelEl.value) return []
-  // Everything inside the panel is on screen: collapsed recipes are removed
-  // from the DOM by v-if rather than hidden, so there is nothing to filter out.
-  return Array.from(
-    panelEl.value.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])'),
-  )
-}
-
-/** Focus trap: Tab off either end of the panel wraps to the other end. */
-function onPanelKeydown(e: KeyboardEvent): void {
-  if (e.key !== 'Tab') return
-  const items = focusables()
-  if (items.length === 0) return
-  const first = items[0]
-  const last = items[items.length - 1]
-  const active = document.activeElement as HTMLElement | null
-  if (e.shiftKey && (active === first || !panelEl.value?.contains(active))) {
-    e.preventDefault()
-    last.focus()
-  } else if (!e.shiftKey && active === last) {
-    e.preventDefault()
-    first.focus()
-  }
-}
 
 /** True when the person is typing somewhere — `?` must stay a question mark. */
 function isTyping(target: EventTarget | null): boolean {
@@ -146,7 +128,7 @@ onBeforeUnmount(() => {
       aria-modal="true"
       aria-label="How do I…"
       data-testid="help-drawer"
-      @keydown="onPanelKeydown"
+      @keydown="focusTrap.onKeydown"
     >
       <span class="sheet-handle" aria-hidden="true"></span>
       <header class="help-header">

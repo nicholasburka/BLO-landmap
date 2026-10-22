@@ -1,21 +1,29 @@
 <template>
   <aside
     v-if="visible"
+    ref="railEl"
     class="county-rail blo-panel blo-panel--primary"
+    data-testid="county-rail"
     :class="{
       'county-rail--walk': mode === 'walk',
       'county-rail--inspect': mode === 'inspect',
       'county-rail--collapsed': collapsed,
     }"
     role="complementary"
-    :aria-label="mode === 'walk' ? 'County walkthrough' : 'County inspection'"
+    :aria-label="`County ${surface}`"
+    tabindex="-1"
     @click.stop
   >
     <header class="rail-header">
+      <!-- P15-2: no Back when the rail opened straight into the rank
+           list with nothing inspected. There is no detail view behind
+           it, so the arrow would strand the visitor on an empty card
+           with a blank county name and no way back to the list. -->
       <button
-        v-if="view === 'rank' || view === 'listings'"
+        v-if="(view === 'rank' || view === 'listings') && !standaloneRank"
         type="button"
         class="rail-back"
+        data-testid="county-rail-back"
         @click="view = 'detail'"
         aria-label="Back to county details"
         title="Back"
@@ -23,7 +31,7 @@
       <span v-else-if="mode === 'walk'" class="rail-rank">
         {{ rank }}<span class="rail-rank-of"> of {{ total }}</span>
       </span>
-      <span v-else class="rail-eyebrow">Inspect</span>
+      <span v-else class="rail-eyebrow">{{ standaloneRank ? 'Rankings' : 'Inspect' }}</span>
       <!-- Collapsed-state context: when the user has minimized the rail
            on mobile, surface the county name in the header so the bar
            still reads as "this county is what's selected." Hidden on
@@ -34,14 +42,14 @@
           class="rail-collapse"
           type="button"
           @click="collapsed = !collapsed"
-          :aria-label="collapsed ? 'Expand inspection' : 'Collapse inspection'"
+          :aria-label="`${collapsed ? 'Expand' : 'Collapse'} ${surface}`"
           :title="collapsed ? 'Expand' : 'Collapse'"
         >{{ collapsed ? '▲' : '▼' }}</button>
         <button
           class="rail-exit"
           type="button"
           @click="$emit('exit')"
-          :aria-label="mode === 'walk' ? 'Exit walkthrough' : 'Close inspection'"
+          :aria-label="mode === 'walk' ? 'Exit walkthrough' : `Close ${surface}`"
           :title="mode === 'walk' ? 'Exit walkthrough (Esc)' : 'Close (Esc)'"
         >×</button>
       </div>
@@ -67,6 +75,7 @@
           v-if="scoreRank"
           type="button"
           class="rail-score-rank"
+          data-testid="county-rail-score-rank"
           @click.stop="view = 'rank'"
           :aria-label="`Open full ranking — currently ${formatRank(scoreRank.rank)} of ${scoreRank.total}`"
           title="See where this county ranks among all counties"
@@ -157,13 +166,14 @@
           {{ rankCounties.length.toLocaleString() }} counties · scroll or click to inspect
         </p>
       </div>
-      <ol class="rail-rank-list" ref="rankListEl">
+      <ol class="rail-rank-list" ref="rankListEl" data-testid="county-rail-rank-list">
         <li
           v-for="row in rankCounties"
           :key="row.geoId"
           class="rail-rank-row"
           :class="{ 'rail-rank-row--current': row.geoId === currentGeoId }"
           :data-geoid="row.geoId"
+          data-testid="county-rail-rank-row"
         >
           <button
             type="button"
@@ -276,7 +286,7 @@
           <option v-for="abbr in availableStateOptions" :key="abbr" :value="abbr">{{ abbr }}</option>
         </select>
       </div>
-      <ol class="rail-rank-list">
+      <ol class="rail-rank-list" data-testid="county-rail-rankings-list">
         <li
           v-for="row in rankingsRows"
           :key="row.geoId"
@@ -369,8 +379,15 @@ const props = defineProps<{
   /** Phase 4h: rankings view (new 4th view). When the parent decides
    *  the rail's default view should be 'rankings' (mobile, query active,
    *  no inspect target), it sets initialView to 'rankings' and the rail
-   *  auto-opens there. The rail still respects user navigation after. */
-  initialView?: 'detail' | 'rankings' | null
+   *  auto-opens there. The rail still respects user navigation after.
+   *
+   *  P15-2 added 'rank': the national leaderboard used to be reachable
+   *  only by inspecting a county and then clicking the grey "rank 412th
+   *  of 3,144" line, which is the best zero-setup thing on the map
+   *  hidden behind the one gesture nobody makes. The parent now asks
+   *  for 'rank' directly — with no county inspected and no query — and
+   *  the rail opens on the list from the top. */
+  initialView?: 'detail' | 'rankings' | 'rank' | null
   /** Active-query descriptor shown in the rankings view header
    *  (e.g. "Black Homeownership"). Mirrors the LensHeader descriptor. */
   queryDescriptor?: string
@@ -438,13 +455,39 @@ const rankCounties = computed(() => props.rankCounties ?? [])
 // active query, the rail's default surface on mobile when a query is
 // active and no county is inspected).
 const view = ref<'detail' | 'rank' | 'listings' | 'rankings'>(
-  props.initialView === 'rankings' ? 'rankings' : 'detail'
+  props.initialView === 'rankings' || props.initialView === 'rank'
+    ? props.initialView
+    : 'detail'
 )
 // React to parent-driven initialView changes (e.g. user inspects then
 // closes; parent flips initialView back to 'rankings' so the rail
 // returns to the rankings surface instead of disappearing).
+// P15-2: 'rank' arrives the same way — the parent opens the rail and
+// asks for the leaderboard in the same tick, so this watch is what
+// actually gets us there on a second and third opening (the ref
+// initialiser above only runs on the first mount).
 watch(() => props.initialView, (next) => {
-  if (next === 'rankings' && view.value === 'detail') view.value = 'rankings'
+  if ((next === 'rankings' || next === 'rank') && view.value === 'detail') {
+    view.value = next
+  }
+})
+
+/** P15-2: the rail IS the national leaderboard right now — opened into
+ *  the rank list with nothing inspected (the welcome overlay's rankings
+ *  door, P15-3). Distinct from the same list reached from a county,
+ *  which keeps its Back arrow and its highlighted row; here there is no
+ *  county behind the list and `currentGeoId` is null, so no row
+ *  highlights and the list stays at the top. */
+const standaloneRank = computed(() => view.value === 'rank' && !props.currentGeoId)
+
+/** What this rail is, in the one word its aria-labels need. Three
+ *  surfaces share this component and P15-2 added the third, so the
+ *  labels can no longer be constants: a bare national leaderboard read
+ *  out as "County inspection", with a × that closes an inspection
+ *  nobody started, is wrong in the one place nobody looks. */
+const surface = computed<'walkthrough' | 'rankings' | 'inspection'>(() => {
+  if (props.mode === 'walk') return 'walkthrough'
+  return standaloneRank.value ? 'rankings' : 'inspection'
 })
 
 /** Two-way binding for the state-dropdown filter, threaded through
@@ -549,8 +592,41 @@ watch(() => props.landSearch?.selectedListingId, (id) => {
   if (id && view.value === 'detail') view.value = 'listings'
 })
 
+const railEl = ref<HTMLElement | null>(null)
 const rankListEl = ref<HTMLOListElement | null>(null)
 const listingsListEl = ref<HTMLUListElement | null>(null)
+
+/**
+ * P15-3: take the keyboard, for a host that has just opened this rail from
+ * somewhere else on the page.
+ *
+ * The welcome overlay's other two doors hand focus to the prompt box and to
+ * the first layer checkbox. The rankings door had nothing to hand it to, so
+ * it left focus on the `<body>` the dismissed overlay dropped it to and a
+ * keyboard reader had to Tab the length of the document to reach the
+ * leaderboard they had just asked for.
+ *
+ * Focus lands on the rail itself rather than on a control inside it. The
+ * first control is the collapse chevron, which announces "Collapse rankings"
+ * and says nothing about what just opened; the first meaningful one is a
+ * rank row, which starts a reader inside a list whose heading they have not
+ * heard. The container carries the role and the label, so it is read as what
+ * it IS before any control — the same reasoning `WelcomeOverlay` uses for
+ * focusing its panel rather than its first button, and the APG's rule for a
+ * region that scrolls, which `.county-rail` does. `tabindex="-1"` over `0`
+ * because this is a destination for a host handing focus over, not a new
+ * stop in the Tab order of every rail on the map.
+ *
+ * Async because the rail is `v-if`'d on a prop the caller has only just set:
+ * there is no element to focus until that render has happened, and making
+ * the host wait for it would be making the host know that.
+ */
+async function focus(): Promise<void> {
+  await nextTick()
+  railEl.value?.focus()
+}
+
+defineExpose({ focus })
 
 function scrollCurrentRowIntoView(): void {
   if (view.value !== 'rank' || !props.currentGeoId || !rankListEl.value) return
@@ -1318,6 +1394,13 @@ function formatRank(n: number): string {
 .rail-rankings-state:focus {
   outline: 2px solid var(--blo-orange-ring, rgba(255, 107, 28, 0.35));
   outline-offset: 1px;
+}
+
+/* The rail arriving is the visual signal that focus came with it; a ring
+   round a 320px panel is noise on top of it. `WelcomeOverlay.vue:237` drops
+   it on its panel for the same reason, and neither element is a tab stop. */
+.county-rail:focus {
+  outline: none;
 }
 
 .rail-rank-list {

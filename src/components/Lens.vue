@@ -163,6 +163,36 @@ function onHeaderKeydown(e: KeyboardEvent): void {
   }
 }
 
+/** How long the body's cross-fade takes (`.lens-fade-*` below). */
+const CROSS_FADE_MS = 150
+
+/**
+ * P15-3: open the panel on a named tab from outside it.
+ *
+ * The welcome's third door is "Choose your measures", and the Lens opens on
+ * Legend — so revealing the panel is not enough, the tab has to be switched.
+ * On a phone the panel is a collapsed peek strip until someone taps it,
+ * which is the same "revealed but not usable" problem one layer out, so
+ * that is expanded too.
+ *
+ * Resolves with the tab's panel element once it is actually on screen, for
+ * a caller that wants to put focus inside it. `mode="out-in"` means the new
+ * panel does not exist until the old one has faded out, so awaiting
+ * `nextTick` would hand back the panel that is leaving. The wait is the
+ * cross-fade's own duration plus a frame — the same reasoning, and the same
+ * number, as `scheduleAffordanceCheck` below.
+ */
+function showTab(id: TabId): Promise<HTMLElement | null> {
+  if (isMobile.value) mobileExpanded.value = true
+  const settled = activeTab.value === id
+  activeTab.value = id
+  const panel = () => document.getElementById('lens-panel-' + id)
+  if (settled) return nextTick().then(panel)
+  return new Promise(resolve => setTimeout(() => resolve(panel()), CROSS_FADE_MS + 30))
+}
+
+defineExpose({ showTab })
+
 function onTabKeydown(e: KeyboardEvent, currentId: TabId): void {
   const idx = TABS.findIndex(t => t.id === currentId)
   if (idx === -1) return
@@ -221,7 +251,7 @@ function updateScrollAffordance(): void {
 // the body, including children — exactly the trigger we need.
 function scheduleAffordanceCheck(): void {
   nextTick(updateScrollAffordance)
-  setTimeout(updateScrollAffordance, 180)
+  setTimeout(updateScrollAffordance, CROSS_FADE_MS + 30)
 }
 watch(activeTab, scheduleAffordanceCheck)
 
@@ -435,6 +465,17 @@ onBeforeUnmount(() => {
   .lens--mobile-peek .lens-tabs-and-body {
     /* Already hidden via class; ensure no scroll height */
     pointer-events: none;
+  }
+
+  /* P15-4: the header's "What is this?" is a second row, and the peek is a
+     56px strip with `overflow: hidden` — so in peek it would show as a
+     clipped sliver of text that is still in the tab order. Out entirely
+     until the drawer is open, which is also the honest affordance: in peek
+     the whole strip means "tap to expand" and nothing else. The rule lives
+     here rather than in LensHeader because peek is this component's idea
+     and LensHeader is given no say in it. */
+  .lens--mobile-peek :deep(.lens-hd-what) {
+    display: none;
   }
 
   .lens--mobile-expanded {

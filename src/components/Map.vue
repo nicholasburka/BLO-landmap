@@ -25,6 +25,7 @@
          rail is the canonical place for county-scoped actions. -->
 
     <PromptInput
+      ref="promptInput"
       :messages="chat.messages.value"
       :is-thinking="chat.isThinking.value"
       :chat-error="chat.error.value"
@@ -65,14 +66,26 @@
       @close="handleModalClose"
     />
 
-    <!-- Phase 4f: one-time welcome card explaining the BLO Livability
-         Index. Auto-dismisses on click and via localStorage. -->
-    <WelcomeCard />
+    <!-- P15-3: the public map's welcome. Three doors, each of which does
+         the thing rather than describing it — the 320px phase-4f card this
+         replaces explained the Livability Index in one sentence and said
+         nothing about the prompt box, the scoring engine or the
+         3,144-county leaderboard, none of which existed when it shipped.
+
+         `shouldShowWelcome` owns the half that matters: NOT appearing. The
+         old card checked localStorage and never the URL, so a first-time
+         visitor opening a shared `/?layers=…&fit=…` got a welcome screen
+         over the answer they were sent. -->
+    <WelcomeOverlay
+      v-if="welcomeVisible"
+      @door="onWelcomeDoor"
+      @close="dismissWelcome"
+    />
 
     <!-- Phase 4d: the Lens — single primary surface for "what does this
          map mean right now?" Replaces ColorLegend, AveragesPanel, and
          the standalone Data Layers pill. -->
-    <Lens :actions="!!internalUser">
+    <Lens ref="lens" :actions="!!internalUser">
       <!-- P5-16 / P5-74: save the current map+query state as a named library
            view. Internal users only, and now a row of the panel rather than a
            floating control that sat on top of it. -->
@@ -122,6 +135,7 @@
           :can-walk-through="canWalkThrough"
           @clear="clearActiveQuery"
           @walk-through="startWalkthrough"
+          @what-is-this="reopenWelcome"
         />
       </template>
       <template #legend>
@@ -207,6 +221,7 @@
       @dismiss="entityRailDismissed = true"
     />
     <CountyRail
+      ref="rail"
       :visible="railVisible"
       :mode="walkthroughActive ? 'walk' : 'inspect'"
       :rank="walkthroughIndex + 1"
@@ -276,7 +291,13 @@ import LensHeader from "@/components/LensHeader.vue";
 import LensLegend from "@/components/LensLegend.vue";
 import LensLayers from "@/components/LensLayers.vue";
 import LensContext from "@/components/LensContext.vue";
-import WelcomeCard from "@/components/WelcomeCard.vue";
+import WelcomeOverlay from "@/components/WelcomeOverlay.vue";
+import {
+  SEED_QUESTION,
+  markWelcomeSeen,
+  shouldShowWelcome,
+  type WelcomeDoor,
+} from "@/lib/welcome";
 import PromptInput from "@/components/PromptInput.vue";
 import type { QueryResponse } from "@/composables/usePromptQuery";
 import { useChat } from "@/composables/useChat";
@@ -571,6 +592,10 @@ const clearActiveQuery = () => {
   chat.clearConversation();
   // Phase 4e: clear any open inspect rail; its context is gone too.
   if (inspectActive.value) closeInspect();
+  // P15-2: and the standalone leaderboard. It outlives any query — that is
+  // the point of it — but "reset everything to the default view" that leaves
+  // a rail standing has not reset anything the user can see.
+  rankExplorerOpen.value = false;
   // Phase 4i (Round-3 feedback): nuclear reset includes the land
   // search. The user reported that the 3 separate "Clear" buttons
   // each scoped to a different concern (chat / query / listings) were
@@ -685,22 +710,55 @@ const walkthroughStats = computed(() => {
 // AND auto-returns to detail. Implemented as a view inside CountyRail
 // (not a separate panel) so we don't add another floating surface.
 
+/** P15-2: the rank explorer standing on its own, with no county
+ *  inspected and no query. `rankExplorerCounties` below keeps a BLO
+ *  Livability fallback for exactly this, so the list has always worked
+ *  from a cold start — the only way in was to inspect a county and then
+ *  notice that the grey "rank 412th of 3,144" line is a button. This
+ *  flag is the front door; P15-3's welcome overlay is its first caller. */
+const rankExplorerOpen = ref(false);
+
+/** Open the national leaderboard directly — the entry point for callers
+ *  that have no county in hand.
+ *
+ *  The rail has one slot, and both a walkthrough and an inspection win
+ *  over 'rank' in `railInitialView` below, so neither may be left
+ *  running: a caller that asked for the rankings would otherwise be
+ *  handed a county card instead. Reaching the same list *from* a county
+ *  is unchanged and still belongs to the rank line. */
+const openRankExplorer = () => {
+  if (walkthroughActive.value) exitWalkthrough();
+  if (inspectActive.value) closeInspect();
+  rankExplorerOpen.value = true;
+};
+
 /** Phase 4h: rail is visible whenever a walkthrough is active, an
  *  inspect target is set, OR (mobile-only) a scoring query is active.
  *  The query-active branch is what auto-opens the rail to its new
  *  rankings view on mobile when the user submits a query without
- *  having clicked a county first. */
+ *  having clicked a county first.
+ *  P15-2 adds a fourth, the only one that needs neither a county nor a
+ *  query: the leaderboard someone asked for outright. */
 const railVisible = computed(() => {
   if (walkthroughActive.value) return true;
   if (inspectActive.value && !showDetailedPopup.value) return true;
+  if (rankExplorerOpen.value) return true;
   if (hasActiveScoringQuery.value && isMobileViewport.value) return true;
   return false;
 });
 
 /** Phase 4h: which view the rail should open in. inspect/walk → 'detail'
- *  (CountyRail's default). Query-active-without-inspect → 'rankings'. */
-const railInitialView = computed<'detail' | 'rankings' | null>(() => {
+ *  (CountyRail's default). Query-active-without-inspect → 'rankings'.
+ *
+ *  P15-2's 'rank' sits ahead of the Phase 4h mobile default deliberately:
+ *  a visitor who pressed "browse the rankings" asked for the
+ *  3,144-county leaderboard, not the active query's top-N. Only one of
+ *  the two can render — the rail has a single `view` — which is also how
+ *  a phone, where RankingPanel is `display: none`, ends up with one
+ *  rankings surface rather than two. */
+const railInitialView = computed<'detail' | 'rankings' | 'rank' | null>(() => {
   if (walkthroughActive.value || inspectActive.value) return 'detail';
+  if (rankExplorerOpen.value) return 'rank';
   if (hasActiveScoringQuery.value && isMobileViewport.value) return 'rankings';
   return null;
 });
@@ -951,6 +1009,10 @@ const inspectCounty = (geoId: string) => {
   currentCounty.value = { id: geoId, name: getCountyName(geoId) };
   inspectActive.value = true;
   showDetailedPopup.value = false;
+  // P15-2: a county is the subject now, so the standalone leaderboard is
+  // over — left set, it would reopen the rail on the list the moment this
+  // inspection closed, which reads as a rail that refuses to shut.
+  rankExplorerOpen.value = false;
   zoomToGeoId(geoId, { regional: true });
 };
 
@@ -962,8 +1024,11 @@ const closeInspect = () => {
   currentCounty.value = null;
 };
 
-/** Rail's "exit" emit routes here. The rail's mode tells us which to call. */
+/** Rail's "exit" emit routes here. The rail's mode tells us which to call.
+ *  P15-2: × means "this rail is done" whichever surface it was showing,
+ *  so the standalone leaderboard clears unconditionally. */
 const handleRailExit = () => {
+  rankExplorerOpen.value = false;
   if (walkthroughActive.value) exitWalkthrough();
   else closeInspect();
 };
@@ -1007,8 +1072,13 @@ state.onQueryApplied((input) => {
   // walkthrough from the new ranking via the panel.
   // Phase 4e: same logic applies to inspect mode — a new query is a new
   // context, so close any active inspection card.
+  // P15-2: and to the standalone leaderboard, for the same reason. A phone
+  // that kept it open would answer a fresh query with every county ranked by
+  // the composite instead of the query's own top-N — Phase 4h's rankings
+  // view, which `railInitialView` only reaches once this flag is down.
   if (walkthroughActive.value) exitWalkthrough();
   if (inspectActive.value) closeInspect();
+  rankExplorerOpen.value = false;
 
   if ((input.layers?.length ?? 0) === 0) {
     rankingPanelExpanded.value = false;
@@ -1472,6 +1542,89 @@ watch(activeLayerCount, (now, before) => {
 });
 
 
+
+// ============= P15-3: the welcome overlay =============
+
+/** The Lens, the prompt box and the rail — one per welcome door. A door
+ *  does not describe a capability, it uses it, and all three of those live
+ *  inside a child, so each exposes the one method its door needs rather
+ *  than this component reaching into its DOM. */
+const lens = ref<InstanceType<typeof Lens> | null>(null);
+const promptInput = ref<InstanceType<typeof PromptInput> | null>(null);
+const rail = ref<InstanceType<typeof CountyRail> | null>(null);
+
+/**
+ * Decided once, on the first frame, from the URL and localStorage
+ * (`src/lib/welcome.ts` holds the whole rule and the reasons).
+ *
+ * At setup rather than in `onMounted` deliberately: the overlay has to be
+ * up before the choropleth is, because the one genuine win in the timing is
+ * that a visitor reading three doors while 5.6 MB of counties stream in has
+ * spent the wait rather than watched it.
+ */
+const welcomeVisible = ref(shouldShowWelcome(route.query));
+
+/** Gone, and recorded as seen. All four ways out land here: each of the
+ *  three doors, and the close the overlay emits for Escape, the backdrop
+ *  and "Just show me the map" alike. */
+const dismissWelcome = () => {
+  markWelcomeSeen();
+  welcomeVisible.value = false;
+};
+
+/** P15-4: the way back, from the Lens header.
+ *
+ *  Note what this does NOT do: touch the flag. It records "has seen it",
+ *  not "is hidden" — so re-opening leaves it set, and the dismissal that
+ *  follows writes nothing that was not already true. A visitor who comes
+ *  back for a second look does not get the overlay again on their next
+ *  visit for having done so. */
+const reopenWelcome = () => {
+  welcomeVisible.value = true;
+};
+
+/**
+ * Door ③: the Lens, on the Layers tab, with focus in the list.
+ *
+ * The panel opens on Legend, so revealing it is not enough — the tab has to
+ * be switched, which is why `Lens.showTab` exists. It hands back the panel
+ * once the cross-fade has actually put it on screen, since `mode="out-in"`
+ * means the Layers panel does not exist until Legend has finished leaving.
+ *
+ * The first checkbox is `combined_scores_v2`, the one layer `LayerControls`
+ * renders with no category (`layerConfig.ts:79-86`) — so it sits above every
+ * accordion and is on screen whether or not any of them are open. A control
+ * inside a collapsed one would take `.focus()` and silently do nothing.
+ */
+const openMeasures = async (): Promise<void> => {
+  const panel = await lens.value?.showTab("layers");
+  panel?.querySelector<HTMLInputElement>('input[type="checkbox"]')?.focus();
+};
+
+/** Which door was pressed. The overlay names one; the meaning is here,
+ *  because every one of these is a capability of this page. */
+const onWelcomeDoor = (door: WelcomeDoor) => {
+  dismissWelcome();
+  switch (door) {
+    case "rankings":
+      // P15-2's front door. The list has always worked from a cold start.
+      openRankExplorer();
+      // And then the keyboard, which is the half the other two doors do for
+      // themselves. Opening a surface the visitor asked for and leaving
+      // focus on the dismissed overlay's `<body>` makes them Tab the length
+      // of the document to reach what they just pressed a button to get.
+      void rail.value?.focus();
+      break;
+    case "ask":
+      // Seeded, NOT sent: spending a stranger's first model call for them
+      // is a cost and a surprise. They press Ask.
+      promptInput.value?.seed(SEED_QUESTION);
+      break;
+    case "measures":
+      void openMeasures();
+      break;
+  }
+};
 
 // ============= P5-28: entity rail =============
 const entityRailLayers = computed<EntityRailLayer[]>(() =>

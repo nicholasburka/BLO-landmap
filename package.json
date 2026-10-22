@@ -9,7 +9,7 @@
     "demo": "run-p demo:api dev",
     "demo:api": "cd server && LIBRARY_DEV_PGMEM=1 npm run dev",
     "prebuild": "npm run build:datasets",
-    "build": "run-p \"build-only {@}\" --",
+    "build": "run-p type-check \"build-only {@}\" --",
     "build:datasets": "node scripts/build-datasets.mjs",
     "postbuild": "node scripts/check-bundle-leaks.mjs",
     "check:bundle-leaks": "node scripts/check-bundle-leaks.mjs",

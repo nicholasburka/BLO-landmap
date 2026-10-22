@@ -11,6 +11,7 @@
           </svg>
         </span>
         <input
+          ref="inputRef"
           v-model="query"
           type="text"
           placeholder="Ask about a place or the data — e.g., 'top 5 affordable counties' or 'Mecklenburg County'"
@@ -214,8 +215,37 @@ const emit = defineEmits<{
 }>()
 
 const query = ref('')
+const inputRef = ref<HTMLInputElement | null>(null)
 const historyExpanded = ref(true)
 const scrollRef = ref<HTMLElement | null>(null)
+
+/**
+ * P15-3: put a question in the box without asking it.
+ *
+ * The welcome's second door teaches what the server will actually take —
+ * a region, a constraint and a top-N in one call — which the placeholder's
+ * own examples understate. It must not SUBMIT: spending a stranger's first
+ * model call for them is a cost and a surprise, so the text lands with the
+ * cursor behind it and the visitor presses Ask.
+ *
+ * Exposed rather than taken as a prop because seeding is an event, not a
+ * state: a `modelValue` the host wrote once would fight the v-model the
+ * moment the visitor edited it, and re-pressing the same door would be a
+ * no-op because the prop had not changed.
+ */
+function seed(text: string): void {
+  query.value = text
+  // Past the re-render, or the caret is set on an input still showing the
+  // old value and the browser puts it back at 0.
+  nextTick(() => {
+    const el = inputRef.value
+    if (!el) return
+    el.focus()
+    el.setSelectionRange(el.value.length, el.value.length)
+  })
+}
+
+defineExpose({ seed })
 
 // ============= Phase 4c: Inline place suggestions =============
 //

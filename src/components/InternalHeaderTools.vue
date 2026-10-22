@@ -20,6 +20,7 @@ import { RouterLink, useRouter } from 'vue-router'
 import HelpDrawer from './HelpDrawer.vue'
 import { useAuth } from '@/composables/useAuth'
 import { lockBodyScroll, unlockBodyScroll } from '@/lib/scrollLock'
+import { useFocusTrap } from '@/composables/useFocusTrap'
 
 /** The width below which the header collapses — same number as the CSS. */
 const PHONE = '(max-width: 640px)'
@@ -30,6 +31,10 @@ const { internalUser, logoutInternal } = useAuth()
 const open = ref(false)
 const panelEl = ref<HTMLElement | null>(null)
 const triggerEl = ref<HTMLButtonElement | null>(null)
+
+// P15-1: the sheet's Tab wrap and its focus return are the shared trap's now.
+// This component held one of the two hand-rolled copies.
+const focusTrap = useFocusTrap(panelEl)
 
 /**
  * Everywhere the collapsed header can no longer show a link to (P5-60).
@@ -61,7 +66,7 @@ function close(): void {
   open.value = false
   // Back where it came from, so a keyboard user is not dumped at the top of
   // the document.
-  triggerEl.value?.focus()
+  focusTrap.release()
 }
 
 async function logout(): Promise<void> {
@@ -76,33 +81,12 @@ watch(open, async isOpen => {
     return
   }
   lockBodyScroll()
+  focusTrap.capture(triggerEl.value)
   await nextTick()
-  focusables()[0]?.focus()
+  // The sheet takes focus itself: it covers the header the Menu button sits
+  // in, so leaving focus out there is leaving it under the sheet.
+  focusTrap.focusFirst()
 })
-
-function focusables(): HTMLElement[] {
-  if (!panelEl.value) return []
-  return Array.from(
-    panelEl.value.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'),
-  )
-}
-
-/** Focus trap: Tab off either end wraps to the other end. */
-function onPanelKeydown(event: KeyboardEvent): void {
-  if (event.key !== 'Tab') return
-  const list = focusables()
-  if (list.length === 0) return
-  const first = list[0]
-  const last = list[list.length - 1]
-  const active = document.activeElement as HTMLElement | null
-  if (event.shiftKey && (active === first || !panelEl.value?.contains(active))) {
-    event.preventDefault()
-    last.focus()
-  } else if (!event.shiftKey && active === last) {
-    event.preventDefault()
-    first.focus()
-  }
-}
 
 function onKey(event: KeyboardEvent): void {
   if (event.key === 'Escape' && open.value) {
@@ -159,7 +143,7 @@ onBeforeUnmount(() => {
       aria-modal="true"
       aria-label="Menu"
       data-testid="nav-menu-sheet"
-      @keydown="onPanelKeydown"
+      @keydown="focusTrap.onKeydown"
     >
       <span class="sheet-handle" aria-hidden="true"></span>
       <div class="nav-menu-head">

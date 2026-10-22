@@ -1571,7 +1571,7 @@ describe('a set opens on its own, with or without a saved framing (P11-2)', () =
     const w = await mountAt(mapView())
     await settleMap()
     expect(w.get('[data-testid="workspace-title"]').text()).toBe('Memphis redevelopment')
-    expect(w.get('[data-testid="interface-switch"]').exists()).toBe(true)
+    expect(w.find('[data-testid="interface-switch"]').exists()).toBe(true)
     expect(w.findComponent(MapPane).exists()).toBe(true)
     // Nothing anywhere says a view is missing, because nothing is.
     expect(w.find('[data-testid="workspace-sibling"]').exists()).toBe(false)

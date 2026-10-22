@@ -36,6 +36,24 @@
         >{{ chip.label }}</span>
       </div>
     </div>
+
+    <!-- P15-4: the way back to the welcome. Dismissing it is permanent per
+         browser, so without this it is a screen you can only ever lose —
+         and "click the thing that explains it" has no referent for anyone
+         recommending the map to a colleague.
+
+         Here rather than beside the Ask box because this is the calmer
+         surface and already the home of the panel's other quiet control.
+         A Show in the P9-13 sense: `.blo-type-action`, not the `Clear ×`
+         pill above it, which is a different tier of promise. `@click.stop`
+         for the same reason `Clear ×` has it — on a phone the whole header
+         strip is the drawer's expand target. -->
+    <button
+      type="button"
+      class="blo-type-action lens-hd-what"
+      data-testid="lens-what-is-this"
+      @click.stop="$emit('what-is-this')"
+    >What is this?</button>
   </div>
 </template>
 
@@ -71,6 +89,10 @@ const props = defineProps<{
 defineEmits<{
   (e: 'clear'): void
   (e: 'walk-through'): void
+  /** P15-4: re-open the welcome overlay. The host decides what that means;
+   *  it does NOT clear the seen-flag, which records "has seen it" rather
+   *  than "is hidden". */
+  (e: 'what-is-this'): void
 }>()
 
 const filterChips = computed<FilterChip[]>(() =>
@@ -197,6 +219,25 @@ const queryDescriptorFull = computed(() => {
 .lens-hd-walk:hover {
   background: var(--blo-ink, #111);
   border-color: var(--blo-ink, #111);
+}
+
+/* P15-4. Reset only what a <button> brings that a text action must not:
+   the UA's own font family, chrome and padding. Size, weight and colour
+   stay `.blo-type-action`'s — restating them here would win on scoped
+   specificity and quietly opt this control out of the vocabulary it wears.
+   `align-self` keeps the hit area to the words in a column that stretches
+   its children full width. */
+.lens-hd-what {
+  align-self: flex-start;
+  font-family: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.lens-hd-what:hover {
+  text-decoration: underline;
 }
 
 .lens-hd-clear {
