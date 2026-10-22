@@ -415,3 +415,258 @@ every button is ≥44px, and the body does not scroll behind it.
   centred panel covers the Lens, the card it replaces, and most of the
   prompt box — which is the point, but it means **every** control a visitor
   might reach for is behind it while it is open.
+
+---
+
+# Tickets
+
+```
+P15-1 ──┐
+        ├── P15-3 ── P15-4
+P15-2 ──┘
+```
+
+**Critical path: P15-2 → P15-3.** P15-1 is independent and can run first or
+in parallel. Roughly a week.
+
+---
+
+## P15-1 [CHORE] A focus trap, once
+
+**Type:** Chore · **Size:** S · **Depends:** none
+
+### Context
+
+There is no focus-trap utility in this codebase. There are **two hand-rolled
+copies** of the same ~15-line pair — `onPanelKeydown` + `focusables()` — in
+`HelpDrawer.vue:71-95` and `InternalHeaderTools.vue:91`. Both are
+internal-only components, so the public map has no access to either, and
+`CountyModal` — the one dialog a public visitor actually meets today — has no
+trap, no focus return and no backdrop at all.
+
+P15-3 would be the third copy. Two is a coincidence; three is a pattern with
+no home.
+
+### Requirements
+
+- [ ] `src/composables/useFocusTrap.ts` (or `src/lib/`): given a container
+      ref, trap Tab and Shift+Tab inside it, and return focus to a recorded
+      trigger on release.
+- [ ] `HelpDrawer` and `InternalHeaderTools` both use it; their local copies
+      are deleted, not left beside it.
+- [ ] Their existing tests pass **unchanged** — this ticket changes no
+      behaviour, and that is how we know.
+- [ ] Documented: the HelpDrawer copy deliberately does not filter hidden
+      elements because collapsed recipes are `v-if`'d out of the DOM
+      (`HelpDrawer.vue:72-74`). A shared utility cannot assume that, so it
+      filters on visibility and the comment moves with it.
+
+### Acceptance criteria
+
+**Given** the help drawer is open, **when** Tab is pressed on its last
+focusable element, **then** focus moves to its first — as it does today.
+
+**Given** the drawer closes, **when** focus is read, **then** it is on the
+Help trigger — as it does today.
+
+**Given** a container with a hidden focusable child, **when** Tab cycles,
+**then** the hidden child is skipped.
+
+### Files
+
+`src/composables/useFocusTrap.ts` (new) · `src/components/HelpDrawer.vue` ·
+`src/components/InternalHeaderTools.vue` · tests for the new utility
+
+---
+
+## P15-2 [FEATURE] The national leaderboard has a front door
+
+**Type:** Feature · **Size:** S · **Depends:** none
+
+### User story
+
+As a visitor who has just arrived, I want to see how every county ranks
+without first guessing that a grey line of text is a button, so that the best
+zero-setup thing on the map is reachable.
+
+### Context
+
+`CountyRail`'s rank explorer lists **all 3,144 counties** by BLO Index and
+works with **no query at all** — `Map.vue:778-800` keeps a BLO fallback for
+precisely this. It is the strongest zero-setup payoff on the public map.
+
+Today it can only be opened by inspecting a county and then clicking *"rank
+412th of 3,144"* (`CountyRail.vue:66-76`), which is styled as metadata beside
+the score and whose only affordance is a `title` attribute.
+
+P15-3's second door needs to open it directly. So does anyone who has not
+clicked a county yet.
+
+### Requirements
+
+- [ ] The rail can open in `rank` mode with **no county inspected** — no
+      highlighted row, the list from the top.
+- [ ] The existing path (inspect → click the rank) is unchanged, including
+      the highlighted current county.
+- [ ] Works with no scoring query active, which is the default state.
+- [ ] On a phone the rail is already the rankings surface
+      (`RankingPanel.vue:537-543`); this must not double up.
+
+### Acceptance criteria
+
+**Given** a bare `/` with nothing clicked, **when** the rank explorer is
+opened, **then** the rail shows 3,144 counties ordered by BLO Index with no
+row highlighted, and clicking a row inspects that county.
+
+**Given** a county already inspected, **when** its rank line is pressed,
+**then** behaviour is exactly as before, with that county highlighted.
+
+**Given** a 390px viewport, **when** the rank explorer opens, **then** one
+rankings surface renders, not two.
+
+### Out of scope
+
+Restyling the "rank N of M" line, and the `RankingPanel`'s own rankings.
+
+### Files
+
+`src/components/Map.vue` · `src/components/CountyRail.vue` ·
+`src/components/__tests__/CountyRail.spec.ts`
+
+---
+
+## P15-3 [FEATURE] The welcome overlay
+
+**Type:** Feature · **Size:** L · **Depends:** P15-1, P15-2
+
+### User story
+
+As a first-time visitor, I want one screen telling me the three things this
+map does, each of which I can press to actually do it, so that I start by
+using the tool rather than by reading about it.
+
+### Requirements
+
+**The panel**
+- [ ] `src/components/WelcomeOverlay.vue`, mounted by `Map.vue` in place of
+      `WelcomeCard`.
+- [ ] `.blo-panel .blo-panel--reference` — the existing frosted tier. No new
+      glass.
+- [ ] Desktop: centred, `min(720px, 66vw)` wide, height auto capped at
+      `min(560px, 80vh)` with the doors scrolling inside.
+- [ ] Phone (≤640px): a bottom sheet, `max-height: 85svh`, with a handle.
+      `.sheet`/`.sheet-backdrop` are internal-only and must be restated
+      locally — see the spec.
+- [ ] Backdrop `rgba(20, 18, 14, 0.35)`, the value both existing overlays
+      use. Above the loading overlay (`z-index: 1000`).
+- [ ] Type per P12-1; **every door button `.blo-act .blo-act--lg`, never
+      `--write`**; no orange.
+
+**The three doors**
+- [ ] *Choose measures* → closes, opens the Lens on the **Layers** tab (it
+      defaults to Legend, so it must be switched), focus to the first layer
+      checkbox.
+- [ ] *Open the rankings* → closes, opens the rank explorer (P15-2).
+- [ ] *Try that question* → closes, focuses the prompt box, **seeds** the
+      example text **unsent**, cursor at the end.
+- [ ] *Just show me the map* → closes, nothing else.
+
+**When it must not appear**
+- [ ] `blo:welcome:v2` set. **A new key** — reusing `blo:welcomeDismissed`
+      would hide this from everyone who dismissed the old card.
+- [ ] Any of `?layers=`, `?focus=`, `?fit=`, `?view=`, `?set=` on the URL.
+      In this case the key is **not** set either.
+- [ ] A conversation restored from localStorage (`useChat.ts:94-97`).
+- [ ] localStorage throwing degrades to showing it, never to an exception.
+
+**Accessibility**
+- [ ] `role="dialog"`, `aria-modal="true"`, `aria-label`; Escape and
+      backdrop-`@click.self` close; focus trapped via P15-1 and returned;
+      body scroll locked via `src/lib/scrollLock.ts`.
+- [ ] `prefers-reduced-motion` honoured — the fourth component in the repo
+      to do it, following `RankingPanel.vue:451-456`.
+- [ ] Every control ≥44px on a phone (free with `.blo-act`).
+
+**Retiring the old one**
+- [ ] `WelcomeCard.vue` deleted; its mount at `Map.vue:70`/`:279` removed.
+- [ ] `cypress/e2e/smoke.cy.ts:48-65` updated — the "press Got it first"
+      workaround goes, and the deep-link case becomes a real assertion.
+
+### Acceptance criteria
+
+The seven worked examples in the spec are the acceptance criteria verbatim:
+first visit, a shared link, each of the three doors, the phone sheet, reduced
+motion, and private mode.
+
+Plus, pinned as tests because they are the two rules most likely to drift:
+
+**Given** the overlay renders, **when** its primary button's classes are
+read, **then** they contain `blo-act` and `blo-act--lg` and **do not**
+contain `blo-act--write` — the `IndexWeightEditor.spec.ts:19-27` pattern.
+
+**Given** the overlay's copy, **when** it is read, **then** it names no layer
+absent from `layerRegistry.ts` — no heirs' property, no flood risk, no
+land-ownership acreage.
+
+### Out of scope
+
+A multi-step tour. Server-side "seen it". A/B'd copy. Rewriting `/about`'s
+stale "How to Use" list. The "Find land for sale" and "Walk through" doors —
+both too conditional (see the spec).
+
+### Files
+
+`src/components/WelcomeOverlay.vue` (new) ·
+`src/components/__tests__/WelcomeOverlay.spec.ts` (new) ·
+`src/components/WelcomeCard.vue` (deleted) · `src/components/Map.vue` ·
+`src/components/Lens.vue` · `src/components/PromptInput.vue` ·
+`cypress/e2e/smoke.cy.ts`
+
+---
+
+## P15-4 [FEATURE] A way back to it
+
+**Type:** Feature · **Size:** XS · **Depends:** P15-3
+
+### Context
+
+Dismissal is permanent per browser and there is no route back. An overlay you
+can only ever lose is one nobody can recommend to a colleague — *"click the
+thing that explains it"* has no referent.
+
+### Requirements
+
+- [ ] A quiet **"What is this?"** action re-opens the overlay. The Lens
+      header is the proposed home — it already carries "Clear ×" and is the
+      calmer surface (see the spec's open question).
+- [ ] Re-opening does **not** clear `blo:welcome:v2`; dismissing again does
+      not re-set it. The key records "has seen it", not "is hidden".
+- [ ] `.blo-type-action`, not a button — this is a Show, and a small one.
+
+### Acceptance criteria
+
+**Given** the overlay was dismissed, **when** "What is this?" is pressed,
+**then** it opens with all three doors working.
+
+**Given** it was re-opened and dismissed again, **when** the page is
+reloaded, **then** it does not appear.
+
+### Files
+
+`src/components/LensHeader.vue` · `src/components/Map.vue` ·
+`src/components/__tests__/LensHeader.spec.ts`
+
+---
+
+## Backlog, from this audit
+
+- `LensHeader.vue` carries `canWalkThrough`, a `walk-through` emit and
+  `.lens-hd-walk` CSS with no button rendered. A comment at `:12-14` says the
+  entry deliberately lives elsewhere — so this is dead code to delete, not a
+  feature to restore.
+- `/about`'s "How to Use This Tool" (`AboutView.vue:189-209`) predates the
+  prompt box, the rankings and the scoring. The overlay will say three true
+  things that page does not.
+- The public map uses a 768px breakpoint; the stated standard is 640px.
+- A stale comment at `layerRegistry.ts:60` says 26 public layers; there are
+  15 (plus 5 EPA point overlays).
