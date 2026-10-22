@@ -116,32 +116,35 @@ rather than inventing a glass.
 ║      │  .blo-panel .blo-panel--reference                   │          ║
 ║      │  min(720px, 66vw) wide · auto height · radius 12px  │          ║
 ║      │                                                     │          ║
-║      │  THE BLACK LIVABILITY OBSERVATORY        ← eyebrow  │          ║
-║      │                                           11/700    │          ║
-║      │  Welcome to the map              ← 1.7rem display   │          ║
+║      │  Welcome to BLO's Black Livability           │          ║
+║      │  Data Map                        ← 1.7rem display   │          ║
 ║      │                                                     │          ║
-║      │  Every US county, scored on the conditions that     │          ║
-║      │  shape Black livability. Three ways in:  ← 14/400   │          ║
+║      │  Every county in the country, scored on the         │          ║
+║      │  conditions that shape Black livability.            │          ║
+║      │  Start anywhere:                         ← 14/400   │          ║
 ║      │                                            68ch     │          ║
 ║      │  ┌───────────────────────────────────────────────┐  │          ║
-║      │  │ ① Rank counties by what matters to you        │  │          ║
-║      │  │   Pick the measures, set their weights, and   │  │          ║
-║      │  │   the map re-scores every county.             │  │          ║
-║      │  │                       [ Choose measures ]  ←lg│  │          ║
+║      │  │ ① See how every county ranks                  │  │          ║
+║      │  │   All 3,144, best to worst on the Livability  │  │          ║
+║      │  │   Index. Click any one to look closer.        │  │          ║
+║      │  │                      [ See the rankings ]  ←lg│  │          ║
 ║      │  └───────────────────────────────────────────────┘  │          ║
 ║      │  ┌───────────────────────────────────────────────┐  │          ║
-║      │  │ ② See how all 3,144 counties rank             │  │          ║
-║      │  │   The national leaderboard, no setup needed.  │  │          ║
-║      │  │                      [ Open the rankings ]    │  │          ║
-║      │  └───────────────────────────────────────────────┘  │          ║
-║      │  ┌───────────────────────────────────────────────┐  │          ║
-║      │  │ ③ Ask for what you want, in plain English     │  │          ║
+║      │  │ ② Ask a question in plain words               │  │          ║
 ║      │  │   "top 10 affordable Southeast counties with  │  │          ║
-║      │  │    high Black population"                     │  │          ║
-║      │  │                        [ Try that question ]  │  │          ║
+║      │  │    high Black population" — the map answers   │  │          ║
+║      │  │   by redrawing itself.                        │  │          ║
+║      │  │                       [ Try this question ]   │  │          ║
+║      │  └───────────────────────────────────────────────┘  │          ║
+║      │  ┌───────────────────────────────────────────────┐  │          ║
+║      │  │ ③ Score counties on what matters to you       │  │          ║
+║      │  │   Choose the measures — homeownership, wages, │  │          ║
+║      │  │   pollution, life expectancy — and set how    │  │          ║
+║      │  │   much each one counts.                       │  │          ║
+║      │  │                     [ Choose your measures ]  │  │          ║
 ║      │  └───────────────────────────────────────────────┘  │          ║
 ║      │                                                     │          ║
-║      │  Just show me the map          About the index →    │          ║
+║      │  Just show me the map        How the score works →  │          ║
 ║      │  ↑ .blo-type-action            ↑ a.blo-type-action  │          ║
 ║      └────────────────────────────────────────────────────┘          ║
 ╚══════════════════════════════════════════════════════════════════════╝
@@ -165,18 +168,22 @@ takes the shape the product already uses for this — a bottom sheet.
 │                          │
 ├──────────────────────────┤
 │         ──────           │ ← 40×4 handle
-│  THE BLACK LIVABILITY…   │
-│  Welcome to the map      │
+│  Welcome to BLO's Black  │
+│  Livability Data Map     │
 │                          │
-│  Every US county, scored │
-│  on the conditions that… │
+│  Every county in the     │
+│  country, scored on the  │
+│  conditions that shape…  │
 │                          │
-│  ① Rank counties by…     │
-│     [ Choose measures ]  │ ← 44px min target
-│  ② See how all 3,144…    │
-│     [ Open the rankings ]│
-│  ③ Ask in plain English  │
-│     [ Try that question ]│
+│  ① See how every county  │
+│     ranks                │
+│     [ See the rankings ] │ ← 44px min target
+│  ② Ask a question in     │
+│     plain words          │
+│     [ Try this question ]│
+│  ③ Score counties on     │
+│     what matters to you  │
+│     [ Choose your measu… │
 │                          │
 │  Just show me the map    │
 └──────────────────────────┘
@@ -198,18 +205,22 @@ Each is a real first move. Pressing one dismisses the overlay and leaves the
 map in that state — so the first thing a visitor does is the thing, not a
 tutorial about the thing.
 
-1. **"Choose measures"** → opens the Lens on the **Layers** tab
-   (`Lens.vue:122-126`; the tab defaults to Legend, so it must be switched,
-   not merely revealed). The visitor is one tick away from the scoring engine
-   that nothing currently announces.
-2. **"Open the rankings"** → opens the rail's rank explorer directly. It
+**The order is a ladder: least setup first.** Signed off 2026-10-22.
+
+1. **"See the rankings"** → opens the rail's rank explorer directly. It
    already works with no query (`Map.vue:778-800` keeps a BLO fallback for
    exactly this) but today it can only be reached by inspecting a county
    first and then clicking its rank. **This needs a new entry point** — the
-   one piece of new plumbing in the phase.
-3. **"Try that question"** → focuses the prompt box and **seeds** the text
+   one piece of new plumbing in the phase. First because it costs the
+   visitor nothing and pays immediately.
+2. **"Try this question"** → focuses the prompt box and **seeds** the text
    with the worked example. It does **not** submit: the visitor presses Ask.
    Spending a stranger's first model call for them is a cost and a surprise.
+3. **"Choose your measures"** → opens the Lens on the **Layers** tab
+   (`Lens.vue:122-126`; the tab defaults to Legend, so it must be switched,
+   not merely revealed). The visitor is one tick away from the scoring engine
+   that nothing currently announces. Last because it is the most to take in,
+   not because it matters least.
 
 ### Where it sits in the stack
 
@@ -242,6 +253,40 @@ is meant to re-orient.
 A visitor who dismisses it has no route back today. The Lens header gains a
 quiet **"What is this?"** action that re-opens the overlay. Without it the
 overlay is a thing you can only ever lose.
+
+### The copy, verbatim
+
+Signed off 2026-10-22. Implementation uses these words; it does not improve
+them in passing.
+
+| Slot | Words |
+|---|---|
+| Title | **Welcome to BLO's Black Livability Data Map** |
+| Lede | Every county in the country, scored on the conditions that shape Black livability. Start anywhere: |
+| ① title | See how every county ranks |
+| ① body | All 3,144, best to worst on the Livability Index. Click any one to look closer. |
+| ① button | See the rankings |
+| ② title | Ask a question in plain words |
+| ② body | *"top 10 affordable Southeast counties with high Black population"* — the map answers by redrawing itself. |
+| ② button | Try this question |
+| ③ title | Score counties on what matters to you |
+| ③ body | Choose the measures — homeownership, wages, pollution, life expectancy — and set how much each one counts. |
+| ③ button | Choose your measures |
+| Dismiss | Just show me the map |
+| Secondary | How the score works → (`/about`) |
+
+**No eyebrow.** The title already names the product, so an overline repeating
+it would be the "say a thing twice" P9-13 rule 3 removed elsewhere.
+
+**Every measure named in ③ is real**: `homeownership_by_race`,
+`avg_weekly_wage`, `contamination`, `life_expectancy`
+(`layerRegistry.ts:129-482`).
+
+> **A naming inconsistency this inherits rather than creates.** The header
+> says "U.S. Livability Index" (`App.vue:58`), the default layer is "BLO
+> Livability Index", `/about` says "an interactive mapping tool", and this
+> title adds "BLO's Black Livability Data Map". Four names for one product.
+> Out of scope here; worth one pass of its own.
 
 ### Accessibility
 
@@ -349,15 +394,15 @@ Escape, the backdrop and "Just show me the map" all close it and set the key.
 **Then** no overlay renders at all, and the key is **not** set — they have
 not seen it, and a later bare visit still shows it.
 
-### 3 — Door 1
+### 3 — Door ③
 **Given** the overlay is open.
-**When** "Choose measures" is pressed.
+**When** "Choose your measures" is pressed.
 **Then** the overlay closes, the key is set, the Lens is open on the
 **Layers** tab, and focus lands on the first layer checkbox.
 
-### 4 — Door 3 does not spend their turn
+### 4 — Door ② does not spend their turn
 **Given** the overlay is open.
-**When** "Try that question" is pressed.
+**When** "Try this question" is pressed.
 **Then** the overlay closes, the prompt box is focused, and the example text
 is in the field **unsent**, with the cursor at the end.
 
@@ -379,20 +424,16 @@ every button is ≥44px, and the body does not scroll behind it.
 
 ---
 
-## Open Questions
+## Decisions taken (signed off 2026-10-22)
 
-- [ ] **Door 2's label.** "Open the rankings" vs "See the leaderboard". The
-      product calls the panel "County Rankings" and the rail view "3,144
-      counties"; neither says leaderboard. Leaning on the product's word.
-- [ ] **Is "Welcome to the map" the right title**, or should it name the
-      product — "The Black Livability Observatory"? The mockup uses the
-      eyebrow for the product and the title for the act, which is the
-      P12-1 pattern, but this is a founder call.
-- [ ] **Does the re-open affordance belong in the Lens header** or in the
-      prompt box's row? The Lens header has a "Clear ×" already and is the
-      quieter home.
-
----
+- **Title** — "Welcome to BLO's Black Livability Data Map". "Observatory" was
+  my invention and is not a name the product uses anywhere.
+- **Order** — rankings, then the question, then the measures. Least setup
+  first.
+- **Door 1's label** — "See the rankings", using the product's own word
+  ("County Rankings", `RankingPanel.vue:19`) rather than "leaderboard",
+  which the app says nowhere.
+- **The way back** lives in the Lens header (P15-4).
 
 ## Noted in passing, not in this spec
 
@@ -562,14 +603,16 @@ using the tool rather than by reading about it.
 - [ ] Type per P12-1; **every door button `.blo-act .blo-act--lg`, never
       `--write`**; no orange.
 
-**The three doors**
-- [ ] *Choose measures* → closes, opens the Lens on the **Layers** tab (it
-      defaults to Legend, so it must be switched), focus to the first layer
-      checkbox.
-- [ ] *Open the rankings* → closes, opens the rank explorer (P15-2).
-- [ ] *Try that question* → closes, focuses the prompt box, **seeds** the
+**The three doors, in this order**
+- [ ] ① *See the rankings* → closes, opens the rank explorer (P15-2).
+- [ ] ② *Try this question* → closes, focuses the prompt box, **seeds** the
       example text **unsent**, cursor at the end.
+- [ ] ③ *Choose your measures* → closes, opens the Lens on the **Layers**
+      tab (it defaults to Legend, so it must be switched), focus to the
+      first layer checkbox.
 - [ ] *Just show me the map* → closes, nothing else.
+- [ ] **The copy is the table in the spec, verbatim.** A test asserts the
+      title and the three button labels, so a rewrite in passing fails.
 
 **When it must not appear**
 - [ ] `blo:welcome:v2` set. **A new key** — reusing `blo:welcomeDismissed`
